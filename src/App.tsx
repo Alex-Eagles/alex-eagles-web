@@ -7,7 +7,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 
 import Home from "@/pages/Home";
 import Team from "@/pages/Team";
-import Blog from "@/pages/Blog";
+import Blog from "@/pages/BlogFigma";
 import Vehicles from "@/pages/Vehicles";
 import Gallery from "@/pages/Gallery";
 import History from "@/pages/History";
