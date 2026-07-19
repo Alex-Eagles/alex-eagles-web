@@ -1,0 +1,226 @@
+/* ============================================================================
+ * global.css — Tailwind entry + base styles + keyframes.
+ * ============================================================================
+ * Load order matters:
+ *   1. Tailwind itself.
+ *   2. Our design tokens (theme.css) — so the variables exist.
+ *   3. `@theme inline` — bridges those variables into Tailwind utility classes.
+ * This file is imported once, in src/main.tsx.
+ * ==========================================================================*/
+
+@import "tailwindcss";
+@import "./theme.css";
+
+/* ----------------------------------------------------------------------------
+ * BRIDGE: expose design tokens as Tailwind utilities.
+ *
+ * `inline` is important: it makes the generated utilities emit `var(--…)`
+ * rather than baking in a fixed value, so they update live when the theme
+ * switches (data-theme swap). Naming convention below → utility class:
+ *
+ *   --color-canvas   → bg-canvas / text-canvas / border-canvas
+ *   --color-fg       → text-fg
+ *   --color-brand    → text-brand / bg-brand / border-brand
+ *   --font-display   → font-display
+ *   --text-hero      → text-hero
+ * --------------------------------------------------------------------------*/
+@theme inline {
+  /* Fonts */
+  --font-display: var(--font-display);
+  --font-heading: var(--font-heading);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Semantic surfaces */
+  --color-canvas: var(--bg-primary);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+
+  /* Brand + accents */
+  --color-brand: var(--brand);
+  --color-brand-light: var(--brand-light);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-sky: var(--sky);
+
+  /* Text */
+  --color-fg: var(--text-primary);
+  --color-fg-muted: var(--text-secondary);
+  --color-fg-subtle: var(--text-muted);
+
+  /* Borders */
+  --color-border: var(--border-subtle);
+  --color-border-strong: var(--border-solid);
+
+  /* Type scale → text-hero, text-h1 … text-caption */
+  --text-hero: var(--text-hero);
+  --text-h1: var(--text-h1);
+  --text-h2: var(--text-h2);
+  --text-h3: var(--text-h3);
+  --text-h4: var(--text-h4);
+  --text-body-lg: var(--text-body-lg);
+  --text-body: var(--text-body);
+  --text-small: var(--text-small);
+  --text-caption: var(--text-caption);
+
+  /* Radii → rounded-sm/md/lg/xl */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+}
+
+/* ----------------------------------------------------------------------------
+ * BASE LAYER — resets and site-wide defaults.
+ * --------------------------------------------------------------------------*/
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* never allow horizontal scroll (responsive rule) */
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    /* Typography rule: kerning + optimized legibility always on. */
+    font-feature-settings: "kern" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Smooth cross-fade when the theme flips. */
+    transition: background var(--transition-slow), color var(--transition-slow);
+  }
+
+  /* Native smooth scrolling for in-page anchor links (#team, #vehicles …). */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Brand selection color. */
+  ::selection {
+    background: var(--brand);
+    color: #fff;
+  }
+
+  /* Accessibility: a visible focus ring on every interactive element.
+   * (Typography/UX rule — never `outline: none`.) */
+  :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--brand-light);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * KEYFRAMES — decorative motion used across the site.
+ * (Respect `prefers-reduced-motion` below.)
+ * --------------------------------------------------------------------------*/
+@keyframes ae-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes ae-grid {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 60px 60px;
+  }
+}
+@keyframes ae-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+@keyframes ae-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * SMALL REUSABLE HELPERS (kept as plain classes; used by several components).
+ * --------------------------------------------------------------------------*/
+@layer components {
+  /* ALL-CAPS "eyebrow" label above section headings.
+   * Enforces the caps-letterspacing typography rule in one place. */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--brand-light);
+  }
+
+  /* Constrains body copy to a readable measure (45–90 chars). */
+  .prose-measure {
+    max-width: var(--maxw-prose);
+  }
+
+  /* ------------------------------------------------------------------------
+   * Z-INDEX SCALE (documented so layers never fight):
+   *   10  in-flow content raised above decorative backdrops (hero copy, etc.)
+   *   40  fixed chrome: navbar, theme toggle, mobile hamburger
+   *   50  overlays: full-screen mobile menu
+   *   60  skip link (must sit above everything, incl. the open menu)
+   * Use Tailwind `z-10` / `z-40` / `z-50`; the skip link uses 60 below.
+   * ----------------------------------------------------------------------*/
+
+  /* Skip-to-content link: hidden until focused (keyboard accessibility). */
+  .skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 60;
+    transform: translateY(-150%);
+    background: var(--brand);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: transform 200ms ease;
+  }
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * REDUCED MOTION — honor the OS setting. Kills decorative + scroll animation.
+ * (Framer Motion is handled separately via the useReducedMotion hook.)
+ * --------------------------------------------------------------------------*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

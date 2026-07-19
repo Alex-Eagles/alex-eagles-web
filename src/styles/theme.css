@@ -1,0 +1,156 @@
+/* ============================================================================
+ * theme.css — THE SINGLE SOURCE OF TRUTH for the Alex Eagles design system.
+ * ============================================================================
+ *
+ * This file defines every color, font, size, radius, shadow, and timing value
+ * the whole website uses, as plain CSS custom properties (CSS variables).
+ *
+ * ─── WHY THIS FILE EXISTS ───────────────────────────────────────────────────
+ * Change a brand color, a font, or a shadow HERE, once, and it updates
+ * everywhere across every page automatically. No component hardcodes a hex
+ * value — they all read these variables. This keeps the site perfectly unified.
+ *
+ * ─── HOW TO CONNECT TO THIS STYLE (read this) ───────────────────────────────
+ * There are two equivalent ways to use these tokens in a component:
+ *
+ *   1. Tailwind utility classes (preferred for most cases).
+ *      global.css maps these variables into Tailwind's theme, so you can write:
+ *          <h1 className="font-display text-fg">           // text-primary color
+ *          <button className="bg-gold text-canvas">        // gold bg, dark text
+ *          <div className="bg-surface border border-border">
+ *      See global.css for the full list of generated utility names.
+ *
+ *   2. Raw CSS variables (for one-off / arbitrary values Tailwind can't name).
+ *      Use them directly in a `style={{}}` prop or an arbitrary class:
+ *          <div style={{ background: "var(--bg-glass)" }}>
+ *          <div className="bg-[var(--bg-elevated)]">
+ *
+ * ─── THEMING (dark / light) ─────────────────────────────────────────────────
+ * Dark mode is the brand default. The color block is swapped by the
+ * `data-theme` attribute on <html> (toggled in src/context/ThemeContext.tsx and
+ * persisted to localStorage). Because components reference the *semantic* names
+ * (e.g. --text-primary), the same component renders correctly in both themes
+ * without any per-theme code.
+ *
+ * ─── TO ADD A NEW COLOR ─────────────────────────────────────────────────────
+ *   1. Add the variable to BOTH the dark and light blocks below.
+ *   2. (Optional) expose it as a Tailwind utility in global.css `@theme inline`.
+ * ==========================================================================*/
+
+/* ----------------------------------------------------------------------------
+ * 1. TYPOGRAPHY TOKENS  (theme-independent — same in dark and light)
+ * --------------------------------------------------------------------------*/
+:root {
+  /* Font families ---------------------------------------------------------
+   * Display  → hero headlines & big section titles (aerospace condensed)
+   * Heading  → smaller headings / sub-headings
+   * Sans     → all body copy and UI text
+   * Mono     → specs, telemetry, stats, dates (technical numbers)          */
+  --font-display: "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Type scale (fluid where it helps). Matches the design spec's scale.
+   * Use via Tailwind (text-hero, text-h1 …) — see global.css.               */
+  --text-hero: clamp(58px, 10vw, 112px); /* Barlow Condensed 800, lh 1.0   */
+  --text-h1: clamp(44px, 7vw, 72px); /* Barlow Condensed 700              */
+  --text-h2: clamp(34px, 5vw, 46px); /* Barlow Condensed 700              */
+  --text-h3: 33px; /* Barlow / Barlow Condensed 700    */
+  --text-h4: 22px; /* Barlow 600                       */
+  --text-body-lg: 18px; /* Inter 400, lh 1.7                */
+  --text-body: 16px; /* Inter 400, lh 1.6                */
+  --text-small: 14px; /* Inter 400, lh 1.5                */
+  --text-caption: 12px; /* Inter 500, lh 1.4                */
+
+  /* Letter-spacing for ALL-CAPS labels (typography rule: caps must be
+   * letterspaced). Applied by the `.eyebrow` helper in global.css.          */
+  --tracking-caps: 0.12em;
+  --tracking-tight: -0.02em; /* h1 / h2 headline tightening      */
+
+  /* ------------------------------------------------------------------------
+   * 2. SHAPE, MOTION & SPACING TOKENS  (theme-independent)
+   * ----------------------------------------------------------------------*/
+  --radius-sm: 4px; /* buttons                          */
+  --radius-md: 6px; /* cards                            */
+  --radius-lg: 12px; /* badges / tags / inputs           */
+  --radius-xl: 18px; /* feature cards                    */
+  --radius-full: 9999px; /* pills / nav / toggle             */
+
+  --transition-fast: 150ms ease-out; /* micro-interactions        */
+  --transition-base: 250ms ease-out; /* hovers, cards             */
+  --transition-slow: 400ms ease-out; /* theme swap, big reveals   */
+
+  --maxw-content: 1180px; /* standard page content width      */
+  --maxw-prose: 65ch; /* readable body-text line length   */
+}
+
+/* ----------------------------------------------------------------------------
+ * 3. COLOR TOKENS — DARK MODE (default)
+ * --------------------------------------------------------------------------*/
+:root,
+:root[data-theme="dark"] {
+  /* Surfaces (back → front) */
+  --bg-primary: #07091c; /* deep-space navy — page background   */
+  --bg-surface: #0d1035; /* section backgrounds                 */
+  --bg-elevated: #161a50; /* cards, modals, elevated elements    */
+  --bg-glass: rgba(22, 26, 80, 0.6); /* glassmorphic overlays (navbar etc.) */
+  --canvas: #0d1035; /* alias: section canvas behind cards   */
+  --card: #161a50; /* the card surface itself             */
+
+  /* Brand + accents */
+  --brand: #3c40b5; /* Alex Eagles royal indigo            */
+  --brand-light: #5458cc; /* hover / active                      */
+  --brand-glow: rgba(60, 64, 181, 0.25); /* glow behind brand elements          */
+  --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
+  --gold-hover: #fbbf24;
+  --sky: #60a5fa; /* technical links / data accent       */
+
+  /* Text (indigo-tinted, per brand) */
+  --text-primary: #f0f2ff;
+  --text-secondary: #8b8fc8;
+  --text-muted: #565a94;
+
+  /* Borders */
+  --border-subtle: rgba(60, 64, 181, 0.18);
+  --border-solid: #1e2258;
+
+  /* 4-level elevation system */
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --elevation-3: 0 10px 30px rgba(0, 0, 0, 0.6);
+  --elevation-4: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+/* ----------------------------------------------------------------------------
+ * 4. COLOR TOKENS — LIGHT MODE
+ *    Same semantic names, remapped for a light background. Because components
+ *    only ever reference the names, light mode "just works".
+ * --------------------------------------------------------------------------*/
+:root[data-theme="light"] {
+  --bg-primary: #f7f8ff; /* faintly indigo-tinted white          */
+  --bg-surface: #ffffff;
+  --bg-elevated: #eceeff;
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --canvas: #eceeff; /* section canvas behind cards          */
+  --card: #ffffff; /* white cards for light-mode contrast   */
+
+  --brand: #3c40b5; /* brand indigo stays constant          */
+  --brand-light: #2b2f9e; /* darker on hover against light bg     */
+  --brand-glow: rgba(60, 64, 181, 0.12);
+  --gold: #b45309; /* darker amber for AA contrast on light */
+  --gold-hover: #92400e;
+  --sky: #1d4ed8;
+
+  --text-primary: #0d1030; /* deep navy text                       */
+  --text-secondary: #3b3f7a;
+  --text-muted: #6366a8;
+
+  --border-subtle: #d4d6f0;
+  --border-solid: #b0b3e0;
+
+  --elevation-1: 0 1px 3px rgba(60, 64, 181, 0.08);
+  --elevation-2: 0 4px 12px rgba(60, 64, 181, 0.12);
+  --elevation-3: 0 10px 30px rgba(60, 64, 181, 0.15);
+  --elevation-4: 0 20px 50px rgba(60, 64, 181, 0.18);
+}
