@@ -27,3 +27,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code agent state / worktrees
+.claude/
