@@ -1,10 +1,10 @@
 import { Linkedin, User } from "lucide-react";
 import { memberPhoto, type TeamMember } from "@/data/team";
-import { chipStyle, roleAccent, teamAccent } from "./accents";
+import { teamAccent } from "./accents";
 
 /**
- * TeamMemberCard — one person: role badge, portrait, name, sub-team tag,
- * year/major, and an optional LinkedIn link.
+ * TeamMemberCard — one person: portrait, name, role + sub-team, bio,
+ * and an optional LinkedIn link.
  *
  * `size="large"` is used for the Leadership row (bigger portrait + name);
  * everyone else renders at the default size.
@@ -21,8 +21,8 @@ export default function TeamMemberCard({
 }: TeamMemberCardProps) {
   const isLarge = size === "large";
   const photo = memberPhoto(member);
+  const bio = member.bio;
   const accent = teamAccent(member.team);
-  const badge = roleAccent(member.role);
 
   return (
     <article
@@ -40,20 +40,11 @@ export default function TeamMemberCard({
         } as React.CSSProperties
       }
     >
-      {/* Role badge — pinned top-left so the portrait stays optically centered. */}
-      <span
-        className="absolute top-4 left-4 font-sans text-caption font-bold uppercase
-                   tracking-[var(--tracking-caps)] px-2.5 py-1 rounded-lg border"
-        style={chipStyle(badge)}
-      >
-        {member.role}
-      </span>
-
       {/* Portrait (or placeholder when no photo exists for this member). */}
       <div
         className={
-          "relative rounded-full overflow-hidden flex items-center justify-center " +
-          "bg-[var(--bg-elevated)] border-2 mt-8 mb-5 shrink-0 " +
+          "relative rounded-lg overflow-hidden flex items-center justify-center " +
+          "bg-[var(--bg-elevated)] border-2 mt-1 mb-4 shrink-0 " +
           "transition-[border-color,transform] duration-[250ms] ease-out " +
           "group-hover:scale-[1.03] " +
           (isLarge ? "w-[148px] h-[148px]" : "w-[116px] h-[116px]")
@@ -91,21 +82,46 @@ export default function TeamMemberCard({
         {member.name}
       </h3>
 
-      {/* Sub-team tag */}
-      <span
-        className="font-sans text-caption font-semibold px-2.5 py-1 rounded-lg border mb-3.5"
-        style={chipStyle(accent)}
-      >
-        {member.subTeam}
-      </span>
+      {/* Team + role, e.g. "Autonomous Lead" */}
+      <p className="font-sans text-body font-bold text-fg m-0 mb-2.5">
+        {member.subTeam} {member.role}
+      </p>
 
-      {/* Year + major — mono, per the "technical numbers" typography rule. */}
-      <div className="font-mono text-[12px] text-fg-subtle leading-[1.6] mb-1">
-        Year {member.year}
-      </div>
-      <div className="font-sans text-small text-fg-muted leading-[1.5]">
-        {member.major}
-      </div>
+      {/* Second position, for members holding two roles. */}
+      {member.secondRole && (
+        <p className="font-sans text-body font-bold text-fg m-0 mb-2.5">
+          {member.secondRole}
+        </p>
+      )}
+
+      {/*
+       * Freeform text — write whatever you want per member in team.ts.
+       * Hidden by default; revealed as a bubble above the card on hover
+       * (driven by `group-hover`, since the whole <article> is `.group`).
+       */}
+      {bio && (
+        <div
+          className={
+            "absolute left-1/2 -translate-x-1/2 bottom-full mb-3 z-20 " +
+            "w-max max-w-[220px] rounded-lg px-3.5 py-2.5 text-center font-sans " +
+            "text-small text-fg leading-[1.5] whitespace-pre-line " +
+            "opacity-0 invisible translate-y-1 " +
+            "transition-[opacity,transform,visibility] duration-300 ease-out " +
+            "group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 " +
+            "pointer-events-none"
+          }
+          style={{
+            // Same glass treatment as the navbar pill.
+            background: "var(--bg-glass)",
+            border: "1px solid var(--border-subtle)",
+            boxShadow: "var(--elevation-2)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+          }}
+        >
+          {bio}
+        </div>
+      )}
 
       {/* LinkedIn — pushed to the card floor so cards bottom-align. */}
       {member.linkedIn && (

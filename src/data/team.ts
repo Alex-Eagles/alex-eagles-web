@@ -14,30 +14,43 @@
  * -------------------------------------------------------------------------*/
 
 /** Top-level squads. `All` exists only as a filter option, never on a member. */
-export type Team = "Executive" | "Mechanical" | "Autonomous";
+export type Team = "Management" | "Mechanical" | "Autonomous";
 export type TeamFilter = "All" | Team;
 
-export type MechanicalSubTeam =
-  | "Management"
+export type SubTeam =
+  | "Executive"
   | "Aerodesign"
   | "Wing"
   | "Tail & Stability"
   | "Structure"
-  | "Propulsion";
-
-export type AutonomousSubTeam =
-  | "Management"
+  | "Propulsion"
   | "Software"
   | "Hardware"
   | "Computer Vision"
   | "Firmware";
 
-export type ExecutiveSubTeam = "Management";
-
-export type SubTeam =
-  | MechanicalSubTeam
-  | AutonomousSubTeam
-  | ExecutiveSubTeam;
+  
+export type Bio =
+  | "Mechatronics and Robotics\n2026"
+  | "Mechatronics and Robotics\n2027"
+  | "Mechatronics and Robotics\n2028"
+  | "Mechatronics and Robotics\n2029"
+  | "Computer and Communications\n2026"
+  | "Computer and Communications\n2027"
+  | "Computer and Communications\n2028"
+  | "Computer and Communications\n2029"
+  | "Electromechanics\n2026"
+  | "Electromechanics\n2027"
+  | "Electromechanics\n2028"
+  | "Electromechanics\n2029"
+  |"Biomedical Engineering\n2026"
+  |"Biomedical Engineering\n2027"
+  |"Biomedical Engineering\n2028"
+  |"Biomedical Engineering\n2029"
+  |"Mechanical Engineering\n2026"
+  |"Mechanical Engineering\n2027"
+  |"Mechanical Engineering\n2028"
+  |"Mechanical Engineering\n2029";
 
 /** Leadership ranks. Drives both card badges and the Leadership/Members split. */
 export type Role = "Lead" | "Vice Lead" | "Member";
@@ -48,22 +61,21 @@ export interface TeamMember {
   role: Role;
   team: Team;
   subTeam: SubTeam;
-  /** Academic year, e.g. "3". */
-  year: string;
-  major: string;
-  /** Photo slug — the filename (no extension) in src/assets/members/. */
+  /** For members holding a second position, e.g. "Software Lead". */
+  secondRole?: string;
+  /** Freeform line(s) shown under the name — write whatever you want here. */
+  bio?: Bio
   photo?: string;
   linkedIn?: string;
 }
 
-/* ---------------------------------------------------------------------------
+/* 
  * 2. PHOTO RESOLUTION
- * -------------------------------------------------------------------------*/
-
-/**
+/*
  * Eagerly import every member photo so Vite fingerprints and bundles them.
  * Keys come back as full relative paths; we re-key them by bare slug.
  */
+
 const photoModules = import.meta.glob<{ default: string }>(
   "../assets/members/*.{jpg,jpeg,png,webp}",
   { eager: true },
@@ -88,16 +100,15 @@ export function memberPhoto(member: TeamMember): string | undefined {
 
 export const TEAM_FILTERS: readonly TeamFilter[] = [
   "All",
-  "Executive",
+  "Management",
   "Mechanical",
   "Autonomous",
 ] as const;
 
 /** Sub-teams offered once a squad is selected. "All" shows none. */
 export const SUB_TEAMS: Record<Team, readonly SubTeam[]> = {
-  Executive: ["Management"],
+  Management: ["Executive"],
   Mechanical: [
-    "Management",
     "Aerodesign",
     "Wing",
     "Tail & Stability",
@@ -105,7 +116,6 @@ export const SUB_TEAMS: Record<Team, readonly SubTeam[]> = {
     "Propulsion",
   ],
   Autonomous: [
-    "Management",
     "Software",
     "Hardware",
     "Computer Vision",
@@ -119,53 +129,38 @@ export const SUB_TEAMS: Record<Team, readonly SubTeam[]> = {
 
 export const TEAM_MEMBERS: TeamMember[] = [
   /* ---- Executive leadership ---------------------------------------------- */
-  { id: "1", name: "Ahmed Baheyeldin", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Mechatronics", photo: "ahmed-baheyeldin" },
-  { id: "2", name: "Norhan Mohammed", role: "Vice Lead", team: "Executive", subTeam: "Management", year: "4", major: "Mechatronics", photo: "norhan-mohammed" },
-  { id: "3", name: "Peter Ayoub", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Electromechanics", photo: "peter-ayoub" },
+  { id: "1", name: "Farah Yasser Harfoush", role: "Lead", team: "Management", subTeam: "Executive", bio: "Mechatronics and Robotics\n2026", photo: "ahmed-baheyeldin" },
+  { id: "2", name: "Youssef Hozayen", role: "Lead", team: "Management", subTeam: "Executive", secondRole: "Hardware Lead", bio: "Mechatronics and Robotics\n2027", photo: "norhan-mohammed" },
+  { id: "3", name: "Ziad Essam", role: "Lead", team: "Management", subTeam: "Executive", secondRole: "Autonomous Lead", bio: "Computer and Communications\n2026", photo: "peter-ayoub" },
+  { id: "4", name: "Mazen Asser", role: "Vice Lead", team: "Autonomous", subTeam: "Executive", secondRole: "Autonomous Vice Lead", bio: "Computer and Communications\n2026", photo: "mazen-amr" },
 
   /* ---- Autonomous — leads ------------------------------------------------ */
-  { id: "4", name: "Ahmed Saleh", role: "Lead", team: "Autonomous", subTeam: "Management", year: "4", major: "Computer and Communications", photo: "ahmed-saleh" },
-  { id: "5", name: "Ibrahim Mohamed", role: "Vice Lead", team: "Autonomous", subTeam: "Computer Vision", year: "4", major: "Computer and Communications", photo: "ibrahim-mohamed" },
-  { id: "6", name: "Ahmed Anan", role: "Lead", team: "Autonomous", subTeam: "Hardware", year: "4", major: "Mechatronics", photo: "ahmed-ibrahim-anan" },
-  { id: "7", name: "Maram Wael", role: "Lead", team: "Autonomous", subTeam: "Software", year: "4", major: "Computer and Communications", photo: "maram-wael" },
-  { id: "8", name: "Ann Tarek", role: "Vice Lead", team: "Autonomous", subTeam: "Software", year: "3", major: "Computer and Communications", photo: "ann-tarek" },
+  { id: "5", name: "Mohamed Bassem", role: "Lead", team: "Autonomous", subTeam: "Computer Vision", bio: "Computer and Communications\n2026", photo: "ahmed-saleh" },
+  { id: "6", name: "Sara Gharib", role: "Lead", team: "Autonomous", subTeam: "Software", bio:"Biomedical engineering\n2027", photo: "ibrahim-mohamed" },
+  { id: "7", name: "Mazen Nazeih", role: "Lead", team: "Autonomous", subTeam: "Software", bio: "Computer and Communications\n2026", photo: "ahmed-ibrahim-anan" },
+  { id: "8", name: "Menna Ezzat", role: "Vice Lead", team: "Autonomous", subTeam: "Hardware", bio: "Mechatronics and robotics\n2026", photo: "maram-wael" },
+  { id: "9", name: "Lina Tarek", role: "Vice Lead", team: "Autonomous", subTeam: "Hardware", bio: "Mechatronics and robotics\n2027", photo: "lina-tarek" },
 
   /* ---- Autonomous — members ---------------------------------------------- */
-  { id: "9", name: "Mazen Nazeih", role: "Member", team: "Autonomous", subTeam: "Software", year: "3", major: "Computer and Communications", photo: "mazen-amr" },
-  { id: "10", name: "Sara Gharib", role: "Member", team: "Autonomous", subTeam: "Software", year: "3", major: "Computer and Communications", photo: "sara-gharib" },
-  { id: "11", name: "Zeyad Essam", role: "Member", team: "Autonomous", subTeam: "Software", year: "2", major: "Computer and Communications", photo: "zeyad-essam" },
-  { id: "12", name: "John Ayman", role: "Member", team: "Autonomous", subTeam: "Software", year: "2", major: "Computer and Communications", photo: "john-ayman" },
-  { id: "13", name: "Ahmed Saber", role: "Member", team: "Autonomous", subTeam: "Hardware", year: "3", major: "Mechatronics", photo: "ahmed-saber" },
-  { id: "14", name: "Ahmed Saeed", role: "Member", team: "Autonomous", subTeam: "Hardware", year: "3", major: "Mechatronics", photo: "ahmed-saeed" },
-  { id: "15", name: "Menna Ezzat", role: "Member", team: "Autonomous", subTeam: "Hardware", year: "2", major: "Mechatronics", photo: "menna-ezzat" },
-  { id: "16", name: "Mazen Asser", role: "Member", team: "Autonomous", subTeam: "Computer Vision", year: "3", major: "Computer and Communications", photo: "mazen-asser" },
-  { id: "17", name: "Eyad Ashraf", role: "Member", team: "Autonomous", subTeam: "Computer Vision", year: "3", major: "Computer and Communications", photo: "eyad-ashraf" },
-  { id: "18", name: "Mohamed Bassem", role: "Member", team: "Autonomous", subTeam: "Computer Vision", year: "2", major: "Computer and Communications", photo: "mohamed-bassem" },
-  { id: "19", name: "Peter Mina", role: "Member", team: "Autonomous", subTeam: "Computer Vision", year: "2", major: "Computer and Communications", photo: "peter-mina" },
-  { id: "20", name: "Mohamed Elzayat", role: "Member", team: "Autonomous", subTeam: "Computer Vision", year: "2", major: "Computer and Communications", photo: "mohamed-elzayat" },
+  { id: "10", name: "Rewan Gomaa", role: "Member", team: "Autonomous", subTeam: "Software", bio: "Year 3 — Computer and Communications", photo: "sara-gharib" },
+  { id: "11", name: "Zeyad Essam", role: "Member", team: "Autonomous", subTeam: "Software", bio: "Year 2 — Computer and Communications", photo: "zeyad-essam" },
+  { id: "12", name: "John Ayman", role: "Member", team: "Autonomous", subTeam: "Software", bio: "Year 2 — Computer and Communications", photo: "john-ayman" },
+  { id: "13", name: "Ahmed Saber", role: "Member", team: "Autonomous", subTeam: "Hardware", bio: "Year 3 — Mechatronics", photo: "ahmed-saber" },
+  { id: "14", name: "Ahmed Saeed", role: "Member", team: "Autonomous", subTeam: "Hardware", bio: "Year 3 — Mechatronics", photo: "ahmed-saeed" },
+
 
   /* ---- Mechanical — leads ------------------------------------------------ */
-  { id: "21", name: "Mohamed Fathallah", role: "Lead", team: "Mechanical", subTeam: "Management", year: "4", major: "Electromechanics", photo: "mohamed-fathallah" },
-  { id: "22", name: "Hattan Yosry", role: "Lead", team: "Mechanical", subTeam: "Aerodesign", year: "4", major: "Mechatronics", photo: "hattan-yosry" },
-  { id: "23", name: "Ehdaa Farahat", role: "Lead", team: "Mechanical", subTeam: "Structure", year: "4", major: "Electromechanics", photo: "ehdaa-farahat" },
-  { id: "24", name: "Osama Mohamed", role: "Vice Lead", team: "Mechanical", subTeam: "Tail & Stability", year: "4", major: "Mechatronics", photo: "osama-mohamed" },
-  { id: "25", name: "Abdelrahman Arafat", role: "Lead", team: "Mechanical", subTeam: "Wing", year: "4", major: "Electromechanics", photo: "abdelrahman-arafat" },
-  { id: "26", name: "Abdelghfour Alaa", role: "Lead", team: "Mechanical", subTeam: "Wing", year: "4", major: "Mechatronics", photo: "abdelghfour-alaa" },
-  { id: "27", name: "Adham Amr", role: "Lead", team: "Mechanical", subTeam: "Propulsion", year: "4", major: "Electromechanics", photo: "adham" },
-  { id: "28", name: "Youssef Hozayen", role: "Vice Lead", team: "Mechanical", subTeam: "Propulsion", year: "3", major: "Mechatronics", photo: "youssef-hozayen" },
+  { id: "21", name: "Mohamed ElBarbary", role: "Lead", team: "Mechanical", subTeam: "Aerodesign", bio: "Mechanical Engineering\n2026", photo: "mohamed-elbarbary" },
+  { id: "22", name: "Rodyna Amr", role: "Lead", team: "Mechanical", subTeam: "Propulsion", bio: "Mechatronics and Robotics\n2028", photo: "rodyna-amr" },
+  { id: "23", name: "Mo`men Ashraf", role: "Vice Lead", team: "Mechanical", subTeam: "Structure", bio: "Mechatronics and Robotics\n2027", photo: "momen-ashraf" },
+  { id: "25", name: "Youssef Ibrahim", role: "Vice Lead", team: "Mechanical", subTeam: "Structure", bio: "Electromechanics\n2027", photo: "youssef-ibrahim" },
+
 
   /* ---- Mechanical — members ---------------------------------------------- */
-  { id: "29", name: "Esraa Ahmed", role: "Member", team: "Mechanical", subTeam: "Aerodesign", year: "3", major: "Electromechanics", photo: "esraa-ahmed" },
-  { id: "30", name: "Farah Harfoush", role: "Member", team: "Mechanical", subTeam: "Aerodesign", year: "3", major: "Mechatronics", photo: "farah-harfoush" },
-  { id: "31", name: "Hana Waleed", role: "Member", team: "Mechanical", subTeam: "Structure", year: "3", major: "Electromechanics", photo: "hana-waleed" },
-  { id: "32", name: "Hossam Eldeen", role: "Member", team: "Mechanical", subTeam: "Structure", year: "2", major: "Mechatronics", photo: "hossam-eldeen" },
-  { id: "33", name: "Lina Tarek", role: "Member", team: "Mechanical", subTeam: "Wing", year: "2", major: "Electromechanics", photo: "lina-tarek" },
-  { id: "34", name: "Mira Barsoum", role: "Member", team: "Mechanical", subTeam: "Wing", year: "2", major: "Mechatronics", photo: "mira-barsoum" },
-  { id: "35", name: "Mo’men Ashraf", role: "Member", team: "Mechanical", subTeam: "Tail & Stability", year: "2", major: "Electromechanics", photo: "momen-ashraf" },
-  { id: "36", name: "Moamen Nawara", role: "Member", team: "Mechanical", subTeam: "Tail & Stability", year: "2", major: "Mechatronics", photo: "moamen-nawara" },
-  { id: "37", name: "Mohamed Brbry", role: "Member", team: "Mechanical", subTeam: "Propulsion", year: "2", major: "Electromechanics", photo: "mohamed-brbry" },
-  { id: "38", name: "Rana", role: "Member", team: "Mechanical", subTeam: "Propulsion", year: "1", major: "Mechatronics", photo: "rana" },
-  { id: "39", name: "Reem Eldalil", role: "Member", team: "Mechanical", subTeam: "Structure", year: "1", major: "Electromechanics", photo: "reem-eldalil" },
-  { id: "40", name: "Rodyna Amr", role: "Member", team: "Mechanical", subTeam: "Aerodesign", year: "1", major: "Mechatronics", photo: "rodyna-amr" },
-  { id: "41", name: "Youssef Ibrahim", role: "Member", team: "Mechanical", subTeam: "Wing", year: "1", major: "Electromechanics", photo: "youssef-ibrahim" },
+  { id: "29", name: "Esraa Ahmed", role: "Member", team: "Mechanical", subTeam: "Aerodesign", bio: "Year 3 — Electromechanics", photo: "esraa-ahmed" },
+  { id: "30", name: "Farah Harfoush", role: "Member", team: "Mechanical", subTeam: "Aerodesign", bio: "Year 3 — Mechatronics", photo: "farah-harfoush" },
+  { id: "31", name: "Hana Waleed", role: "Member", team: "Mechanical", subTeam: "Structure", bio: "Year 3 — Electromechanics", photo: "hana-waleed" },
+  { id: "32", name: "Hossam Eldeen", role: "Member", team: "Mechanical", subTeam: "Structure", bio: "Year 2 — Mechatronics", photo: "hossam-eldeen" },
+  { id: "33", name: "Lina Tarek", role: "Member", team: "Mechanical", subTeam: "Wing", bio: "Year 2 — Electromechanics", photo: "lina-tarek" },
+
 ];

@@ -10,13 +10,7 @@ import {
   type TeamFilter,
 } from "@/data/team";
 
-/**
- * Team — the full roster: a photo hero, the squad/sub-team filters, and the
- * filtered members split into Leadership and Members.
- *
- * This page owns the filter state; FilterBar and TeamMembersSection are both
- * presentational, so the filtering logic lives in exactly one place.
- */
+
 export default function Team() {
   const [activeTeam, setActiveTeam] = useState<TeamFilter>("All");
   const [activeSubTeam, setActiveSubTeam] = useState<SubTeam | null>(null);
@@ -27,10 +21,7 @@ export default function Team() {
     setActiveSubTeam(null);
   }
 
-  /**
-   * A sub-team is only applied when it actually belongs to the selected squad,
-   * which keeps the list correct even if the two states ever drift apart.
-   */
+
   const filtered = useMemo(() => {
     let result = TEAM_MEMBERS;
 
