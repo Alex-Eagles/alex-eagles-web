@@ -59,6 +59,49 @@ export const PALETTE = {
   propDimmed: 0x2c3160,
 } as const;
 
+export type ScenePalette = { [K in keyof typeof PALETTE]: number };
+
+/**
+ * Light-mode ENVIRONMENT overrides.
+ *
+ * ─── WHAT CHANGES AND WHAT DOESN'T ──────────────────────────────────────────
+ * In light mode we only re-tint the scene's *background* layer — the page
+ * backdrop, the ground plane, the resting (unlit) dot grid, the idle path and
+ * the props. The travelling light and everything it lights up (`dotLit`,
+ * `pathLit`, `lightCore`, `lightGlow`) are DELIBERATELY left as the same blues,
+ * so the blue light and the blue dots trailing it read identically in both
+ * themes — only the canvas they move across turns pale.
+ *
+ * Values come from the light-mode design tokens (the light column of the brand
+ * colour-usage map / `theme.css`), so the 3D backdrop matches the rest of the
+ * page in light mode:
+ *   background  → --bg-primary  (#f7f8ff)  keeps the seam with the page invisible
+ *   ground      → --bg-tertiary (#e8e8f9)  a touch deeper, so it reads as surface
+ *   dotIdle     → --border-default (#d0d0ed) faint grid on the pale floor
+ *   pathIdle    → --border-strong  (#b0b0d8) dim path, a shade more defined
+ *   prop        → --text-secondary (#4a4a7a) dark figures, high contrast on white
+ *   propDimmed  → --text-muted     (#9090ba) dimmed figures recede toward the bg
+ */
+const PALETTE_LIGHT_OVERRIDES = {
+  background: 0xf7f8ff,
+  ground: 0xe8e8f9,
+  dotIdle: 0xd0d0ed,
+  pathIdle: 0xb0b0d8,
+  prop: 0x4a4a7a,
+  propDimmed: 0x9090ba,
+} satisfies Partial<ScenePalette>;
+
+/** The full light-mode palette: dark blues kept, environment re-tinted pale. */
+export const PALETTE_LIGHT: ScenePalette = {
+  ...PALETTE,
+  ...PALETTE_LIGHT_OVERRIDES,
+};
+
+/** Pick the palette for the active theme. Blues are identical either way. */
+export function scenePalette(isDark: boolean): ScenePalette {
+  return isDark ? PALETTE : PALETTE_LIGHT;
+}
+
 /**
  * Path layout. The curve is GENERATED from these — see `journeyCurve.ts`.
  * Stops are laid out marching into -Z, swinging left and right so the light

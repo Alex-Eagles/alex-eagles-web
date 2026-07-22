@@ -27,10 +27,11 @@
  * IS the art direction.
  */
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { useThree } from "@react-three/fiber";
 import { Color } from "three";
 import type { Vector3 } from "three";
-import { PALETTE, type QualitySettings } from "./sceneConfig";
+import { PALETTE, type QualitySettings, type ScenePalette } from "./sceneConfig";
 
 const vertexShader = /* glsl */ `
   varying vec3 vWorldPos;
@@ -96,6 +97,8 @@ interface GroundDotsProps {
   quality: QualitySettings;
   /** Shared ref holding the light's current world position. */
   lightPosRef: React.MutableRefObject<Vector3>;
+  /** Active-theme palette. Only the ground + idle dots re-tint; `dotLit` stays. */
+  palette: ScenePalette;
 }
 
 export default function GroundDots({
@@ -104,7 +107,10 @@ export default function GroundDots({
   centerZ,
   quality,
   lightPosRef,
+  palette,
 }: GroundDotsProps) {
+  const invalidate = useThree((state) => state.invalidate);
+
   // Built once. Colours are converted from the palette's hex values into the
   // renderer's working colour space here, not per frame.
   //
@@ -115,8 +121,11 @@ export default function GroundDots({
   const uniforms = useMemo(
     () => ({
       uLightPos: { value: lightPosRef.current },
-      uGround: { value: new Color(PALETTE.ground) },
-      uDotIdle: { value: new Color(PALETTE.dotIdle) },
+      // Ground + idle dots follow the theme; `dotLit` (the blue the light
+      // paints) is constant. Initialised from the current palette so the first
+      // frame is already correct; kept in sync by the effect below.
+      uGround: { value: new Color(palette.ground) },
+      uDotIdle: { value: new Color(palette.dotIdle) },
       uDotLit: { value: new Color(PALETTE.dotLit) },
       uSpacing: { value: quality.dotSpacing },
       // 0.115 of the spacing. Larger values (0.16 was the first attempt) read
@@ -129,6 +138,14 @@ export default function GroundDots({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [quality.dotSpacing],
   );
+
+  // Re-tint the ground + idle dots when the theme flips, then draw one frame so
+  // the change shows without waiting for the next scroll (frameloop="demand").
+  useEffect(() => {
+    uniforms.uGround.value.set(palette.ground);
+    uniforms.uDotIdle.value.set(palette.dotIdle);
+    invalidate();
+  }, [palette, uniforms, invalidate]);
 
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, centerZ]}>

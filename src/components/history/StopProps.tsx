@@ -25,7 +25,7 @@
  */
 
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import {
   Color,
   DoubleSide,
@@ -33,7 +33,7 @@ import {
   Object3D,
   type Vector3,
 } from "three";
-import { PALETTE, STOP, type QualitySettings } from "./sceneConfig";
+import { STOP, type QualitySettings, type ScenePalette } from "./sceneConfig";
 import { crowdSizeFor, stopIntensity } from "./journeyCurve";
 
 /**
@@ -96,6 +96,8 @@ interface StopPropsProps {
   uRef: React.MutableRefObject<number>;
   /** Total path length, to convert normalised distance into world units. */
   pathLength: number;
+  /** Active-theme palette. Both prop tints follow the theme. */
+  palette: ScenePalette;
 }
 
 export default function StopProps({
@@ -103,7 +105,9 @@ export default function StopProps({
   quality,
   uRef,
   pathLength,
+  palette,
 }: StopPropsProps) {
+  const invalidate = useThree((state) => state.invalidate);
   const peopleRef = useRef<InstancedMesh>(null);
   const polesRef = useRef<InstancedMesh>(null);
   const shadowsRef = useRef<InstancedMesh>(null);
@@ -202,9 +206,15 @@ export default function StopProps({
   // Scratch colours, reused every frame — allocating a Color per instance per
   // frame would produce a steady stream of garbage for the GC to collect,
   // which shows up as periodic stutter.
-  const litColor = useMemo(() => new Color(PALETTE.prop), []);
-  const dimColor = useMemo(() => new Color(PALETTE.propDimmed), []);
+  const litColor = useMemo(() => new Color(palette.prop), [palette]);
+  const dimColor = useMemo(() => new Color(palette.propDimmed), [palette]);
   const scratch = useMemo(() => new Color(), []);
+
+  // The per-frame fade below already reads these colours, but at rest the loop
+  // is idle — so on a theme flip, ask for one frame to repaint the props.
+  useEffect(() => {
+    invalidate();
+  }, [palette, invalidate]);
 
   useFrame(() => {
     const people = peopleRef.current;

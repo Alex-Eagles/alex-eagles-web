@@ -35,10 +35,17 @@ import StopProps, {
 } from "./StopProps";
 import StopOverlays from "./StopOverlays";
 import { buildJourneyCurve, poleOffsetFor } from "./journeyCurve";
-import { PALETTE, LIGHT, QUALITY, type QualitySettings } from "./sceneConfig";
+import {
+  LIGHT,
+  QUALITY,
+  scenePalette,
+  type QualitySettings,
+  type ScenePalette,
+} from "./sceneConfig";
 import { useAdaptiveQuality } from "./usePerfTier";
 import type { Tier } from "./capability";
 import { polesFor, type Achievement } from "@/data/achievements";
+import { useTheme } from "@/context/ThemeContext";
 
 /**
  * Lateral distance between the two poles of a two-competition stop.
@@ -149,6 +156,30 @@ function SceneController({
   return null;
 }
 
+/**
+ * Applies the scene's background + fog colour and keeps them in sync with the
+ * active theme.
+ *
+ * Both are set on the default scene at mount via the `scene` prop below, but
+ * that snapshot doesn't re-run when the theme flips. This lives INSIDE the
+ * Canvas so it can mutate the live scene and — crucially, since the canvas
+ * renders on demand — call invalidate() to draw the one frame that shows the
+ * new colour. Without that nudge a theme toggle would only take effect on the
+ * next scroll.
+ */
+function SceneBackground({ palette }: { palette: ScenePalette }) {
+  const scene = useThree((state) => state.scene);
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    (scene.background as Color).set(palette.background);
+    (scene.fog as FogExp2).color.set(palette.background);
+    invalidate();
+  }, [palette, scene, invalidate]);
+
+  return null;
+}
+
 interface JourneySceneProps {
   achievements: Achievement[];
   progressRef: React.MutableRefObject<number>;
@@ -171,6 +202,12 @@ export default function JourneyScene({
   reducedMotion,
 }: JourneySceneProps) {
   const quality: QualitySettings = QUALITY[tier];
+
+  // The scene mirrors the site theme: in light mode the backdrop, ground, idle
+  // dots, idle path and props turn pale, while the travelling light and the
+  // blues it lights up stay exactly the same. See `scenePalette`.
+  const { isDark } = useTheme();
+  const palette = useMemo(() => scenePalette(isDark), [isDark]);
 
   // Geometry is derived from the CONTENT, so editing achievements.ts reshapes
   // the path automatically — no hand-placed coordinates anywhere.
@@ -277,8 +314,10 @@ export default function JourneyScene({
   const groundDepth = journey.length + 160;
   const centerZ = -(journey.length * 0.5);
 
-  const fog = useMemo(() => new FogExp2(PALETTE.background, 0.0085), []);
-  const background = useMemo(() => new Color(PALETTE.background), []);
+  // Initial background + fog for mount. Theme changes after mount are handled
+  // reactively by <SceneBackground> below.
+  const fog = useMemo(() => new FogExp2(palette.background, 0.0085), [palette]);
+  const background = useMemo(() => new Color(palette.background), [palette]);
 
   return (
     <Canvas
@@ -305,6 +344,8 @@ export default function JourneyScene({
           anywhere — the blob shadows in StopProps stand in for them. */}
       <ambientLight intensity={1.15} color="#8ea0d8" />
       <directionalLight position={[12, 24, 8]} intensity={1.5} color="#cfe0ff" />
+
+      <SceneBackground palette={palette} />
 
       <SceneController
         curve={journey.curve}
@@ -336,6 +377,7 @@ export default function JourneyScene({
         centerZ={centerZ}
         quality={quality}
         lightPosRef={lightPosRef}
+        palette={palette}
       />
 
       <JourneyPath
@@ -344,6 +386,7 @@ export default function JourneyScene({
         quality={quality}
         lightPosRef={lightPosRef}
         lightDirRef={lightDirRef}
+        palette={palette}
       />
 
       <TravellingLight quality={quality} groupRef={lightGroupRef} />
@@ -353,6 +396,7 @@ export default function JourneyScene({
         quality={quality}
         uRef={uRef}
         pathLength={journey.length}
+        palette={palette}
       />
 
       <StopOverlays

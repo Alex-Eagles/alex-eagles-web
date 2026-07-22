@@ -20,10 +20,11 @@
  * sense of speed and direction.
  */
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { useThree } from "@react-three/fiber";
 import { CatmullRomCurve3, Color } from "three";
 import type { Vector3 } from "three";
-import { PALETTE, LIGHT, type QualitySettings } from "./sceneConfig";
+import { PALETTE, LIGHT, type QualitySettings, type ScenePalette } from "./sceneConfig";
 
 /** Tube radius in world units. Thin — it's a light trail, not a pipe. */
 const PATH_RADIUS = 0.16;
@@ -79,6 +80,8 @@ interface JourneyPathProps {
   quality: QualitySettings;
   lightPosRef: React.MutableRefObject<Vector3>;
   lightDirRef: React.MutableRefObject<Vector3>;
+  /** Active-theme palette. Only the idle path re-tints; the lit blue stays. */
+  palette: ScenePalette;
 }
 
 export default function JourneyPath({
@@ -87,7 +90,10 @@ export default function JourneyPath({
   quality,
   lightPosRef,
   lightDirRef,
+  palette,
 }: JourneyPathProps) {
+  const invalidate = useThree((state) => state.invalidate);
+
   // Geometry is built once per quality tier and then never touched again.
   const tubularSegments = useMemo(
     () => Math.max(24, Math.round(length * quality.pathSegmentsPerUnit)),
@@ -100,7 +106,8 @@ export default function JourneyPath({
       // uniform writes from JS at all.
       uLightPos: { value: lightPosRef.current },
       uLightDir: { value: lightDirRef.current },
-      uIdle: { value: new Color(PALETTE.pathIdle) },
+      // The idle (unlit) path follows the theme; the lit blue is constant.
+      uIdle: { value: new Color(palette.pathIdle) },
       uLit: { value: new Color(PALETTE.pathLit) },
       uTrailLength: { value: LIGHT.trailLength },
       uAheadLength: { value: AHEAD_LENGTH },
@@ -108,6 +115,13 @@ export default function JourneyPath({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
+
+  // Re-tint the idle path when the theme flips, then draw one frame so the
+  // change shows immediately (frameloop="demand").
+  useEffect(() => {
+    uniforms.uIdle.value.set(palette.pathIdle);
+    invalidate();
+  }, [palette, uniforms, invalidate]);
 
   return (
     <mesh position={[0, LIGHT.hoverHeight, 0]}>
