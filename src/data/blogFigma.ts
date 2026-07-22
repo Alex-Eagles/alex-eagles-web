@@ -19,7 +19,7 @@ export const CATEGORY_LABEL: Record<BlogCategory, string> = {
   hardware: "hardware",
   software: "software",
   firmware: "firmware",
-  computerVision: "computer vision",
+  computerVision: "AI",
   structure: "structure",
   aerodesign: "aerodesign",
   propulsion: "propulsion",
