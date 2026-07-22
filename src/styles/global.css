@@ -82,7 +82,22 @@
   body {
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* never allow horizontal scroll (responsive rule) */
+
+    /* Never allow horizontal scroll (responsive rule).
+     *
+     * MUST be `clip`, not `hidden`. They look equivalent but are not:
+     * per spec, when one axis is `hidden` the other computes to `auto`, which
+     * makes html/body a SCROLL CONTAINER. Any `position: sticky` descendant
+     * then tries to stick inside that container instead of the viewport, and
+     * silently fails — it just scrolls away like static content.
+     *
+     * That broke the pinned 3D scene on the History page (the scene scrolled
+     * off while the journey kept advancing, unseen). `clip` suppresses
+     * horizontal scrolling exactly the same way WITHOUT creating a scroll
+     * container, so sticky keeps working.
+     *
+     * If you ever change this back to `hidden`, /history breaks. */
+    overflow-x: clip;
   }
 
   body {

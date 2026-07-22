@@ -1,11 +1,103 @@
-import ComingSoon from "@/pages/ComingSoon";
+/**
+ * History — the team's story as a scroll-driven journey.
+ *
+ * ─── PAGE SHAPE ─────────────────────────────────────────────────────────────
+ *   HERO      normal scrolling — establishes context
+ *   JOURNEY   pinned 3D scene, scrubbed by scroll (HistoryJourney)
+ *   CLOSING   the same milestones as readable text (Timeline2D)
+ *
+ * The hero earns its place beyond looking good: it gives the browser a few
+ * hundred milliseconds to fetch the 3D chunk, create the WebGL context and
+ * compile shaders BEFORE the visitor reaches the scene. Drop the visitor
+ * straight into the canvas and all of that happens under their eyes, which is
+ * exactly where a stutter is most damaging.
+ *
+ * The closing timeline repeats every milestone as plain semantic text. That's
+ * what screen readers and search engines actually read — a WebGL canvas is
+ * invisible to both — and it means nobody has to scrub a 3D scene to find out
+ * what happened in 2019.
+ */
 
-/** History page — placeholder until the real design lands. */
+import { motion } from "framer-motion";
+import SectionHeader from "@/components/ui/SectionHeader";
+import HistoryJourney from "@/components/history/HistoryJourney";
+import Timeline2D from "@/components/history/Timeline2D";
+import { fadeUp } from "@/lib/motion";
+import { achievements } from "@/data/achievements";
+
 export default function History() {
+  const firstYear = achievements[0]?.year ?? "2013";
+  const latestYear = achievements[achievements.length - 1]?.year ?? "2025";
+  const awardCount = achievements.reduce(
+    (total, achievement) => total + achievement.awards.length,
+    0,
+  );
+
   return (
-    <ComingSoon
-      title="Our History"
-      blurb="From first flight to competition excellence — a timeline of milestones, publications, and awards. This page is on its way."
-    />
+    <>
+      {/* ── Hero ────────────────────────────────────────────────────────── */}
+      <section className="relative min-h-[70vh] flex items-center px-6 overflow-hidden">
+        {/* Same grid texture used elsewhere on the site, masked to a soft pool. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--border-subtle) 1px, transparent 1px), linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+            maskImage:
+              "radial-gradient(70% 60% at 50% 45%, #000 0%, transparent 75%)",
+            WebkitMaskImage:
+              "radial-gradient(70% 60% at 50% 45%, #000 0%, transparent 75%)",
+          }}
+        />
+
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="relative z-10 mx-auto w-full"
+          style={{ maxWidth: "var(--maxw-content)" }}
+        >
+          <SectionHeader
+            eyebrow={`${firstYear} — ${latestYear}`}
+            title={
+              <>
+                A decade of
+                <br />
+                building and flying
+              </>
+            }
+          />
+
+          <p
+            className="font-sans text-body-lg text-fg-muted leading-[1.7] mt-6 mb-8"
+            style={{ maxWidth: "var(--maxw-prose)" }}
+          >
+            {awardCount} awards across {achievements.length} years of
+            competition. Follow the path to travel through the team&rsquo;s
+            history, one milestone at a time.
+          </p>
+        </motion.div>
+      </section>
+
+      {/* ── The journey ─────────────────────────────────────────────────────
+          Self-gating: renders the 3D scene where the device can hold it, and
+          the plain timeline everywhere else. See HistoryJourney. */}
+      <HistoryJourney />
+
+      {/* ── Closing timeline ────────────────────────────────────────────── */}
+      <section className="relative px-6 pt-20">
+        <div className="mx-auto" style={{ maxWidth: "var(--maxw-content)" }}>
+          <SectionHeader
+            eyebrow="Every milestone"
+            title="The full record"
+            align="center"
+          />
+        </div>
+      </section>
+
+      <Timeline2D />
+    </>
   );
 }
