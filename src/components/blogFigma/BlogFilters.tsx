@@ -1,4 +1,14 @@
-import { Grid3x3, Cpu, Code, Settings, type LucideIcon } from "lucide-react";
+import {
+  Grid3x3,
+  Cpu,
+  Code,
+  CircuitBoard,
+  Eye,
+  Settings,
+  Plane,
+  Wind,
+  type LucideIcon,
+} from "lucide-react";
 import { BLOG_FILTERS, type BlogFilter } from "@/data/blogFigma";
 
 interface BlogFiltersProps {
@@ -10,7 +20,11 @@ const ICONS: Record<BlogFilter["id"], LucideIcon> = {
   all: Grid3x3,
   hardware: Cpu,
   software: Code,
-  mechanical: Settings,
+  firmware: CircuitBoard,
+  computerVision: Eye,
+  structure: Settings,
+  aerodesign: Plane,
+  propulsion: Wind,
 };
 
 /**
@@ -30,13 +44,13 @@ export default function BlogFilters({ activeFilter, onFilterChange }: BlogFilter
             type="button"
             onClick={() => onFilterChange(filter.id)}
             aria-pressed={active}
-            className={`font-sans text-small font-semibold px-6 py-2 rounded-full border transition-colors duration-200 flex items-center gap-2 cursor-pointer ${
+            className={`font-sans text-[13px] font-semibold px-3.5 py-1.5 rounded-full border transition-colors duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               active
                 ? "bg-gold text-canvas border-gold shadow-[0_8px_24px_var(--brand-glow)]"
                 : "bg-elevated text-fg-muted border-border hover:text-fg hover:border-brand"
             }`}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className="w-3.5 h-3.5" />
             {filter.label}
           </button>
         );
