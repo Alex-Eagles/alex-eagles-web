@@ -203,10 +203,17 @@ function StopOverlay({
     // about where the stop is.
     const poleBase = stop.poleBase;
 
+    // A multi-competition stop with one frame per competition lays its frames
+    // out in SCREEN space (screenRight), matching how its poles are placed, so
+    // portrait[0] sits under competition[0]'s flag on the LEFT and they read
+    // left-to-right in label order. Single-competition stops keep using `right`
+    // so their lone photo still alternates sides down the path.
+    const frameAxis =
+      stop.poles.length > 1 && stop.frameCount > 1 ? stop.screenRight : stop.right;
     const frames = frameSlots(stop.frameCount).map((slot) => {
       const position = poleBase
         .clone()
-        .addScaledVector(stop.right, slot * FRAME.spacing);
+        .addScaledVector(frameAxis, slot * FRAME.spacing);
       return [position.x, FRAME.height, position.z] as [number, number, number];
     });
 
@@ -351,8 +358,10 @@ function StopOverlay({
               style={{
                 background:
                   "linear-gradient(160deg, rgba(111,227,255,0.5), rgba(60,64,181,0.25))",
+                // A purely DARK drop shadow, no coloured glow. Cast down and
+                // out so the frame reads as floating ABOVE the ground.
                 boxShadow:
-                  "0 18px 40px rgba(0,0,0,0.75), 0 0 26px rgba(57,198,255,0.28)",
+                  "0 26px 46px rgba(0,0,0,0.72), 0 10px 20px rgba(0,0,0,0.5)",
               }}
             >
               <Portrait
@@ -361,18 +370,17 @@ function StopOverlay({
               />
             </div>
 
-            {/* Reflection — a flipped, faded copy, so the frame reads as
-                standing ON the ground rather than hovering above it. */}
+            {/* Cast shadow — a soft, dark, blurred ellipse sitting below the
+                frame. Replaces the old cyan "reflection", which read as a glow;
+                a dark shadow instead sells the frame as floating above the
+                ground. */}
             <div
               aria-hidden="true"
-              className="w-[150px] h-[38px] mt-[2px] rounded-[6px] overflow-hidden opacity-25"
+              className="w-[128px] h-[16px] mx-auto mt-[12px] rounded-[50%]"
               style={{
-                transform: "scaleY(-1)",
-                maskImage: "linear-gradient(to top, transparent 5%, #000 95%)",
-                WebkitMaskImage:
-                  "linear-gradient(to top, transparent 5%, #000 95%)",
                 background:
-                  "linear-gradient(160deg, rgba(111,227,255,0.35), transparent)",
+                  "radial-gradient(ellipse at center, rgba(0,0,0,0.55), rgba(0,0,0,0) 72%)",
+                filter: "blur(3px)",
               }}
             />
           </div>
@@ -381,25 +389,34 @@ function StopOverlay({
 
       {/* ── Competition flags — one per pole ────────────────────────────────
           Each flag flies its competition's logo (or the Egyptian flag on the
-          founding stop), shaped like a real flag: a straight edge fixed to the
-          pole and a gently waving free edge streaming out to the side.
+          founding stop) as a plain RECTANGLE fixed to the pole: one straight
+          edge tied to the pole and the whole cloth streaming out to the side.
 
-          Anchored at the POLE TOP (transform mode → the div's corner sits at
-          that 3D point) and draped with a CSS translate, NOT a world offset:
-          because the element is already rotated to `facing`, its local X runs
-          along the flag's own plane, so it hangs correctly whichever way the
-          path heads. The wavy shape is a clip-path whose STRAIGHT edge is on
-          the pole side — mirrored for left-draping flags — so a two-pole stop
-          opens its two flags outward, exactly like the reference images.
+          Anchored at the POLE TOP. drei's <Html transform> CENTRES its content
+          on the anchor by default (an internal translate(-50%,-50%)), so a raw
+          translateX(0) would put the pole through the flag's middle. We undo
+          that half-shift deliberately:
 
-              right-draping            left-draping
-              ┃▔▔▔╲                        ╱▔▔▔┃
-              ┃logo ╲                      ╱ logo┃
-              ┃▁▁▁╱                        ╲▁▁▁┃
+            • a right-flying flag  → translate(+50%, +50%): its LEFT edge lands
+              exactly on the pole and its TOP edge sits at the pole tip, so the
+              cloth hangs down-and-to-the-RIGHT.
+            • a left-flying flag   → translate(-50%, +50%): mirror image, its
+              RIGHT edge on the pole, cloth streaming LEFT.
+
+          A lone pole always flies right; a two-pole stop flies its flags
+          outward (left pole left, right pole right) so they never overlap.
+          Because the element is already rotated to `facing`, its local X runs
+          along the flag's own plane and "+X" reads as screen-right whichever
+          way the path heads.
+
+              flies right              flies left
+              ┃▔▔▔▔┃                    ┃▔▔▔▔┃
+              ┃logo ┃                    ┃ logo┃
+              ┃▁▁▁▁┃                    ┃▁▁▁▁┃
               ┃                                ┃
               ┃ (pole)                  (pole) ┃          */}
       {anchors.flags.map((flag, i) => {
-        const attachRight = flag.side === "left"; // pole on the flag's right
+        const fliesLeft = flag.side === "left"; // pole on the flag's right
         return (
           <Html
             key={i}
@@ -413,23 +430,18 @@ function StopOverlay({
               ref={collect}
               style={{
                 opacity: 0,
-                // Put the attached (straight) edge exactly on the pole: a
-                // right-draping flag hangs from the pole's right (translateX 0);
-                // a left-draping flag's right edge meets the pole (−100%).
-                transform: attachRight
-                  ? "translateX(-100%)"
-                  : "translateX(0%)",
+                // Cancel drei's centring so the flag's inner edge lands ON the
+                // pole and its top edge sits at the pole tip (see block above).
+                transform: fliesLeft
+                  ? "translate(-50%, 50%)"
+                  : "translate(50%, 50%)",
               }}
               className="pointer-events-none select-none"
             >
+              {/* Plain rectangular flag. Adjust w-[..]/h-[..] to resize it. */}
               <div
-                className="w-[66px] h-[44px]"
+                className="w-[64px] h-[40px] rounded-[2px] overflow-hidden"
                 style={{
-                  // Wavy flag silhouette. Straight edge on the pole side; the
-                  // opposite (free) edge ripples with a single soft wave.
-                  clipPath: attachRight
-                    ? "polygon(100% 0%, 0% 8%, 18% 50%, 0% 92%, 100% 100%)"
-                    : "polygon(0% 0%, 100% 8%, 82% 50%, 100% 92%, 0% 100%)",
                   filter: "drop-shadow(0 5px 10px rgba(0,0,0,0.55))",
                 }}
               >

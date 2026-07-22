@@ -61,6 +61,13 @@ export interface StopPlacement {
   /** Unit vector pointing sideways off the path — props stand along this. */
   right: Vector3;
   /**
+   * Unit vector pointing to the VIEWER's right (cross(tangent, up)), which —
+   * unlike `right` — never flips with path parity. Multi-competition stops lay
+   * their poles and frames along this so competitions always read left-to-right
+   * in label order. See JourneyScene and StopOverlays.
+   */
+  screenRight: Vector3;
+  /**
    * Y rotation (radians) that turns a flat frame to face back down the path,
    * squarely at the approaching camera.
    *

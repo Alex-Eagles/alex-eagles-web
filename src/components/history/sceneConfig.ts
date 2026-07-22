@@ -155,10 +155,12 @@ export const LIGHT = {
  * than 2023 without reading a word.
  */
 export const STOP = {
-  // Kept modest so the flags near the pole top project into the MIDDLE of the
-  // screen, leaving the upper band clear for the label (which is separately
-  // clamped below the navbar — see StopOverlays).
-  poleHeight: 5.2,
+  // Tall enough that the flag (flown at the pole TOP) rides ABOVE the image
+  // frames, so the two never intersect — the flags occupy the band between the
+  // frame tops and the floating label. If you shorten this, the flags drop into
+  // the photos; if you lengthen it, raise LABEL.heightAbovePole to keep the
+  // label from colliding with the flag. See the flag block in StopOverlays.
+  poleHeight: 7.2,
   poleRadius: 0.09,
   personHeight: 1.7,
   personRadius: 0.28,
@@ -250,8 +252,10 @@ export const QUALITY: Record<"high" | "medium" | "low", QualitySettings> = {
 export const FRAME = {
   /** Gap between adjacent frames, in world units. */
   spacing: 4.4,
-  /** Height of a frame's centre above the ground. */
-  height: 2.3,
+  /** Height of a frame's centre above the ground. Kept low enough that the
+   *  frame's bottom edge floats just above the ground and its top stays clear
+   *  below the raised flags (see STOP.poleHeight). */
+  height: 3.3,
   /** Minimum distance any frame must keep from the path. */
   minPathClearance: 3.6,
 } as const;
@@ -274,20 +278,22 @@ export const FRAME = {
 export const LABEL = {
   /** Whole-label scale. Smaller ⇒ larger on screen. */
   distanceFactor: 15,
-  /** World height of the label's baseline above the pole top. */
-  heightAbovePole: 1.7,
+  /** World height of the label's baseline above the pole top. Small because the
+   *  pole is now tall (see STOP.poleHeight); this sits the label just above the
+   *  flag that flies from the pole top. */
+  heightAbovePole: 0.8,
   /** Award headline lines — the big, bold text. */
-  titleSize: 23,
+  titleSize: 28,
   /** "ACHIEVEMENT NN" eyebrow. */
   eyebrowSize: 13,
   /** The year. */
-  yearSize: 15,
+  yearSize: 18,
   /** Competition name under each award. */
-  competitionSize: 12,
+  competitionSize: 16,
   /** Founding-year headline ("Started the team"). */
-  foundingTitleSize: 30,
+  foundingTitleSize: 35,
   /** Founding-year description. */
-  blurbSize: 13,
+  blurbSize: 15,
 } as const;
 
 /** Scroll length per stop, in viewport heights. Sets the pace of the journey. */

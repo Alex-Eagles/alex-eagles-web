@@ -43,11 +43,13 @@ import { polesFor, type Achievement } from "@/data/achievements";
 /**
  * Lateral distance between the two poles of a two-competition stop.
  *
- * Wide enough that, with each flag draping OUTWARD from its pole (left pole →
- * left, right pole → right), the two cloths never reach each other. A tight gap
- * was why the two flags overlapped.
+ * Kept SMALL so both poles sit inside the gap between the two image frames
+ * (whose inner edges are ~±1.4 world units from the stop centre) and stay fully
+ * visible instead of hiding behind a frame. The flags drape OUTWARD from their
+ * poles and ride above the frames, so a tight gap can't make the two cloths
+ * collide — that constraint only applied to the old inward-draping flags.
  */
-const POLE_PAIR_GAP = 3.4;
+const POLE_PAIR_GAP = 2.0;
 
 /**
  * How quickly the light converges on the scroll position, per second.
@@ -182,7 +184,15 @@ export default function JourneyScene({
 
     return journey.stopUs.map((u, index) => {
       const tangent = journey.curve.getTangentAt(u, new Vector3()).normalize();
-      const right = new Vector3().crossVectors(tangent, up).normalize();
+
+      // `screenRight` always points to the VIEWER's right: the camera chases
+      // the light along the tangent, and cross(tangent, up) is the camera's
+      // right. It never flips with path parity — so a flag whose cloth streams
+      // toward +screenRight looks like it's flying right no matter which side
+      // of the path the stop is on. The flag drape uses this below.
+      const screenRight = new Vector3().crossVectors(tangent, up).normalize();
+
+      const right = screenRight.clone();
 
       // Alternate which side of the path each stop sits on. Keeping them all
       // on one side would leave half the frame permanently empty as the
@@ -214,26 +224,37 @@ export default function JourneyScene({
       // One pole per distinct competition, positioned around poleBase. A lone
       // pole sits dead centre; a pair straddles the centre.
       //
-      // Drape direction is derived from each pole's PHYSICAL position, not from
-      // polesFor's ordering: the pole on the left of the pair drapes its flag
-      // left, the one on the right drapes right, so the two cloths open away
-      // from each other and can't overlap. A single pole always drapes right,
-      // like a real flag pole.
+      // Multi-competition stops are laid out in SCREEN space (`screenRight`),
+      // NOT along the parity-flipped `right`. That guarantees the competitions
+      // read left-to-right in the SAME order they're listed in the label (the
+      // first-listed competition on the left), on every stop regardless of
+      // which way the path happens to be curving. Laying them along `right`
+      // instead flipped the pair left↔right on odd-numbered stops.
+      //
+      // Drape direction then follows each pole's actual screen position: a pole
+      // left-of-centre drapes its flag left, right-of-centre drapes right, so
+      // the pair opens outward. A single pole always drapes right.
       const poleSpecs = polesFor(achievement);
+      const multiPole = poleSpecs.length > 1;
       const poles: PolePlacement[] = poleSpecs.map((spec, i) => {
         // Offsets: 1 pole → [0]; 2 → [−gap/2, +gap/2]; N → centred spread.
         const centred = i - (poleSpecs.length - 1) / 2;
         const base = poleBase
           .clone()
-          .addScaledVector(right, centred * POLE_PAIR_GAP);
-        const side: PolePlacement["side"] =
-          poleSpecs.length === 1 ? "right" : centred < 0 ? "left" : "right";
+          .addScaledVector(multiPole ? screenRight : right, centred * POLE_PAIR_GAP);
+        const screenOffset = base.clone().sub(poleBase).dot(screenRight);
+        const side: PolePlacement["side"] = !multiPole
+          ? "right"
+          : screenOffset < 0
+            ? "left"
+            : "right";
         return { base, logo: spec.logo, side };
       });
 
       return {
         anchor,
         right,
+        screenRight,
         facing,
         awardCount: achievement.awards.length,
         frameCount,
