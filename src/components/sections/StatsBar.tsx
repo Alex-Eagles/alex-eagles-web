@@ -4,7 +4,7 @@ import { STATS } from "@/data/home";
 /**
  * StatsBar — a full-width band of four headline figures, sitting on the
  * surface color and bordered top/bottom. Numbers use the mono/technical font
- * in gold, per the design system.
+ * in the brand color, per the design system.
  */
 export default function StatsBar() {
   return (
@@ -13,7 +13,7 @@ export default function StatsBar() {
         {STATS.map((stat, i) => (
           <ScrollReveal key={stat.label} delay={i * 0.08} className="text-center p-3.5">
             <div
-              className="font-mono font-medium text-gold leading-none"
+              className="font-mono font-medium text-brand leading-none"
               style={{ fontSize: "clamp(32px, 5vw, 46px)" }}
             >
               {stat.num}

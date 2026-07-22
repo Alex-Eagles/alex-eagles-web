@@ -37,7 +37,7 @@ export default function Hero() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 80% at 50% -10%, #161A50 0%, #0A0D2B 45%, var(--bg-primary) 100%)",
+            "radial-gradient(120% 80% at 50% -10%, var(--brand-dark) 0%, #12122e 45%, var(--bg-primary) 100%)",
         }}
       />
 
@@ -60,7 +60,7 @@ export default function Hero() {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(7,9,28,0.55) 0%, rgba(7,9,28,0.85) 100%)",
+            "linear-gradient(to bottom, rgba(9,9,14,0.55) 0%, rgba(9,9,14,0.85) 100%)",
         }}
       />
 
@@ -87,7 +87,7 @@ export default function Hero() {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(7,9,28,0) 55%, var(--bg-primary) 100%)",
+            "linear-gradient(to bottom, rgba(9,9,14,0) 55%, var(--bg-primary) 100%)",
         }}
       />
 
@@ -109,13 +109,13 @@ export default function Hero() {
           />
         </div>
 
-        <div className="eyebrow mb-4" style={{ color: "#8B8FC8" }}>
+        <div className="eyebrow mb-4" style={{ color: "var(--brand-light)" }}>
           SUAS Competition 2025
         </div>
 
         <h1
           className="font-display font-extrabold leading-none tracking-[-0.02em] m-0 mb-5 pb-1"
-          style={{ fontSize: "var(--text-hero)", color: "#F0F2FF" }}
+          style={{ fontSize: "var(--text-hero)", color: "var(--text-on-dark)" }}
         >
           ALEX EAGLES
         </h1>
@@ -124,7 +124,7 @@ export default function Hero() {
           className="font-sans font-normal mx-auto mb-9 leading-[1.6]"
           style={{
             fontSize: "clamp(16px, 2.2vw, 20px)",
-            color: "#B7BAE0",
+            color: "var(--text-on-dark-muted)",
             maxWidth: "560px",
           }}
         >

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * SectionHeader — the repeated "eyebrow → heading → gold bar" pattern that
+ * SectionHeader — the repeated "eyebrow → heading → brand bar" pattern that
  * opens most sections. Keeping it in one component guarantees every section
  * title looks identical.
  *
@@ -35,9 +35,9 @@ export default function SectionHeader({
         {title}
       </h2>
 
-      {/* Short gold underline bar — the section-header signature. */}
+      {/* Short brand underline bar — the section-header signature. */}
       <div
-        className={`h-0.5 w-12 bg-gold mt-3.5 ${isCenter ? "mx-auto" : ""}`}
+        className={`h-0.5 w-12 bg-brand mt-3.5 ${isCenter ? "mx-auto" : ""}`}
       />
     </div>
   );

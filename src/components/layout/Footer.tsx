@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, ChevronRight, Mail, MapPin } from "lucide-react";
 import AeLogo from "@/components/ui/AeLogo";
@@ -15,9 +15,34 @@ import {
  * quick links, vehicles, and a contact + newsletter column. Shared across every
  * page via the layout in App.tsx.
  */
+/**
+ * The footer is intentionally near-black in BOTH themes (per the color map, so
+ * the brand pops as an accent). Rather than override every child's color, we
+ * remap the semantic design tokens *locally* on the <footer> element — every
+ * `text-fg` / `bg-elevated` / `border-border` utility inside then resolves to
+ * the footer's dark palette automatically. All values still come from the
+ * footer-* tokens in theme.css, so this stays fully centralized.
+ */
+const FOOTER_THEME = {
+  background: "var(--footer-bg)",
+  borderColor: "var(--footer-border)",
+  "--text-primary": "var(--footer-heading)",
+  "--text-secondary": "var(--footer-text)",
+  "--text-muted": "var(--footer-muted)",
+  "--brand": "var(--footer-brand)",
+  "--brand-light": "var(--footer-brand)",
+  "--border-subtle": "var(--footer-border)",
+  "--border-solid": "var(--footer-border)",
+  "--bg-surface": "var(--footer-surface)",
+  "--bg-elevated": "var(--footer-elevated)",
+} as CSSProperties;
+
 export default function Footer() {
   return (
-    <footer className="bg-canvas border-t border-border-strong relative overflow-hidden">
+    <footer
+      className="relative overflow-hidden border-t"
+      style={FOOTER_THEME}
+    >
       <div className="max-w-[var(--maxw-content)] mx-auto px-6 pt-[72px] pb-7 relative z-10">
         <div className="grid gap-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
           {/* Column 1 — brand + mission + socials */}
@@ -54,7 +79,7 @@ export default function Footer() {
                   to={link.path}
                   className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
                 >
-                  <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
+                  <ChevronRight size={14} className="text-brand-light" strokeWidth={2.5} />
                   {link.label}
                 </Link>
               </li>
@@ -69,7 +94,7 @@ export default function Footer() {
                   to="/vehicles"
                   className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
                 >
-                  <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
+                  <ChevronRight size={14} className="text-brand-light" strokeWidth={2.5} />
                   {name}
                 </Link>
               </li>
@@ -81,11 +106,11 @@ export default function Footer() {
             <ColumnHeading>Communication</ColumnHeading>
             <div className="flex flex-col gap-3.5 mb-[22px]">
               <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted">
-                <Mail size={17} className="text-gold" />
+                <Mail size={17} className="text-brand-light" />
                 {CONTACT.email}
               </span>
               <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted">
-                <MapPin size={17} className="text-gold" />
+                <MapPin size={17} className="text-brand-light" />
                 {CONTACT.location}
               </span>
             </div>
@@ -111,7 +136,7 @@ export default function Footer() {
                 <button
                   type="submit"
                   aria-label="Subscribe"
-                  className="flex-none w-11 h-11 rounded-md bg-gold text-canvas cursor-pointer flex items-center justify-center hover:bg-gold-hover transition-colors"
+                  className="flex-none w-11 h-11 rounded-md bg-brand-light text-white cursor-pointer flex items-center justify-center hover:opacity-90 transition-opacity"
                 >
                   <ArrowUpRight size={18} strokeWidth={2.4} />
                 </button>

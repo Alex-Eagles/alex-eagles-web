@@ -31,7 +31,7 @@ export interface BlogPost {
 export const LATEST_POSTS: BlogPost[] = [
   {
     subteam: "Airframe",
-    dotColor: "#60A5FA",
+    dotColor: "#85B7EB",
     author: "M. Khaled",
     date: "WED, 04 JUN 25",
     title: "Carbon wing layup complete",
@@ -40,7 +40,7 @@ export const LATEST_POSTS: BlogPost[] = [
   },
   {
     subteam: "Avionics",
-    dotColor: "#5458CC",
+    dotColor: "#AFA9EC",
     author: "S. Nour",
     date: "SAT, 31 MAY 25",
     title: "Telemetry link tuning",
@@ -49,7 +49,7 @@ export const LATEST_POSTS: BlogPost[] = [
   },
   {
     subteam: "Software",
-    dotColor: "#34D399",
+    dotColor: "#5DCAA5",
     author: "A. Fathy",
     date: "TUE, 27 MAY 25",
     title: "Autonomous waypoint mode",

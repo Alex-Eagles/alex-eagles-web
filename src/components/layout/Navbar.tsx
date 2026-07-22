@@ -147,7 +147,7 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 aria-current={active ? "page" : undefined}
                 className="font-display font-semibold text-3xl px-6 py-2 rounded-lg transition-colors"
-                style={{ color: active ? "var(--gold)" : "var(--text-primary)" }}
+                style={{ color: active ? "var(--brand-light)" : "var(--text-primary)" }}
               >
                 {link.label}
               </Link>
