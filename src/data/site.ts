@@ -54,4 +54,8 @@ export const SOCIALS: SocialLink[] = [
 ];
 
 /** Vehicle names surfaced in the footer (full data lives with the Vehicles page). */
-export const VEHICLE_NAMES: string[] = ["Falcon-X1", "Talon VTOL", "Skimmer FW"];
+export const VEHICLE_NAMES: string[] = [
+  "Falcon-X1",
+  "Talon VTOL",
+  "Skimmer FW",
+];

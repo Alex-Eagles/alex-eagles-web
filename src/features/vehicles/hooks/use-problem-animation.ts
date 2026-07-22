@@ -11,6 +11,7 @@ function useProblemAnimation(
   containerRef: RefObject<HTMLElement | null>,
   contentRef: RefObject<HTMLElement | null>,
   animationRef: RefObject<DotLottie | null>,
+  videoRef: RefObject<HTMLVideoElement | null>,
 ) {
   const [totalFrames, setTotalFrames] = useState<number>(0);
 
@@ -28,10 +29,17 @@ function useProblemAnimation(
 
   useGSAP(
     () => {
-      if (!containerRef.current || !animationRef.current || totalFrames === 0)
+      if (
+        !containerRef.current ||
+        !animationRef.current ||
+        !videoRef.current ||
+        totalFrames === 0
+      )
         return;
 
       const finalFrame = animationRef.current.totalFrames - 1;
+
+      videoRef.current.pause();
 
       gsap.to(contentRef, {
         scrollTrigger: {
@@ -47,6 +55,9 @@ function useProblemAnimation(
 
             animationRef.current!.setFrame(finalFrame - requiredFrame);
             // console.log(self.progress, requiredFrame, finalFrame);
+            if (self.progress >= 0.9) {
+              videoRef.current!.play();
+            }
           },
         },
       });

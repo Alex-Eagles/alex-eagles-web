@@ -15,10 +15,8 @@ function Problem2() {
     >
       <div className="pt-[12vh] pb-14 section-inline-padding h-full problem-grid problem-grid--textless items-end gap-y-8">
         <div className="space-y-4">
-          <div className="uppercase text-xs lg:text-lg">The problem</div>
-          <h2 className="text-4xl lg:text-5xl">
-            They demand precision, reliability, and intelligence.
-          </h2>
+          <div className="uppercase text-xs lg:text-lg">Our drone</div>
+          <h2 className="text-4xl lg:text-5xl">Engineered for Every Mission</h2>
         </div>
         <div className="self-start flex items-center gap-x-2">
           2 <div className="w-12 h-px bg-current"></div> 2

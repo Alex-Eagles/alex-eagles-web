@@ -9,21 +9,33 @@ function Technical() {
       </p>
       <div className="space-y-6 lg:grid lg:grid-cols-3 lg:gap-6 lg:space-y-0">
         <Card
-          title="Engine"
-          impactPercentage={85}
+          title="Weight"
+          impact={"7500g"}
           description="High-performance engine with advanced fuel efficiency."
           icon={Plus}
         />
         <Card
-          title="Engine"
-          impactPercentage={85}
+          title="Weight (Without Payload)"
+          impact={"6500g"}
           description="High-performance engine with advanced fuel efficiency."
           icon={Plus}
         />
         <Card
-          title="Engine"
-          impactPercentage={85}
+          title="Flight time"
+          impact={"35mins"}
           description="High-performance engine with advanced fuel efficiency."
+          icon={Plus}
+        />
+        <Card
+          title="Propulsion System"
+          impact={"465kv"}
+          description="KDE 4215"
+          icon={Plus}
+        />
+        <Card
+          title="Power System"
+          impact={"800Wh"}
+          description="6S8P Custom LiOn Pack"
           icon={Plus}
         />
       </div>
@@ -34,14 +46,23 @@ function Technical() {
 
 interface CardProps {
   title: string;
-  impactPercentage: number;
+  impact: string;
   description: string;
   icon: LucideIcon;
 }
 
-function Card({ title, impactPercentage, description, icon: Icon }: CardProps) {
+function Card({ title, impact, description, icon: Icon }: CardProps) {
   return (
-    <div className="glassmorphism rounded-2xl">
+    <div
+      className="glassmorphism rounded-2xl text-white"
+      style={{
+        background: "var(--bg-glass)",
+        border: `1px solid var(--border-subtle)`,
+        boxShadow: "var(--elevation-2)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+      }}
+    >
       <h3 className="text-2xl p-5">{title}</h3>
       <div className="flex w-max items-center gap-2 p-5">
         <span className="flex items-center">
@@ -49,7 +70,7 @@ function Card({ title, impactPercentage, description, icon: Icon }: CardProps) {
           <Icon size={13} />
           {"]"}
         </span>
-        <p className="text-5xl">{impactPercentage}%</p>
+        <p className="text-5xl">{impact}</p>
       </div>
       <p className="border-t border-gray-300/5 p-5">{description}</p>
     </div>
