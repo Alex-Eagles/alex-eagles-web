@@ -22,7 +22,7 @@ import { motion } from "framer-motion";
 import SectionHeader from "@/components/ui/SectionHeader";
 import HistoryJourney from "@/components/history/HistoryJourney";
 import Timeline2D from "@/components/history/Timeline2D";
-import { fadeUp } from "@/lib/motion";
+import { fadeUp, viewportOnce } from "@/lib/motion";
 import { achievements } from "@/data/achievements";
 
 export default function History() {
@@ -86,15 +86,35 @@ export default function History() {
           the plain timeline everywhere else. See HistoryJourney. */}
       <HistoryJourney />
 
-      {/* ── Closing timeline ────────────────────────────────────────────── */}
-      <section className="relative px-6 pt-20">
-        <div className="mx-auto" style={{ maxWidth: "var(--maxw-content)" }}>
+      {/* ── Closing timeline ──────────────────────────────────────────────
+          The written companion to the scene above. It gets clear air from the
+          immersive journey (pt-24/pt-32) and a supporting line so the heading
+          never reads as a lonely, dropped-in label. Reveals with the same
+          fadeUp used site-wide — opacity + transform only, runs once. */}
+      <section className="relative px-6 pt-24 md:pt-32">
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          className="mx-auto"
+          style={{ maxWidth: "var(--maxw-content)" }}
+        >
           <SectionHeader
-            eyebrow="Every milestone"
-            title="The full record"
+            eyebrow="Prefer to read?"
+            title="The whole story, in writing"
             align="center"
           />
-        </div>
+
+          <p
+            className="font-sans text-body-lg text-fg-muted leading-[1.7] mt-7 mx-auto text-center"
+            style={{ maxWidth: "var(--maxw-prose)" }}
+          >
+            Every milestone laid out year by year — {achievements.length}{" "}
+            entries and {awardCount} awards between {firstYear} and{" "}
+            {latestYear}, in the order they happened.
+          </p>
+        </motion.div>
       </section>
 
       <Timeline2D />
