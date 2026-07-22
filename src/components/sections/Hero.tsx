@@ -109,7 +109,7 @@ export default function Hero() {
           />
         </div>
 
-        <div className="eyebrow mb-4" style={{ color: "var(--brand-light)" }}>
+        <div className="eyebrow mb-4" style={{ color: "var(--eyebrow)" }}>
           SUAS Competition 2025
         </div>
 

@@ -103,7 +103,7 @@
   --bg-primary: #0f0f0f; /* page background                     */
   --bg-surface: #1a1a1a; /* section backgrounds                 */
   --bg-elevated: #252525; /* cards, modals, elevated elements    */
-  --bg-glass: rgba(26, 26, 26, 0.6); /* glassmorphic overlays (navbar etc.) */
+  --bg-glass: rgba(26, 26, 26, 0.4); /* glassmorphic overlays (navbar etc.) */
   --canvas: #1a1a1a; /* alias: section canvas behind cards   */
   --card: #1a1a1a; /* the card surface itself             */
 
@@ -112,11 +112,12 @@
   --brand-light: #5a5bdd; /* hover / active                      */
   --brand-dark: #242599; /* deepest brand (pressed / gradients) */
   --brand-glow: rgba(61, 62, 204, 0.25); /* glow behind brand elements     */
+  --eyebrow: #7a7bea; /* section kicker label — lighter than brand-light to clear AA on dark */
 
   /* Text */
   --text-primary: #f2f2f2;
   --text-secondary: #aaaaaa;
-  --text-muted: #666666;
+  --text-muted: #8a8a8a; /* subtle tier — lifted from #666 to clear AA (was 3:1) */
 
   /* Borders */
   --border-subtle: #2e2e2e;
@@ -145,7 +146,7 @@
   --bg-primary: #e8e8f9; /* page background (map bg-tertiary)     */
   --bg-surface: #ffffff; /* section / content background         */
   --bg-elevated: #f3f3fd; /* cards (map bg-secondary)             */
-  --bg-glass: rgba(255, 255, 255, 0.75);
+  --bg-glass: rgba(255, 255, 255, 0.4);
   --canvas: #f3f3fd; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
 
@@ -153,10 +154,11 @@
   --brand-light: #3d3ecc; /* lighter brand for hover / accents    */
   --brand-dark: #1a1b72; /* deepest brand (pressed / gradients)  */
   --brand-glow: rgba(36, 37, 153, 0.12);
+  --eyebrow: #3d3ecc; /* section kicker — unchanged in light (already clears AA at 6.3:1) */
 
   --text-primary: #111128; /* near-black indigo text               */
   --text-secondary: #4a4a7a;
-  --text-muted: #9090ba;
+  --text-muted: #616191; /* subtle tier — darkened from #9090ba to clear AA (was 2.5:1) */
 
   --border-subtle: #d0d0ed;
   --border-solid: #b0b0d8;

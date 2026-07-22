@@ -1,4 +1,5 @@
 import {
+  Facebook,
   Github,
   Instagram,
   Linkedin,
@@ -35,8 +36,31 @@ export const BRAND = {
 } as const;
 
 export const CONTACT = {
-  email: "team@alexeagles.org",
+  email: "alex_eagles@alexu.edu.eg",
   location: "Alexandria University, Egypt",
+  /** Google Maps link for the location line in the footer. */
+  mapsUrl: "https://maps.app.goo.gl/xop1aPn1M7CSjY4d6",
+} as const;
+
+/**
+ * The pre-written "I'm interested" message the footer newsletter form sends to
+ * the team. When a visitor submits their email, the form opens their mail client
+ * with this subject/body addressed to CONTACT.email — `{email}` is replaced with
+ * whatever the visitor typed. Edit the wording here to change the outgoing email.
+ */
+export const NEWSLETTER_EMAIL = {
+  subject: "New updates subscriber — interested in Alex Eagles",
+  body: [
+    "Hello Alex Eagles team,",
+    "",
+    "I came across your website and I'm interested in learning more about the",
+    "team. Please add me to your mailing list so I receive your constant updates,",
+    "news, and developments.",
+    "",
+    "My email address: {email}",
+    "",
+    "Thank you!",
+  ].join("\n"),
 } as const;
 
 export interface SocialLink {
@@ -47,11 +71,12 @@ export interface SocialLink {
 
 /** Footer social row. `Icon` is a lucide component rendered as <Icon />. */
 export const SOCIALS: SocialLink[] = [
-  { label: "Instagram", href: "#", Icon: Instagram },
-  { label: "LinkedIn", href: "#", Icon: Linkedin },
-  { label: "YouTube", href: "#", Icon: Youtube },
-  { label: "GitHub", href: "#", Icon: Github },
+  { label: "Instagram", href: "https://www.instagram.com/alex_eagles.aerodesign/", Icon: Instagram },
+  { label: "Facebook", href: "https://www.facebook.com/alexeagles2015/", Icon: Facebook },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/alex-eagles-aero-design/posts/?feedView=all", Icon: Linkedin },
+  { label: "YouTube", href: "https://www.youtube.com/@AlexEagles.aerodesign", Icon: Youtube },
+  { label: "GitHub", href: "https://github.com/Alex-Eagles", Icon: Github },
 ];
 
 /** Vehicle names surfaced in the footer (full data lives with the Vehicles page). */
-export const VEHICLE_NAMES: string[] = ["Falcon-X1", "Talon VTOL", "Skimmer FW"];
+export const VEHICLE_NAMES: string[] = ["Clover","Harpy", "Itay", "Taco" ];

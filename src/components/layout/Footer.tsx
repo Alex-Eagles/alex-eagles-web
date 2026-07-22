@@ -6,6 +6,7 @@ import {
   BRAND,
   CONTACT,
   NAV_LINKS,
+  NEWSLETTER_EMAIL,
   SOCIALS,
   VEHICLE_NAMES,
 } from "@/data/site";
@@ -80,20 +81,43 @@ export default function Footer() {
           <div>
             <ColumnHeading>Communication</ColumnHeading>
             <div className="flex flex-col gap-3.5 mb-[22px]">
-              <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted">
+              <a
+                href={`mailto:${CONTACT.email}`}
+                className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted transition-colors hover:text-fg"
+              >
                 <Mail size={17} className="text-brand-light" />
                 {CONTACT.email}
-              </span>
-              <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted">
+              </a>
+              <a
+                href={CONTACT.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted transition-colors hover:text-fg"
+              >
                 <MapPin size={17} className="text-brand-light" />
                 {CONTACT.location}
-              </span>
+              </a>
             </div>
 
-            {/* Newsletter — presentational (wire to a real endpoint later). */}
+            {/* Newsletter — opens the visitor's mail client with a pre-written
+                "I'm interested" message addressed to the team (see NEWSLETTER_EMAIL
+                in site.ts). No backend needed. */}
             <form
               className="bg-elevated border border-border rounded-[10px] p-4"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={(e) => {
+                e.preventDefault();
+                const input = e.currentTarget.elements.namedItem(
+                  "footer-email",
+                ) as HTMLInputElement | null;
+                const email = input?.value.trim();
+                if (!email) return;
+                const subject = encodeURIComponent(NEWSLETTER_EMAIL.subject);
+                const body = encodeURIComponent(
+                  NEWSLETTER_EMAIL.body.replace("{email}", email),
+                );
+                window.location.href = `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
+                e.currentTarget.reset();
+              }}
             >
               <label
                 htmlFor="footer-email"
@@ -104,7 +128,9 @@ export default function Footer() {
               <div className="flex gap-2">
                 <input
                   id="footer-email"
+                  name="footer-email"
                   type="email"
+                  required
                   placeholder="Email"
                   className="flex-1 min-w-0 h-11 bg-surface border border-border rounded-md px-3 font-sans text-sm text-fg outline-none"
                 />
@@ -122,7 +148,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-[22px] border-t border-border text-center font-sans text-[13px] text-fg-subtle">
-          © 2025 Alex Eagles · Alexandria University · SUAS Competition
+          © 2025 Alex Eagles · Alexandria University · All rights reserved
         </div>
       </div>
     </footer>
