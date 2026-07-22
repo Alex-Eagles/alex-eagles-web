@@ -88,30 +88,37 @@ export default function Timeline2D({
                     index % 2 === 0 ? "md:text-left" : "md:text-right"
                   }`}
                 >
-                  <h3 className="font-display font-bold text-h4 text-fg m-0 mb-2 leading-tight">
-                    {achievement.title}
-                  </h3>
-
-                  {achievement.blurb ? (
-                    <p className="font-sans text-small text-fg-muted leading-[1.65] m-0">
-                      {achievement.blurb}
-                    </p>
-                  ) : (
-                    <ul className="list-none p-0 m-0 space-y-1">
+                  {achievement.awards.length > 0 ? (
+                    // One headline per award — the exact lines shown on the stop
+                    // labels in the 3D scene above, so the written record reads
+                    // identically. Multi-award years (2021, 2022, 2025) list
+                    // every award, each with the competition it was won at.
+                    <ul className="list-none p-0 m-0 space-y-4">
                       {achievement.awards.map((award, i) => (
-                        <li
-                          key={i}
-                          className="font-sans text-small text-fg-muted leading-[1.5]"
-                        >
-                          {award.place ? `${award.place} — ` : ""}
-                          {award.title}
-                          <span className="text-[var(--text-muted)]">
-                            {" · "}
+                        <li key={i}>
+                          <h3 className="font-display font-bold text-h4 text-fg m-0 leading-tight">
+                            {award.place ? `${award.place} — ` : ""}
+                            {award.title}
+                          </h3>
+                          <span className="font-mono text-[12px] tracking-[0.12em] uppercase text-[var(--text-muted)] mt-1.5 inline-block">
                             {award.competition}
                           </span>
                         </li>
                       ))}
                     </ul>
+                  ) : (
+                    // Founding year — a real headline and description, since it
+                    // has no awards to list.
+                    <>
+                      <h3 className="font-display font-bold text-h4 text-fg m-0 mb-2 leading-tight">
+                        {achievement.title}
+                      </h3>
+                      {achievement.blurb && (
+                        <p className="font-sans text-small text-fg-muted leading-[1.65] m-0">
+                          {achievement.blurb}
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
