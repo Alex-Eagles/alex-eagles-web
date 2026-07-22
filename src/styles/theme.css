@@ -86,23 +86,12 @@
 
   /* ------------------------------------------------------------------------
    * 3. ALWAYS-DARK CONTEXT TOKENS  (theme-independent — do NOT flip)
-   *    Some surfaces are permanently dark in BOTH themes: the hero (light text
-   *    sits over a dark video/backdrop) and the footer (near-black per the
-   *    color map, so the brand pops as an accent). Text on these surfaces must
-   *    stay light regardless of the active theme — so these tokens are fixed.
+   *    The hero sits over a dark video/backdrop in BOTH themes, so its text
+   *    must stay light regardless of the active theme — these tokens are fixed.
+   *    (The footer, by contrast, is theme-relative: light in light mode.)
    * ----------------------------------------------------------------------*/
   --text-on-dark: #f2f2f2; /* headings/body over a permanently-dark surface */
   --text-on-dark-muted: #b4b4c4; /* secondary text on the same surfaces      */
-
-  /* Footer — intentionally near-black in BOTH themes (color-map spec). */
-  --footer-bg: #101010;
-  --footer-heading: #f2f2f2; /* brand name + column headings */
-  --footer-text: #aaaaaa; /* body copy + links            */
-  --footer-muted: #666666; /* fine print / bottom bar      */
-  --footer-brand: #5a5bdd; /* accent (eyebrow, link icons) — light indigo pops */
-  --footer-border: rgba(255, 255, 255, 0.1);
-  --footer-surface: rgba(255, 255, 255, 0.06); /* input field bg  */
-  --footer-elevated: rgba(255, 255, 255, 0.04); /* newsletter box bg */
 }
 
 /* ----------------------------------------------------------------------------

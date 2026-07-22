@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, ChevronRight, Mail, MapPin } from "lucide-react";
 import AeLogo from "@/components/ui/AeLogo";
@@ -15,34 +15,9 @@ import {
  * quick links, vehicles, and a contact + newsletter column. Shared across every
  * page via the layout in App.tsx.
  */
-/**
- * The footer is intentionally near-black in BOTH themes (per the color map, so
- * the brand pops as an accent). Rather than override every child's color, we
- * remap the semantic design tokens *locally* on the <footer> element — every
- * `text-fg` / `bg-elevated` / `border-border` utility inside then resolves to
- * the footer's dark palette automatically. All values still come from the
- * footer-* tokens in theme.css, so this stays fully centralized.
- */
-const FOOTER_THEME = {
-  background: "var(--footer-bg)",
-  borderColor: "var(--footer-border)",
-  "--text-primary": "var(--footer-heading)",
-  "--text-secondary": "var(--footer-text)",
-  "--text-muted": "var(--footer-muted)",
-  "--brand": "var(--footer-brand)",
-  "--brand-light": "var(--footer-brand)",
-  "--border-subtle": "var(--footer-border)",
-  "--border-solid": "var(--footer-border)",
-  "--bg-surface": "var(--footer-surface)",
-  "--bg-elevated": "var(--footer-elevated)",
-} as CSSProperties;
-
 export default function Footer() {
   return (
-    <footer
-      className="relative overflow-hidden border-t"
-      style={FOOTER_THEME}
-    >
+    <footer className="bg-canvas border-t border-border-strong relative overflow-hidden">
       <div className="max-w-[var(--maxw-content)] mx-auto px-6 pt-[72px] pb-7 relative z-10">
         <div className="grid gap-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
           {/* Column 1 — brand + mission + socials */}
