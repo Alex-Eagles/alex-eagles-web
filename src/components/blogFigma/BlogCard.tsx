@@ -26,6 +26,7 @@ export default function BlogCard({
   title,
   excerpt,
   image,
+  imageFit = "cover",
   category,
   date,
   author,
@@ -44,11 +45,18 @@ export default function BlogCard({
       {/* Cover photo + category badge — the one piece of chrome the home
           page's text-only cards don't need. */}
       <div className="relative h-56 overflow-hidden">
+        {imageFit === "contain" && (
+          <div aria-hidden="true" className="absolute inset-0 bg-white" />
+        )}
         <img
           src={image}
           alt={`Cover image for "${title}"`}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className={
+            imageFit === "contain"
+              ? "relative w-full h-full object-contain p-10 transition-transform duration-300 group-hover:scale-105"
+              : "w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          }
         />
         {/* Category-color wash over the photo, matching the card's accent. */}
         <div

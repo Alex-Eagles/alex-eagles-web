@@ -100,6 +100,13 @@ export interface BlogPostFull {
   title: string;
   excerpt: string;
   image: string;
+  /**
+   * How the cover image fills its banner. Defaults to "cover" (crop to
+   * fill, for photos). Use "contain" for small/transparent logo-style
+   * images so they stay crisp and uncropped on a plain backdrop instead of
+   * being stretched and blurred.
+   */
+  imageFit?: "cover" | "contain";
   category: BlogCategory;
   date: string;
   author: string;
@@ -124,8 +131,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Auditing the Team Website",
     excerpt:
       "We started editing the team website itself — auditing what was already in place, identifying what was missing, and mapping out the requirements it still needed to meet.",
-    image:
-      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/website-audit.jpg",
     category: "software",
     date: "Feb 15, 2026",
     author: "Software Team",
@@ -136,8 +142,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Sprint 3: Front End Structure, Live Tracking & MAVLink",
     excerpt:
       "This sprint tied the front end's main structure together, connected the endpoints to our Drone class, improved live drone tracking on the map, and simulated our MavlinkController class against PX4 firmware.",
-    image:
-      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/mavlink.png",
     category: "software",
     date: "Dec 5, 2025",
     author: "Software Team",
@@ -148,8 +153,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Sprint 2: Ground Station UI, Satellite Maps & the Drone Class",
     excerpt:
       "Sprint 2 covered a lot of ground: building the ground station's UI and layout, researching satellite map integration, implementing our core Drone class, and standing up the API gateway.",
-    image:
-      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/ground-station.jpg",
     category: "software",
     date: "Nov 23, 2025",
     author: "Software Team",
@@ -172,8 +176,8 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Getting Up to Speed with React",
     excerpt:
       "Before sprint work began, the team spent the week studying React fundamentals — components, hooks, and state management — to build a shared foundation for the ground station front end.",
-    image:
-      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/react.png",
+    imageFit: "contain",
     category: "software",
     date: "Oct 21, 2025",
     author: "Software Team",
