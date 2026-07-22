@@ -120,16 +120,64 @@ export const BLOG_POSTS: BlogPostFull[] = [
     readTime: "8 min read",
   },
   {
-    id: 2,
-    title: "Optimizing Flight Control Algorithms",
+    id: 9,
+    title: "Auditing the Team Website",
     excerpt:
-      "How we achieved 40% better flight stability through advanced PID tuning and machine learning techniques. A technical breakdown of our approach.",
+      "We started editing the team website itself — auditing what was already in place, identifying what was missing, and mapping out the requirements it still needed to meet.",
     image:
       "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
     category: "software",
-    date: "Mar 8, 2026",
-    author: "Alex Rivera",
+    date: "Feb 15, 2026",
+    author: "Software Team",
+    readTime: "4 min read",
+  },
+  {
+    id: 10,
+    title: "Sprint 3: Front End Structure, Live Tracking & MAVLink",
+    excerpt:
+      "This sprint tied the front end's main structure together, connected the endpoints to our Drone class, improved live drone tracking on the map, and simulated our MavlinkController class against PX4 firmware.",
+    image:
+      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "software",
+    date: "Dec 5, 2025",
+    author: "Software Team",
     readTime: "6 min read",
+  },
+  {
+    id: 11,
+    title: "Sprint 2: Ground Station UI, Satellite Maps & the Drone Class",
+    excerpt:
+      "Sprint 2 covered a lot of ground: building the ground station's UI and layout, researching satellite map integration, implementing our core Drone class, and standing up the API gateway.",
+    image:
+      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "software",
+    date: "Nov 23, 2025",
+    author: "Software Team",
+    readTime: "6 min read",
+  },
+  {
+    id: 12,
+    title: "Sprint 1: GCS Architecture & Simulation",
+    excerpt:
+      "Kicked off our first sprint by reviewing the ground control station's overall architecture and running early simulations to validate our approach before writing production code.",
+    image:
+      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "software",
+    date: "Oct 24, 2025",
+    author: "Software Team",
+    readTime: "5 min read",
+  },
+  {
+    id: 13,
+    title: "Getting Up to Speed with React",
+    excerpt:
+      "Before sprint work began, the team spent the week studying React fundamentals — components, hooks, and state management — to build a shared foundation for the ground station front end.",
+    image:
+      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "software",
+    date: "Oct 21, 2025",
+    author: "Software Team",
+    readTime: "3 min read",
   },
   {
     id: 3,
@@ -156,16 +204,28 @@ export const BLOG_POSTS: BlogPostFull[] = [
     readTime: "7 min read",
   },
   {
-    id: 5,
-    title: "Real-Time Object Detection for Navigation",
+    id: 14,
+    title: "Sprint 2: Diffusion Models, Gimbal Control & Camera Streaming",
     excerpt:
-      "Implementing computer vision models for obstacle avoidance and path planning. Our approach to edge AI processing.",
+      "Sprint 2 explored diffusion models for 3D texturing, implemented gimbal control via Herelink, and got camera stream acquisition working through Herelink.",
     image:
       "https://images.unsplash.com/photo-1612338762643-298feee70520?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb2JvdGljcyUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzczNjM2NTEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
     category: "computerVision",
-    date: "Feb 28, 2026",
-    author: "David Kim",
-    readTime: "9 min read",
+    date: "Nov 17, 2025",
+    author: "AI Team",
+    readTime: "5 min read",
+  },
+  {
+    id: 15,
+    title: "Sprint 1: Dataset Generation with Blender",
+    excerpt:
+      "Kicked off with a synthetic dataset generation pipeline built in Blender — the foundation we'd use to train our computer vision models.",
+    image:
+      "https://images.unsplash.com/photo-1612338762643-298feee70520?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb2JvdGljcyUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzczNjM2NTEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "computerVision",
+    date: "Oct 21, 2025",
+    author: "AI Team",
+    readTime: "4 min read",
   },
   {
     id: 6,

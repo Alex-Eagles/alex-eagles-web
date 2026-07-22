@@ -19,10 +19,8 @@ type BlogCardProps = Omit<BlogPostFull, "id">;
  * The whole card — photo, badge, and body alike — uses the post's fixed
  * `CATEGORY_STYLE` (accent/text/label straight from the subteam reference
  * sheet), not the site's theme tokens — those stay the same in light or
- * dark mode. Light mode stays exactly as the reference sheet specifies
- * (opaque `bg.light`, no blur). Dark mode gets a frosted-glass treatment
- * instead — a darker, translucent `bg.dark` over a backdrop blur — so the
- * card reads as glass against the page rather than a flat opaque tile.
+ * dark mode. Both themes render an opaque card — `bg.light` or `bg.dark` —
+ * with no transparency or blur.
  */
 export default function BlogCard({
   title,
@@ -36,17 +34,10 @@ export default function BlogCard({
   const style = CATEGORY_STYLE[category];
   const { isDark } = useTheme();
 
-  const cardStyle = isDark
-    ? {
-        backgroundColor: `${style.bg.dark}CC`, // ~80% opacity — glassy, not opaque
-        borderColor: style.accent,
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-      }
-    : {
-        backgroundColor: style.bg.light,
-        borderColor: style.accent,
-      };
+  const cardStyle = {
+    backgroundColor: isDark ? style.bg.dark : style.bg.light,
+    borderColor: style.accent,
+  };
 
   return (
     <GlassCard className="overflow-hidden flex flex-col h-full group" style={cardStyle}>
