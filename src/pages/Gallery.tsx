@@ -1,18 +1,41 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { galleryData, galleryCategories, GalleryItem } from '@/data/gallery';
+import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { galleryData, galleryCategories } from '@/data/gallery';
 
 export default function Gallery() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
-  // Filter images based on selected category
   const filteredImages = galleryData.filter(
     (item) => activeCategory === 'All' || item.category === activeCategory
   );
 
-  // Handle keyboard navigation for the Lightbox
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleUserActivity = useCallback(() => {
+    if (!overlayRef.current) return;
+    
+    overlayRef.current.style.opacity = '1';
+    
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    const video = document.getElementById('lightbox-video') as HTMLVideoElement;
+    
+    if (video && !video.paused) {
+      timeoutRef.current = setTimeout(() => {
+        if (overlayRef.current) overlayRef.current.style.opacity = '0';
+      }, 2500);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedImageIndex === null && timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, [selectedImageIndex]);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (selectedImageIndex === null) return;
@@ -28,7 +51,6 @@ export default function Gallery() {
     [selectedImageIndex, filteredImages.length]
   );
 
-  // Attach and detach event listener
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -36,6 +58,7 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] pt-24 pb-12 px-6">
+      
       {/* Header Section */}
       <div className="relative z-10 text-center max-w-[560px] mx-auto mb-12 mt-12">
         <h1 className="font-display font-extrabold text-h1 text-fg leading-none tracking-[-0.02em] m-0 mb-4">
@@ -52,10 +75,10 @@ export default function Gallery() {
           <button
             key={category}
             onClick={() => setActiveCategory(category)}
-            className={`px-5 py-2 rounded-full font-inter text-sm transition-all duration-300 ${
+            className={`px-5 py-2 rounded-full font-sans text-sm transition-all duration-300 ${
               activeCategory === category
-                ? 'bg-[var(--brand)] text-[var(--bg-primary)]'
-                : 'bg-[var(--bg-glass)] text-[var(--text-primary)] hover:bg-[var(--brand-muted)]'
+                ? 'bg-[var(--brand-glow)] border border-[var(--border-subtle)] text-fg'
+                : 'bg-transparent border border-transparent text-fg-muted hover:bg-[var(--brand-glow)]/50'
             }`}
           >
             {category}
@@ -63,7 +86,7 @@ export default function Gallery() {
         ))}
       </div>
 
-      {/* Masonry Grid with Pop & Dim*/}
+      {/* Masonry Grid */}
       <div className="max-w-7xl mx-auto columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 group">
         <AnimatePresence>
           {filteredImages.map((item, index) => (
@@ -75,22 +98,48 @@ export default function Gallery() {
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
               className="relative rounded-2xl overflow-hidden cursor-pointer break-inside-avoid 
-                         transition-all duration-500 group-hover:opacity-40 hover:!opacity-100 hover:scale-[1.02] hover:z-10 hover:shadow-2xl"
+                         transition-all duration-500 group-hover:opacity-40 hover:!opacity-100 hover:scale-[1.02] hover:z-10 hover:shadow-2xl group/card"
               onClick={() => setSelectedImageIndex(index)}
+              onMouseEnter={(e) => {
+                const video = e.currentTarget.querySelector('video');
+                if (video) video.play();
+              }}
+              onMouseLeave={(e) => {
+                const video = e.currentTarget.querySelector('video');
+                if (video) video.pause();
+              }}
             >
-              {/* Native Lazy Loading for performance */}
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                loading="lazy"
-                className="w-full h-auto object-cover"
-              />
               
-              {/* Glassmorphism Title Overlay */}
+              {/* Media Renderer */}
+              {item.videoUrl ? (
+                <>
+                  <video
+                    src={`${item.videoUrl}#t=0.001`}
+                    poster={item.imageUrl}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-auto object-cover"
+                  />
+                  <div className="absolute top-4 right-4 bg-black/40 p-2 rounded-full backdrop-blur-md z-20 pointer-events-none">
+                    <Play size={16} className="text-white fill-white" />
+                  </div>
+                </>
+              ) : (
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  loading="lazy"
+                  className="w-full h-auto object-cover"
+                />
+              )}
+              
+              {/* Details Overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent 
-                              opacity-0 hover:opacity-100 transition-opacity duration-300">
-                <h3 className="text-white font-barlow font-bold text-lg">{item.title}</h3>
-                <p className="text-gray-300 font-inter text-sm">{item.category}</p>
+                              opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <h3 className="text-white font-display font-extrabold text-lg leading-none m-0">{item.title}</h3>
+                <p className="text-gray-300 font-sans text-sm mt-2">{item.category}</p>
               </div>
             </motion.div>
           ))}
@@ -104,17 +153,15 @@ export default function Gallery() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 p-4 backdrop-blur-md"
             onClick={() => setSelectedImageIndex(null)}
           >
-            {/* Close Button */}
-            <button className="absolute top-6 right-6 text-white hover:text-[var(--brand)] transition-colors z-50">
+            <button className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors z-[70]">
               <X size={32} />
             </button>
 
-            {/* Navigation Arrows */}
             <button 
-              className="absolute left-6 text-white/50 hover:text-white transition-colors z-50 p-2"
+              className="absolute left-4 sm:left-8 text-white/50 hover:text-white transition-colors z-[70] p-2"
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedImageIndex((prev) => (prev! - 1 + filteredImages.length) % filteredImages.length);
@@ -123,7 +170,7 @@ export default function Gallery() {
               <ChevronLeft size={48} />
             </button>
             <button 
-              className="absolute right-6 text-white/50 hover:text-white transition-colors z-50 p-2"
+              className="absolute right-4 sm:right-8 text-white/50 hover:text-white transition-colors z-[70] p-2"
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedImageIndex((prev) => (prev! + 1) % filteredImages.length);
@@ -132,29 +179,59 @@ export default function Gallery() {
               <ChevronRight size={48} />
             </button>
 
-            {/* Main Expanded Image */}
             <motion.div
               layoutId={`card-container-${filteredImages[selectedImageIndex].id}`}
-              className="relative max-w-[95vw] max-h-[85vh] w-auto flex justify-center rounded-xl overflow-hidden shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-5xl flex flex-col justify-center rounded-xl overflow-hidden shadow-2xl bg-black"
+              onClick={(e) => { e.stopPropagation(); handleUserActivity(); }}
+              onMouseMove={handleUserActivity}
             >
-              <img
-                src={filteredImages[selectedImageIndex].imageUrl}
-                alt={filteredImages[selectedImageIndex].title}
-                className="max-w-full max-h-[85vh] w-auto h-auto object-contain"
-              />
               
-              {/* Image Details Overlay*/}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-                <h2 className="text-2xl text-white font-display font-extrabold m-0 leading-none">
-                  {filteredImages[selectedImageIndex].title}
-                </h2>
-                <div className="inline-flex mt-3 items-center px-2.5 py-1 rounded-md bg-[var(--brand-glow)]/20 border border-[var(--border-subtle)]/30 backdrop-blur-sm">
-                  <span className="font-mono text-[12px] text-white uppercase tracking-[0.08em]">
-                    {filteredImages[selectedImageIndex].category}
-                  </span>
+              {filteredImages[selectedImageIndex].videoUrl ? (
+                <div className="relative flex justify-center w-full max-h-[85vh]">
+                  <video
+                    id="lightbox-video"
+                    src={filteredImages[selectedImageIndex].videoUrl}
+                    poster={filteredImages[selectedImageIndex].imageUrl}
+                    controls
+                    autoPlay
+                    onPlay={handleUserActivity}
+                    onPause={handleUserActivity}
+                    className="max-w-full max-h-[85vh] w-auto h-auto object-contain bg-black"
+                  />
+                  <div 
+                    ref={overlayRef}
+                    className="absolute top-0 left-0 right-0 px-6 pt-6 pb-24 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none transition-opacity duration-500 z-10"
+                  >
+                    <h2 className="text-2xl text-white font-display font-extrabold m-0 leading-none drop-shadow-lg">
+                      {filteredImages[selectedImageIndex].title}
+                    </h2>
+                    <div className="inline-flex mt-3 items-center px-2.5 py-1 rounded-md bg-[var(--brand-glow)]/20 border border-[var(--border-subtle)]/30 backdrop-blur-sm shadow-lg">
+                      <span className="font-mono text-[12px] text-white uppercase tracking-[0.08em]">
+                        {filteredImages[selectedImageIndex].category}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="relative flex justify-center max-h-[85vh]">
+                  <img
+                    src={filteredImages[selectedImageIndex].imageUrl}
+                    alt={filteredImages[selectedImageIndex].title}
+                    className="max-w-full max-h-[85vh] w-auto h-auto object-contain"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none z-10">
+                    <h2 className="text-2xl text-white font-display font-extrabold m-0 leading-none drop-shadow-lg">
+                      {filteredImages[selectedImageIndex].title}
+                    </h2>
+                    <div className="inline-flex mt-3 items-center px-2.5 py-1 rounded-md bg-[var(--brand-glow)]/20 border border-[var(--border-subtle)]/30 backdrop-blur-sm shadow-lg">
+                      <span className="font-mono text-[12px] text-white uppercase tracking-[0.08em]">
+                        {filteredImages[selectedImageIndex].category}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </motion.div>
           </motion.div>
         )}
