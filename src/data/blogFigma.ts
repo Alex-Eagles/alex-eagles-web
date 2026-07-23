@@ -115,16 +115,40 @@ export interface BlogPostFull {
 
 export const BLOG_POSTS: BlogPostFull[] = [
   {
-    id: 1,
-    title: "Building Our First Autonomous Drone",
+    id: 16,
+    title: "Flight Controller v3: Revising the Design",
     excerpt:
-      "Deep dive into the hardware and software architecture that powers our autonomous flight systems. Learn about the sensors, processors, and algorithms we use.",
+      "Back into the flight controller design, working through a new iteration based on lessons from the PCBWay contest board. Testing is planned in the coming weeks.",
+    image:
+      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "hardware",
+    date: "Jul 2026 – Present",
+    author: "Hardware Team",
+    readTime: "4 min read",
+  },
+  {
+    id: 17,
+    title: "Manufacturing a UGV for ICMTC",
+    excerpt:
+      "Applied our hardware design expertise to a new platform, manufacturing a ground vehicle for the ICMTC competition.",
     image:
       "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
     category: "hardware",
-    date: "Mar 10, 2026",
-    author: "Sarah Chen",
-    readTime: "8 min read",
+    date: "May – Jun 2026",
+    author: "Hardware Team",
+    readTime: "5 min read",
+  },
+  {
+    id: 18,
+    title: "PDB Design Review: What We'd Change Next",
+    excerpt:
+      "Reviewed our power distribution board's first revision, identified key improvement areas, and kicked off development of a next-generation version.",
+    image:
+      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "hardware",
+    date: "Apr – Jun 2026",
+    author: "Hardware Team",
+    readTime: "5 min read",
   },
   {
     id: 9,
@@ -184,16 +208,40 @@ export const BLOG_POSTS: BlogPostFull[] = [
     readTime: "3 min read",
   },
   {
-    id: 3,
-    title: "Custom PCB Design for Edge Computing",
+    id: 19,
+    title: "Designing Our Custom Power Distribution Board",
     excerpt:
-      "Designing and manufacturing our custom circuit boards for real-time processing. From schematic to production, here's our journey.",
+      "Designed, built, and tested a custom power distribution board to power every onboard electronic system on the team's UAV.",
     image:
       "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
     category: "hardware",
-    date: "Mar 5, 2026",
-    author: "Mike Thompson",
-    readTime: "10 min read",
+    date: "Feb – Mar 2026",
+    author: "Hardware Team",
+    readTime: "6 min read",
+  },
+  {
+    id: 20,
+    title: "Entering the PCBWay Design Contest",
+    excerpt:
+      "Entered the PCBWay Design Contest with an original flight controller module, engineered entirely in-house from schematic to layout.",
+    image:
+      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "hardware",
+    date: "Nov 2025 – Jan 2026",
+    author: "Hardware Team",
+    readTime: "7 min read",
+  },
+  {
+    id: 21,
+    title: "Onboarding the Hardware Team on Altium Designer",
+    excerpt:
+      "Trained new members to proficiency in Altium Designer, building the team's core PCB design capability from the ground up.",
+    image:
+      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "hardware",
+    date: "Sep – Nov 2025",
+    author: "Hardware Team",
+    readTime: "4 min read",
   },
   {
     id: 4,
