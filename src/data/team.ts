@@ -1,92 +1,116 @@
 /**
- * team.ts — the roster behind the Team page, plus the small type vocabulary
- * (teams, sub-teams, roles) the Team components share.
+ * team.ts — the roster behind the Team page.
  *
- * Photos live in `src/assets/members/<slug>.<ext>` and are resolved at build
- * time by the `import.meta.glob` map below, so adding a member is two steps:
- *   1. drop a kebab-case photo into src/assets/members/
- *   2. add a row to TEAM_MEMBERS with `photo` set to that file's slug
- * A row whose photo is missing simply falls back to the avatar placeholder.
+ * Shape follows the design handoff: a page is one *year*, a year has a
+ * leadership trio plus a list of *divisions*, and each division has *sections*
+ * whose members are the card grid.
+ *
+ *   year → leadership[3]
+ *        → divisions[] → sections[] → members[]
+ *
+ * ---------------------------------------------------------------------------
+ * FILLING IN A SLOT
+ * ---------------------------------------------------------------------------
+ * Every slot below ships blank on purpose — a slot with no `name` renders the
+ * "Name Surname" placeholder, and one with no `photo` renders the drop-portrait
+ * empty state. To fill one in:
+ *
+ *   1. name:  set `name: "Ziad Essam"`
+ *   2. photo: drop a kebab-case file into src/assets/members/<slug>.<ext>
+ *             then set `photo: "ziad-essam"`
+ *   3. hover reveal (optional): drop a background-removed PNG into
+ *             src/assets/members/cutouts/<slug>.png — same slug as the photo.
+ *             That alone switches the card from the grayscale→colour hover to
+ *             the blue-backdrop cut-out reveal. No code change. Delete the file
+ *             and the card reverts.
+ *
+ * Add or remove slots by editing the arrays — the grid and the jump nav both
+ * follow whatever is here.
  */
 
 /* ---------------------------------------------------------------------------
  * 1. TYPES
  * -------------------------------------------------------------------------*/
 
-/** Top-level squads. `All` exists only as a filter option, never on a member. */
-export type Team = "Management" | "Mechanical" | "Autonomous";
-export type TeamFilter = "All" | Team;
-
-export type SubTeam =
-  | "Executive"
-  | "Aerodesign"
-  | "Wing"
-  | "Tail & Stability"
-  | "Structure"
-  | "Propulsion"
-  | "Software"
-  | "Hardware"
-  | "Computer Vision"
-  | "Firmware";
-
-  
-export type Bio =
-  | "Mechatronics and Robotics\n2026"
-  | "Mechatronics and Robotics\n2027"
-  | "Mechatronics and Robotics\n2028"
-  | "Mechatronics and Robotics\n2029"
-  | "Computer and Communications\n2026"
-  | "Computer and Communications\n2027"
-  | "Computer and Communications\n2028"
-  | "Computer and Communications\n2029"
-  | "Electromechanics\n2026"
-  | "Electromechanics\n2027"
-  | "Electromechanics\n2028"
-  | "Electromechanics\n2029"
-  |"Biomedical Engineering\n2026"
-  |"Biomedical Engineering\n2027"
-  |"Biomedical Engineering\n2028"
-  |"Biomedical Engineering\n2029"
-  |"Mechanical Engineering\n2026"
-  |"Mechanical Engineering\n2027"
-  |"Mechanical Engineering\n2028"
-  |"Mechanical Engineering\n2029";
-
-/** Leadership ranks. Drives both card badges and the Leadership/Members split. */
-export type Role = "Lead" | "Vice Lead" | "Member";
+/** Card role label. Shown in the rest-state pill and again in the hover panel. */
+export type Role =
+  | "Team Leader"
+  | "Vice Lead"
+  | "Head of Autonomous"
+  | "Section Lead"
+  | "Member";
 
 export interface TeamMember {
   id: string;
+  /** Blank renders the "Name Surname" placeholder. */
   name: string;
+  /** Overrides the big name behind the portrait. Defaults to the first word of `name`. */
+  firstName?: string;
   role: Role;
-  team: Team;
-  subTeam: SubTeam;
-  /** For members holding a second position, e.g. "Software Lead". */
-  secondRole?: string;
-  /** Freeform line(s) shown under the name — write whatever you want here. */
-  bio?: Bio
+  /** Section the card sits in — stamped on by the builder, shown in the hover panel. */
+  department: string;
+  /** Defaults to the roster year. Set only to override one person. */
+  gradYear?: string;
+  /** Slug of the photo in src/assets/members/ */
   photo?: string;
+  /**
+   * Slug of the background-removed PNG in src/assets/members/cutouts/.
+   * Omit it and we look for a cutout under the `photo` slug, so matching
+   * filenames pair up automatically. Set it only to point at a different file.
+   */
+  cutout?: string;
   linkedIn?: string;
 }
 
-/* 
- * 2. PHOTO RESOLUTION
+export interface Section {
+  name: string;
+  /** Slug used as the anchor id and the jump-nav target. */
+  id: string;
+  members: TeamMember[];
+}
+
+export interface Division {
+  /** The oversized "01" / "02" behind the division heading. */
+  num: string;
+  name: string;
+  sections: Section[];
+}
+
+export interface YearRoster {
+  year: string;
+  /** Exactly three: left card, centre card (the raised one), right card. */
+  leadership: [TeamMember, TeamMember, TeamMember];
+  divisions: Division[];
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. IMAGE RESOLUTION
+ * -------------------------------------------------------------------------*/
 /*
- * Eagerly import every member photo so Vite fingerprints and bundles them.
+ * Eagerly import every member image so Vite fingerprints and bundles them.
  * Keys come back as full relative paths; we re-key them by bare slug.
+ * Note `*` does not cross a `/`, so the two globs never overlap.
  */
 
-const photoModules = import.meta.glob<{ default: string }>(
-  "../assets/members/*.{jpg,jpeg,png,webp}",
-  { eager: true },
+const bySlug = (mods: Record<string, { default: string }>): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(mods).map(([path, mod]) => [
+      // "../assets/members/ziad-essam.jpeg" → "ziad-essam"
+      path.split("/").pop()!.replace(/\.[^.]+$/, ""),
+      mod.default,
+    ]),
+  );
+
+const PHOTOS = bySlug(
+  import.meta.glob<{ default: string }>("../assets/members/*.{jpg,jpeg,png,webp}", {
+    eager: true,
+  }),
 );
 
-const PHOTOS: Record<string, string> = Object.fromEntries(
-  Object.entries(photoModules).map(([path, mod]) => [
-    // "../assets/members/ahmed-saber.jpeg" → "ahmed-saber"
-    path.split("/").pop()!.replace(/\.[^.]+$/, ""),
-    mod.default,
-  ]),
+const CUTOUTS = bySlug(
+  import.meta.glob<{ default: string }>("../assets/members/cutouts/*.{png,webp}", {
+    eager: true,
+  }),
 );
 
 /** Resolved photo URL for a member, or undefined if no file matches. */
@@ -94,73 +118,150 @@ export function memberPhoto(member: TeamMember): string | undefined {
   return member.photo ? PHOTOS[member.photo] : undefined;
 }
 
+/**
+ * Resolved background-removed portrait, or undefined if there isn't one.
+ * Presence of this is what puts a card into the blue-backdrop hover mode.
+ */
+export function memberCutout(member: TeamMember): string | undefined {
+  const slug = member.cutout ?? member.photo;
+  return slug ? CUTOUTS[slug] : undefined;
+}
+
 /* ---------------------------------------------------------------------------
- * 3. FILTER VOCABULARY  (single source of truth for the FilterBar)
+ * 3. DISPLAY HELPERS  (the only place card copy is assembled)
  * -------------------------------------------------------------------------*/
 
-export const TEAM_FILTERS: readonly TeamFilter[] = [
-  "All",
-  "Management",
-  "Mechanical",
-  "Autonomous",
-] as const;
+/** Shown when a slot has no name yet. */
+export const NAME_PLACEHOLDER = "Name Surname";
 
-/** Sub-teams offered once a squad is selected. "All" shows none. */
-export const SUB_TEAMS: Record<Team, readonly SubTeam[]> = {
-  Management: ["Executive"],
-  Mechanical: [
-    "Aerodesign",
-    "Wing",
-    "Tail & Stability",
-    "Structure",
-    "Propulsion",
-  ],
-  Autonomous: [
-    "Software",
-    "Hardware",
-    "Computer Vision",
-    "Firmware",
-  ],
-};
+export const hasName = (member: TeamMember): boolean => member.name.trim().length > 0;
+
+/** The name on the card — the real one, or the placeholder for an empty slot. */
+export function memberName(member: TeamMember): string {
+  return hasName(member) ? member.name : NAME_PLACEHOLDER;
+}
+
+/**
+ * The stretched name behind the portrait. Empty for an unfilled slot — a giant
+ * "NAME" behind a placeholder card reads as a bug rather than as a design.
+ */
+export function memberFirstName(member: TeamMember): string {
+  if (!hasName(member)) return "";
+  return (member.firstName ?? member.name.split(" ")[0]).toUpperCase();
+}
+
+/** "Class of 2026" — per-member override, else the roster year. */
+export function memberYearLabel(member: TeamMember, rosterYear: string): string {
+  return `Class of ${member.gradYear ?? rosterYear}`;
+}
 
 /* ---------------------------------------------------------------------------
  * 4. THE ROSTER
  * -------------------------------------------------------------------------*/
 
-export const TEAM_MEMBERS: TeamMember[] = [
-  /* ---- Executive leadership ---------------------------------------------- */
-  { id: "1", name: "Farah Yasser Harfoush", role: "Lead", team: "Management", subTeam: "Executive", bio: "Mechatronics and Robotics\n2026", photo: "ahmed-baheyeldin" },
-  { id: "2", name: "Youssef Hozayen", role: "Lead", team: "Management", subTeam: "Executive", secondRole: "Hardware Lead", bio: "Mechatronics and Robotics\n2027", photo: "norhan-mohammed" },
-  { id: "3", name: "Ziad Essam", role: "Lead", team: "Management", subTeam: "Executive", secondRole: "Autonomous Lead", bio: "Computer and Communications\n2026", photo: "peter-ayoub" },
-  { id: "4", name: "Mazen Asser", role: "Vice Lead", team: "Autonomous", subTeam: "Executive", secondRole: "Autonomous Vice Lead", bio: "Computer and Communications\n2026", photo: "mazen-amr" },
+export const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-  /* ---- Autonomous — leads ------------------------------------------------ */
-  { id: "5", name: "Mohamed Bassem", role: "Lead", team: "Autonomous", subTeam: "Computer Vision", bio: "Computer and Communications\n2026", photo: "ahmed-saleh" },
-  { id: "6", name: "Sara Gharib", role: "Lead", team: "Autonomous", subTeam: "Software", bio:"Biomedical engineering\n2027", photo: "ibrahim-mohamed" },
-  { id: "7", name: "Mazen Nazeih", role: "Lead", team: "Autonomous", subTeam: "Software", bio: "Computer and Communications\n2026", photo: "ahmed-ibrahim-anan" },
-  { id: "8", name: "Menna Ezzat", role: "Vice Lead", team: "Autonomous", subTeam: "Hardware", bio: "Mechatronics and robotics\n2026", photo: "maram-wael" },
-  { id: "9", name: "Lina Tarek", role: "Vice Lead", team: "Autonomous", subTeam: "Hardware", bio: "Mechatronics and robotics\n2027", photo: "lina-tarek" },
+/** Ids must be unique across years, since both rosters are built at once. */
+let slotCounter = 0;
 
-  /* ---- Autonomous — members ---------------------------------------------- */
-  { id: "10", name: "Rewan Gomaa", role: "Member", team: "Autonomous", subTeam: "Software", bio: "Year 3 — Computer and Communications", photo: "sara-gharib" },
-  { id: "11", name: "Zeyad Essam", role: "Member", team: "Autonomous", subTeam: "Software", bio: "Year 2 — Computer and Communications", photo: "zeyad-essam" },
-  { id: "12", name: "John Ayman", role: "Member", team: "Autonomous", subTeam: "Software", bio: "Year 2 — Computer and Communications", photo: "john-ayman" },
-  { id: "13", name: "Ahmed Saber", role: "Member", team: "Autonomous", subTeam: "Hardware", bio: "Year 3 — Mechatronics", photo: "ahmed-saber" },
-  { id: "14", name: "Ahmed Saeed", role: "Member", team: "Autonomous", subTeam: "Hardware", bio: "Year 3 — Mechatronics", photo: "ahmed-saeed" },
+/**
+ * One card slot. `name` comes second so the common edit — typing a name in —
+ * is a one-word change near the start of the line.
+ */
+const slot = (
+  role: Role,
+  name = "",
+  extra: Partial<Omit<TeamMember, "id" | "role" | "name" | "department">> = {},
+): Omit<TeamMember, "department"> => ({
+  id: `slot-${++slotCounter}`,
+  role,
+  name,
+  ...extra,
+});
 
+const section = (name: string, members: Omit<TeamMember, "department">[]): Section => ({
+  name,
+  id: slugify(name),
+  // `department` is always the section name, so it's stamped on here rather
+  // than repeated on every row.
+  members: members.map((m) => ({ ...m, department: name })),
+});
 
-  /* ---- Mechanical — leads ------------------------------------------------ */
-  { id: "21", name: "Mohamed ElBarbary", role: "Lead", team: "Mechanical", subTeam: "Aerodesign", bio: "Mechanical Engineering\n2026", photo: "mohamed-elbarbary" },
-  { id: "22", name: "Rodyna Amr", role: "Lead", team: "Mechanical", subTeam: "Propulsion", bio: "Mechatronics and Robotics\n2028", photo: "rodyna-amr" },
-  { id: "23", name: "Mo`men Ashraf", role: "Vice Lead", team: "Mechanical", subTeam: "Structure", bio: "Mechatronics and Robotics\n2027", photo: "momen-ashraf" },
-  { id: "25", name: "Youssef Ibrahim", role: "Vice Lead", team: "Mechanical", subTeam: "Structure", bio: "Electromechanics\n2027", photo: "youssef-ibrahim" },
+/** The four-slot shape every section starts from. */
+const standardSection = (name: string): Section =>
+  section(name, [
+    slot("Section Lead"),
+    slot("Vice Lead"),
+    slot("Member"),
+    slot("Member"),
+  ]);
 
-
-  /* ---- Mechanical — members ---------------------------------------------- */
-  { id: "29", name: "Esraa Ahmed", role: "Member", team: "Mechanical", subTeam: "Aerodesign", bio: "Year 3 — Electromechanics", photo: "esraa-ahmed" },
-  { id: "30", name: "Farah Harfoush", role: "Member", team: "Mechanical", subTeam: "Aerodesign", bio: "Year 3 — Mechatronics", photo: "farah-harfoush" },
-  { id: "31", name: "Hana Waleed", role: "Member", team: "Mechanical", subTeam: "Structure", bio: "Year 3 — Electromechanics", photo: "hana-waleed" },
-  { id: "32", name: "Hossam Eldeen", role: "Member", team: "Mechanical", subTeam: "Structure", bio: "Year 2 — Mechatronics", photo: "hossam-eldeen" },
-  { id: "33", name: "Lina Tarek", role: "Member", team: "Mechanical", subTeam: "Wing", bio: "Year 2 — Electromechanics", photo: "lina-tarek" },
-
+/** The leadership trio, in render order: [left, centre, right]. */
+const leadershipTrio = (): [TeamMember, TeamMember, TeamMember] => [
+  { ...slot("Vice Lead"), department: "Team Leadership" },
+  { ...slot("Team Leader"), department: "Team Leadership" },
+  { ...slot("Head of Autonomous"), department: "Team Leadership" },
 ];
+
+const ROSTER_2026: YearRoster = {
+  year: "2026",
+  leadership: leadershipTrio(),
+  divisions: [
+    {
+      num: "01",
+      name: "Mechanical",
+      sections: ["Aerodesign", "Structure", "Propulsion"].map(standardSection),
+    },
+    {
+      num: "02",
+      name: "Autonomous",
+      sections: ["Software", "Hardware", "AI"].map(standardSection),
+    },
+  ],
+};
+
+const ROSTER_2025: YearRoster = {
+  year: "2025",
+  leadership: leadershipTrio(),
+  divisions: [
+    {
+      num: "01",
+      name: "Mechanical",
+      sections: ["Aerodesign", "Structure", "Propulsion"].map(standardSection),
+    },
+    {
+      num: "02",
+      name: "Autonomous",
+      sections: ["Software", "Hardware", "AI"].map(standardSection),
+    },
+  ],
+};
+
+/** Display order of the year tabs in the hero. The first one is the default. */
+export const ROSTER_YEARS = ["2026", "2025"] as const;
+export type RosterYear = (typeof ROSTER_YEARS)[number];
+
+export const ROSTERS: Record<RosterYear, YearRoster> = {
+  "2026": ROSTER_2026,
+  "2025": ROSTER_2025,
+};
+
+/* ---------------------------------------------------------------------------
+ * 5. JUMP NAV
+ * -------------------------------------------------------------------------*/
+
+export interface NavGroup {
+  label: string;
+  items: { name: string; href: string }[];
+}
+
+/** Leadership, then one group per division — drives the PULL side nav. */
+export function navGroups(roster: YearRoster): NavGroup[] {
+  return [
+    { label: "Leadership", items: [{ name: "Leadership", href: "#leadership" }] },
+    ...roster.divisions.map((division) => ({
+      label: division.name,
+      items: division.sections.map((s) => ({ name: s.name, href: `#${s.id}` })),
+    })),
+  ];
+}

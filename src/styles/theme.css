@@ -83,6 +83,23 @@
 
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
+
+  /* Layout anchors used by the CSS-module components (Team roster et al.).
+   * `--page-max` / `--page-gutter` keep those modules aligned with the
+   * Tailwind `--maxw-content` wrapper the rest of the site uses.            */
+  --page-max: var(--maxw-content);
+  --page-gutter: 48px;
+  --page-gutter-sm: 20px;
+
+  /* Height the fixed navbar occupies (35px offset + ~42px pill). Anything
+   * that must not slide under the bar anchors to this — notably
+   * `scroll-margin-top` on anchor targets. Update it here, once.            */
+  --nav-height: 88px;
+}
+
+/* Anchor targets clear the fixed navbar instead of landing beneath it. */
+:target {
+  scroll-margin-top: calc(var(--nav-height) + 16px);
 }
 
 /* ----------------------------------------------------------------------------

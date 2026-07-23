@@ -1,0 +1,390 @@
+/* ---------------------------------------------------------------------------
+ * Team member card. Values come from the design handoff and are final —
+ * see design_handoff_team_card/README.md ("Fidelity: high").
+ *
+ * Hover is CSS-only (:hover / :focus-within) so the component never re-renders
+ * on pointer movement, which matters with ~30 cards on screen.
+ * -------------------------------------------------------------------------*/
+
+.card {
+  /* tokens — override on a wrapper if a page needs a variant */
+  --accent: #f0910e;
+  --ink: #ffffff;
+  --periwinkle: #c3c8f2;
+  --periwinkle-dim: #9297cf;
+  --muted: #6b71a8;
+  --name-behind: #5b62a0;
+  --ease-move: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-img: cubic-bezier(0.16, 0.84, 0.34, 1);
+
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #0f1236;
+  box-shadow: 0 8px 24px -14px rgb(0 0 0 / 0.6);
+  transition: transform 0.45s var(--ease-move), box-shadow 0.45s ease;
+}
+
+.card:is(:hover, :focus-within) {
+  transform: translateY(-6px);
+  box-shadow: 0 34px 60px -30px rgb(230 232 255 / 0.22);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.inner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 0.8;
+  overflow: hidden;
+  background: linear-gradient(165deg, #20265e, #12163c);
+  /* kills the white anti-alias fringe on the rounded edges when the image
+     scales on hover — do not remove */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  transform: translateZ(0);
+}
+
+/* --- portrait ------------------------------------------------------------ */
+
+.photoLayer {
+  position: absolute;
+  inset: 0;
+  filter: grayscale(1) contrast(1.02) brightness(0.9);
+  transform: scale(1);
+  transition: filter 0.55s ease, opacity 0.5s ease, transform 0.7s var(--ease-img);
+}
+
+.photoLayer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* mode A — no cutout: grayscale → colour, slight zoom */
+.card[data-mode="photo"]:is(:hover, :focus-within) .photoLayer {
+  filter: grayscale(0) contrast(1) brightness(1);
+  transform: scale(1.05);
+}
+
+/* mode B — cutout present: the flat portrait gets out of the way */
+.card[data-mode="cutout"]:is(:hover, :focus-within) .photoLayer {
+  opacity: 0;
+}
+
+/* --- empty portrait slot -------------------------------------------------- */
+/*
+ * Shown when a roster slot has no photo file yet. Deliberately reads as an
+ * unfilled slot rather than a broken image — see team.ts for how to fill it.
+ */
+
+.emptyPortrait {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 16px;
+  text-align: center;
+}
+
+.emptyPortrait svg {
+  color: var(--periwinkle-dim);
+  opacity: 0.55;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--periwinkle);
+}
+
+.emptyHint {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+/* --- mode B backdrop + cut-out ------------------------------------------- */
+
+.backdrop,
+.backdropScrim {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.backdrop {
+  background-size: cover;
+  background-position: center;
+}
+
+.backdropScrim {
+  background: linear-gradient(180deg, rgb(9 11 30 / 0.55), rgb(9 11 30 / 0.35));
+}
+
+.card:is(:hover, :focus-within) :is(.backdrop, .backdropScrim) {
+  opacity: 1;
+}
+
+.cutoutLayer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.72) translateY(3%);
+  transform-origin: bottom center;
+  transition: opacity 0.5s ease, transform 0.7s var(--ease-img);
+}
+
+.cutoutLayer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  display: block;
+}
+
+.card:is(:hover, :focus-within) .cutoutLayer {
+  opacity: 1;
+  transform: scale(0.9);
+}
+
+/* --- stretched first name ------------------------------------------------ */
+
+.bigName {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  font-size: 70px;
+  line-height: 0.78;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  transform: scaleY(2.1);
+  transform-origin: top;
+  white-space: nowrap;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.bigNameBack {
+  color: var(--name-behind);
+}
+
+.bigNameFront {
+  color: #eef0ff;
+  text-shadow: 0 3px 24px rgb(0 0 0 / 0.6);
+}
+
+.card:is(:hover, :focus-within) .bigNameBack {
+  opacity: 1;
+}
+
+.card:is(:hover, :focus-within) .bigNameFront {
+  opacity: 0.9;
+}
+
+.topScrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 58%;
+  background: linear-gradient(
+    180deg,
+    rgb(10 12 40 / 0.86),
+    rgb(10 12 40 / 0.35) 52%,
+    rgb(10 12 40 / 0)
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.card:is(:hover, :focus-within) .topScrim {
+  opacity: 0.9;
+}
+
+/* --- rest state tags ------------------------------------------------------ */
+
+.restRole,
+.restName {
+  position: absolute;
+  left: 14px;
+  margin: 0;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+
+.restRole {
+  top: 14px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgb(10 12 36 / 0.55);
+  backdrop-filter: blur(6px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.restName {
+  bottom: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.6);
+}
+
+/* An unfilled slot's name reads dimmer than a real one. */
+.restName[data-placeholder="true"],
+.panelName[data-placeholder="true"] {
+  color: rgb(255 255 255 / 0.55);
+}
+
+.card:is(:hover, :focus-within) :is(.restRole, .restName) {
+  opacity: 0;
+}
+
+/* --- hover panel ---------------------------------------------------------- */
+
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 52px 18px 18px;
+  background: linear-gradient(
+    180deg,
+    rgb(14 17 48 / 0),
+    rgb(14 17 48 / 0.85) 44%,
+    rgb(14 17 48 / 0.98)
+  );
+  opacity: 0;
+  transform: translateY(30%);
+  transition: opacity 0.45s ease, transform 0.5s var(--ease-move);
+}
+
+.card:is(:hover, :focus-within) .panel {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.panelRole {
+  margin: 0 0 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.panelName {
+  margin: 0 0 2px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.panelDepartment {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--periwinkle-dim);
+}
+
+.panelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+  padding-top: 11px;
+}
+
+.panelYear {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.linkedIn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 5px 10px;
+  border: 1px solid rgb(139 143 196 / 0.4);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--periwinkle);
+  text-decoration: none;
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.linkedIn:is(:hover, :focus-visible) {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+/* --- touch + accessibility ------------------------------------------------ */
+
+/* No hover on touch: show the info panel outright instead of hiding the
+   person's details behind an interaction that device can't perform. */
+@media (hover: none) {
+  .photoLayer {
+    filter: grayscale(0);
+  }
+  .panel {
+    opacity: 1;
+    transform: none;
+  }
+  .restRole,
+  .restName {
+    opacity: 0;
+  }
+  .card[data-mode="cutout"] .cutoutLayer,
+  .card[data-mode="cutout"] :is(.backdrop, .backdropScrim),
+  .card[data-mode="cutout"] .bigNameBack {
+    opacity: 1;
+  }
+  .card[data-mode="cutout"] .cutoutLayer {
+    transform: scale(0.9);
+  }
+  .card[data-mode="cutout"] .photoLayer {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card * {
+    transition-duration: 0.01ms !important;
+  }
+  .card:is(:hover, :focus-within) {
+    transform: none;
+  }
+  .card[data-mode="photo"]:is(:hover, :focus-within) .photoLayer {
+    transform: none;
+  }
+}
