@@ -98,6 +98,12 @@
   --canvas: #0d1035; /* alias: section canvas behind cards   */
   --card: #161a50; /* the card surface itself             */
 
+  /* Portrait "stage" — the backdrop behind cut-out member photos. Deliberately
+     dark in BOTH themes: the name is knocked out of it in white, so it cannot
+     follow the surface tokens without losing all contrast in light mode. */
+  --stage-from: #1e2467;
+  --stage-to: #0b0e2c;
+
   /* Brand + accents */
   --brand: #3c40b5; /* Alex Eagles royal indigo            */
   --brand-light: #5458cc; /* hover / active                      */
@@ -134,6 +140,10 @@
   --bg-glass: rgba(255, 255, 255, 0.75);
   --canvas: #eceeff; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
+
+  /* Intentionally identical to dark mode — see the note above. */
+  --stage-from: #1e2467;
+  --stage-to: #0b0e2c;
 
   --brand: #3c40b5; /* brand indigo stays constant          */
   --brand-light: #2b2f9e; /* darker on hover against light bg     */

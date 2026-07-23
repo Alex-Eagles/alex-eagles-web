@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Write-Output \"node: $\\(\\(Get-Command node -ErrorAction SilentlyContinue\\).Source\\)\"; Write-Output \"npm: $\\(\\(Get-Command npm -ErrorAction SilentlyContinue\\).Source\\)\"; Write-Output \"--- Program Files nodejs ---\"; Test-Path \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\"; Write-Output \"--- nvm ---\"; Test-Path \"$env:APPDATA\\\\nvm\"; Write-Output \"--- winget node ---\"; \\(Get-Command winget -ErrorAction SilentlyContinue\\).Source)",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" --version)",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" --version)",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" install)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; node --version; npm --version)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm install)",
+      "PowerShell([Environment]::SetEnvironmentVariable\\(\"Path\", [Environment]::GetEnvironmentVariable\\(\"Path\", \"User\"\\) + \";C:\\\\Program Files\\\\nodejs\", \"User\"\\); Write-Output \"Done. New User PATH tail:\"; \\([Environment]::GetEnvironmentVariable\\(\"Path\", \"User\"\\) -split ';' | Select-Object -Last 3\\))",
+      "PowerShell(git fetch origin)",
+      "PowerShell(git merge origin/teampage --no-edit)",
+      "PowerShell(git config --global user.name \"farahharfoush\"; git config --global user.email \"fharfoush04@gmail.com\"; Write-Output \"name: $\\(git config --global user.name\\)\"; Write-Output \"email: $\\(git config --global user.email\\)\")",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm run build 2>&1 | Select-Object -Last 25)",
+      "PowerShell(git rm --cached .claude/worktrees/vercel-deploy-docs)",
+      "PowerShell(git add .gitignore)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm run dev)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\nodejs;\" + $env:Path; npm run dev -- --port 5199 --strictPort)",
+      "PowerShell(Write-Output \"=== duplicate slugs \\(same name, different ext\\) ===\"; Get-ChildItem src\\\\assets\\\\members\\\\ | Group-Object BaseName | Where-Object Count -gt 1 | ForEach-Object { \"$\\($_.Name\\): $\\($_.Group.Name -join ', '\\)\" }; Write-Output \"=== newest files ===\"; Get-ChildItem src\\\\assets\\\\members\\\\ | Sort-Object LastWriteTime -Descending | Select-Object -First 5 Name, Length, LastWriteTime | Format-Table -AutoSize)",
+      "PowerShell(Write-Output \"=== git status ===\"; git status --short; Write-Output \"=== is the png still locked? ===\"; try { $s=[System.IO.File]::Open\\(\"D:\\\\Alex Eagles\\\\website\\\\alex-eagles-web\\\\src\\\\assets\\\\members\\\\ahmed-baheyeldin.png\",'Open','Read','None'\\); $s.Close\\(\\); \"UNLOCKED - safe to watch\" } catch { \"STILL LOCKED by another process\" })"
+    ]
+  }
+}

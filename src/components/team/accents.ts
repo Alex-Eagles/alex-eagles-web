@@ -29,15 +29,3 @@ export function roleAccent(role: Role): string {
   if (role === "Vice Lead") return "var(--sky)";
   return "var(--brand-light)";
 }
-
-/**
- * Tinted "chip" styling built from an accent: faint fill, matching border,
- * accent text. Used by both the sub-team tag and the role badge.
- */
-export function chipStyle(accent: string) {
-  return {
-    color: accent,
-    borderColor: `color-mix(in srgb, ${accent} 42%, transparent)`,
-    background: `color-mix(in srgb, ${accent} 12%, transparent)`,
-  };
-}

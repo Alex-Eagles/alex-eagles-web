@@ -53,6 +53,18 @@ export interface TeamMember {
   major: string;
   /** Photo slug — the filename (no extension) in src/assets/members/. */
   photo?: string;
+  /**
+   * True when the photo is a background-removed cut-out (transparent PNG).
+   * Only those get the name rendered *behind* the subject on the card — an
+   * opaque photo would cover the text completely.
+   */
+  cutout?: boolean;
+  /**
+   * Slug of the full-scene "with background" photo shown, greyscaled, in the
+   * card's rest state. On hover it cross-fades away to reveal the coloured
+   * cut-out + name beneath. Only meaningful alongside `cutout`.
+   */
+  photoBg?: string;
   linkedIn?: string;
 }
 
@@ -80,6 +92,11 @@ const PHOTOS: Record<string, string> = Object.fromEntries(
 /** Resolved photo URL for a member, or undefined if no file matches. */
 export function memberPhoto(member: TeamMember): string | undefined {
   return member.photo ? PHOTOS[member.photo] : undefined;
+}
+
+/** Resolved "with background" rest-state photo URL, or undefined. */
+export function memberPhotoBg(member: TeamMember): string | undefined {
+  return member.photoBg ? PHOTOS[member.photoBg] : undefined;
 }
 
 /* ---------------------------------------------------------------------------
@@ -117,11 +134,20 @@ export const SUB_TEAMS: Record<Team, readonly SubTeam[]> = {
  * 4. THE ROSTER
  * -------------------------------------------------------------------------*/
 
+/**
+ * Rosters by competition year. Everything we have today is the **2025** team;
+ * the 2026 roster isn't known yet, so it's intentionally empty and the page
+ * shows a "coming soon" state for it. Fill 2026 in when it exists — no other
+ * code changes needed.
+ */
+export const ROSTER_YEARS = ["2026", "2025"] as const;
+export type RosterYear = (typeof ROSTER_YEARS)[number];
+
 export const TEAM_MEMBERS: TeamMember[] = [
   /* ---- Executive leadership ---------------------------------------------- */
   { id: "1", name: "Ahmed Baheyeldin", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Mechatronics", photo: "ahmed-baheyeldin" },
   { id: "2", name: "Norhan Mohammed", role: "Vice Lead", team: "Executive", subTeam: "Management", year: "4", major: "Mechatronics", photo: "norhan-mohammed" },
-  { id: "3", name: "Peter Ayoub", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Electromechanics", photo: "peter-ayoub" },
+  { id: "3", name: "Peter Ayoub", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Electromechanics", photo: "peter-ayoub", cutout: true, photoBg: "peter-ayoub-bg" },
 
   /* ---- Autonomous — leads ------------------------------------------------ */
   { id: "4", name: "Ahmed Saleh", role: "Lead", team: "Autonomous", subTeam: "Management", year: "4", major: "Computer and Communications", photo: "ahmed-saleh" },
@@ -169,3 +195,9 @@ export const TEAM_MEMBERS: TeamMember[] = [
   { id: "40", name: "Rodyna Amr", role: "Member", team: "Mechanical", subTeam: "Aerodesign", year: "1", major: "Mechatronics", photo: "rodyna-amr" },
   { id: "41", name: "Youssef Ibrahim", role: "Member", team: "Mechanical", subTeam: "Wing", year: "1", major: "Electromechanics", photo: "youssef-ibrahim" },
 ];
+
+/** Roster lookup by year. 2026 is empty until that team is announced. */
+export const ROSTERS: Record<RosterYear, TeamMember[]> = {
+  "2026": [],
+  "2025": TEAM_MEMBERS,
+};
