@@ -7,6 +7,9 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTheme } from "@/context/ThemeContext";
 import { BLOG_POSTS, type BlogFilter } from "@/data/blogFigma";
 
+/** Posts shown per "page" before Load more reveals the next batch. */
+const PAGE_SIZE = 6;
+
 /**
  * BlogFigma — the build-log listing page ported from the Figma "Aviation
  * website" blog design: title block, category filter pills, and a
@@ -18,6 +21,7 @@ import { BLOG_POSTS, type BlogFilter } from "@/data/blogFigma";
  */
 export default function BlogFigma() {
   const [activeFilter, setActiveFilter] = useState<BlogFilter["id"]>("all");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const reduced = useReducedMotion();
   const { isDark } = useTheme();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -27,10 +31,15 @@ export default function BlogFigma() {
       ? BLOG_POSTS
       : BLOG_POSTS.filter((post) => post.category === activeFilter);
 
+  const visiblePosts = filteredPosts.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredPosts.length;
+
   /** Filtering also scrolls the cards panel into view — the pills live up
-   * in the video hero, so without this the result of a click isn't visible. */
+   * in the video hero, so without this the result of a click isn't visible.
+   * Also resets pagination back to the first page for the new category. */
   const handleFilterChange = (filter: BlogFilter["id"]) => {
     setActiveFilter(filter);
+    setVisibleCount(PAGE_SIZE);
     panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -56,20 +65,34 @@ export default function BlogFigma() {
           style={{ backgroundColor: isDark ? "#121B34" : "#DEE0F0" }}
         >
           {filteredPosts.length > 0 ? (
-            <motion.div
-              key={activeFilter}
-              className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-              variants={reduced ? undefined : staggerParent}
-              initial={reduced ? undefined : "hidden"}
-              animate={reduced ? undefined : "visible"}
-              viewport={viewportOnce}
-            >
-              {filteredPosts.map((post) => (
-                <motion.div key={post.id} variants={reduced ? undefined : fadeUp}>
-                  <BlogCard {...post} />
-                </motion.div>
-              ))}
-            </motion.div>
+            <>
+              <motion.div
+                key={activeFilter}
+                className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                variants={reduced ? undefined : staggerParent}
+                initial={reduced ? undefined : "hidden"}
+                animate={reduced ? undefined : "visible"}
+                viewport={viewportOnce}
+              >
+                {visiblePosts.map((post) => (
+                  <motion.div key={post.id} variants={reduced ? undefined : fadeUp}>
+                    <BlogCard {...post} />
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {hasMore && (
+                <div className="flex justify-center mt-10">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                    className="font-sans text-sm font-semibold px-6 py-2.5 rounded-full border border-border bg-elevated text-fg cursor-pointer transition-colors duration-200 hover:border-brand hover:text-brand"
+                  >
+                    Load more posts
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center text-fg-muted py-20">
               <p className="font-sans text-xl">No blog posts found in this category.</p>

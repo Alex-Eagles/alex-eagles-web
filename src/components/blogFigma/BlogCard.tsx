@@ -13,8 +13,8 @@ type BlogCardProps = Omit<BlogPostFull, "id">;
  * BlogCard — post card for the Figma-sourced blog page: a cover photo with a
  * category badge, then title / meta / excerpt / footer styled to match the
  * home page's "Latest updates" cards (same title scale, label:value meta
- * rows, and the bordered footer with the date + decorative dots) so the two
- * pages read as one consistent card language.
+ * rows, and the bordered footer with the date) so the two pages read as one
+ * consistent card language.
  *
  * The whole card — photo, badge, and body alike — uses the post's fixed
  * `CATEGORY_STYLE` (accent/text/label straight from the subteam reference
@@ -29,7 +29,6 @@ export default function BlogCard({
   imageFit = "cover",
   category,
   date,
-  author,
   readTime,
 }: BlogCardProps) {
   const style = CATEGORY_STYLE[category];
@@ -83,7 +82,6 @@ export default function BlogCard({
         </h3>
 
         <div className="flex flex-col gap-1 mb-4">
-          <Meta label="Author" value={author} style={style} />
           <Meta label="Read time" value={readTime} style={style} />
         </div>
 
@@ -95,7 +93,7 @@ export default function BlogCard({
         </p>
 
         <div
-          className="flex items-center justify-between mt-[22px] pt-[18px] border-t"
+          className="mt-[22px] pt-[18px] border-t"
           style={{ borderColor: style.accent }}
         >
           <span
@@ -103,11 +101,6 @@ export default function BlogCard({
             style={{ color: style.label }}
           >
             {date}
-          </span>
-          <span aria-hidden="true" className="inline-flex items-center gap-1.5">
-            <Dot color={style.label} />
-            <Dot color={style.label} />
-            <Dot color={style.label} />
           </span>
         </div>
       </div>
@@ -125,6 +118,3 @@ function Meta({ label, value, style }: { label: string; value: string; style: Ca
   );
 }
 
-function Dot({ color }: { color: string }) {
-  return <span className="w-[5px] h-[5px] rounded-full" style={{ backgroundColor: color }} />;
-}

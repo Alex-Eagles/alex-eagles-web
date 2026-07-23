@@ -47,18 +47,28 @@ export default function BlogHeader({ activeFilter, onFilterChange }: BlogHeaderP
         {/* Title block — vertically centered in the space above the pills,
             using the exact same treatment as the home hero's title. */}
         <div className="flex-1 flex flex-col justify-center">
-          <div className="eyebrow mb-3" style={{ color: "#8B8FC8" }}>
+          <div
+            className="eyebrow mb-3"
+            style={{ color: "#8B8FC8", textShadow: "0 2px 16px rgba(7,9,28,0.6)" }}
+          >
             Alex Eagles
           </div>
 
           <h1
             className="font-display font-extrabold leading-none tracking-[-0.02em] m-0 mb-5 pb-1"
-            style={{ fontSize: "var(--text-hero)", color: "#F0F2FF" }}
+            style={{
+              fontSize: "var(--text-hero)",
+              color: "#F0F2FF",
+              textShadow: "0 4px 24px rgba(7,9,28,0.65)",
+            }}
           >
             Blogs
           </h1>
 
-          <p className="font-sans text-body-lg italic mt-6" style={{ color: "#B7BAE0" }}>
+          <p
+            className="font-sans text-body-lg italic mt-6"
+            style={{ color: "#B7BAE0", textShadow: "0 2px 16px rgba(7,9,28,0.6)" }}
+          >
             “Technical stories, flight tests & innovations from the team”
           </p>
         </div>
