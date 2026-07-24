@@ -20,14 +20,18 @@ interface BlogHeaderProps {
  */
 export default function BlogHeader({ activeFilter, onFilterChange }: BlogHeaderProps) {
   return (
-    <div className="relative overflow-hidden">
-      {/* Background video — muted/loop/autoplay, no controls. */}
+    <div className="relative overflow-hidden bg-[#07091c]">
+      {/* Background video — muted/loop/autoplay, no controls. The poster (and
+          the container's navy bg) is the fallback shown while the clip buffers
+          or when autoplay is blocked (iOS Low Power Mode, data-saver), so the
+          hero stays on-brand instead of going black on mobile. */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
         autoPlay
         muted
         loop
         playsInline
+        poster="/media/blog-hero-poster.svg"
         aria-hidden="true"
       >
         <source src="/media/blog-hero.mp4" type="video/mp4" />
@@ -43,7 +47,7 @@ export default function BlogHeader({ activeFilter, onFilterChange }: BlogHeaderP
         }}
       />
 
-      <div className="relative z-10 max-w-[var(--maxw-content)] mx-auto px-6 pt-24 pb-6 md:pt-28 min-h-screen flex flex-col text-center">
+      <div className="relative z-10 max-w-[var(--maxw-content)] mx-auto px-6 pt-24 pb-6 md:pt-28 min-h-dvh flex flex-col text-center">
         {/* Title block — vertically centered in the space above the pills,
             using the exact same treatment as the home hero's title. */}
         <div className="flex-1 flex flex-col justify-center">

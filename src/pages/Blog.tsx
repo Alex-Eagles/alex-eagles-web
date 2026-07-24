@@ -45,7 +45,7 @@ export default function Blog() {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-dvh"
       style={{
         background: isDark
           ? "#121B34"
@@ -86,7 +86,7 @@ export default function Blog() {
                   <button
                     type="button"
                     onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-                    className="font-sans text-sm font-semibold px-6 py-2.5 rounded-full border border-border bg-elevated text-fg cursor-pointer transition-colors duration-200 hover:border-brand hover:text-brand"
+                    className="font-sans text-sm font-semibold px-6 py-2.5 min-h-11 rounded-full border border-border bg-elevated text-fg cursor-pointer transition-colors duration-200 hover:border-brand hover:text-brand"
                   >
                     Load more posts
                   </button>

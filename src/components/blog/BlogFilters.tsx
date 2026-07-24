@@ -51,7 +51,7 @@ export default function BlogFilters({ activeFilter, onFilterChange }: BlogFilter
             type="button"
             onClick={() => onFilterChange(filter.id)}
             aria-pressed={active}
-            className={`font-sans text-[13px] font-semibold px-3.5 py-1.5 rounded-full border transition-colors duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+            className={`font-sans text-[13px] font-semibold px-3.5 py-1.5 min-h-11 sm:min-h-0 rounded-full border transition-colors duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
               active
                 ? "bg-gold border-gold shadow-[0_8px_24px_var(--brand-glow)]"
                 : "bg-elevated text-fg-muted border-border hover:text-fg hover:border-brand"
