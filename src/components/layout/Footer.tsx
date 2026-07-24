@@ -148,7 +148,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-[22px] border-t border-border text-center font-sans text-[13px] text-fg-subtle">
-          © 2025 Alex Eagles · Alexandria University · All rights reserved
+          © 2026 Alex Eagles · Alexandria University · All rights reserved
         </div>
       </div>
     </footer>
