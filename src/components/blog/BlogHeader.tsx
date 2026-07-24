@@ -1,38 +1,88 @@
+import BlogFilters from "@/components/blog/BlogFilters";
+import type { BlogFilter } from "@/data/blog";
+
+interface BlogHeaderProps {
+  activeFilter: BlogFilter["id"];
+  onFilterChange: (filter: BlogFilter["id"]) => void;
+}
+
 /**
- * BlogHeader — the Blog page hero: eyebrow, oversized display title, and a
- * one-line intro, over the same brand-grid backdrop used by the hero and the
- * ComingSoon template. Purely presentational.
+ * BlogHeader — the "Alex Eagles / Blogs" title block for the Figma-sourced
+ * blog page, with a looping background video of the team manufacturing the
+ * drone and fixed-wing. The video is scoped to this section only (scrolls
+ * away with the header, not pinned to the viewport); the title, tagline,
+ * and category filter pills sit inset to the site's normal content width,
+ * directly over the footage.
+ *
+ * Colors here are hardcoded, not theme tokens — same convention as <Hero/>.
+ * This band is always a dark video + scrim regardless of the site's
+ * light/dark toggle, so the text needs to stay light-on-dark either way.
  */
-export default function BlogHeader() {
+export default function BlogHeader({ activeFilter, onFilterChange }: BlogHeaderProps) {
   return (
-    <header className="relative overflow-hidden px-6 pt-32 pb-16 text-center">
-      {/* Subtle brand grid backdrop (matches the hero texture). */}
+    <div className="relative overflow-hidden bg-[#07091c]">
+      {/* Background video — muted/loop/autoplay, no controls. The poster (and
+          the container's navy bg) is the fallback shown while the clip buffers
+          or when autoplay is blocked (iOS Low Power Mode, data-saver), so the
+          hero stays on-brand instead of going black on mobile. */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster="/media/blog-hero-poster.svg"
+        aria-hidden="true"
+      >
+        <source src="/media/blog-hero.mp4" type="video/mp4" />
+      </video>
+
+      {/* Darkening scrim so the title/tagline/filters stay readable over the footage. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 opacity-40"
+        className="absolute inset-0"
         style={{
-          backgroundImage:
-            "linear-gradient(var(--border-subtle) 1px, transparent 1px), linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-          maskImage:
-            "radial-gradient(70% 70% at 50% 40%, #000 0%, transparent 78%)",
-          WebkitMaskImage:
-            "radial-gradient(70% 70% at 50% 40%, #000 0%, transparent 78%)",
+          background:
+            "linear-gradient(to bottom, rgba(7,9,28,0.55) 0%, rgba(7,9,28,0.88) 100%)",
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-[var(--maxw-content)]">
-        <div className="eyebrow mb-4">Alex Eagles</div>
+      <div className="relative z-10 max-w-[var(--maxw-content)] mx-auto px-6 pt-24 pb-6 md:pt-28 min-h-dvh flex flex-col text-center">
+        {/* Title block — vertically centered in the space above the pills,
+            using the exact same treatment as the home hero's title. */}
+        <div className="flex-1 flex flex-col justify-center">
+          <div
+            className="eyebrow mb-3"
+            style={{ color: "#8B8FC8", textShadow: "0 2px 16px rgba(7,9,28,0.6)" }}
+          >
+            Alex Eagles
+          </div>
 
-        <h1 className="font-display font-extrabold text-hero text-fg leading-none tracking-[-0.02em] m-0">
-          Blog
-        </h1>
+          <h1
+            className="font-display font-extrabold leading-none tracking-[-0.02em] m-0 mb-5 pb-1"
+            style={{
+              fontSize: "var(--text-hero)",
+              color: "#F0F2FF",
+              textShadow: "0 4px 24px rgba(7,9,28,0.65)",
+            }}
+          >
+            Blogs
+          </h1>
 
-        <p className="font-sans text-body-lg text-fg-muted leading-[1.7] mx-auto mt-6 prose-measure">
-          Technical stories, flight tests, and innovations from the team — the
-          build log behind every subteam.
-        </p>
+          <p
+            className="font-sans text-body-lg italic mt-6"
+            style={{ color: "#B7BAE0", textShadow: "0 2px 16px rgba(7,9,28,0.6)" }}
+          >
+            “Technical stories, flight tests & innovations from the team”
+          </p>
+        </div>
+
+        {/* Category filter pills, pinned near the bottom of the hero — the
+            last thing over the video before the cards panel. */}
+        <div>
+          <BlogFilters activeFilter={activeFilter} onFilterChange={onFilterChange} />
+        </div>
       </div>
-    </header>
+    </div>
   );
 }

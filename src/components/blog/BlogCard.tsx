@@ -1,78 +1,120 @@
-import { Calendar, Clock, User } from "lucide-react";
 import GlassCard from "@/components/ui/GlassCard";
-import { CATEGORY_META, type BlogPost } from "@/data/blog";
+import { useTheme } from "@/context/ThemeContext";
+import {
+  CATEGORY_STYLE,
+  CATEGORY_LABEL,
+  type BlogPostFull,
+  type CategoryStyle,
+} from "@/data/blog";
+
+type BlogCardProps = Omit<BlogPostFull, "id">;
 
 /**
- * BlogCard — a single build-log post as an elevated glass card: cover banner
- * with a category badge, then title, excerpt, and a meta row (author / date /
- * read time). When a post has no `image`, the banner falls back to a branded
- * gradient with the category icon so the layout still reads as intentional.
+ * BlogCard — post card for the Figma-sourced blog page: a cover photo with a
+ * category badge, then title / meta / excerpt / footer styled to match the
+ * home page's "Latest updates" cards (same title scale, label:value meta
+ * rows, and the bordered footer with the date) so the two pages read as one
+ * consistent card language.
  *
- * The card uses GlassCard's default hover-lift, matching the Home page's
- * "Latest updates" cards for a consistent feel across the site.
+ * The whole card — photo, badge, and body alike — uses the post's fixed
+ * `CATEGORY_STYLE` (accent/text/label straight from the subteam reference
+ * sheet), not the site's theme tokens — those stay the same in light or
+ * dark mode. Both themes render an opaque card — `bg.light` or `bg.dark` —
+ * with no transparency or blur.
  */
-export default function BlogCard({ post }: { post: BlogPost }) {
-  const { title, excerpt, image, category, date, author, readTime } = post;
-  const meta = CATEGORY_META[category];
-  const Icon = meta.icon;
+export default function BlogCard({
+  title,
+  excerpt,
+  image,
+  imageFit = "cover",
+  category,
+  date,
+  readTime,
+}: BlogCardProps) {
+  const style = CATEGORY_STYLE[category];
+  const { isDark } = useTheme();
+
+  const cardStyle = {
+    backgroundColor: isDark ? style.bg.dark : style.bg.light,
+    borderColor: style.accent,
+  };
 
   return (
-    <GlassCard className="overflow-hidden flex flex-col h-full group">
-      {/* Cover banner (image, or branded gradient fallback). */}
-      <div className="relative h-52 overflow-hidden">
-        {image ? (
-          <img
-            src={image}
-            alt={`Cover image for “${title}”`}
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="w-full h-full flex items-center justify-center transition-transform duration-300 ease-out group-hover:scale-105"
-            style={{
-              background: `linear-gradient(135deg, ${meta.accent}33 0%, var(--bg-elevated) 70%)`,
-            }}
-          >
-            <Icon size={56} strokeWidth={1.25} style={{ color: meta.accent, opacity: 0.55 }} />
-          </div>
+    <GlassCard className="overflow-hidden flex flex-col h-full group" style={cardStyle}>
+      {/* Cover photo + category badge — the one piece of chrome the home
+          page's text-only cards don't need. */}
+      <div className="relative h-56 overflow-hidden">
+        {imageFit === "contain" && (
+          <div aria-hidden="true" className="absolute inset-0 bg-white" />
         )}
-
-        {/* Category badge. Dark text on the light accent reads in both themes. */}
+        <img
+          src={image}
+          alt={`Cover image for "${title}"`}
+          loading="lazy"
+          className={
+            imageFit === "contain"
+              ? "relative w-full h-full object-contain p-10 transition-transform duration-300 group-hover:scale-105"
+              : "w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          }
+        />
+        {/* Category-color wash over the photo, matching the card's accent. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{ backgroundColor: style.accent, opacity: 0.35, mixBlendMode: "multiply" }}
+        />
         <span
-          className="absolute top-4 right-4 inline-flex items-center rounded-full px-3 py-1 text-caption font-semibold"
-          style={{ background: meta.accent, color: "#0B1020" }}
+          className="absolute top-4 right-4 inline-flex items-center rounded-full px-3 py-0.5 font-sans text-caption font-semibold"
+          style={{ backgroundColor: style.accent, color: style.text }}
         >
-          {meta.label}
+          {CATEGORY_LABEL[category]}
         </span>
       </div>
 
-      {/* Body. */}
-      <div className="flex flex-col flex-1 p-6">
-        <h3 className="font-display font-bold text-h4 leading-snug tracking-[-0.01em] m-0 mb-3 text-fg transition-colors duration-200 group-hover:text-brand-light">
+      {/* Body — same padding, title scale, meta rows, and footer bar as
+          <LatestUpdates/>'s cards, colored from the fixed category style. */}
+      <div className="flex flex-col flex-1 p-[30px_28px_24px]">
+        <h3
+          className="font-display font-bold text-h3 leading-[1.02] tracking-[-0.01em] m-0 mb-4"
+          style={{ color: style.text }}
+        >
           {title}
         </h3>
 
-        <p className="font-sans text-small leading-[1.6] text-fg-muted m-0 mb-5 line-clamp-3">
+        <div className="flex flex-col gap-1 mb-4">
+          <Meta label="Read time" value={readTime} style={style} />
+        </div>
+
+        <p
+          className="font-sans text-[15px] leading-[1.65] m-0 flex-1 line-clamp-3"
+          style={{ color: style.text }}
+        >
           {excerpt}
         </p>
 
-        <div className="mt-auto pt-4 border-t border-border flex flex-wrap items-center gap-x-4 gap-y-2 text-caption text-fg-subtle">
-          <span className="inline-flex items-center gap-1.5">
-            <User size={14} aria-hidden="true" />
-            {author}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Calendar size={14} aria-hidden="true" />
+        <div
+          className="mt-[22px] pt-[18px] border-t"
+          style={{ borderColor: style.accent }}
+        >
+          <span
+            className="font-mono text-[13px] tracking-[0.04em] uppercase font-semibold"
+            style={{ color: style.label }}
+          >
             {date}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Clock size={14} aria-hidden="true" />
-            {readTime}
           </span>
         </div>
       </div>
     </GlassCard>
   );
 }
+
+/* ---- internal helpers (mirrors LatestUpdates' Meta/Dot) ---- */
+
+function Meta({ label, value, style }: { label: string; value: string; style: CategoryStyle }) {
+  return (
+    <span className="font-sans text-sm" style={{ color: style.label }}>
+      {label}: <span className="font-semibold" style={{ color: style.text }}>{value}</span>
+    </span>
+  );
+}
+
