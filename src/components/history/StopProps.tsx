@@ -68,6 +68,12 @@ export interface StopPlacement {
    */
   screenRight: Vector3;
   /**
+   * Unit vector pointing the way the path is HEADING at this stop. Negating it
+   * points back at the oncoming camera, which is how the parked aircraft is
+   * placed in FRONT of its photo frame rather than level with it.
+   */
+  tangent: Vector3;
+  /**
    * Y rotation (radians) that turns a flat frame to face back down the path,
    * squarely at the approaching camera.
    *

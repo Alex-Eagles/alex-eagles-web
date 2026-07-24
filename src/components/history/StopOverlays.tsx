@@ -237,15 +237,29 @@ function StopOverlay({
         STOP.poleHeight + LABEL.heightAbovePole,
         poleBase.z,
       ] as [number, number, number],
-      // The aircraft hovers dead-centre over the pole base, in the clear band
-      // between the frame tops and the flags (see VEHICLE in sceneConfig).
-      // Centred means it stays put as the frame COUNT changes year to year —
-      // frames spread outward from this same point.
-      vehicle: [poleBase.x, VEHICLE.height, poleBase.z] as [
-        number,
-        number,
-        number,
-      ],
+      // The aircraft, parked on the ground beside the stop's FIRST photo
+      // frame (UAVC in 2025) — anchored to that frame rather than to the pole,
+      // so it stays beside it however many photos the year ends up with.
+      //
+      // Two offsets, each on a deliberately different axis:
+      //   • sideways on `screenRight`, NOT on `frameAxis`. screenRight never
+      //     flips with path parity, so a negative lateralOffset is toward the
+      //     left of the PAGE on every stop; frameAxis would put it on the
+      //     right half the time.
+      //   • forward on −`tangent`, i.e. back toward the oncoming camera, so
+      //     the aircraft stands in FRONT of the frame instead of level with it.
+      //
+      // Y is 0: the element is bottom-anchored in CSS below, so the aircraft
+      // meets the floor exactly regardless of how big it's rendered.
+      vehicle: (() => {
+        const firstSlot = frameSlots(stop.frameCount)[0];
+        const parked = poleBase
+          .clone()
+          .addScaledVector(frameAxis, firstSlot * FRAME.spacing)
+          .addScaledVector(stop.screenRight, VEHICLE.lateralOffset)
+          .addScaledVector(stop.tangent, -VEHICLE.forwardOffset);
+        return [parked.x, 0, parked.z] as [number, number, number];
+      })(),
       frames,
       flags,
     };
@@ -406,9 +420,26 @@ function StopOverlay({
           frames, so it shares their perspective and banks with the camera
           through curves instead of floating in screen space.
 
-          TWO nested divs on purpose: the scene's fade writes `opacity` to the
-          outer one every frame, while the CSS bob animates `transform` on the
-          inner one. Splitting them means neither ever overwrites the other. */}
+          ─── DELIBERATELY THE CHEAPEST THING ON THE STOP ───────────────────
+          The <img> IS the faded element — no wrapper divs, no name plate, no
+          animation. That means:
+            • one DOM node, so the per-frame fade does one style write here,
+              not three;
+            • no `filter`, which would make the browser re-run a per-pixel blur
+              on a large transparent bitmap on every one of those opacity
+              writes — by far the most expensive thing this element could do;
+            • no CSS animation and no `will-change`, so the compositor never
+              allocates a layer for it or wakes up to repaint it. The aircraft
+              is parked: once drawn, it costs nothing until the fade moves.
+
+          `translateY(-50%)` cancels drei's centring so the element's BOTTOM
+          edge lands on the anchor — the same trick the flags use below. The
+          anchor is at ground level, so the aircraft sits exactly on the floor
+          whatever VEHICLE.width is, with no magic offset to re-tune.
+
+          The intrinsic width/height attributes are the file's real pixel size:
+          they give the browser the aspect ratio before the bytes arrive, so
+          the element never reflows when the image decodes. */}
       {achievement.vehicle && (
         <Html
           position={anchors.vehicle}
@@ -417,41 +448,27 @@ function StopOverlay({
           scale={VEHICLE.scale}
           zIndexRange={[9, 0]}
         >
-          <div
+          <img
             ref={collect}
-            style={{ opacity: 0 }}
-            className="pointer-events-none select-none text-center"
-          >
-            <div className="vehicle-hover">
-              <img
-                src={achievement.vehicle.render}
-                // Named, not decorative: this is the team's own aircraft, so
-                // the alt text carries real information for screen readers.
-                alt={`${achievement.vehicle.name}, the aircraft flown in ${achievement.year}`}
-                loading="lazy"
-                decoding="async"
-                draggable={false}
-                width={VEHICLE.width}
-                className="block h-auto mx-auto"
-                style={{
-                  width: VEHICLE.width,
-                  // Grounds the aircraft against the dotted floor. A plain dark
-                  // drop shadow, matching the frames — no coloured glow, which
-                  // would read as sci-fi rather than as a real object.
-                  filter: "drop-shadow(0 14px 22px rgba(0,0,0,0.55))",
-                }}
-              />
-              <div
-                className="font-mono tracking-[0.16em] text-[var(--sky)] uppercase mt-1"
-                style={{
-                  fontSize: VEHICLE.nameSize,
-                  textShadow: "0 2px 10px rgba(0,0,0,0.75)",
-                }}
-              >
-                {achievement.vehicle.name}
-              </div>
-            </div>
-          </div>
+            src={achievement.vehicle.render}
+            // Named, not decorative: this is the team's own aircraft, so the
+            // alt text carries real information for screen readers even though
+            // nothing is drawn on screen.
+            alt={`${achievement.vehicle.name}, the aircraft flown in ${achievement.year}`}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            width={achievement.vehicle.width}
+            height={achievement.vehicle.height}
+            className="block pointer-events-none select-none"
+            style={{
+              opacity: 0,
+              transform: "translateY(-50%)",
+              width: VEHICLE.width,
+              height: "auto",
+              maxWidth: "none",
+            }}
+          />
         </Html>
       )}
 

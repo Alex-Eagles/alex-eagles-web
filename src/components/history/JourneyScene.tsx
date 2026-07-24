@@ -292,6 +292,7 @@ export default function JourneyScene({
         anchor,
         right,
         screenRight,
+        tangent,
         facing,
         awardCount: achievement.awards.length,
         frameCount,

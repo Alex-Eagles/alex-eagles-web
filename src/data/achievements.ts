@@ -35,20 +35,33 @@
  * ║                                                                          ║
  * ║  1. Drop the render into:   public/history/vehicles/                     ║
  * ║                                                                          ║
- * ║  2. Add a `vehicle` to the matching year below:                          ║
+ * ║  2. Add a `vehicle` to the matching year below, with the render's REAL   ║
+ * ║     pixel size:                                                          ║
  * ║                                                                          ║
  * ║         vehicle: {                                                       ║
  * ║           name: "Do3soka",                                               ║
  * ║           render: "/history/vehicles/do3soka.webp",                      ║
+ * ║           width: 563,                                                    ║
+ * ║           height: 240,                                                   ║
  * ║         },                                                               ║
  * ║                                                                          ║
- * ║  The aircraft then hovers above that year's stop, with its name below.   ║
- * ║  Years without a `vehicle` simply don't show one — nothing else moves.   ║
+ * ║  The aircraft then stands ON THE GROUND at that year's stop, just left   ║
+ * ║  of and in front of its first photo frame. No label is drawn — `name`    ║
+ * ║  is the alt text. Years without a `vehicle` simply don't show one, and   ║
+ * ║  nothing else about the stop moves.                                      ║
+ * ║                                                                          ║
+ * ║  To move or resize it, use the VEHICLE block in sceneConfig.ts. It can   ║
+ * ║  never sink into or float above the floor — that is handled in CSS, not  ║
+ * ║  by a number you have to re-tune.                                        ║
  * ║                                                                          ║
  * ║  FORMAT: WebP with a TRANSPARENT background, and TRIMMED so the aircraft ║
  * ║  touches the edges of the file. Transparent padding left in the file     ║
  * ║  becomes dead space in the scene and shrinks the aircraft on screen.     ║
- * ║  ~600px on the long edge is plenty; these land around 13KB.              ║
+ * ║  ~600px on the long edge is plenty; these land around 10KB.              ║
+ * ║                                                                          ║
+ * ║  Don't downscale below that hoping for a smaller file — it backfires.    ║
+ * ║  Resampling softens the clean edges WebP compresses well, so a 420px     ║
+ * ║  copy of this render encodes LARGER than the 563px original.             ║
  * ║                                                                          ║
  * ║  Renders, NOT .glb models — see the `Vehicle` type below for why.        ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
@@ -108,7 +121,11 @@ export interface Award {
  * crisp at any zoom and needs no new dependency.
  */
 export interface Vehicle {
-  /** Display name, shown under the render. */
+  /**
+   * The aircraft's name. NOT drawn on screen — the scene shows the aircraft
+   * with no label. This is the alt text, so it still has to be accurate: it's
+   * what a screen-reader user gets instead of the image.
+   */
   name: string;
   /**
    * Transparent-background render, in `public/history/vehicles/`.
@@ -119,6 +136,19 @@ export interface Vehicle {
    * Roughly 600px on the long edge is plenty.
    */
   render: string;
+  /**
+   * The render's REAL pixel dimensions.
+   *
+   * Set on the <img> so the browser knows the aspect ratio before the file
+   * arrives and reserves the right box immediately — without them the element
+   * reflows the moment the image decodes, which inside a 3D-transformed
+   * overlay shows up as the aircraft visibly popping into place.
+   *
+   * These must match the file. If you re-export at a different size, update
+   * them.
+   */
+  width: number;
+  height: number;
 }
 
 /** One stop on the path — one year of the team's history. */
@@ -257,6 +287,8 @@ export const achievements: Achievement[] = [
     vehicle: {
       name: "Do3soka",
       render: "/history/vehicles/do3soka.webp",
+      width: 563,
+      height: 240,
     },
   },
 ];
