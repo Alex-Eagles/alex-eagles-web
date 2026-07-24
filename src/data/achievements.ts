@@ -42,22 +42,32 @@
  * ║           name: "Do3soka",                                               ║
  * ║           render: "/history/vehicles/do3soka.webp",                      ║
  * ║           width: 563, height: 240,   // the file's real size             ║
- * ║           alongPoles: 0.1,           // 0 = 1st pole, 1 = last pole      ║
- * ║           forwardOffset: 2.2,        // how far toward the viewer        ║
+ * ║           alongPoles: 0.1,           // 0 = 1st pole, 1 = last pole,     ║
+ * ║                                      //   negative = further LEFT        ║
+ * ║           forwardOffset: 2.2,        // toward the viewer                ║
  * ║           displayWidth: 200,         // how big to draw it               ║
+ * ║           shadowRadius: 2.5,         // contact shadow half-width        ║
+ * ║           groundOffset: 0,           // 0 = wheels on the floor          ║
  * ║         }],                                                              ║
  * ║                                                                          ║
- * ║  Each aircraft then stands ON THE GROUND between that year's flag        ║
- * ║  poles. No label is drawn — `name` is the alt text. Years with no        ║
- * ║  `vehicles` simply don't show any, and nothing else about the stop       ║
- * ║  moves.                                                                  ║
+ * ║  THE FOUR POSITION KNOBS, and which way each moves it:                   ║
+ * ║     alongPoles    ←→  sideways. 0 sits on the first pole, 1 on the last, ║
+ * ║                       0.5 midway. Values outside that range keep going,  ║
+ * ║                       so −0.5 is out past the first pole, 2.7 is way     ║
+ * ║                       out beyond the last.                               ║
+ * ║     forwardOffset  ↓   toward the viewer. Raise it to bring an aircraft  ║
+ * ║                       out in FRONT of the poles and photos.              ║
+ * ║     groundOffset   ↕   height off the floor. 0 = parked. This is the one ║
+ * ║                       to reach for if it looks like it's floating or     ║
+ * ║                       sunk. The shadow stays on the floor either way.    ║
+ * ║     displayWidth   ⤢   apparent size.                                    ║
  * ║                                                                          ║
- * ║  A year can list SEVERAL. Give them different `forwardOffset`s as well   ║
- * ║  as different `alongPoles` — the poles are narrower than an aircraft,    ║
- * ║  so depth, not sideways distance, is what stops two overlapping.         ║
+ * ║  No label is drawn — `name` is the alt text. Years with no `vehicles`    ║
+ * ║  simply don't show any, and nothing else about the stop moves.           ║
  * ║                                                                          ║
- * ║  They can never sink into or float above the floor — that is handled in  ║
- * ║  CSS, not by a number you have to re-tune.                               ║
+ * ║  A year can list SEVERAL. Separate them with `alongPoles` AND            ║
+ * ║  `forwardOffset` — the poles are narrower than an aircraft, so depth,    ║
+ * ║  not sideways distance alone, is what stops two overlapping.             ║
  * ║                                                                          ║
  * ║  FORMAT: WebP with a TRANSPARENT background, and TRIMMED so the aircraft ║
  * ║  touches the edges of the file. Transparent padding left in the file     ║
@@ -190,6 +200,36 @@ export interface Vehicle {
    * shared width would draw them as though they were equally big.
    */
   displayWidth: number;
+  /**
+   * Half-width of the contact shadow pooled under it, in WORLD units (the
+   * render's size is in px, so this can't be derived from it).
+   *
+   * Roughly half the aircraft's real span. The shadow is drawn as a squashed
+   * ellipse aligned with the aircraft, flat on the floor — that contact patch
+   * is what makes it read as standing ON the ground instead of pasted in
+   * front of it.
+   */
+  shadowRadius: number;
+  /**
+   * ⬆ HOW HIGH OFF THE FLOOR IT SITS, in world units. THIS IS THE KNOB FOR
+   * "the aircraft is sinking into / floating above the ground".
+   *
+   *   0    = wheels exactly on the floor (the default, and what a parked
+   *          aircraft should normally be)
+   *   +0.5 = lifted half a unit, as though hovering
+   *   -0.3 = pushed down into the floor, to hide a render whose own shadow or
+   *          empty margin is baked into the image
+   *
+   * It works because the <img> is BOTTOM-anchored in CSS (StopOverlays), so
+   * this is the height of the image's bottom edge — not its centre. Resizing
+   * an aircraft therefore never changes where it meets the ground, and this
+   * number keeps its meaning.
+   *
+   * The contact shadow always stays flat on the floor and does NOT rise with
+   * it, which is exactly what you want: lift an aircraft and it separates from
+   * its shadow, reading as airborne.
+   */
+  groundOffset: number;
 }
 
 /** One stop on the path — one year of the team's history. */
@@ -327,27 +367,36 @@ export const achievements: Achievement[] = [
       "/history/uavc-2025.webp",
       "/history/suas-2025.webp",
     ],
-    // Both 2025 aircraft stand between the two flag poles: the fixed-wing
-    // over by the UAVC pole, the quadcopter by the SUAS pole and a step
-    // further forward so the two never overlap.
+    // The fixed-wing sits back between the two poles; the quadcopter stands
+    // well to its right, in front of the SUAS photo. They're kept apart on
+    // BOTH axes — sideways so they don't intersect, and in depth so neither
+    // reads as growing out of the other.
     vehicles: [
       {
         name: "Do3soka",
         render: "/history/vehicles/do3soka.webp",
         width: 563,
         height: 240,
-        alongPoles: 0.1,
-        forwardOffset: 2.2,
-        displayWidth: 200,
+        // Left of the UAVC pole, out in front of the UAVC photo. Pulled well
+        // forward so it clears both the pole behind it and the drone beside it.
+        alongPoles: -0.55,
+        forwardOffset: 3.2,
+        displayWidth: 175,
+        shadowRadius: 2.5,
+        groundOffset: 0,
       },
       {
         name: "Itay",
         render: "/history/vehicles/itay.webp",
         width: 400,
         height: 281,
-        alongPoles: 0.9,
-        forwardOffset: 4.6,
-        displayWidth: 132,
+        // Over in front of the SUAS photo — far enough right of the fixed-wing
+        // that the two never touch, and small enough not to cover the photo.
+        alongPoles: 2.7,
+        forwardOffset: 3.4,
+        displayWidth: 105,
+        shadowRadius: 1.3,
+        groundOffset: 0,
       },
     ],
   },

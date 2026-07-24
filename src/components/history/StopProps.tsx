@@ -22,6 +22,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
+  CanvasTexture,
   Color,
   DoubleSide,
   type InstancedMesh,
@@ -30,6 +31,27 @@ import {
 } from "three";
 import { STOP, type QualitySettings, type ScenePalette } from "./sceneConfig";
 import { stopIntensity } from "./journeyCurve";
+
+/**
+ * One aircraft parked at a stop, resolved to world space.
+ *
+ * Computed once in JourneyScene alongside the poles, because TWO files need
+ * it and they must not disagree: StopOverlays anchors the <img> here, and this
+ * file pools the contact shadow at the same spot. Deriving it independently in
+ * both would let an aircraft drift off its own shadow.
+ */
+export interface VehiclePlacement {
+  /** Ground position the aircraft stands on. */
+  position: Vector3;
+  /** Half-width of its contact shadow, world units. */
+  shadowRadius: number;
+  /**
+   * Height of the aircraft's bottom edge above the floor. Read by StopOverlays
+   * for the <img> anchor; the shadow here deliberately ignores it and stays
+   * flat on the ground, so lifting one separates it from its shadow.
+   */
+  groundOffset: number;
+}
 
 /** One flag pole standing at a stop. */
 export interface PolePlacement {
@@ -75,6 +97,8 @@ export interface StopPlacement {
   poleBase: Vector3;
   /** One pole per distinct competition. 1 or 2 in the current data. */
   poles: PolePlacement[];
+  /** The aircraft parked at this stop, if any. */
+  vehicles: VehiclePlacement[];
   /** Arc-length position of this stop, for the fade calculation. */
   u: number;
 }
@@ -129,6 +153,27 @@ export default function StopProps({
         dummy.updateMatrix();
         shadows.push({ matrix: dummy.matrix.toArray(), stopIndex });
       });
+
+      // Contact shadow under each parked aircraft — the thing that sells it as
+      // standing ON the floor rather than pasted in front of it. Same instanced
+      // mesh as the pole shadows, so however many aircraft get added they never
+      // cost another draw call.
+      //
+      // ROTATION: laying the disc flat needs X = −90°. The Z term then spins it
+      // within the floor, and `facing` is exactly the angle that lines its long
+      // axis up with the aircraft's wingspan — the same rotation the billboard
+      // itself uses, so the shadow always points the way the aircraft does.
+      //
+      // SCALE: squashed to 40% in local Y, which after the flip is the world
+      // DEPTH axis. A circle would read as a ball's shadow; a wide, shallow
+      // ellipse reads as a wing's.
+      stop.vehicles.forEach((vehicle) => {
+        dummy.position.set(vehicle.position.x, 0.02, vehicle.position.z);
+        dummy.rotation.set(-Math.PI / 2, 0, stop.facing);
+        dummy.scale.set(vehicle.shadowRadius, vehicle.shadowRadius * 0.4, 1);
+        dummy.updateMatrix();
+        shadows.push({ matrix: dummy.matrix.toArray(), stopIndex });
+      });
     });
 
     return { poles, shadows };
@@ -158,6 +203,43 @@ export default function StopProps({
     place(polesRef.current, layout.poles);
     place(shadowsRef.current, layout.shadows);
   }, [layout, quality.blobShadows]);
+
+  /**
+   * Soft-edged alpha mask for the contact shadows.
+   *
+   * Drawn into a 64px canvas rather than shipped as a file: it's a radial
+   * gradient, so generating it costs a fraction of a millisecond once and saves
+   * a network request, a decode and an asset to keep in sync. 64px is plenty —
+   * it's nothing but a smooth falloff, and the GPU is stretching it across a
+   * blurry ellipse anyway.
+   *
+   * Without it these are flat discs with a hard polygonal rim, which read as
+   * dark stickers on the floor. The falloff is what makes them read as shadow.
+   */
+  const shadowAlpha = useMemo(() => {
+    const size = 64;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      const half = size / 2;
+      const gradient = ctx.createRadialGradient(half, half, 0, half, half, half);
+      // Held near-opaque through the middle so the shadow has a solid core and
+      // only softens at the rim — a gradient straight from 1 to 0 looks like
+      // fog rather than contact.
+      gradient.addColorStop(0, "rgba(255,255,255,1)");
+      gradient.addColorStop(0.5, "rgba(255,255,255,0.92)");
+      gradient.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+    }
+    return new CanvasTexture(canvas);
+  }, []);
+
+  // Textures hold a GPU allocation that outlives the React tree, so it has to
+  // be released explicitly — garbage collection won't reclaim it.
+  useEffect(() => () => shadowAlpha.dispose(), [shadowAlpha]);
 
   // Scratch colours, reused every frame — allocating a Color per instance per
   // frame would produce a steady stream of garbage for the GC to collect,
@@ -229,11 +311,14 @@ export default function StopProps({
           args={[undefined, undefined, layout.shadows.length]}
           frustumCulled={false}
         >
-          <circleGeometry args={[1, 12]} />
+          {/* 24 segments, not 12: an aircraft's shadow is several world units
+              across, and at that size a 12-gon's straight edges are visible. */}
+          <circleGeometry args={[1, 24]} />
           <meshBasicMaterial
             color="#000000"
             transparent
-            opacity={0.35}
+            alphaMap={shadowAlpha}
+            opacity={0.5}
             depthWrite={false}
             side={DoubleSide}
             toneMapped={false}

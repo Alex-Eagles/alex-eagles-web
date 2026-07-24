@@ -237,31 +237,23 @@ function StopOverlay({
         STOP.poleHeight + LABEL.heightAbovePole,
         poleBase.z,
       ] as [number, number, number],
-      // The aircraft, parked on the ground BETWEEN the stop's flag poles.
+      // The aircraft parked on the ground at this stop. The world positions
+      // were resolved in JourneyScene, which is also what StopProps pools each
+      // contact shadow at — recomputing them here would risk an aircraft
+      // drifting off its own shadow.
       //
-      // Each one's `alongPoles` is a fraction of the way from the first pole
-      // to the last, so it stays pinned to its competition's pole rather than
-      // to an absolute distance — move the poles apart and the aircraft move
-      // with them. `lerp` handles the one-pole case for free: both ends are
-      // the same point, so the aircraft simply stands at that pole.
-      //
-      // `forwardOffset` then pulls it back along −tangent, toward the oncoming
-      // camera, so it stands in FRONT of the poles. That axis is also what
-      // keeps two aircraft from overlapping: the poles are narrower than an
-      // aircraft, so the separation that actually reads is depth, not sideways
-      // distance.
-      //
-      // Y is 0: the element is bottom-anchored in CSS below, so each aircraft
-      // meets the floor exactly regardless of how big it is drawn.
-      vehicles: (achievement.vehicles ?? []).map((vehicle) => {
-        const firstPole = stop.poles[0].base;
-        const lastPole = stop.poles[stop.poles.length - 1].base;
-        const parked = firstPole
-          .clone()
-          .lerp(lastPole, vehicle.alongPoles)
-          .addScaledVector(stop.tangent, -vehicle.forwardOffset);
-        return [parked.x, 0, parked.z] as [number, number, number];
-      }),
+      // Y comes from the aircraft's own `groundOffset` (0 = parked on the
+      // floor). Because the element is bottom-anchored in CSS below, that is
+      // the height of its BOTTOM EDGE, so resizing an aircraft never changes
+      // where it meets the ground.
+      vehicles: stop.vehicles.map(
+        (vehicle) =>
+          [vehicle.position.x, vehicle.groundOffset, vehicle.position.z] as [
+            number,
+            number,
+            number,
+          ],
+      ),
       frames,
       flags,
     };

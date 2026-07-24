@@ -32,6 +32,7 @@ import ChaseCamera from "./ChaseCamera";
 import StopProps, {
   type StopPlacement,
   type PolePlacement,
+  type VehiclePlacement,
 } from "./StopProps";
 import StopOverlays from "./StopOverlays";
 import { buildJourneyCurve, poleOffsetFor } from "./journeyCurve";
@@ -288,12 +289,33 @@ export default function JourneyScene({
         return { base, logo: spec.logo, side };
       });
 
+      // Where this year's aircraft park, resolved once here so the <img> in
+      // StopOverlays and the contact shadow in StopProps read the SAME point
+      // and an aircraft can never drift off its own shadow.
+      //
+      // `alongPoles` is a fraction from the first pole to the last, so an
+      // aircraft stays pinned to its competition's pole if the poles are ever
+      // moved apart. lerp covers the single-pole case for free: both ends are
+      // the same point. `forwardOffset` then pulls it back along −tangent,
+      // toward the oncoming camera.
+      const vehicles: VehiclePlacement[] = (achievement.vehicles ?? []).map(
+        (vehicle) => ({
+          position: poles[0].base
+            .clone()
+            .lerp(poles[poles.length - 1].base, vehicle.alongPoles)
+            .addScaledVector(tangent, -vehicle.forwardOffset),
+          shadowRadius: vehicle.shadowRadius,
+          groundOffset: vehicle.groundOffset,
+        }),
+      );
+
       return {
         anchor,
         right,
         screenRight,
         tangent,
         facing,
+        vehicles,
         frameCount,
         poleBase,
         poles,
