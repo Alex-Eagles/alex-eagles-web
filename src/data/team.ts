@@ -54,25 +54,12 @@ export interface TeamMember {
   /** Slug of the photo in src/assets/members/ */
   photo?: string;
   /**
-<<<<<<< HEAD
-   * True when the photo is a background-removed cut-out (transparent PNG).
-   * Only those get the name rendered *behind* the subject on the card — an
-   * opaque photo would cover the text completely.
-   */
-  cutout?: boolean;
-  /**
-   * Slug of the full-scene "with background" photo shown, greyscaled, in the
-   * card's rest state. On hover it cross-fades away to reveal the coloured
-   * cut-out + name beneath. Only meaningful alongside `cutout`.
-   */
-  photoBg?: string;
-=======
+
    * Slug of the background-removed PNG in src/assets/members/cutouts/.
    * Omit it and we look for a cutout under the `photo` slug, so matching
    * filenames pair up automatically. Set it only to point at a different file.
    */
   cutout?: string;
->>>>>>> 127711238eba8b64611b66d37a5cd4fa3323e141
   linkedIn?: string;
 }
 
@@ -132,11 +119,7 @@ export function memberPhoto(member: TeamMember): string | undefined {
   return member.photo ? PHOTOS[member.photo] : undefined;
 }
 
-<<<<<<< HEAD
-/** Resolved "with background" rest-state photo URL, or undefined. */
-export function memberPhotoBg(member: TeamMember): string | undefined {
-  return member.photoBg ? PHOTOS[member.photoBg] : undefined;
-=======
+
 /**
  * Resolved background-removed portrait, or undefined if there isn't one.
  * Presence of this is what puts a card into the blue-backdrop hover mode.
@@ -144,7 +127,6 @@ export function memberPhotoBg(member: TeamMember): string | undefined {
 export function memberCutout(member: TeamMember): string | undefined {
   const slug = member.cutout ?? member.photo;
   return slug ? CUTOUTS[slug] : undefined;
->>>>>>> 127711238eba8b64611b66d37a5cd4fa3323e141
 }
 
 /* ---------------------------------------------------------------------------
@@ -179,13 +161,7 @@ export function memberYearLabel(member: TeamMember, rosterYear: string): string 
  * 4. THE ROSTER
  * -------------------------------------------------------------------------*/
 
-<<<<<<< HEAD
-/**
- * Rosters by competition year. Everything we have today is the **2025** team;
- * the 2026 roster isn't known yet, so it's intentionally empty and the page
- * shows a "coming soon" state for it. Fill 2026 in when it exists — no other
- * code changes needed.
- */
+
 export const ROSTER_YEARS = ["2026", "2025"] as const;
 export type RosterYear = (typeof ROSTER_YEARS)[number];
 
@@ -194,9 +170,8 @@ export const TEAM_MEMBERS: TeamMember[] = [
   { id: "1", name: "Ahmed Baheyeldin", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Mechatronics", photo: "ahmed-baheyeldin" },
   { id: "2", name: "Norhan Mohammed", role: "Vice Lead", team: "Executive", subTeam: "Management", year: "4", major: "Mechatronics", photo: "norhan-mohammed" },
   { id: "3", name: "Peter Ayoub", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Electromechanics", photo: "peter-ayoub", cutout: true, photoBg: "peter-ayoub-bg" },
-=======
+
 export const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
->>>>>>> 127711238eba8b64611b66d37a5cd4fa3323e141
 
 /** Ids must be unique across years, since both rosters are built at once. */
 let slotCounter = 0;
@@ -240,13 +215,11 @@ const leadershipTrio = (): [TeamMember, TeamMember, TeamMember] => [
   { ...slot("Head of Autonomous"), department: "Team Leadership" },
 ];
 
-<<<<<<< HEAD
 /** Roster lookup by year. 2026 is empty until that team is announced. */
 export const ROSTERS: Record<RosterYear, TeamMember[]> = {
   "2026": [],
   "2025": TEAM_MEMBERS,
 };
-=======
 const ROSTER_2026: YearRoster = {
   year: "2026",
   leadership: leadershipTrio(),
@@ -309,4 +282,3 @@ export function navGroups(roster: YearRoster): NavGroup[] {
     })),
   ];
 }
->>>>>>> 127711238eba8b64611b66d37a5cd4fa3323e141
