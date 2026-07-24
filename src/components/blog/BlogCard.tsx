@@ -1,28 +1,24 @@
+import { Link } from "react-router-dom";
 import GlassCard from "@/components/ui/GlassCard";
 import { useTheme } from "@/context/ThemeContext";
-import {
-  CATEGORY_STYLE,
-  CATEGORY_LABEL,
-  type BlogPostFull,
-  type CategoryStyle,
-} from "@/data/blog";
+import { CATEGORY_STYLE, CATEGORY_LABEL, type BlogPostFull } from "@/data/blog";
 
-type BlogCardProps = Omit<BlogPostFull, "id">;
+type BlogCardProps = BlogPostFull;
 
 /**
  * BlogCard — post card for the Figma-sourced blog page: a cover photo with a
  * category badge, then title / meta / excerpt / footer styled to match the
  * home page's "Latest updates" cards (same title scale, label:value meta
  * rows, and the bordered footer with the date) so the two pages read as one
- * consistent card language.
+ * consistent card language. The whole card links through to its detail page
+ * at `/blog/:id`.
  *
- * The whole card — photo, badge, and body alike — uses the post's fixed
- * `CATEGORY_STYLE` (accent/text/label straight from the subteam reference
- * sheet), not the site's theme tokens — those stay the same in light or
- * dark mode. Both themes render an opaque card — `bg.light` or `bg.dark` —
- * with no transparency or blur.
+ * Card surface/text pull from the post's `CATEGORY_STYLE`, switching between
+ * its `light`/`dark` tint per the site's theme toggle — `bg.dark` is a true
+ * deep tone (not just a grayed pastel), so dark mode reads as genuinely dark.
  */
 export default function BlogCard({
+  id,
   title,
   excerpt,
   image,
@@ -34,87 +30,103 @@ export default function BlogCard({
   const style = CATEGORY_STYLE[category];
   const { isDark } = useTheme();
 
+  const text = isDark ? style.text.dark : style.text.light;
+  const label = isDark ? style.label.dark : style.label.light;
+
   const cardStyle = {
     backgroundColor: isDark ? style.bg.dark : style.bg.light,
     borderColor: style.accent,
   };
 
   return (
-    <GlassCard className="overflow-hidden flex flex-col h-full group" style={cardStyle}>
-      {/* Cover photo + category badge — the one piece of chrome the home
-          page's text-only cards don't need. */}
-      <div className="relative h-56 overflow-hidden">
-        {imageFit === "contain" && (
-          <div aria-hidden="true" className="absolute inset-0 bg-white" />
-        )}
-        <img
-          src={image}
-          alt={`Cover image for "${title}"`}
-          loading="lazy"
-          className={
-            imageFit === "contain"
-              ? "relative w-full h-full object-contain p-10 transition-transform duration-300 group-hover:scale-105"
-              : "w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          }
-        />
-        {/* Category-color wash over the photo, matching the card's accent. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{ backgroundColor: style.accent, opacity: 0.35, mixBlendMode: "multiply" }}
-        />
-        <span
-          className="absolute top-4 right-4 inline-flex items-center rounded-full px-3 py-0.5 font-sans text-caption font-semibold"
-          style={{ backgroundColor: style.accent, color: style.text }}
-        >
-          {CATEGORY_LABEL[category]}
-        </span>
-      </div>
-
-      {/* Body — same padding, title scale, meta rows, and footer bar as
-          <LatestUpdates/>'s cards, colored from the fixed category style. */}
-      <div className="flex flex-col flex-1 p-[30px_28px_24px]">
-        <h3
-          className="font-display font-bold text-h3 leading-[1.02] tracking-[-0.01em] m-0 mb-4"
-          style={{ color: style.text }}
-        >
-          {title}
-        </h3>
-
-        <div className="flex flex-col gap-1 mb-4">
-          <Meta label="Read time" value={readTime} style={style} />
-        </div>
-
-        <p
-          className="font-sans text-[15px] leading-[1.65] m-0 flex-1 line-clamp-3"
-          style={{ color: style.text }}
-        >
-          {excerpt}
-        </p>
-
-        <div
-          className="mt-[22px] pt-[18px] border-t"
-          style={{ borderColor: style.accent }}
-        >
+    <Link to={`/blog/${id}`} className="block h-full" aria-label={`Read "${title}"`}>
+      <GlassCard className="overflow-hidden flex flex-col h-full group" style={cardStyle}>
+        {/* Cover photo + category badge — the one piece of chrome the home
+            page's text-only cards don't need. */}
+        <div className="relative h-56 overflow-hidden">
+          {imageFit === "contain" && (
+            <div aria-hidden="true" className="absolute inset-0 bg-white" />
+          )}
+          <img
+            src={image}
+            alt={`Cover image for "${title}"`}
+            loading="lazy"
+            className={
+              imageFit === "contain"
+                ? "relative w-full h-full object-contain p-10 transition-transform duration-300 group-hover:scale-105"
+                : "w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            }
+          />
+          {/* Bottom scrim — darkens the photo just enough for the badge and
+              the card's dark surface to read as one continuous surface,
+              instead of a flat color-multiply tint over the whole shot. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.08) 45%, rgba(0,0,0,0) 65%)",
+            }}
+          />
           <span
-            className="font-mono text-[13px] tracking-[0.04em] uppercase font-semibold"
-            style={{ color: style.label }}
+            className="absolute top-4 right-4 inline-flex items-center rounded-full px-3 py-0.5 font-sans text-caption font-semibold"
+            style={{ backgroundColor: style.accent, color: style.badgeText }}
           >
-            {date}
+            {CATEGORY_LABEL[category]}
           </span>
         </div>
-      </div>
-    </GlassCard>
+
+        {/* Body — same padding, title scale, meta rows, and footer bar as
+            <LatestUpdates/>'s cards, colored from the fixed category style. */}
+        <div className="flex flex-col flex-1 p-[30px_28px_24px]">
+          <h3
+            className="font-display font-bold text-h3 leading-[1.02] tracking-[-0.01em] m-0 mb-4"
+            style={{ color: text }}
+          >
+            {title}
+          </h3>
+
+          <div className="flex flex-col gap-1 mb-4">
+            <Meta label="Read time" value={readTime} text={text} labelColor={label} />
+          </div>
+
+          <p
+            className="font-sans text-[15px] leading-[1.65] m-0 flex-1 line-clamp-3"
+            style={{ color: text }}
+          >
+            {excerpt}
+          </p>
+
+          <div className="mt-[22px] pt-[18px] border-t" style={{ borderColor: style.accent }}>
+            <span
+              className="font-mono text-[13px] tracking-[0.04em] uppercase font-semibold"
+              style={{ color: label }}
+            >
+              {date}
+            </span>
+          </div>
+        </div>
+      </GlassCard>
+    </Link>
   );
 }
 
-/* ---- internal helpers (mirrors LatestUpdates' Meta/Dot) ---- */
+/* ---- internal helpers (mirrors LatestUpdates' Meta) ---- */
 
-function Meta({ label, value, style }: { label: string; value: string; style: CategoryStyle }) {
+function Meta({
+  label,
+  value,
+  text,
+  labelColor,
+}: {
+  label: string;
+  value: string;
+  text: string;
+  labelColor: string;
+}) {
   return (
-    <span className="font-sans text-sm" style={{ color: style.label }}>
-      {label}: <span className="font-semibold" style={{ color: style.text }}>{value}</span>
+    <span className="font-sans text-sm" style={{ color: labelColor }}>
+      {label}: <span className="font-semibold" style={{ color: text }}>{value}</span>
     </span>
   );
 }
-

@@ -1,15 +1,15 @@
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
-import { BLOG_POSTS, CATEGORY_STYLE, CATEGORY_LABEL } from "@/data/blogFigma";
+import { BLOG_POSTS, CATEGORY_STYLE, CATEGORY_LABEL } from "@/data/blog";
 
 /**
- * BlogPostFigma — the single-post detail view opened by clicking a
- * <BlogCard/> on /blog. Reuses the card's own per-category palette
- * (bg/accent/text/label from `CATEGORY_STYLE`) inside a panel styled like
- * the rest of the site, so the two pages read as one consistent language.
+ * BlogPost — the single-post detail view opened by clicking a <BlogCard/>
+ * on /blog. Reuses the card's own per-category palette (bg/accent/text/label
+ * from `CATEGORY_STYLE`) inside a panel styled like the rest of the site, so
+ * the two pages read as one consistent language.
  */
-export default function BlogPostFigma() {
+export default function BlogPost() {
   const { id } = useParams<{ id: string }>();
   const { isDark } = useTheme();
   const post = BLOG_POSTS.find((p) => String(p.id) === id);
@@ -23,7 +23,7 @@ export default function BlogPostFigma() {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-dvh"
       style={{
         background: isDark
           ? "#121B34"
@@ -76,10 +76,7 @@ export default function BlogPostFigma() {
             />
           </div>
 
-          <p
-            className="font-sans text-body-lg leading-[1.75] m-0"
-            style={{ color: text }}
-          >
+          <p className="font-sans text-body-lg leading-[1.75] m-0" style={{ color: text }}>
             {post.excerpt}
           </p>
         </div>

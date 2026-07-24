@@ -27,75 +27,80 @@ export const CATEGORY_LABEL: Record<BlogCategory, string> = {
 
 export interface CategoryStyle {
   /**
-   * Card surface — the pale card background from the reference sheet.
-   * `light` is the sheet's exact value; `dark` is the same hue a few
-   * shades darker so the card reads correctly against the site's dark
-   * canvas (everything else — accent/text/label — stays fixed per theme).
+   * Card surface. `light` is a slightly deeper tint of the reference
+   * sheet's pastel (a bit darker/richer than the raw value); `dark` is a
+   * true deep, moody tone of the same hue — not just a grayed-down pastel —
+   * so the card reads as genuinely dark against the site's dark canvas.
    */
   bg: { light: string; dark: string };
-  /** Saturated swatch — card border, photo wash, footer rule. */
+  /** Saturated swatch — card border, badge fill, hover glow, footer rule.
+   *  Stays the same vivid value in both themes. */
   accent: string;
-  /** Primary dark text (title, excerpt, meta values) — reads on `bg`. */
-  text: string;
-  /**
-   * Secondary dark text (meta labels, footer date/dots) — reads on `bg`.
-   * Tuned to clear WCAG AA (4.5:1) on BOTH `bg.light` and the darker
-   * `bg.dark`; the reference-sheet originals only passed on light.
-   */
-  label: string;
+  /** Primary text (title, excerpt, meta values) — `light` reads on `bg.light`,
+   *  `dark` (a light tint of the hue) reads on the now much-darker `bg.dark`. */
+  text: { light: string; dark: string };
+  /** Secondary text (meta labels, footer date) — same light/dark split as `text`. */
+  label: { light: string; dark: string };
+  /** Text drawn on top of the badge's `accent` fill. The accent stays a pale/vivid
+   *  pastel in both themes, so this is always the dark tone (same as `text.light`). */
+  badgeText: string;
 }
 
 /**
- * Per-category card styling, values taken exactly from the subteam
- * reference sheet (color_usage_map_toggle_3.html). Unlike site-wide theme
- * tokens, the accent/text/label stay fixed regardless of the toggle —
- * `bg.light` is untouched (exactly the reference sheet's value); `bg.dark`
- * is the same hue darkened further and rendered translucent + blurred
- * (see BlogCard's glass treatment) for a frosted look in dark mode.
- * (The oval badge on the photo stays theme-reactive/uniform, separately.)
+ * Per-category card styling. Hue families come from the subteam reference
+ * sheet (color_usage_map_toggle_3.html); `bg`/`text`/`label` are tuned per
+ * theme from there so the card is noticeably darker/richer than the raw
+ * pastel while keeping accessible contrast in both modes.
  */
 export const CATEGORY_STYLE: Record<BlogCategory, CategoryStyle> = {
   hardware: {
-    bg: { light: "#FAEEDA", dark: "#C8BEAE" },
+    bg: { light: "#F5E4C4", dark: "#241C12" },
     accent: "#FAC775",
-    text: "#5F3A0A",
-    label: "#6E4109",
+    text: { light: "#5F3A0A", dark: "#F5D9AE" },
+    label: { light: "#6E4109", dark: "#D9A65C" },
+    badgeText: "#5F3A0A",
   },
   software: {
-    bg: { light: "#E1F5EE", dark: "#B4C4BE" },
+    bg: { light: "#D2EEE2", dark: "#10241D" },
     accent: "#9FE1CB",
-    text: "#085041",
-    label: "#0C5744",
+    text: { light: "#085041", dark: "#B7ECD9" },
+    label: { light: "#0C5744", dark: "#59C79E" },
+    badgeText: "#085041",
   },
   firmware: {
-    bg: { light: "#EEEDFE", dark: "#BEBECB" },
+    bg: { light: "#DEDCFC", dark: "#1A1830" },
     accent: "#C5C6F5",
-    text: "#26215C",
-    label: "#3C3489",
+    text: { light: "#26215C", dark: "#D6D3FB" },
+    label: { light: "#3C3489", dark: "#9A93E8" },
+    badgeText: "#26215C",
   },
   computerVision: {
-    bg: { light: "#FBEAF0", dark: "#C9BBC0" },
+    bg: { light: "#F6D9E5", dark: "#260F1A" },
     accent: "#F4C0D1",
-    text: "#4B1528",
-    label: "#812D49",
+    text: { light: "#4B1528", dark: "#F4C7DA" },
+    label: { light: "#812D49", dark: "#DD79A0" },
+    badgeText: "#4B1528",
   },
   structure: {
-    bg: { light: "#F1EFE8", dark: "#C1BFBA" },
+    bg: { light: "#E7E3D6", dark: "#201E19" },
     accent: "#D3D1C7",
-    text: "#2C2C2A",
-    label: "#4C4B48",
+    text: { light: "#2C2C2A", dark: "#E5E2D8" },
+    label: { light: "#4C4B48", dark: "#B0AB9C" },
+    badgeText: "#2C2C2A",
   },
   aerodesign: {
-    bg: { light: "#E6F1FB", dark: "#B8C1C9" },
+    bg: { light: "#D5E7F7", dark: "#10202E" },
     accent: "#B5D4F4",
-    text: "#042C53",
-    label: "#144D86",
+    text: { light: "#042C53", dark: "#C6E1F7" },
+    label: { light: "#144D86", dark: "#6AA8E0" },
+    badgeText: "#042C53",
   },
   propulsion: {
-    bg: { light: "#EAF3DE", dark: "#BBC2B2" },
+    bg: { light: "#DCEAC7", dark: "#1A2211" },
     accent: "#C0DD97",
-    text: "#173404",
-    label: "#2E550D",
+    text: { light: "#173404", dark: "#D4EAB0" },
+    label: { light: "#2E550D", dark: "#8FC257" },
+    badgeText: "#173404",
   },
 };
 

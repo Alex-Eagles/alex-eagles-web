@@ -7,12 +7,8 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 
 import Home from "@/pages/Home";
 import Team from "@/pages/Team";
-<<<<<<< HEAD
-import Blog from "@/pages/BlogFigma";
-import BlogPost from "@/pages/BlogPostFigma";
-=======
 import Blog from "@/pages/Blog";
->>>>>>> edcb026aa64ad6e8206fa292762580051a92e4d2
+import BlogPost from "@/pages/BlogPost";
 import Vehicles from "@/pages/Vehicles";
 import Gallery from "@/pages/Gallery";
 import History from "@/pages/History";
