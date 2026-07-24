@@ -5,6 +5,7 @@ import {
   memberFirstName,
   memberName,
   memberPhoto,
+  memberRoleLabel,
   memberYearLabel,
   type TeamMember,
 } from "@/data/team";
@@ -34,13 +35,14 @@ export function TeamMemberCard({
   const name = memberName(member);
   const filled = hasName(member);
   const yearLabel = memberYearLabel(member, rosterYear);
+  const roleLabel = memberRoleLabel(member);
 
   return (
     <article
       className={styles.card}
       data-mode={cutout ? "cutout" : "photo"}
       tabIndex={0}
-      aria-label={filled ? `${member.name}, ${member.role}` : `Unfilled ${member.role} slot`}
+      aria-label={filled ? `${member.name}, ${roleLabel}` : `Unfilled ${roleLabel} slot`}
     >
       <div className={styles.inner}>
         {cutout && (
@@ -106,14 +108,14 @@ export function TeamMemberCard({
         )}
 
         {/* Visible at rest, hidden on hover */}
-        <p className={styles.restRole}>{member.role}</p>
+        <p className={styles.restRole}>{roleLabel}</p>
         <p className={styles.restName} data-placeholder={!filled}>
           {name}
         </p>
 
         {/* Hidden at rest, revealed on hover */}
         <div className={styles.panel}>
-          <p className={styles.panelRole}>{member.role}</p>
+          <p className={styles.panelRole}>{roleLabel}</p>
           <p className={styles.panelName} data-placeholder={!filled}>
             {name}
           </p>

@@ -103,7 +103,7 @@
    * updates. Slug must match slugify(subTeamName): "Tail & Stability" →
    * `--team-tail-stability`, "Computer Vision" → `--team-computer-vision`.
    * --------------------------------------------------------------------- */
-  --team-management: #f0910e; /* amber (brand accent)   */
+  --team-management: #3d3ecc; /* brand blue (accent)    */
   --team-aerodesign: #85b7eb; /* sky blue               */
   --team-wing: #6ad1d8; /* cyan                   */
   --team-tail-stability: #f0a07a; /* coral                  */

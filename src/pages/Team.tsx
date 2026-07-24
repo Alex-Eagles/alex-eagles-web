@@ -36,9 +36,6 @@ export default function Team() {
    * grayscale→reveal hover card. Same props, so the grid code below is shared. */
   const Card = year === "2025" ? MemberCardSolid : TeamMemberCard;
 
-  /* Each year gets its own crew photo in the hero. */
-  const heroPhoto = year === "2025" ? crew2025Photo : crewPhoto;
-
   /* The hint fades and drifts down as you leave the hero — it only means
    * anything while the cards are still off-screen. */
   const hintOpacity = Math.max(0, 1 - scrollY / 180);
@@ -118,7 +115,18 @@ export default function Team() {
     <div className={styles.page}>
       {/* ---- Hero -------------------------------------------------------- */}
       <header className={styles.hero}>
-        <img className={styles.heroPhoto} src={heroPhoto} alt="The Alex Eagles team" />
+        {/* Both crew photos stay mounted so switching years crossfades
+            instead of popping — only the active year's photo is visible. */}
+        <img
+          className={`${styles.heroPhoto} ${year === "2026" ? styles.heroPhotoActive : ""}`}
+          src={crewPhoto}
+          alt="The Alex Eagles team"
+        />
+        <img
+          className={`${styles.heroPhoto} ${year === "2025" ? styles.heroPhotoActive : ""}`}
+          src={crew2025Photo}
+          alt="The Alex Eagles team"
+        />
         <div className={styles.heroScrim} aria-hidden />
 
         <div
@@ -164,57 +172,63 @@ export default function Team() {
         </div>
       </header>
 
-      {/* ---- Leadership -------------------------------------------------- */}
-      <section id="leadership" className={styles.leadership} aria-labelledby="leadership-heading">
-        <div className={styles.sectionIntro}>
-          <p className={styles.sectionEyebrow}>Leadership</p>
-          <h2 id="leadership-heading" className={styles.sectionHeading}>
-            The people steering the team
-          </h2>
-        </div>
+      {/* `key={year}` remounts everything below on every year switch, which
+          restarts the CSS fade/rise animation on .rosterContent — that's what
+          makes changing years read as a transition rather than an instant
+          content swap. */}
+      <div key={year} className={styles.rosterContent}>
+        {/* ---- Leadership ------------------------------------------------ */}
+        <section id="leadership" className={styles.leadership} aria-labelledby="leadership-heading">
+          <div className={styles.sectionIntro}>
+            <p className={styles.sectionEyebrow}>Leadership</p>
+            <h2 id="leadership-heading" className={styles.sectionHeading}>
+              The people steering the team
+            </h2>
+          </div>
 
-        {/* [left, centre, right] — the centre card is the raised one. */}
-        <div className={styles.leadershipRow}>
-          <div className={styles.leaderSide}>
-            <Card member={roster.leadership[0]} rosterYear={roster.year} />
-          </div>
-          <div className={styles.leaderCentre}>
-            <Card member={roster.leadership[1]} rosterYear={roster.year} />
-          </div>
-          <div className={styles.leaderSide}>
-            <Card member={roster.leadership[2]} rosterYear={roster.year} />
-          </div>
-        </div>
-      </section>
-
-      {/* ---- Divisions --------------------------------------------------- */}
-      {roster.divisions.map((division) => (
-        <section key={division.num} aria-labelledby={`division-${division.num}`}>
-          <div className={styles.divisionHeader}>
-            <div className={styles.divisionHeaderInner}>
-              <span className={styles.divisionNumber} aria-hidden>
-                {division.num}
-              </span>
-              <p className={styles.sectionEyebrow}>Division</p>
-              <h2 id={`division-${division.num}`} className={styles.divisionName}>
-                {division.name}
-              </h2>
+          {/* [left, centre, right] — the centre card is the raised one. */}
+          <div className={styles.leadershipRow}>
+            <div className={styles.leaderSide}>
+              <Card member={roster.leadership[0]} rosterYear={roster.year} />
+            </div>
+            <div className={styles.leaderCentre}>
+              <Card member={roster.leadership[1]} rosterYear={roster.year} />
+            </div>
+            <div className={styles.leaderSide}>
+              <Card member={roster.leadership[2]} rosterYear={roster.year} />
             </div>
           </div>
-
-          {/* Division heads — Head / Vice — on a raised row above the sections. */}
-          {division.heads && division.heads.length > 0 && (
-            <div className={styles.divisionHeads}>
-              {cardRow(division.heads, styles.leadRow)}
-            </div>
-          )}
-
-          {division.sections.map((section) => renderSection(section))}
         </section>
-      ))}
 
-      <div className={styles.pageFooter}>
-        <p>Alex Eagles · Aerodesign team · {roster.year}</p>
+        {/* ---- Divisions --------------------------------------------------- */}
+        {roster.divisions.map((division) => (
+          <section key={division.num} aria-labelledby={`division-${division.num}`}>
+            <div className={styles.divisionHeader}>
+              <div className={styles.divisionHeaderInner}>
+                <span className={styles.divisionNumber} aria-hidden>
+                  {division.num}
+                </span>
+                <p className={styles.sectionEyebrow}>Division</p>
+                <h2 id={`division-${division.num}`} className={styles.divisionName}>
+                  {division.name}
+                </h2>
+              </div>
+            </div>
+
+            {/* Division heads — Head / Vice — on a raised row above the sections. */}
+            {division.heads && division.heads.length > 0 && (
+              <div className={styles.divisionHeads}>
+                {cardRow(division.heads, styles.leadRow)}
+              </div>
+            )}
+
+            {division.sections.map((section) => renderSection(section))}
+          </section>
+        ))}
+
+        <div className={styles.pageFooter}>
+          <p>Alex Eagles · Aerodesign team · {roster.year}</p>
+        </div>
       </div>
 
       <JumpNav groups={navGroups(roster)} />

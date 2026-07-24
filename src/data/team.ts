@@ -38,8 +38,7 @@ export type Role =
   | "Vice Lead"
   | "Head of Autonomous"
   | "Vice Lead of Autonomous"
-  | "Electrical-Mechanical Integration Lead"
-  | "Mechanical Lead"
+  | "EM Integration Lead"
   | "Section Lead"
   | "Vice Section Lead"
   | "Member";
@@ -57,10 +56,9 @@ export function roleTier(role: Role): Tier {
   switch (role) {
     case "Team Leader":
     case "Vice Lead":
-    case "Electrical-Mechanical Integration Lead":
+    case "EM Integration Lead":
       return "exec";
     case "Head of Autonomous":
-    case "Mechanical Lead":
       return "head";
     case "Vice Lead of Autonomous":
     case "Vice Section Lead":
@@ -226,6 +224,17 @@ export function memberYearLabel(member: TeamMember, rosterYear: string): string 
   return `Class of ${member.gradYear ?? rosterYear}`;
 }
 
+/**
+ * The role text shown on the card. A generic "Section Lead" doesn't say which
+ * section, so it's swapped for the sub-team-specific title — "Structure Lead",
+ * "Aerodesign Lead" — using the section name already stamped onto `department`.
+ * Every other role (Vice Section Lead, Member, the exec titles) shows as-is.
+ */
+export function memberRoleLabel(member: TeamMember): string {
+  if (member.role === "Section Lead") return `${member.department} Lead`;
+  return member.role;
+}
+
 /* ---------------------------------------------------------------------------
  * 4. THE ROSTER
  * -------------------------------------------------------------------------*/
@@ -238,7 +247,7 @@ export const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]
  * brand accent for anything without its own token (e.g. "Team Leadership").
  */
 export function subTeamAccent(name: string): string {
-  return `var(--team-${slugify(name)}, #f0910e)`;
+  return `var(--team-${slugify(name)}, #3d3ecc)`;
 }
 
 /** Ids must be unique across years, since both rosters are built at once. */
@@ -300,13 +309,6 @@ export function splitByTier(members: TeamMember[]): {
   return { leads, grid };
 }
 
-/** The leadership trio, in render order: [left, centre, right]. */
-const leadershipTrio = (): [TeamMember, TeamMember, TeamMember] => [
-  { ...slot("Vice Lead"), department: "Team Leadership" },
-  { ...slot("Team Leader"), department: "Team Leadership" },
-  { ...slot("Electrical-Mechanical Integration Lead"), department: "Team Leadership" },
-];
-
 /** A division-head card (Head / Vice), stamped with the division name. */
 const head = (
   role: Role,
@@ -317,7 +319,11 @@ const head = (
 
 const ROSTER_2026: YearRoster = {
   year: "2026",
-  leadership: leadershipTrio(),
+  leadership: [
+    { ...slot("Vice Lead"), department: "Team Leadership" },
+    { ...slot("Team Leader"), department: "Team Leadership" },
+    { ...slot("EM Integration Lead"), department: "Team Leadership" },
+  ],
   divisions: [
     {
       num: "01",
@@ -342,19 +348,18 @@ const ROSTER_2025: YearRoster = {
   leadership: [
     { ...slot("Vice Lead", "Norhan Mohammed", { photo: "norhan-mohammed" }), department: "Team Leadership" },
     { ...slot("Team Leader", "Ahmed Baheyeldin", { photo: "ahmed-baheyeldin" }), department: "Team Leadership" },
-    { ...slot("Electrical-Mechanical Integration Lead", "Peter Ayoub", { photo: "peter-ayoub" }), department: "Team Leadership" },
+    { ...slot("EM Integration Lead", "Peter Ayoub", { photo: "peter-ayoub" }), department: "Team Leadership" },
   ],
   divisions: [
     {
       num: "01",
       name: "Mechanical",
-      // Mohamed Fathallah runs the whole division — a head row above the sections.
-      heads: [head("Mechanical Lead", "Mohamed Fathallah", "Mechanical", { photo: "mohamed-fathallah" })],
       sections: [
         section(
           "Structure",
           [
-            slot("Section Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
+            slot("Section Lead", "Mohamed Fathallah", { photo: "mohamed-fathallah" }),
+            slot("Vice Section Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
             slot("Member", "Hana Waleed", { photo: "hana-waleed" }),
             slot("Member", "Hossam Eldeen", { photo: "hossam-eldeen" }),
             slot("Member", "Reem Eldalil", { photo: "reem-eldalil" }),

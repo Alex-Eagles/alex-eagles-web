@@ -22,9 +22,9 @@
   justify-content: center;
   gap: 3px;
   cursor: pointer;
-  color: #0a0c24;
-  background: #f0910e;
-  box-shadow: 0 8px 22px -8px rgb(240 145 14 / 0.6);
+  color: #ffffff;
+  background: #3d3ecc;
+  box-shadow: 0 8px 22px -8px rgb(61 62 204 / 0.6);
   transition: right 0.38s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -64,10 +64,10 @@
   flex-direction: column;
   gap: 2px;
   padding: 16px 12px;
-  background: rgb(12 15 44 / 0.9);
+  background: rgb(26 26 26 / 0.9);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgb(139 143 196 / 0.2);
+  border: 1px solid rgb(68 68 68 / 0.35);
   border-radius: 16px;
   box-shadow: 0 20px 50px -18px rgb(0 0 0 / 0.75);
   transform: translateY(-50%) translateX(120%);
@@ -94,7 +94,7 @@
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #8b8fc4;
+  color: #aaaaaa;
 }
 
 .close {
@@ -102,12 +102,12 @@
   padding: 2px;
   background: none;
   border: none;
-  color: #6b71a8;
+  color: #666666;
   cursor: pointer;
 }
 
 .close:is(:hover, :focus-visible) {
-  color: #ffffff;
+  color: #f2f2f2;
 }
 
 .groupLabel {
@@ -116,7 +116,7 @@
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #f0910e;
+  color: #3d3ecc;
 }
 
 .link {
@@ -125,15 +125,15 @@
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #c3c8f2;
+  color: #aaaaaa;
   text-decoration: none;
   white-space: nowrap;
   transition: background 0.2s, color 0.2s;
 }
 
 .link:is(:hover, :focus-visible) {
-  background: rgb(240 145 14 / 0.16);
-  color: #ffffff;
+  background: rgb(61 62 204 / 0.16);
+  color: #f2f2f2;
 }
 
 /* The tab overlaps the cards on narrow screens, so shrink it out of the way. */
