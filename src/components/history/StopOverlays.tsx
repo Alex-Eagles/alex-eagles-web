@@ -448,6 +448,8 @@ function StopOverlay({
                 <img
                   src={flag.logo}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                   draggable={false}
                 />
