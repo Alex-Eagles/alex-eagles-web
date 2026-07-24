@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import TeamMembersSection from "@/components/team/TeamMembersSection";
-
-/**
- * Team — the full roster page. All of the layout (photo hero, leadership row,
- * divisions → sections → member grid, jump nav) lives in TeamMembersSection,
- * which reads the roster from the data layer directly, so this page is just a
- * mount point.
- */
-export default function Team() {
-  return <TeamMembersSection />;
-=======
 import { useState } from "react";
 import crewPhoto from "@/assets/team/crew.jpg";
 import { JumpNav } from "@/components/team/JumpNav";
@@ -147,5 +135,4 @@ export default function Team() {
       <JumpNav groups={navGroups(roster)} />
     </div>
   );
->>>>>>> 127711238eba8b64611b66d37a5cd4fa3323e141
 }

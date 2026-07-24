@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useState, type CSSProperties } from "react";
 import cardTexture from "@/assets/team/card-texture.png";
 import { memberPhoto, memberPhotoBg, type TeamMember } from "@/data/team";
@@ -530,10 +529,8 @@ export function TeamMemberCard({
           </div>
         </div>
       </div>
-<<<<<<< HEAD
     </div>
 =======
     </article>
->>>>>>> 127711238eba8b64611b66d37a5cd4fa3323e141
   );
 }
