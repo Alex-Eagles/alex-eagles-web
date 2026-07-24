@@ -39,13 +39,9 @@
   /* Brand + accents */
   --color-brand: var(--brand);
   --color-brand-light: var(--brand-light);
-  --color-brand-dark: var(--brand-dark);
-
-  /* Status & feedback (text tones — bg/border read as raw vars where needed) */
-  --color-success: var(--success-text);
-  --color-warning: var(--warning-text);
-  --color-danger: var(--danger-text);
-  --color-info: var(--info-text);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-sky: var(--sky);
 
   /* Text */
   --color-fg: var(--text-primary);
@@ -86,7 +82,22 @@
   body {
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* never allow horizontal scroll (responsive rule) */
+
+    /* Never allow horizontal scroll (responsive rule).
+     *
+     * MUST be `clip`, not `hidden`. They look equivalent but are not:
+     * per spec, when one axis is `hidden` the other computes to `auto`, which
+     * makes html/body a SCROLL CONTAINER. Any `position: sticky` descendant
+     * then tries to stick inside that container instead of the viewport, and
+     * silently fails — it just scrolls away like static content.
+     *
+     * That broke the pinned 3D scene on the History page (the scene scrolled
+     * off while the journey kept advancing, unseen). `clip` suppresses
+     * horizontal scrolling exactly the same way WITHOUT creating a scroll
+     * container, so sticky keeps working.
+     *
+     * If you ever change this back to `hidden`, /history breaks. */
+    overflow-x: clip;
   }
 
   body {
@@ -175,7 +186,7 @@
     font-weight: 600;
     letter-spacing: var(--tracking-caps);
     text-transform: uppercase;
-    color: var(--eyebrow);
+    color: var(--brand-light);
   }
 
   /* Constrains body copy to a readable measure (45–90 chars). */
