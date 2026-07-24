@@ -304,6 +304,47 @@ export const FRAME = {
 } as const;
 
 /**
+ * The team's aircraft, hovering over the stop for years that have a render.
+ *
+ * ─── WHERE IT SITS, AND WHY ─────────────────────────────────────────────────
+ * A stop is a stack of occupied bands: crowd on the ground, image frames
+ * centred at FRAME.height, flags flying from the pole TOPS at STOP.poleHeight,
+ * and the text label above those. The aircraft goes in the one clear gap —
+ * between the top of the frames and the flags — centred on the pole base, so
+ * it reads as flying over its own year rather than colliding with it.
+ *
+ * `height` is therefore bounded by its neighbours. Push it much below ~4.4 and
+ * it sinks into the photos; much above ~6.4 and it clips the flags. If you
+ * change STOP.poleHeight or FRAME.height, re-check this.
+ */
+export const VEHICLE = {
+  /** World height of the aircraft's centre above the ground. */
+  height: 5.4,
+  /** Matches the frames' scale so the aircraft sits at their visual depth. */
+  scale: 1.6,
+  /** Rendered width of the aircraft in px, before `scale`. */
+  width: 230,
+  /** Name plate under the aircraft. */
+  nameSize: 13,
+} as const;
+
+/**
+ * NOTE ON THE HOVER BOB — it is deliberately CSS, not useFrame.
+ *
+ * The canvas runs `frameloop="demand"`: it renders only when something asks it
+ * to, which is why a stationary reader's phone isn't burning battery redrawing
+ * an unchanged scene. Animating the aircraft from useFrame would mean calling
+ * invalidate() every frame forever, quietly converting the whole page back into
+ * a continuously-rendering one — for a 3px wobble.
+ *
+ * The aircraft is a DOM element (see StopOverlays), so a CSS keyframe on it is
+ * composited by the browser on its own thread, touches neither React nor the
+ * render loop, and costs nothing while the scene sits idle. The keyframes live
+ * in global.css as `.vehicle-hover`, and are disabled under
+ * prefers-reduced-motion.
+ */
+
+/**
  * The floating achievement label — ALL its tunable knobs in one place.
  *
  * ─── TO RESIZE THE TEXT ─────────────────────────────────────────────────────

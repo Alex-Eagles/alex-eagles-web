@@ -173,6 +173,24 @@
     opacity: 1;
   }
 }
+/* The aircraft hovering over its stop on the History page.
+ *
+ * Deliberately CSS rather than useFrame: that canvas renders on demand, and
+ * animating this from the render loop would force it to redraw continuously
+ * forever. Here the browser composites it off the main thread and the WebGL
+ * loop stays asleep. See the VEHICLE note in sceneConfig.ts.
+ *
+ * Smaller than it looks — the element is scaled down in the 3D scene, so a few
+ * px here is a subtle drift there. The reduced-motion block below stops it. */
+@keyframes ae-vehicle-hover {
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
 
 /* ----------------------------------------------------------------------------
  * SMALL REUSABLE HELPERS (kept as plain classes; used by several components).
@@ -192,6 +210,15 @@
   /* Constrains body copy to a readable measure (45–90 chars). */
   .prose-measure {
     max-width: var(--maxw-prose);
+  }
+
+  /* Hover bob for the History page's aircraft. Applied to an INNER wrapper:
+   * the outer element's opacity is written every frame by the scene's fade,
+   * and `will-change` promotes this to its own compositor layer so the two
+   * never trigger each other's repaints. */
+  .vehicle-hover {
+    animation: ae-vehicle-hover 4.5s ease-in-out infinite;
+    will-change: transform;
   }
 
   /* ------------------------------------------------------------------------

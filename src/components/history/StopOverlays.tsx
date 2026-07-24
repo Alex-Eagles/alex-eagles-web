@@ -41,7 +41,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import { FRAME, LABEL, STOP } from "./sceneConfig";
+import { FRAME, LABEL, STOP, VEHICLE } from "./sceneConfig";
 import { frameSlots, stopIntensity } from "./journeyCurve";
 import type { StopPlacement } from "./StopProps";
 import type { Achievement } from "@/data/achievements";
@@ -237,6 +237,15 @@ function StopOverlay({
         STOP.poleHeight + LABEL.heightAbovePole,
         poleBase.z,
       ] as [number, number, number],
+      // The aircraft hovers dead-centre over the pole base, in the clear band
+      // between the frame tops and the flags (see VEHICLE in sceneConfig).
+      // Centred means it stays put as the frame COUNT changes year to year —
+      // frames spread outward from this same point.
+      vehicle: [poleBase.x, VEHICLE.height, poleBase.z] as [
+        number,
+        number,
+        number,
+      ],
       frames,
       flags,
     };
@@ -386,6 +395,65 @@ function StopOverlay({
           </div>
         </Html>
       ))}
+
+      {/* ── The year's aircraft ─────────────────────────────────────────────
+          Only rendered for years that have a render on file; everything else
+          about the stop is identical whether or not one exists.
+
+          A transparent WebP, not a 3D model — see the Vehicle type in
+          achievements.ts for the reasoning. `transform` puts it genuinely in
+          the scene and `facing` squares it to the path, exactly like the photo
+          frames, so it shares their perspective and banks with the camera
+          through curves instead of floating in screen space.
+
+          TWO nested divs on purpose: the scene's fade writes `opacity` to the
+          outer one every frame, while the CSS bob animates `transform` on the
+          inner one. Splitting them means neither ever overwrites the other. */}
+      {achievement.vehicle && (
+        <Html
+          position={anchors.vehicle}
+          rotation={facing}
+          transform
+          scale={VEHICLE.scale}
+          zIndexRange={[9, 0]}
+        >
+          <div
+            ref={collect}
+            style={{ opacity: 0 }}
+            className="pointer-events-none select-none text-center"
+          >
+            <div className="vehicle-hover">
+              <img
+                src={achievement.vehicle.render}
+                // Named, not decorative: this is the team's own aircraft, so
+                // the alt text carries real information for screen readers.
+                alt={`${achievement.vehicle.name}, the aircraft flown in ${achievement.year}`}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+                width={VEHICLE.width}
+                className="block h-auto mx-auto"
+                style={{
+                  width: VEHICLE.width,
+                  // Grounds the aircraft against the dotted floor. A plain dark
+                  // drop shadow, matching the frames — no coloured glow, which
+                  // would read as sci-fi rather than as a real object.
+                  filter: "drop-shadow(0 14px 22px rgba(0,0,0,0.55))",
+                }}
+              />
+              <div
+                className="font-mono tracking-[0.16em] text-[var(--sky)] uppercase mt-1"
+                style={{
+                  fontSize: VEHICLE.nameSize,
+                  textShadow: "0 2px 10px rgba(0,0,0,0.75)",
+                }}
+              >
+                {achievement.vehicle.name}
+              </div>
+            </div>
+          </div>
+        </Html>
+      )}
 
       {/* ── Competition flags — one per pole ────────────────────────────────
           Each flag flies its competition's logo (or the Egyptian flag on the

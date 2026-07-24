@@ -29,6 +29,30 @@
  * ║  on it, so a missing or misspelled file never breaks the layout.         ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  *
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║  WHERE TO PUT THE AIRCRAFT RENDERS                                       ║
+ * ╠══════════════════════════════════════════════════════════════════════════╣
+ * ║                                                                          ║
+ * ║  1. Drop the render into:   public/history/vehicles/                     ║
+ * ║                                                                          ║
+ * ║  2. Add a `vehicle` to the matching year below:                          ║
+ * ║                                                                          ║
+ * ║         vehicle: {                                                       ║
+ * ║           name: "Do3soka",                                               ║
+ * ║           render: "/history/vehicles/do3soka.webp",                      ║
+ * ║         },                                                               ║
+ * ║                                                                          ║
+ * ║  The aircraft then hovers above that year's stop, with its name below.   ║
+ * ║  Years without a `vehicle` simply don't show one — nothing else moves.   ║
+ * ║                                                                          ║
+ * ║  FORMAT: WebP with a TRANSPARENT background, and TRIMMED so the aircraft ║
+ * ║  touches the edges of the file. Transparent padding left in the file     ║
+ * ║  becomes dead space in the scene and shrinks the aircraft on screen.     ║
+ * ║  ~600px on the long edge is plenty; these land around 13KB.              ║
+ * ║                                                                          ║
+ * ║  Renders, NOT .glb models — see the `Vehicle` type below for why.        ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ *
  * ─── EDIT THIS FILE, NOT THE 3D CODE ────────────────────────────────────────
  * Everything a visitor reads on the History page comes from the array below.
  * The 3D scene (curve shape, stop spacing, camera timing, scroll length) is
@@ -67,6 +91,36 @@ export interface Award {
   competition: Competition;
 }
 
+/**
+ * The aircraft the team flew that year, hovering above its stop.
+ *
+ * ─── WHY THIS IS A RENDER AND NOT A 3D MODEL ────────────────────────────────
+ * A .glb per year would mean shipping a GLTF loader plus a Draco decoder that
+ * nothing else on the site needs, several hundred KB per aircraft, and a
+ * texture/mesh upload landing exactly as the camera arrives at the stop — the
+ * same hitch the photo frames are DOM images to avoid (see StopOverlays).
+ *
+ * It would also read wrong: every solid object in this scene is an untextured
+ * primitive (capsule people, cylinder poles), so one photoreal mesh among them
+ * looks like a bug rather than a centrepiece.
+ *
+ * A trimmed transparent WebP costs ~13KB, decodes off the main thread, stays
+ * crisp at any zoom and needs no new dependency.
+ */
+export interface Vehicle {
+  /** Display name, shown under the render. */
+  name: string;
+  /**
+   * Transparent-background render, in `public/history/vehicles/`.
+   *
+   * FORMAT: WebP with a real alpha channel, trimmed so the aircraft touches
+   * the edges of the canvas — any transparent padding baked into the file
+   * becomes dead space in the scene and shrinks the aircraft on screen.
+   * Roughly 600px on the long edge is plenty.
+   */
+  render: string;
+}
+
 /** One stop on the path — one year of the team's history. */
 export interface Achievement {
   /** Stable key. Also drives the "ACHIEVEMENT 03" counter (index + 1). */
@@ -91,6 +145,11 @@ export interface Achievement {
    * frame. The scene lays them out automatically however many there are.
    */
   portraits: string[];
+  /**
+   * The aircraft flown this year. Optional: a year without one simply doesn't
+   * render a vehicle, and nothing else about the stop moves.
+   */
+  vehicle?: Vehicle;
 }
 
 export const achievements: Achievement[] = [
@@ -195,6 +254,10 @@ export const achievements: Achievement[] = [
       "/history/uavc-2025.webp",
       "/history/suas-2025.webp",
     ],
+    vehicle: {
+      name: "Do3soka",
+      render: "/history/vehicles/do3soka.webp",
+    },
   },
 ];
 
