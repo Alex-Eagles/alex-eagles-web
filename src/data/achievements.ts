@@ -35,24 +35,29 @@
  * ║                                                                          ║
  * ║  1. Drop the render into:   public/history/vehicles/                     ║
  * ║                                                                          ║
- * ║  2. Add a `vehicle` to the matching year below, with the render's REAL   ║
- * ║     pixel size:                                                          ║
+ * ║  2. Add it to `vehicles` on the matching year, with the render's REAL    ║
+ * ║     pixel size and where it should stand:                                ║
  * ║                                                                          ║
- * ║         vehicle: {                                                       ║
+ * ║         vehicles: [{                                                     ║
  * ║           name: "Do3soka",                                               ║
  * ║           render: "/history/vehicles/do3soka.webp",                      ║
- * ║           width: 563,                                                    ║
- * ║           height: 240,                                                   ║
- * ║         },                                                               ║
+ * ║           width: 563, height: 240,   // the file's real size             ║
+ * ║           alongPoles: 0.1,           // 0 = 1st pole, 1 = last pole      ║
+ * ║           forwardOffset: 2.2,        // how far toward the viewer        ║
+ * ║           displayWidth: 200,         // how big to draw it               ║
+ * ║         }],                                                              ║
  * ║                                                                          ║
- * ║  The aircraft then stands ON THE GROUND at that year's stop, just left   ║
- * ║  of and in front of its first photo frame. No label is drawn — `name`    ║
- * ║  is the alt text. Years without a `vehicle` simply don't show one, and   ║
- * ║  nothing else about the stop moves.                                      ║
+ * ║  Each aircraft then stands ON THE GROUND between that year's flag        ║
+ * ║  poles. No label is drawn — `name` is the alt text. Years with no        ║
+ * ║  `vehicles` simply don't show any, and nothing else about the stop       ║
+ * ║  moves.                                                                  ║
  * ║                                                                          ║
- * ║  To move or resize it, use the VEHICLE block in sceneConfig.ts. It can   ║
- * ║  never sink into or float above the floor — that is handled in CSS, not  ║
- * ║  by a number you have to re-tune.                                        ║
+ * ║  A year can list SEVERAL. Give them different `forwardOffset`s as well   ║
+ * ║  as different `alongPoles` — the poles are narrower than an aircraft,    ║
+ * ║  so depth, not sideways distance, is what stops two overlapping.         ║
+ * ║                                                                          ║
+ * ║  They can never sink into or float above the floor — that is handled in  ║
+ * ║  CSS, not by a number you have to re-tune.                               ║
  * ║                                                                          ║
  * ║  FORMAT: WebP with a TRANSPARENT background, and TRIMMED so the aircraft ║
  * ║  touches the edges of the file. Transparent padding left in the file     ║
@@ -149,6 +154,42 @@ export interface Vehicle {
    */
   width: number;
   height: number;
+  /**
+   * WHERE IT PARKS, along the line between the stop's flag poles.
+   *
+   * 0 = standing at the FIRST pole, 1 = at the LAST pole, 0.5 = midway. So on
+   * 2025, whose poles are UAVC then SUAS, 0.1 is "between the poles, hard over
+   * by the UAVC pole" and 0.9 is the same by the SUAS pole.
+   *
+   * Expressed as a fraction rather than a distance so it keeps its meaning if
+   * the poles are ever moved further apart — the aircraft stay in proportion
+   * instead of drifting off their poles. Values outside 0..1 extrapolate
+   * beyond the poles, which is allowed but rarely what you want.
+   *
+   * A stop with only ONE pole ignores this: both ends of the line are the same
+   * point, so the aircraft simply stands at that pole.
+   */
+  alongPoles: number;
+  /**
+   * How far IN FRONT of the poles it stands, in world units — measured back
+   * along the path toward the oncoming camera. Bigger = nearer the viewer.
+   *
+   * This is also what keeps two aircraft at one stop from overlapping. The
+   * poles are only ~2 units apart, which is narrower than an aircraft, so
+   * separating them sideways alone is not enough: giving them different
+   * forward offsets puts them at different DEPTHS, and one reads as standing
+   * in front of the other rather than through it.
+   */
+  forwardOffset: number;
+  /**
+   * Rendered width in px before VEHICLE.scale — the aircraft's apparent SIZE
+   * in the scene.
+   *
+   * Per-vehicle because the real aircraft are not the same size: the
+   * fixed-wing has a far wider span than the quadcopter, and giving them a
+   * shared width would draw them as though they were equally big.
+   */
+  displayWidth: number;
 }
 
 /** One stop on the path — one year of the team's history. */
@@ -176,10 +217,12 @@ export interface Achievement {
    */
   portraits: string[];
   /**
-   * The aircraft flown this year. Optional: a year without one simply doesn't
-   * render a vehicle, and nothing else about the stop moves.
+   * The aircraft flown this year, parked on the ground at the stop. Optional:
+   * a year without any simply doesn't render one, and nothing else about the
+   * stop moves. A year may list several — see `alongPoles` for how they're
+   * spaced out between the flag poles.
    */
-  vehicle?: Vehicle;
+  vehicles?: Vehicle[];
 }
 
 export const achievements: Achievement[] = [
@@ -284,12 +327,29 @@ export const achievements: Achievement[] = [
       "/history/uavc-2025.webp",
       "/history/suas-2025.webp",
     ],
-    vehicle: {
-      name: "Do3soka",
-      render: "/history/vehicles/do3soka.webp",
-      width: 563,
-      height: 240,
-    },
+    // Both 2025 aircraft stand between the two flag poles: the fixed-wing
+    // over by the UAVC pole, the quadcopter by the SUAS pole and a step
+    // further forward so the two never overlap.
+    vehicles: [
+      {
+        name: "Do3soka",
+        render: "/history/vehicles/do3soka.webp",
+        width: 563,
+        height: 240,
+        alongPoles: 0.1,
+        forwardOffset: 2.2,
+        displayWidth: 200,
+      },
+      {
+        name: "Itay",
+        render: "/history/vehicles/itay.webp",
+        width: 400,
+        height: 281,
+        alongPoles: 0.9,
+        forwardOffset: 4.6,
+        displayWidth: 132,
+      },
+    ],
   },
 ];
 

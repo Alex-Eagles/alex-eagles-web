@@ -171,14 +171,6 @@ export function stopIntensity(distance: number): number {
 }
 
 /**
- * Number of figures standing at a stop: a base crowd plus more for each award
- * won that year, so bigger years are visibly bigger on the path.
- */
-export function crowdSizeFor(awardCount: number): number {
-  return STOP.peopleBase + awardCount * STOP.peoplePerAward;
-}
-
-/**
  * Positions for `count` image frames along a stop's `right` axis, in slot
  * units (multiply by FRAME.spacing for world units).
  *
@@ -202,11 +194,11 @@ export function frameSlots(count: number): number[] {
  * How far off the path a stop's flag pole stands, given how many frames it
  * carries.
  *
- * MUST be used by everything that positions something at a stop — pole,
- * crowd, shadows, frames, label, flag. They are laid out in two different
+ * MUST be used by everything that positions something at a stop — poles,
+ * shadows, frames, label, flags, aircraft. They are laid out in two different
  * files (StopProps for the 3D props, StopOverlays for the DOM), so if one used
  * a fixed offset and the other used this, a big year's flag pole would drift
- * away from its own crowd.
+ * away from its own photos.
  *
  * Bigger years push further out, because their outermost-left frame reaches
  * further back toward the path — see FRAME.minPathClearance.

@@ -237,33 +237,38 @@ function StopOverlay({
         STOP.poleHeight + LABEL.heightAbovePole,
         poleBase.z,
       ] as [number, number, number],
-      // The aircraft, parked on the ground beside the stop's FIRST photo
-      // frame (UAVC in 2025) — anchored to that frame rather than to the pole,
-      // so it stays beside it however many photos the year ends up with.
+      // The aircraft, parked on the ground BETWEEN the stop's flag poles.
       //
-      // Two offsets, each on a deliberately different axis:
-      //   • sideways on `screenRight`, NOT on `frameAxis`. screenRight never
-      //     flips with path parity, so a negative lateralOffset is toward the
-      //     left of the PAGE on every stop; frameAxis would put it on the
-      //     right half the time.
-      //   • forward on −`tangent`, i.e. back toward the oncoming camera, so
-      //     the aircraft stands in FRONT of the frame instead of level with it.
+      // Each one's `alongPoles` is a fraction of the way from the first pole
+      // to the last, so it stays pinned to its competition's pole rather than
+      // to an absolute distance — move the poles apart and the aircraft move
+      // with them. `lerp` handles the one-pole case for free: both ends are
+      // the same point, so the aircraft simply stands at that pole.
       //
-      // Y is 0: the element is bottom-anchored in CSS below, so the aircraft
-      // meets the floor exactly regardless of how big it's rendered.
-      vehicle: (() => {
-        const firstSlot = frameSlots(stop.frameCount)[0];
-        const parked = poleBase
+      // `forwardOffset` then pulls it back along −tangent, toward the oncoming
+      // camera, so it stands in FRONT of the poles. That axis is also what
+      // keeps two aircraft from overlapping: the poles are narrower than an
+      // aircraft, so the separation that actually reads is depth, not sideways
+      // distance.
+      //
+      // Y is 0: the element is bottom-anchored in CSS below, so each aircraft
+      // meets the floor exactly regardless of how big it is drawn.
+      vehicles: (achievement.vehicles ?? []).map((vehicle) => {
+        const firstPole = stop.poles[0].base;
+        const lastPole = stop.poles[stop.poles.length - 1].base;
+        const parked = firstPole
           .clone()
-          .addScaledVector(frameAxis, firstSlot * FRAME.spacing)
-          .addScaledVector(stop.screenRight, VEHICLE.lateralOffset)
-          .addScaledVector(stop.tangent, -VEHICLE.forwardOffset);
+          .lerp(lastPole, vehicle.alongPoles)
+          .addScaledVector(stop.tangent, -vehicle.forwardOffset);
         return [parked.x, 0, parked.z] as [number, number, number];
-      })(),
+      }),
       frames,
       flags,
     };
-  }, [stop]);
+    // `achievement` is in here for the aircraft: their positions are read from
+    // its `vehicles`, so a stop whose data changed but whose geometry didn't
+    // would otherwise keep stale anchors.
+  }, [stop, achievement]);
 
   const counter = String(index + 1).padStart(2, "0");
 
@@ -411,8 +416,8 @@ function StopOverlay({
       ))}
 
       {/* ── The year's aircraft ─────────────────────────────────────────────
-          Only rendered for years that have a render on file; everything else
-          about the stop is identical whether or not one exists.
+          Only rendered for years that have renders on file; everything else
+          about the stop is identical whether or not any exist.
 
           A transparent WebP, not a 3D model — see the Vehicle type in
           achievements.ts for the reasoning. `transform` puts it genuinely in
@@ -434,15 +439,16 @@ function StopOverlay({
 
           `translateY(-50%)` cancels drei's centring so the element's BOTTOM
           edge lands on the anchor — the same trick the flags use below. The
-          anchor is at ground level, so the aircraft sits exactly on the floor
-          whatever VEHICLE.width is, with no magic offset to re-tune.
+          anchor is at ground level, so each aircraft sits exactly on the floor
+          whatever its displayWidth is, with no magic offset to re-tune.
 
           The intrinsic width/height attributes are the file's real pixel size:
           they give the browser the aspect ratio before the bytes arrive, so
           the element never reflows when the image decodes. */}
-      {achievement.vehicle && (
+      {(achievement.vehicles ?? []).map((vehicle, i) => (
         <Html
-          position={anchors.vehicle}
+          key={vehicle.render}
+          position={anchors.vehicles[i]}
           rotation={facing}
           transform
           scale={VEHICLE.scale}
@@ -450,27 +456,27 @@ function StopOverlay({
         >
           <img
             ref={collect}
-            src={achievement.vehicle.render}
-            // Named, not decorative: this is the team's own aircraft, so the
+            src={vehicle.render}
+            // Named, not decorative: these are the team's own aircraft, so the
             // alt text carries real information for screen readers even though
-            // nothing is drawn on screen.
-            alt={`${achievement.vehicle.name}, the aircraft flown in ${achievement.year}`}
+            // no name is drawn on screen.
+            alt={`${vehicle.name}, an aircraft flown in ${achievement.year}`}
             loading="lazy"
             decoding="async"
             draggable={false}
-            width={achievement.vehicle.width}
-            height={achievement.vehicle.height}
+            width={vehicle.width}
+            height={vehicle.height}
             className="block pointer-events-none select-none"
             style={{
               opacity: 0,
               transform: "translateY(-50%)",
-              width: VEHICLE.width,
+              width: vehicle.displayWidth,
               height: "auto",
               maxWidth: "none",
             }}
           />
         </Html>
-      )}
+      ))}
 
       {/* ── Competition flags — one per pole ────────────────────────────────
           Each flag flies its competition's logo (or the Egyptian flag on the

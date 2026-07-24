@@ -53,7 +53,7 @@ export const PALETTE = {
   lightCore: 0xd8f6ff,
   /** Outer glow sprite tint. */
   lightGlow: 0x39c6ff,
-  /** Props (people, poles) — pale grey, like the reference image. */
+  /** Props (the flag poles) — pale grey, like the reference image. */
   prop: 0x9aa3c7,
   /** Props once the light has passed and the stop has dimmed. */
   propDimmed: 0x2c3160,
@@ -120,7 +120,7 @@ export const LAYOUT = {
   lateralFrequency: 1.15,
   /** Straight run-in before the first stop and run-out after the last. */
   leadLength: 20,
-  /** Sideways offset from the path centre to the flag pole / crowd / portrait. */
+  /** Sideways offset from the path centre to the flag poles / portraits. */
   stopOffset: 7.5,
 } as const;
 
@@ -192,11 +192,7 @@ export const LIGHT = {
   hoverHeight: 0.9,
 } as const;
 
-/**
- * Stop props. `peopleBase` figures always stand at a stop, plus one extra per
- * award won that year — so a visitor can literally see that 2025 was bigger
- * than 2023 without reading a word.
- */
+/** Stop props — the flag poles standing at each stop. */
 export const STOP = {
   // Tall enough that the flag (flown at the pole TOP) rides ABOVE the image
   // frames, so the two never intersect — the flags occupy the band between the
@@ -205,14 +201,6 @@ export const STOP = {
   // label from colliding with the flag. See the flag block in StopOverlays.
   poleHeight: 7.2,
   poleRadius: 0.09,
-  personHeight: 1.7,
-  personRadius: 0.28,
-  /** Figures at a stop with no awards (2013, the founding). */
-  peopleBase: 3,
-  /** Additional figures per award won. */
-  peoplePerAward: 2,
-  /** Radius of the crowd cluster around the flag pole. */
-  crowdRadius: 2.6,
   /**
    * How close (world units) the light must be for a stop to be fully lit.
    * Also drives the reversible fade — see `stopIntensity` in journeyCurve.ts.
@@ -240,7 +228,7 @@ export interface QualitySettings {
   pathRadialSegments: number;
   /** Tube segments per world unit of path length. */
   pathSegmentsPerUnit: number;
-  /** Sphere detail for the light core and figure heads. */
+  /** Sphere detail for the travelling light's core. */
   sphereDetail: number;
   /** Whether to draw the fake blob shadows under props. */
   blobShadows: boolean;
@@ -304,40 +292,26 @@ export const FRAME = {
 } as const;
 
 /**
- * The team's aircraft, PARKED ON THE GROUND at the stop, for years that have a
- * render.
+ * The team's aircraft, PARKED ON THE GROUND at the stop.
  *
- * ─── WHERE IT SITS ──────────────────────────────────────────────────────────
- * On the ground, just left of the stop's FIRST photo frame and pulled toward
- * the oncoming camera so it reads as standing in front of that frame rather
- * than level with it. It is deliberately static: no hover, no bob, no label.
+ * ─── ALMOST NOTHING LIVES HERE, ON PURPOSE ──────────────────────────────────
+ * Where each aircraft stands, how big it is drawn and how far forward it sits
+ * are all properties of THAT AIRCRAFT, not of the scene — a year may park two
+ * of different sizes in different places. So they live with the aircraft in
+ * achievements.ts (`alongPoles`, `forwardOffset`, `displayWidth`) and only the
+ * shared projection scale is left here.
  *
- * ─── WHY THE OFFSETS ARE MEASURED FROM THE FRAME, NOT THE POLE ──────────────
- * Frames fan outward from the pole base, so their positions move as a year's
- * frame count changes. Anchoring the aircraft to frame 0 keeps it beside THAT
- * frame no matter how many photos a year ends up with.
+ * They are deliberately static: no hover, no bob, no label.
  *
  * ─── GROUND CONTACT IS NOT A MAGIC NUMBER ───────────────────────────────────
- * The aircraft's Y anchor is 0 and the element is bottom-anchored in CSS (see
- * StopOverlays), so its wheels meet the floor exactly, whatever `width` is set
- * to. Resizing it therefore cannot make it sink or float — no constant here
+ * An aircraft's Y anchor is 0 and the element is bottom-anchored in CSS (see
+ * StopOverlays), so its wheels meet the floor exactly, whatever size it is
+ * drawn at. Resizing one therefore cannot make it sink or float — no constant
  * needs re-tuning when the art changes.
  */
 export const VEHICLE = {
-  /** Matches the frames' scale so the aircraft sits at their visual depth. */
+  /** Matches the frames' scale so the aircraft sit at their visual depth. */
   scale: 1.6,
-  /** Rendered width of the aircraft in px, before `scale`. */
-  width: 210,
-  /**
-   * How far LEFT of frame 0's centre the aircraft parks, in world units.
-   * Negative moves it further left (toward the left of the page).
-   */
-  lateralOffset: -3.4,
-  /**
-   * How far the aircraft stands IN FRONT of the frame — i.e. back along the
-   * path toward the approaching camera. Bigger = closer to the viewer.
-   */
-  forwardOffset: 3.2,
 } as const;
 
 /**
