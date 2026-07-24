@@ -1,0 +1,289 @@
+/* ---------------------------------------------------------------------------
+ * Team page layout: hero → leadership → divisions → sections → card grid.
+ * Palette is the handoff's, which is dark-only by design.
+ * -------------------------------------------------------------------------*/
+
+.page {
+  background: #070919;
+  color: #e9ebff;
+  font-family: "Archivo", system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* --- hero ---------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+}
+
+.heroPhoto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Centred crop. */
+  object-position: center;
+}
+
+.heroScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(7 9 25 / 0.34) 0%,
+    rgb(7 9 25 / 0) 22%,
+    rgb(7 9 25 / 0) 62%,
+    rgb(7 9 25 / 0.55) 82%,
+    rgb(7 9 25 / 0.94) 95%,
+    #070919 100%
+  );
+}
+
+/* The centred "hover a card" hint, which fades out as you scroll away. */
+.heroHint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  pointer-events: none;
+  color: #c3c8f2;
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.heroHintText {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 0.5);
+}
+
+.heroHintArrow {
+  animation: crewBob 1.6s ease-in-out infinite;
+}
+
+@keyframes crewBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.heroCopy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 48px 40px;
+}
+
+.heroCopyInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.heroEyebrow {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #f0910e;
+}
+
+.heroTitle {
+  margin: 0 0 18px;
+  font-size: clamp(40px, 6vw, 68px);
+  line-height: 0.92;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  text-shadow: 0 4px 30px rgb(0 0 0 / 0.55);
+}
+
+.yearTabs {
+  display: flex;
+  gap: 10px;
+}
+
+.yearTab {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 11px 26px;
+  border-radius: 999px;
+  cursor: pointer;
+  background: rgb(255 255 255 / 0.06);
+  color: #c3c8f2;
+  border: 1px solid rgb(139 143 196 / 0.32);
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.yearTab[aria-pressed="true"] {
+  background: #f0910e;
+  color: #0a0c24;
+  border-color: #f0910e;
+}
+
+.yearTab:focus-visible {
+  outline: 2px solid #f0910e;
+  outline-offset: 3px;
+}
+
+/* --- leadership ---------------------------------------------------------- */
+
+.leadership {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 88px 48px 40px;
+  scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
+}
+
+.sectionIntro {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.sectionEyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #f0910e;
+}
+
+.sectionHeading {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.leadershipRow {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+/* All three leadership cards are the same size and align on one line. */
+.leaderSide,
+.leaderCentre {
+  width: 260px;
+  max-width: 100%;
+}
+
+/* --- divisions ----------------------------------------------------------- */
+
+.divisionHeader {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 48px 8px;
+}
+
+.divisionHeaderInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  border-top: 1px solid rgb(139 143 196 / 0.16);
+  padding-top: 40px;
+}
+
+.divisionNumber {
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgb(240 145 14 / 0.18);
+}
+
+.divisionName {
+  margin: 0;
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 34px 48px 0;
+  scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #c3c8f2;
+}
+
+.sectionMarker {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #f0910e;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+  gap: 22px;
+}
+
+/* --- footer line --------------------------------------------------------- */
+
+.pageFooter {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 48px 80px;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: #5f6598;
+}
+
+.pageFooter p {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .heroCopy,
+  .leadership,
+  .divisionHeader,
+  .section,
+  .pageFooter {
+    padding-inline: 20px;
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  /* Keep the last card clear of the fixed PULL tab. */
+  .section {
+    padding-right: 64px;
+  }
+}

@@ -83,6 +83,41 @@
 
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
+
+  /* Layout anchors used by the CSS-module components (Team roster et al.).
+   * `--page-max` / `--page-gutter` keep those modules aligned with the
+   * Tailwind `--maxw-content` wrapper the rest of the site uses.            */
+  --page-max: var(--maxw-content);
+  --page-gutter: 48px;
+  --page-gutter-sm: 20px;
+
+  /* Height the fixed navbar occupies (35px offset + ~42px pill). Anything
+   * that must not slide under the bar anchors to this — notably
+   * `scroll-margin-top` on anchor targets. Update it here, once.            */
+  --nav-height: 88px;
+
+  /* ------------------------------------------------------------------------
+   * SUB-TEAM ACCENT COLORS (Team page)
+   * One accent per sub-team, tuned to read on the dark team cards. Change a
+   * hue here, once, and every section heading + card badge for that sub-team
+   * updates. Slug must match slugify(subTeamName): "Tail & Stability" →
+   * `--team-tail-stability`, "Computer Vision" → `--team-computer-vision`.
+   * --------------------------------------------------------------------- */
+  --team-management: #f0910e; /* amber (brand accent)   */
+  --team-aerodesign: #85b7eb; /* sky blue               */
+  --team-wing: #6ad1d8; /* cyan                   */
+  --team-tail-stability: #f0a07a; /* coral                  */
+  --team-structure: #c2c0b4; /* warm gray              */
+  --team-propulsion: #97c459; /* green                  */
+  --team-software: #5dcaa5; /* teal                   */
+  --team-hardware: #f0b24a; /* gold                   */
+  --team-computer-vision: #ed93b1; /* pink                   */
+  --team-firmware: #afa9ec; /* lavender               */
+}
+
+/* Anchor targets clear the fixed navbar instead of landing beneath it. */
+:target {
+  scroll-margin-top: calc(var(--nav-height) + 16px);
 }
 
 /* ----------------------------------------------------------------------------
@@ -97,6 +132,12 @@
   --bg-glass: rgba(22, 26, 80, 0.6); /* glassmorphic overlays (navbar etc.) */
   --canvas: #0d1035; /* alias: section canvas behind cards   */
   --card: #161a50; /* the card surface itself             */
+
+  /* Portrait "stage" — the backdrop behind cut-out member photos. Deliberately
+     dark in BOTH themes: the name is knocked out of it in white, so it cannot
+     follow the surface tokens without losing all contrast in light mode. */
+  --stage-from: #1e2467;
+  --stage-to: #0b0e2c;
 
   /* Brand + accents */
   --brand: #3c40b5; /* Alex Eagles royal indigo            */
@@ -134,6 +175,10 @@
   --bg-glass: rgba(255, 255, 255, 0.75);
   --canvas: #eceeff; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
+
+  /* Intentionally identical to dark mode — see the note above. */
+  --stage-from: #1e2467;
+  --stage-to: #0b0e2c;
 
   --brand: #3c40b5; /* brand indigo stays constant          */
   --brand-light: #2b2f9e; /* darker on hover against light bg     */

@@ -1,0 +1,235 @@
+/*
+ * MemberCardSolid — the 2025 roster card.
+ *
+ * Rest:  colour cut-out on a dark textured backdrop, a MEMBER badge top-left,
+ *        and the name bottom-left.
+ * Hover: the big first name fades in behind the person and an info panel rises,
+ *        while the rest-state badge + name fade out.
+ *
+ * All motion is CSS, keyed off :hover / :focus-within, so the component never
+ * re-renders on pointer movement.
+ */
+
+.card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 0.8;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(165deg, #12163a 0%, #080a20 100%);
+  font-family: "Archivo", system-ui, sans-serif;
+  box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.6);
+  outline: none;
+  /* Establish a container so the big name can size to the card width. */
+  container-type: inline-size;
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.4s ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-6px);
+  box-shadow: 0 34px 60px -30px rgba(230, 232, 255, 0.22);
+}
+
+/* Dark texture, always visible. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.85;
+  filter: brightness(0.38);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 9, 24, 0.5),
+    rgba(7, 9, 24, 0.75)
+  );
+}
+
+/* Big first name — an SVG stretched to the full card width, behind the person,
+ * revealed on hover. scaleY makes it tall like the reference. */
+.bigName {
+  position: absolute;
+  top: 5%;
+  left: 3%;
+  width: 94%;
+  height: auto;
+  transform: scaleY(2.1);
+  transform-origin: top;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.card:hover .bigName,
+.card:focus-visible .bigName {
+  opacity: 0.9;
+}
+
+/* The colour cut-out — sits above the big name so it occludes it. */
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Cut-outs are pre-normalized to the card aspect with framing baked in, so
+   * cover fits 1:1 — no cropping shift needed. */
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1);
+  transform-origin: bottom center;
+  transition: transform 0.6s cubic-bezier(0.16, 0.84, 0.34, 1);
+}
+
+.card:hover .photo,
+.card:focus-visible .photo {
+  transform: scale(1.05);
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 900 64px "Archivo", system-ui, sans-serif;
+  color: #3a3f77;
+}
+
+/* Rest-state MEMBER badge. */
+.badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(10, 12, 36, 0.55);
+  border: 1px solid rgba(240, 145, 14, 0.5);
+  backdrop-filter: blur(6px);
+  color: #f0910e;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: opacity 0.35s ease;
+}
+
+/* Rest-state name. */
+.restName {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  color: #eef0ff;
+  /* One line, scaled to the card width so long full names still fit. */
+  white-space: nowrap;
+  font-size: 7cqw;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  transition: opacity 0.35s ease;
+}
+
+.card:hover .badge,
+.card:focus-visible .badge,
+.card:hover .restName,
+.card:focus-visible .restName {
+  opacity: 0;
+}
+
+/* Hover info panel. */
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 50px 16px 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 17, 48, 0),
+    rgba(14, 17, 48, 0.85) 44%,
+    rgba(14, 17, 48, 0.98)
+  );
+  opacity: 0;
+  transform: translateY(30%);
+  transition:
+    opacity 0.45s ease,
+    transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.card:hover .panel,
+.card:focus-visible .panel {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.panelRole {
+  margin: 0 0 6px;
+  color: #f0910e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.panelName {
+  margin: 0 0 3px;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.panelDept {
+  margin: 0 0 12px;
+  color: #9297cf;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 10px;
+}
+
+.year {
+  color: #6b71a8;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #c3c8f2;
+  padding: 5px 10px;
+  border: 1px solid rgba(139, 143, 196, 0.4);
+  border-radius: 999px;
+  text-decoration: none;
+  transition:
+    color 0.25s,
+    border-color 0.25s;
+}
+
+.linkedin:hover {
+  color: #ffffff;
+  border-color: #f0910e;
+}

@@ -1,124 +1,142 @@
-import { Linkedin, User } from "lucide-react";
-import { memberPhoto, type TeamMember } from "@/data/team";
-import { chipStyle, roleAccent, teamAccent } from "./accents";
+import backdrop from "@/assets/team/card-backdrop.jpg";
+import {
+  hasName,
+  memberCutout,
+  memberFirstName,
+  memberName,
+  memberPhoto,
+  memberYearLabel,
+  type TeamMember,
+} from "@/data/team";
+import styles from "./TeamMemberCard.module.css";
 
 /**
- * TeamMemberCard — one person: role badge, portrait, name, sub-team tag,
- * year/major, and an optional LinkedIn link.
+ * Team member hover card.
  *
- * `size="large"` is used for the Leadership row (bigger portrait + name);
- * everyone else renders at the default size.
+ * Two modes, picked automatically from the data:
+ *   - no cutout file  → the portrait sits in grayscale and goes full colour on hover
+ *   - cutout file     → the portrait fades out, a textured backdrop fades in, and
+ *                       the cut-out person grows in over it
+ *
+ * All motion lives in the stylesheet, keyed off :hover / :focus-within, so the
+ * component never re-renders on pointer movement.
  */
-
-interface TeamMemberCardProps {
-  member: TeamMember;
-  size?: "default" | "large";
-}
-
-export default function TeamMemberCard({
+export function TeamMemberCard({
   member,
-  size = "default",
-}: TeamMemberCardProps) {
-  const isLarge = size === "large";
+  rosterYear,
+}: {
+  member: TeamMember;
+  rosterYear: string;
+}) {
   const photo = memberPhoto(member);
-  const accent = teamAccent(member.team);
-  const badge = roleAccent(member.role);
+  const cutout = memberCutout(member);
+  const firstName = memberFirstName(member);
+  const name = memberName(member);
+  const filled = hasName(member);
+  const yearLabel = memberYearLabel(member, rosterYear);
 
   return (
     <article
-      className={
-        "group relative h-full flex flex-col items-center text-center " +
-        "bg-[var(--card)] border border-border rounded-xl p-7 " +
-        "shadow-[var(--elevation-2)] transition-[transform,box-shadow,border-color] " +
-        "duration-[250ms] ease-out hover:-translate-y-1.5 " +
-        "hover:shadow-[var(--elevation-4)] hover:border-[var(--accent)]"
-      }
-      style={
-        {
-          // Drives the hover border color via the arbitrary variant above.
-          "--accent": accent,
-        } as React.CSSProperties
-      }
+      className={styles.card}
+      data-mode={cutout ? "cutout" : "photo"}
+      tabIndex={0}
+      aria-label={filled ? `${member.name}, ${member.role}` : `Unfilled ${member.role} slot`}
     >
-      {/* Role badge — pinned top-left so the portrait stays optically centered. */}
-      <span
-        className="absolute top-4 left-4 font-sans text-caption font-bold uppercase
-                   tracking-[var(--tracking-caps)] px-2.5 py-1 rounded-lg border"
-        style={chipStyle(badge)}
-      >
-        {member.role}
-      </span>
-
-      {/* Portrait (or placeholder when no photo exists for this member). */}
-      <div
-        className={
-          "relative rounded-full overflow-hidden flex items-center justify-center " +
-          "bg-[var(--bg-elevated)] border-2 mt-8 mb-5 shrink-0 " +
-          "transition-[border-color,transform] duration-[250ms] ease-out " +
-          "group-hover:scale-[1.03] " +
-          (isLarge ? "w-[148px] h-[148px]" : "w-[116px] h-[116px]")
-        }
-        style={{
-          borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`,
-        }}
-      >
-        {photo ? (
-          <img
-            src={photo}
-            alt={member.name}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <User
-            size={isLarge ? 60 : 46}
-            strokeWidth={1.5}
-            className="text-fg-subtle"
-            aria-hidden="true"
-          />
+      <div className={styles.inner}>
+        {cutout && (
+          <>
+            <div
+              className={styles.backdrop}
+              style={{ backgroundImage: `url(${backdrop})` }}
+              aria-hidden
+            />
+            <div className={styles.backdropScrim} aria-hidden />
+            {firstName && (
+              <span className={`${styles.bigName} ${styles.bigNameBack}`} aria-hidden>
+                {firstName}
+              </span>
+            )}
+            <div className={styles.cutoutLayer} aria-hidden>
+              <img src={cutout} alt="" loading="lazy" />
+            </div>
+          </>
         )}
+
+        <div className={styles.photoLayer}>
+          {photo ? (
+            <img src={photo} alt={filled ? member.name : ""} loading="lazy" />
+          ) : (
+            /*
+             * Empty slot. Not an uploader — adding a portrait means dropping a
+             * file into src/assets/members/, so the hint names the file to add.
+             */
+            <div className={styles.emptyPortrait}>
+              <svg
+                width="30"
+                height="30"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="m21 15-4.35-4.35a2 2 0 0 0-2.83 0L3 21" />
+              </svg>
+              <p className={styles.emptyTitle}>Drop portrait</p>
+              <p className={styles.emptyHint}>
+                {member.photo ? `${member.photo}.jpg not found` : "assets/members/"}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {!cutout && (
+          <>
+            <div className={styles.topScrim} aria-hidden />
+            {firstName && (
+              <span className={`${styles.bigName} ${styles.bigNameFront}`} aria-hidden>
+                {firstName}
+              </span>
+            )}
+          </>
+        )}
+
+        {/* Visible at rest, hidden on hover */}
+        <p className={styles.restRole}>{member.role}</p>
+        <p className={styles.restName} data-placeholder={!filled}>
+          {name}
+        </p>
+
+        {/* Hidden at rest, revealed on hover */}
+        <div className={styles.panel}>
+          <p className={styles.panelRole}>{member.role}</p>
+          <p className={styles.panelName} data-placeholder={!filled}>
+            {name}
+          </p>
+          <p className={styles.panelDepartment}>{member.department}</p>
+          <div className={styles.panelFooter}>
+            <span className={styles.panelYear}>{yearLabel}</span>
+            {member.linkedIn && (
+              <a
+                className={styles.linkedIn}
+                href={member.linkedIn}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`${name} on LinkedIn`}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0zM7.5 8h4.78v2.19h.07c.67-1.2 2.3-2.46 4.73-2.46C22 7.73 24 10.09 24 14.4V24h-5v-8.5c0-2.03-.72-3.42-2.53-3.42-1.38 0-2.2.93-2.56 1.83-.13.32-.16.76-.16 1.2V24h-5z" />
+                </svg>
+                LinkedIn
+              </a>
+            )}
+          </div>
+        </div>
       </div>
-
-      {/* Name */}
-      <h3
-        className={
-          "font-display font-bold text-fg m-0 mb-2.5 leading-[1.15] " +
-          "tracking-[var(--tracking-tight)] " +
-          (isLarge ? "text-[26px]" : "text-h4")
-        }
-      >
-        {member.name}
-      </h3>
-
-      {/* Sub-team tag */}
-      <span
-        className="font-sans text-caption font-semibold px-2.5 py-1 rounded-lg border mb-3.5"
-        style={chipStyle(accent)}
-      >
-        {member.subTeam}
-      </span>
-
-      {/* Year + major — mono, per the "technical numbers" typography rule. */}
-      <div className="font-mono text-[12px] text-fg-subtle leading-[1.6] mb-1">
-        Year {member.year}
-      </div>
-      <div className="font-sans text-small text-fg-muted leading-[1.5]">
-        {member.major}
-      </div>
-
-      {/* LinkedIn — pushed to the card floor so cards bottom-align. */}
-      {member.linkedIn && (
-        <a
-          href={member.linkedIn}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${member.name} on LinkedIn`}
-          className="mt-auto pt-4 text-fg-subtle hover:text-brand-light transition-colors"
-        >
-          <Linkedin size={18} />
-        </a>
-      )}
     </article>
   );
 }

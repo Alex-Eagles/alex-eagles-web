@@ -62,6 +62,7 @@ alex-eagles-web/
 ├── index.html                 # Entry HTML; sets dark theme up-front, loads fonts
 ├── vite.config.ts             # Vite + React + Tailwind v4; `@` → src alias
 ├── tsconfig.json              # Strict TS, bundler resolution, `@/*` path alias
+├── vercel.json                # SPA rewrite + asset caching (see Deployment)
 └── src/
     ├── main.tsx               # App bootstrap: Router + ThemeProvider
     ├── App.tsx                # Layout shell + route table
@@ -184,6 +185,108 @@ npm run preview   # preview the built output
 ```
 
 `build` runs `tsc` first, so a type error fails the build.
+
+---
+
+## Deployment
+
+The site is hosted on **[Vercel](https://vercel.com/)** and served at
+**[alex-eagles.com](https://alex-eagles.com)**.
+
+### How it works
+
+A Vercel project is connected to this GitHub repo and watches it:
+
+| You push to…      | Vercel builds and deploys to…                       |
+| ----------------- | --------------------------------------------------- |
+| `main`            | **Production** — the live `alex-eagles.com` domain   |
+| any other branch  | A **preview** URL (unique per branch, safe to share) |
+| a pull request    | A preview URL, auto-commented on the PR              |
+
+So **merging to `main` publishes the site.** There is no manual deploy step and
+no GitHub Actions workflow — Vercel handles build and hosting itself.
+
+DNS already points at Vercel (`A 76.76.21.21` for the apex, `CNAME
+cname.vercel-dns.com` for `www`). **Do not change DNS records** when moving
+between Vercel projects; only the domain's project assignment changes.
+
+### `vercel.json`
+
+Two things, both required:
+
+1. **SPA rewrite.** We use React Router's `BrowserRouter`, so `/team` is a
+   client-side route, not a file on disk. Without the rewrite, loading
+   `alex-eagles.com/team` directly (or refreshing on it) returns a 404. The
+   rewrite serves `index.html` for any path that isn't a real file, and the
+   router takes over from there.
+2. **Asset caching.** Vite fingerprints filenames in `dist/assets/`
+   (`index-a1b2c3d4.js`), so those files can never go stale — we cache them for
+   a year. `index.html` is deliberately *not* cached, so a new deploy is picked
+   up immediately.
+
+### First-time setup — connecting this repo to Vercel
+
+Do this once. You need to be a member of the Alex Eagles Vercel team (ask an
+admin for an invite).
+
+1. **Import the repo.** Vercel dashboard → **Add New… → Project** → select
+   `Alex-Eagles/alex-eagles-web` → **Import**.
+2. **Confirm the build settings.** Vercel auto-detects Vite. Verify:
+   - Framework Preset: **Vite**
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Install Command: `npm install`
+3. **Deploy.** Click **Deploy** and wait for the build. You get a free
+   `*.vercel.app` URL.
+4. **Test on that URL before touching the domain.** Specifically:
+   - Every route in the nav loads.
+   - **Refresh the page while on `/team`** — this is what the SPA rewrite fixes.
+     A 404 here means `vercel.json` isn't being picked up.
+   - Dark/light toggle persists across a reload.
+   - Images and fonts load; check the browser console for errors.
+5. **Set the production branch.** Settings → **Git** → Production Branch =
+   `main`.
+6. **Move the domain over.** A domain can only be attached to one Vercel project
+   at a time, so removal comes first:
+   - On the **old** project: Settings → Domains → remove `alex-eagles.com` and
+     `www.alex-eagles.com`.
+   - On the **new** project: Settings → Domains → add both. Set one as primary
+     and redirect the other (convention: apex is primary, `www` redirects to it).
+   - Expect a few seconds of downtime between the two steps, and up to a minute
+     for the TLS certificate to be reissued.
+7. **Keep the old project for about a week** as a rollback path, then delete it.
+
+### Day-to-day: shipping a change
+
+```bash
+git checkout main && git pull          # start from current main
+git checkout -b my-feature             # never commit directly to main
+# … make changes …
+npm run lint                           # type-check before pushing
+npm run build                          # make sure it actually builds
+git add -A && git commit -m "…"
+git push -u origin my-feature
+```
+
+Then open a pull request. Vercel comments a preview URL on it within a minute —
+**review the change on that URL, not just locally.** Merge to `main` when it
+looks right, and production updates automatically in 1–2 minutes.
+
+### Rolling back a bad deploy
+
+Vercel keeps every previous deployment. Dashboard → **Deployments** → find the
+last good one → **⋯ → Promote to Production**. This is instant and needs no
+build, so reach for it first, then fix the code properly afterwards.
+
+### Troubleshooting
+
+| Symptom                                    | Cause / fix                                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| 404 when refreshing on a non-`/` route     | `vercel.json` missing or not at the repo root — the SPA rewrite isn't applying.                  |
+| Build fails on Vercel but works locally    | Almost always a type error (`build` runs `tsc` first) or a case-sensitive import path. Vercel builds on Linux, where `Button.tsx` ≠ `button.tsx`; Windows and macOS forgive this locally. |
+| Push to `main` didn't deploy               | Check Settings → Git that the production branch is `main` and the GitHub integration still has repo access. |
+| Old content still showing after a deploy   | Hard-refresh (`Ctrl+Shift+R`). If it persists, confirm the domain is attached to the project you actually deployed. |
+| Fonts or images 404 in production          | Referenced from `public/` with an absolute path (`/logo.svg`), or imported through the `@` alias. Relative paths like `./logo.svg` break under nested routes. |
 
 ---
 
