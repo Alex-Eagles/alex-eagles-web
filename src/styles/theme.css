@@ -101,7 +101,9 @@
   /* Brand + accents */
   --brand: #3c40b5; /* Alex Eagles royal indigo            */
   --brand-light: #5458cc; /* hover / active                      */
+  --brand-dark: #2b2f9e; /* deepest brand — pressed / gradients */
   --brand-glow: rgba(60, 64, 181, 0.25); /* glow behind brand elements          */
+  --eyebrow: var(--brand-light); /* section kicker label above headings */
   --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
   --gold-hover: #fbbf24;
   --sky: #60a5fa; /* technical links / data accent       */
@@ -137,7 +139,9 @@
 
   --brand: #3c40b5; /* brand indigo stays constant          */
   --brand-light: #2b2f9e; /* darker on hover against light bg     */
+  --brand-dark: #1e2258; /* deep indigo — pressed / gradients    */
   --brand-glow: rgba(60, 64, 181, 0.12);
+  --eyebrow: var(--brand-light); /* label; brand-light is darker in light mode */
   --gold: #b45309; /* darker amber for AA contrast on light */
   --gold-hover: #92400e;
   --sky: #1d4ed8;
