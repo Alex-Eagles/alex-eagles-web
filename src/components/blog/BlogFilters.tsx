@@ -1,58 +1,62 @@
-import { LayoutGrid } from "lucide-react";
-import { CATEGORY_META, type BlogCategory } from "@/data/blog";
-
-/** "all" plus every real category — what the filter bar can be set to. */
-export type BlogFilter = "all" | BlogCategory;
+import {
+  Grid3x3,
+  Cpu,
+  Code,
+  CircuitBoard,
+  Eye,
+  Settings,
+  Plane,
+  Wind,
+  type LucideIcon,
+} from "lucide-react";
+import { BLOG_FILTERS, type BlogFilter } from "@/data/blog";
 
 interface BlogFiltersProps {
-  activeFilter: BlogFilter;
-  onFilterChange: (filter: BlogFilter) => void;
+  activeFilter: BlogFilter["id"];
+  onFilterChange: (filter: BlogFilter["id"]) => void;
 }
 
-/** Filter definitions, in display order. "all" is synthesised up front. */
-const FILTERS: { id: BlogFilter; label: string; icon: typeof LayoutGrid }[] = [
-  { id: "all", label: "All", icon: LayoutGrid },
-  ...(Object.keys(CATEGORY_META) as BlogCategory[]).map((id) => ({
-    id,
-    label: CATEGORY_META[id].label,
-    icon: CATEGORY_META[id].icon,
-  })),
-];
+const ICONS: Record<BlogFilter["id"], LucideIcon> = {
+  all: Grid3x3,
+  hardware: Cpu,
+  software: Code,
+  firmware: CircuitBoard,
+  computerVision: Eye,
+  structure: Settings,
+  aerodesign: Plane,
+  propulsion: Wind,
+};
 
 /**
- * BlogFilters — a row of pill toggles that filters the post grid by category.
- * Single-select; the active pill is filled with the gold CTA colour to match
- * the site's primary-button treatment.
+ * Pill filter row above the post grid. The active pill uses the site's gold
+ * CTA treatment (same as `<Button variant="primary">`); inactive pills match
+ * the elevated-surface/border idiom used elsewhere on the site.
  */
-export default function BlogFilters({
-  activeFilter,
-  onFilterChange,
-}: BlogFiltersProps) {
+export default function BlogFilters({ activeFilter, onFilterChange }: BlogFiltersProps) {
   return (
     <div
       role="group"
       aria-label="Filter posts by category"
-      className="flex flex-wrap gap-3 mb-10"
+      className="flex gap-3 mb-12 overflow-x-auto sm:flex-wrap sm:overflow-visible -mx-6 px-6 sm:mx-0 sm:px-0 pb-1 sm:pb-0 [&::-webkit-scrollbar]:hidden"
+      style={{ scrollbarWidth: "none" }}
     >
-      {FILTERS.map(({ id, label, icon: Icon }) => {
-        const active = activeFilter === id;
+      {BLOG_FILTERS.map((filter) => {
+        const Icon = ICONS[filter.id];
+        const active = activeFilter === filter.id;
         return (
           <button
-            key={id}
+            key={filter.id}
             type="button"
+            onClick={() => onFilterChange(filter.id)}
             aria-pressed={active}
-            onClick={() => onFilterChange(id)}
-            className={
-              "inline-flex items-center gap-2 min-h-[44px] px-5 rounded-full " +
-              "font-sans text-small font-semibold cursor-pointer " +
-              "transition-[background-color,color,border-color,transform] duration-200 ease-out " +
-              (active
-                ? "bg-gold text-canvas border border-gold shadow-[0_8px_24px_var(--brand-glow)]"
-                : "bg-elevated text-fg-muted border border-border hover:text-fg hover:border-brand")
-            }
+            className={`font-sans text-[13px] font-semibold px-3.5 py-1.5 rounded-full border transition-colors duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+              active
+                ? "bg-gold text-canvas border-gold shadow-[0_8px_24px_var(--brand-glow)]"
+                : "bg-elevated text-fg-muted border-border hover:text-fg hover:border-brand"
+            }`}
           >
-            <Icon size={16} aria-hidden="true" />
-            {label}
+            <Icon className="w-3.5 h-3.5" />
+            {filter.label}
           </button>
         );
       })}
