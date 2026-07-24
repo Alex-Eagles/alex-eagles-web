@@ -18,8 +18,8 @@
  *   1. name:  set `name: "Ziad Essam"`
  *   2. photo: drop a kebab-case file into src/assets/members/<slug>.<ext>
  *             then set `photo: "ziad-essam"`
- *   3. hover reveal (optional): drop a background-removed PNG into
- *             src/assets/members/cutouts/<slug>.png — same slug as the photo.
+ *   3. hover reveal (optional): drop a background-removed WebP into
+ *             src/assets/members/cutout2/<slug>.webp — same slug as the photo.
  *             That alone switches the card from the grayscale→colour hover to
  *             the blue-backdrop cut-out reveal. No code change. Delete the file
  *             and the card reverts.
@@ -54,8 +54,7 @@ export interface TeamMember {
   /** Slug of the photo in src/assets/members/ */
   photo?: string;
   /**
-
-   * Slug of the background-removed PNG in src/assets/members/cutouts/.
+   * Slug of the background-removed cut-out in src/assets/members/cutout2/.
    * Omit it and we look for a cutout under the `photo` slug, so matching
    * filenames pair up automatically. Set it only to point at a different file.
    */
@@ -109,7 +108,7 @@ const PHOTOS = bySlug(
 );
 
 const CUTOUTS = bySlug(
-  import.meta.glob<{ default: string }>("../assets/members/cutouts/*.{png,webp}", {
+  import.meta.glob<{ default: string }>("../assets/members/cutout2/*.{png,webp}", {
     eager: true,
   }),
 );
@@ -118,7 +117,6 @@ const CUTOUTS = bySlug(
 export function memberPhoto(member: TeamMember): string | undefined {
   return member.photo ? PHOTOS[member.photo] : undefined;
 }
-
 
 /**
  * Resolved background-removed portrait, or undefined if there isn't one.
@@ -161,17 +159,16 @@ export function memberYearLabel(member: TeamMember, rosterYear: string): string 
  * 4. THE ROSTER
  * -------------------------------------------------------------------------*/
 
-
-export const ROSTER_YEARS = ["2026", "2025"] as const;
-export type RosterYear = (typeof ROSTER_YEARS)[number];
-
-export const TEAM_MEMBERS: TeamMember[] = [
-  /* ---- Executive leadership ---------------------------------------------- */
-  { id: "1", name: "Ahmed Baheyeldin", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Mechatronics", photo: "ahmed-baheyeldin" },
-  { id: "2", name: "Norhan Mohammed", role: "Vice Lead", team: "Executive", subTeam: "Management", year: "4", major: "Mechatronics", photo: "norhan-mohammed" },
-  { id: "3", name: "Peter Ayoub", role: "Lead", team: "Executive", subTeam: "Management", year: "4", major: "Electromechanics", photo: "peter-ayoub", cutout: true, photoBg: "peter-ayoub-bg" },
-
 export const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+/**
+ * Per-sub-team accent color, resolved through the centralized `--team-*` tokens
+ * in theme.css (so the whole palette is edited in one place). Falls back to the
+ * brand accent for anything without its own token (e.g. "Team Leadership").
+ */
+export function subTeamAccent(name: string): string {
+  return `var(--team-${slugify(name)}, #f0910e)`;
+}
 
 /** Ids must be unique across years, since both rosters are built at once. */
 let slotCounter = 0;
@@ -215,11 +212,6 @@ const leadershipTrio = (): [TeamMember, TeamMember, TeamMember] => [
   { ...slot("Head of Autonomous"), department: "Team Leadership" },
 ];
 
-/** Roster lookup by year. 2026 is empty until that team is announced. */
-export const ROSTERS: Record<RosterYear, TeamMember[]> = {
-  "2026": [],
-  "2025": TEAM_MEMBERS,
-};
 const ROSTER_2026: YearRoster = {
   year: "2026",
   leadership: leadershipTrio(),
@@ -237,19 +229,88 @@ const ROSTER_2026: YearRoster = {
   ],
 };
 
+/**
+ * The real 2025 roster. Leadership titles for the trio are a best-guess mapping
+ * of last year's three executives onto the design's three leadership slots —
+ * confirm the names/titles before this goes public.
+ */
 const ROSTER_2025: YearRoster = {
   year: "2025",
-  leadership: leadershipTrio(),
+  leadership: [
+    { ...slot("Vice Lead", "Norhan Mohammed", { photo: "norhan-mohammed" }), department: "Team Leadership" },
+    { ...slot("Team Leader", "Ahmed Baheyeldin", { photo: "ahmed-baheyeldin" }), department: "Team Leadership" },
+    { ...slot("Head of Autonomous", "Peter Ayoub", { photo: "peter-ayoub" }), department: "Team Leadership" },
+  ],
   divisions: [
     {
       num: "01",
       name: "Mechanical",
-      sections: ["Aerodesign", "Structure", "Propulsion"].map(standardSection),
+      sections: [
+        section("Management", [
+          slot("Section Lead", "Mohamed Fathallah", { photo: "mohamed-fathallah" }),
+        ]),
+        section("Aerodesign", [
+          slot("Section Lead", "Hattan Yosry", { photo: "hattan-yosry" }),
+          slot("Member", "Esraa Ahmed", { photo: "esraa-ahmed" }),
+          slot("Member", "Farah Harfoush", { photo: "farah-harfoush" }),
+          slot("Member", "Rodyna Amr", { photo: "rodyna-amr" }),
+        ]),
+        section("Wing", [
+          slot("Section Lead", "Abdelrahman Arafat", { photo: "abdelrahman-arafat" }),
+          slot("Section Lead", "Abdelghfour Alaa", { photo: "abdelghfour-alaa" }),
+          slot("Member", "Lina Tarek", { photo: "lina-tarek" }),
+          slot("Member", "Mira Barsoum", { photo: "mira-barsoum" }),
+          slot("Member", "Youssef Ibrahim", { photo: "youssef-ibrahim" }),
+        ]),
+        section("Tail & Stability", [
+          slot("Vice Lead", "Osama Mohamed", { photo: "osama-mohamed" }),
+          slot("Member", "Mo'men Ashraf", { photo: "momen-ashraf" }),
+          slot("Member", "Moamen Nawara", { photo: "moamen-nawara" }),
+        ]),
+        section("Structure", [
+          slot("Section Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
+          slot("Member", "Hana Waleed", { photo: "hana-waleed" }),
+          slot("Member", "Hossam Eldeen", { photo: "hossam-eldeen" }),
+          slot("Member", "Reem Eldalil", { photo: "reem-eldalil" }),
+        ]),
+        section("Propulsion", [
+          slot("Section Lead", "Adham Amr", { photo: "adham" }),
+          slot("Vice Lead", "Youssef Hozayen", { photo: "youssef-hozayen" }),
+          slot("Member", "Mohamed Brbry", { photo: "mohamed-brbry" }),
+          slot("Member", "Rana", { photo: "rana" }),
+        ]),
+      ],
     },
     {
       num: "02",
       name: "Autonomous",
-      sections: ["Software", "Hardware", "AI"].map(standardSection),
+      sections: [
+        section("Management", [
+          slot("Section Lead", "Ahmed Saleh", { photo: "ahmed-saleh" }),
+        ]),
+        section("Software", [
+          slot("Section Lead", "Maram Wael", { photo: "maram-wael" }),
+          slot("Vice Lead", "Ann Tarek", { photo: "ann-tarek" }),
+          slot("Member", "Mazen Nazeih", { photo: "mazen-amr" }),
+          slot("Member", "Sara Gharib", { photo: "sara-gharib" }),
+          slot("Member", "Zeyad Essam", { photo: "zeyad-essam" }),
+          slot("Member", "John Ayman", { photo: "john-ayman" }),
+        ]),
+        section("Hardware", [
+          slot("Section Lead", "Ahmed Anan", { photo: "ahmed-ibrahim-anan" }),
+          slot("Member", "Ahmed Saber", { photo: "ahmed-saber" }),
+          slot("Member", "Ahmed Saeed", { photo: "ahmed-saeed" }),
+          slot("Member", "Menna Ezzat", { photo: "menna-ezzat" }),
+        ]),
+        section("Computer Vision", [
+          slot("Vice Lead", "Ibrahim Mohamed", { photo: "ibrahim-mohamed" }),
+          slot("Member", "Mazen Asser", { photo: "mazen-asser" }),
+          slot("Member", "Eyad Ashraf", { photo: "eyad-ashraf" }),
+          slot("Member", "Mohamed Bassem", { photo: "mohamed-bassem" }),
+          slot("Member", "Peter Mina", { photo: "peter-mina" }),
+          slot("Member", "Mohamed Elzayat", { photo: "mohamed-elzayat" }),
+        ]),
+      ],
     },
   ],
 };

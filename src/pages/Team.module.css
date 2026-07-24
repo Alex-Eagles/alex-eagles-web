@@ -26,9 +26,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* The crew stands in the lower half of the frame; bias the crop down so the
-     building doesn't eat the shot on short viewports. */
-  object-position: center 82%;
+  /* Centred crop. */
+  object-position: center;
 }
 
 .heroScrim {
@@ -183,15 +182,10 @@
   flex-wrap: wrap;
 }
 
-/* The two flanking cards sit lower and slightly smaller than the centre one. */
-.leaderSide {
-  width: 250px;
-  max-width: 100%;
-  margin-top: 44px;
-}
-
+/* All three leadership cards are the same size and align on one line. */
+.leaderSide,
 .leaderCentre {
-  width: 270px;
+  width: 260px;
   max-width: 100%;
 }
 

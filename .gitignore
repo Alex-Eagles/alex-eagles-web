@@ -27,3 +27,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Normalized cut-out working PNGs (webp in cutout2/ ships instead)
+src/assets/members/cutouts/

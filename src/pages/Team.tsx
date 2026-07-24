@@ -1,8 +1,16 @@
 import { useState } from "react";
 import crewPhoto from "@/assets/team/crew.jpg";
+import crew2025Photo from "@/assets/team/team-2025.jpg";
 import { JumpNav } from "@/components/team/JumpNav";
+import { MemberCardSolid } from "@/components/team/MemberCardSolid";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
-import { navGroups, ROSTER_YEARS, ROSTERS, type RosterYear } from "@/data/team";
+import {
+  navGroups,
+  ROSTER_YEARS,
+  ROSTERS,
+  subTeamAccent,
+  type RosterYear,
+} from "@/data/team";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import styles from "./Team.module.css";
 
@@ -19,6 +27,13 @@ export default function Team() {
 
   const roster = ROSTERS[year];
 
+  /* 2025 uses the solid-backdrop colour-cutout card; 2026 uses the
+   * grayscale→reveal hover card. Same props, so the grid code below is shared. */
+  const Card = year === "2025" ? MemberCardSolid : TeamMemberCard;
+
+  /* Each year gets its own crew photo in the hero. */
+  const heroPhoto = year === "2025" ? crew2025Photo : crewPhoto;
+
   /* The hint fades and drifts down as you leave the hero — it only means
    * anything while the cards are still off-screen. */
   const hintOpacity = Math.max(0, 1 - scrollY / 180);
@@ -28,7 +43,7 @@ export default function Team() {
     <div className={styles.page}>
       {/* ---- Hero -------------------------------------------------------- */}
       <header className={styles.hero}>
-        <img className={styles.heroPhoto} src={crewPhoto} alt="The Alex Eagles team" />
+        <img className={styles.heroPhoto} src={heroPhoto} alt="The Alex Eagles team" />
         <div className={styles.heroScrim} aria-hidden />
 
         <div
@@ -86,13 +101,13 @@ export default function Team() {
         {/* [left, centre, right] — the centre card is the raised one. */}
         <div className={styles.leadershipRow}>
           <div className={styles.leaderSide}>
-            <TeamMemberCard member={roster.leadership[0]} rosterYear={roster.year} />
+            <Card member={roster.leadership[0]} rosterYear={roster.year} />
           </div>
           <div className={styles.leaderCentre}>
-            <TeamMemberCard member={roster.leadership[1]} rosterYear={roster.year} />
+            <Card member={roster.leadership[1]} rosterYear={roster.year} />
           </div>
           <div className={styles.leaderSide}>
-            <TeamMemberCard member={roster.leadership[2]} rosterYear={roster.year} />
+            <Card member={roster.leadership[2]} rosterYear={roster.year} />
           </div>
         </div>
       </section>
@@ -114,13 +129,20 @@ export default function Team() {
 
           {division.sections.map((section) => (
             <div key={section.id} id={section.id} className={styles.section}>
-              <h3 className={styles.sectionTitle}>
-                <span className={styles.sectionMarker} aria-hidden />
+              <h3
+                className={styles.sectionTitle}
+                style={{ color: subTeamAccent(section.name) }}
+              >
+                <span
+                  className={styles.sectionMarker}
+                  style={{ background: subTeamAccent(section.name) }}
+                  aria-hidden
+                />
                 {section.name}
               </h3>
               <div className={styles.grid}>
                 {section.members.map((member) => (
-                  <TeamMemberCard key={member.id} member={member} rosterYear={roster.year} />
+                  <Card key={member.id} member={member} rosterYear={roster.year} />
                 ))}
               </div>
             </div>

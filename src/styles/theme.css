@@ -95,6 +95,24 @@
    * that must not slide under the bar anchors to this — notably
    * `scroll-margin-top` on anchor targets. Update it here, once.            */
   --nav-height: 88px;
+
+  /* ------------------------------------------------------------------------
+   * SUB-TEAM ACCENT COLORS (Team page)
+   * One accent per sub-team, tuned to read on the dark team cards. Change a
+   * hue here, once, and every section heading + card badge for that sub-team
+   * updates. Slug must match slugify(subTeamName): "Tail & Stability" →
+   * `--team-tail-stability`, "Computer Vision" → `--team-computer-vision`.
+   * --------------------------------------------------------------------- */
+  --team-management: #f0910e; /* amber (brand accent)   */
+  --team-aerodesign: #85b7eb; /* sky blue               */
+  --team-wing: #6ad1d8; /* cyan                   */
+  --team-tail-stability: #f0a07a; /* coral                  */
+  --team-structure: #c2c0b4; /* warm gray              */
+  --team-propulsion: #97c459; /* green                  */
+  --team-software: #5dcaa5; /* teal                   */
+  --team-hardware: #f0b24a; /* gold                   */
+  --team-computer-vision: #ed93b1; /* pink                   */
+  --team-firmware: #afa9ec; /* lavender               */
 }
 
 /* Anchor targets clear the fixed navbar instead of landing beneath it. */
