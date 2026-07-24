@@ -39,13 +39,9 @@
   /* Brand + accents */
   --color-brand: var(--brand);
   --color-brand-light: var(--brand-light);
-  --color-brand-dark: var(--brand-dark);
-
-  /* Status & feedback (text tones — bg/border read as raw vars where needed) */
-  --color-success: var(--success-text);
-  --color-warning: var(--warning-text);
-  --color-danger: var(--danger-text);
-  --color-info: var(--info-text);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-sky: var(--sky);
 
   /* Text */
   --color-fg: var(--text-primary);
@@ -175,7 +171,7 @@
     font-weight: 600;
     letter-spacing: var(--tracking-caps);
     text-transform: uppercase;
-    color: var(--eyebrow);
+    color: var(--brand-light);
   }
 
   /* Constrains body copy to a readable measure (45–90 chars). */

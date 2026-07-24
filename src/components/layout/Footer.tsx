@@ -55,7 +55,7 @@ export default function Footer() {
                   to={link.path}
                   className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
                 >
-                  <ChevronRight size={14} className="text-brand-light" strokeWidth={2.5} />
+                  <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
                   {link.label}
                 </Link>
               </li>
@@ -70,7 +70,7 @@ export default function Footer() {
                   to="/vehicles"
                   className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
                 >
-                  <ChevronRight size={14} className="text-brand-light" strokeWidth={2.5} />
+                  <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
                   {name}
                 </Link>
               </li>
@@ -85,7 +85,7 @@ export default function Footer() {
                 href={`mailto:${CONTACT.email}`}
                 className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted transition-colors hover:text-fg"
               >
-                <Mail size={17} className="text-brand-light" />
+                <Mail size={17} className="text-gold" />
                 {CONTACT.email}
               </a>
               <a
@@ -94,7 +94,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted transition-colors hover:text-fg"
               >
-                <MapPin size={17} className="text-brand-light" />
+                <MapPin size={17} className="text-gold" />
                 {CONTACT.location}
               </a>
             </div>
@@ -137,7 +137,7 @@ export default function Footer() {
                 <button
                   type="submit"
                   aria-label="Subscribe"
-                  className="flex-none w-11 h-11 rounded-md bg-brand-light text-white cursor-pointer flex items-center justify-center hover:opacity-90 transition-opacity"
+                  className="flex-none w-11 h-11 rounded-md bg-gold text-canvas cursor-pointer flex items-center justify-center hover:bg-gold-hover transition-colors"
                 >
                   <ArrowUpRight size={18} strokeWidth={2.4} />
                 </button>

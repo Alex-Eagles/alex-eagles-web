@@ -29,9 +29,9 @@ interface ButtonProps {
 
 /** Per-variant classes. Colors come entirely from design tokens. */
 const VARIANTS: Record<Variant, string> = {
-  // Solid brand CTA — the primary call to action.
+  // Gold CTA on near-black text — the primary call to action.
   primary:
-    "bg-brand text-white shadow-[0_8px_24px_var(--brand-glow)] hover:bg-brand-light hover:-translate-y-0.5",
+    "bg-gold text-canvas shadow-[0_8px_24px_var(--brand-glow)] hover:bg-gold-hover hover:-translate-y-0.5",
   // Outlined brand — secondary action; fills on hover.
   secondary:
     "bg-transparent border border-brand text-brand-light hover:bg-brand hover:text-white",

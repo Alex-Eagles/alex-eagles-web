@@ -16,7 +16,7 @@
  *   1. Tailwind utility classes (preferred for most cases).
  *      global.css maps these variables into Tailwind's theme, so you can write:
  *          <h1 className="font-display text-fg">           // text-primary color
- *          <button className="bg-brand text-white">        // brand bg, white text
+ *          <button className="bg-gold text-canvas">        // gold bg, dark text
  *          <div className="bg-surface border border-border">
  *      See global.css for the full list of generated utility names.
  *
@@ -83,15 +83,6 @@
 
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
-
-  /* ------------------------------------------------------------------------
-   * 3. ALWAYS-DARK CONTEXT TOKENS  (theme-independent — do NOT flip)
-   *    The hero sits over a dark video/backdrop in BOTH themes, so its text
-   *    must stay light regardless of the active theme — these tokens are fixed.
-   *    (The footer, by contrast, is theme-relative: light in light mode.)
-   * ----------------------------------------------------------------------*/
-  --text-on-dark: #f2f2f2; /* headings/body over a permanently-dark surface */
-  --text-on-dark-muted: #b4b4c4; /* secondary text on the same surfaces      */
 }
 
 /* ----------------------------------------------------------------------------
@@ -99,35 +90,30 @@
  * --------------------------------------------------------------------------*/
 :root,
 :root[data-theme="dark"] {
-  /* Surfaces (back → front) — neutral near-black per the color map */
-  --bg-primary: #0f0f0f; /* page background                     */
-  --bg-surface: #1a1a1a; /* section backgrounds                 */
-  --bg-elevated: #252525; /* cards, modals, elevated elements    */
-  --bg-glass: rgba(26, 26, 26, 0.4); /* glassmorphic overlays (navbar etc.) */
-  --canvas: #1a1a1a; /* alias: section canvas behind cards   */
-  --card: #1a1a1a; /* the card surface itself             */
+  /* Surfaces (back → front) */
+  --bg-primary: #07091c; /* deep-space navy — page background   */
+  --bg-surface: #0d1035; /* section backgrounds                 */
+  --bg-elevated: #161a50; /* cards, modals, elevated elements    */
+  --bg-glass: rgba(22, 26, 80, 0.6); /* glassmorphic overlays (navbar etc.) */
+  --canvas: #0d1035; /* alias: section canvas behind cards   */
+  --card: #161a50; /* the card surface itself             */
 
-  /* Brand + accents (brand lightens in dark mode, per the map) */
-  --brand: #3d3ecc; /* Alex Eagles indigo — dark-mode value */
-  --brand-light: #5a5bdd; /* hover / active                      */
-  --brand-dark: #242599; /* deepest brand (pressed / gradients) */
-  --brand-glow: rgba(61, 62, 204, 0.25); /* glow behind brand elements     */
-  --eyebrow: #7a7bea; /* section kicker label — lighter than brand-light to clear AA on dark */
+  /* Brand + accents */
+  --brand: #3c40b5; /* Alex Eagles royal indigo            */
+  --brand-light: #5458cc; /* hover / active                      */
+  --brand-glow: rgba(60, 64, 181, 0.25); /* glow behind brand elements          */
+  --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
+  --gold-hover: #fbbf24;
+  --sky: #60a5fa; /* technical links / data accent       */
 
-  /* Text */
-  --text-primary: #f2f2f2;
-  --text-secondary: #aaaaaa;
-  --text-muted: #8a8a8a; /* subtle tier — lifted from #666 to clear AA (was 3:1) */
+  /* Text (indigo-tinted, per brand) */
+  --text-primary: #f0f2ff;
+  --text-secondary: #8b8fc8;
+  --text-muted: #565a94;
 
   /* Borders */
-  --border-subtle: #2e2e2e;
-  --border-solid: #444444;
-
-  /* Status & feedback (backgrounds tint dark, text/borders glow) */
-  --success-bg: #0a2e1a; --success-text: #4ae883; --success-border: #1a5c34;
-  --warning-bg: #2a1e00; --warning-text: #f5c842; --warning-border: #5c4400;
-  --danger-bg: #2a0a0a;  --danger-text: #f07070;  --danger-border: #5c1a1a;
-  --info-bg: #081828;    --info-text: #60a8f0;    --info-border: #1a3a5c;
+  --border-subtle: rgba(60, 64, 181, 0.18);
+  --border-solid: #1e2258;
 
   /* 4-level elevation system */
   --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4);
@@ -142,35 +128,29 @@
  *    only ever reference the names, light mode "just works".
  * --------------------------------------------------------------------------*/
 :root[data-theme="light"] {
-  /* Surfaces (back → front) — page tint → white content → faint card tint */
-  --bg-primary: #e8e8f9; /* page background (map bg-tertiary)     */
-  --bg-surface: #ffffff; /* section / content background         */
-  --bg-elevated: #f3f3fd; /* cards (map bg-secondary)             */
-  --bg-glass: rgba(255, 255, 255, 0.4);
-  --canvas: #f3f3fd; /* section canvas behind cards          */
+  --bg-primary: #f7f8ff; /* faintly indigo-tinted white          */
+  --bg-surface: #ffffff;
+  --bg-elevated: #eceeff;
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --canvas: #eceeff; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
 
-  --brand: #242599; /* brand indigo — map primary            */
-  --brand-light: #3d3ecc; /* lighter brand for hover / accents    */
-  --brand-dark: #1a1b72; /* deepest brand (pressed / gradients)  */
-  --brand-glow: rgba(36, 37, 153, 0.12);
-  --eyebrow: #3d3ecc; /* section kicker — unchanged in light (already clears AA at 6.3:1) */
+  --brand: #3c40b5; /* brand indigo stays constant          */
+  --brand-light: #2b2f9e; /* darker on hover against light bg     */
+  --brand-glow: rgba(60, 64, 181, 0.12);
+  --gold: #b45309; /* darker amber for AA contrast on light */
+  --gold-hover: #92400e;
+  --sky: #1d4ed8;
 
-  --text-primary: #111128; /* near-black indigo text               */
-  --text-secondary: #4a4a7a;
-  --text-muted: #616191; /* subtle tier — darkened from #9090ba to clear AA (was 2.5:1) */
+  --text-primary: #0d1030; /* deep navy text                       */
+  --text-secondary: #3b3f7a;
+  --text-muted: #6366a8;
 
-  --border-subtle: #d0d0ed;
-  --border-solid: #b0b0d8;
+  --border-subtle: #d4d6f0;
+  --border-solid: #b0b3e0;
 
-  /* Status & feedback (soft tinted backgrounds, deep readable text) */
-  --success-bg: #c8ffe8; --success-text: #0a5c34; --success-border: #80ffcc;
-  --warning-bg: #fff3cc; --warning-text: #7a5500; --warning-border: #ffe080;
-  --danger-bg: #ffe5e5;  --danger-text: #7a1a1a;  --danger-border: #ffaaaa;
-  --info-bg: #e5f0ff;    --info-text: #1a3f7a;    --info-border: #aaccff;
-
-  --elevation-1: 0 1px 3px rgba(36, 37, 153, 0.08);
-  --elevation-2: 0 4px 12px rgba(36, 37, 153, 0.12);
-  --elevation-3: 0 10px 30px rgba(36, 37, 153, 0.15);
-  --elevation-4: 0 20px 50px rgba(36, 37, 153, 0.18);
+  --elevation-1: 0 1px 3px rgba(60, 64, 181, 0.08);
+  --elevation-2: 0 4px 12px rgba(60, 64, 181, 0.12);
+  --elevation-3: 0 10px 30px rgba(60, 64, 181, 0.15);
+  --elevation-4: 0 20px 50px rgba(60, 64, 181, 0.18);
 }
