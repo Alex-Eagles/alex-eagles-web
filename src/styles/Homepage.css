@@ -1,0 +1,29 @@
+/* Fixed full-viewport drone-video background, shared by every section on
+ * the Homepage. Sits behind the scrolling content (z-index 0), which stays
+ * on top at z-index 10 (see global.css's documented z-index scale). */
+.homepage-bg-video {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.homepage-bg-video-el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.homepage-bg-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 10, 20, 0.55);
+}
+
+.homepage-content {
+  position: relative;
+  z-index: 10;
+}

@@ -37,6 +37,8 @@ export default function Footer() {
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className="w-11 h-11 rounded-lg flex items-center justify-center bg-elevated border border-border text-fg-muted transition-colors duration-200 hover:text-fg hover:border-brand"
                 >
@@ -84,10 +86,15 @@ export default function Footer() {
                 <Mail size={17} className="text-gold" />
                 {CONTACT.email}
               </span>
-              <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted">
+              <a
+                href="https://maps.app.goo.gl/3Go3CTXytPU46Esw5"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted transition-colors hover:text-fg"
+              >
                 <MapPin size={17} className="text-gold" />
                 {CONTACT.location}
-              </span>
+              </a>
             </div>
 
             {/* Newsletter — presentational (wire to a real endpoint later). */}
@@ -122,7 +129,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-[22px] border-t border-border text-center font-sans text-[13px] text-fg-subtle">
-          © 2025 Alex Eagles · Alexandria University · SUAS Competition
+          © 2026 Alex Eagles · Alexandria University · SUAS Competition
         </div>
       </div>
     </footer>

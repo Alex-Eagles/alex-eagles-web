@@ -1,5 +1,5 @@
 import {
-  Github,
+  Facebook,
   Instagram,
   Linkedin,
   Youtube,
@@ -35,7 +35,7 @@ export const BRAND = {
 } as const;
 
 export const CONTACT = {
-  email: "team@alexeagles.org",
+  email: "alex_eagles@alexu.edu.eg",
   location: "Alexandria University, Egypt",
 } as const;
 
@@ -47,10 +47,26 @@ export interface SocialLink {
 
 /** Footer social row. `Icon` is a lucide component rendered as <Icon />. */
 export const SOCIALS: SocialLink[] = [
-  { label: "Instagram", href: "#", Icon: Instagram },
-  { label: "LinkedIn", href: "#", Icon: Linkedin },
-  { label: "YouTube", href: "#", Icon: Youtube },
-  { label: "GitHub", href: "#", Icon: Github },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/alex_eagles.aerodesign?igsh=ZHUxcDM4cmIyZG0x",
+    Icon: Instagram,
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/alex-eagles-aero-design",
+    Icon: Linkedin,
+  },
+  {
+    label: "YouTube",
+    href: "https://www.youtube.com/channel/UCcYOAKkQccqtWqalxiGJtkg",
+    Icon: Youtube,
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/alexeagles2015",
+    Icon: Facebook,
+  },
 ];
 
 /** Vehicle names surfaced in the footer (full data lives with the Vehicles page). */

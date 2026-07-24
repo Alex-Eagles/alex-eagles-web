@@ -91,29 +91,29 @@
 :root,
 :root[data-theme="dark"] {
   /* Surfaces (back → front) */
-  --bg-primary: #07091c; /* deep-space navy — page background   */
-  --bg-surface: #0d1035; /* section backgrounds                 */
-  --bg-elevated: #161a50; /* cards, modals, elevated elements    */
-  --bg-glass: rgba(22, 26, 80, 0.6); /* glassmorphic overlays (navbar etc.) */
-  --canvas: #0d1035; /* alias: section canvas behind cards   */
-  --card: #161a50; /* the card surface itself             */
+  --bg-primary: #060a14; /* near-black aerospace-night blue — page background */
+  --bg-surface: #0b1224; /* section backgrounds                 */
+  --bg-elevated: #121b34; /* cards, modals, elevated elements    */
+  --bg-glass: rgba(18, 27, 52, 0.65); /* glassmorphic overlays (navbar etc.) */
+  --canvas: #0b1224; /* alias: section canvas behind cards   */
+  --card: #121b34; /* the card surface itself             */
 
   /* Brand + accents */
-  --brand: #3c40b5; /* Alex Eagles royal indigo            */
-  --brand-light: #5458cc; /* hover / active                      */
-  --brand-glow: rgba(60, 64, 181, 0.25); /* glow behind brand elements          */
+  --brand: #3b82f6; /* Alex Eagles sky blue (matches logo)  */
+  --brand-light: #60a5fa; /* hover / active                      */
+  --brand-glow: rgba(59, 130, 246, 0.25); /* glow behind brand elements          */
   --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
   --gold-hover: #fbbf24;
-  --sky: #60a5fa; /* technical links / data accent       */
+  --sky: #38bdf8; /* technical links / data accent       */
 
-  /* Text (indigo-tinted, per brand) */
-  --text-primary: #f0f2ff;
-  --text-secondary: #8b8fc8;
-  --text-muted: #565a94;
+  /* Text (cool blue-white, per brand) */
+  --text-primary: #f5f9ff;
+  --text-secondary: #a9c2e8;
+  --text-muted: #63769c;
 
   /* Borders */
-  --border-subtle: rgba(60, 64, 181, 0.18);
-  --border-solid: #1e2258;
+  --border-subtle: rgba(59, 130, 246, 0.18);
+  --border-solid: #1b2846;
 
   /* 4-level elevation system */
   --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4);
@@ -128,29 +128,29 @@
  *    only ever reference the names, light mode "just works".
  * --------------------------------------------------------------------------*/
 :root[data-theme="light"] {
-  --bg-primary: #f7f8ff; /* faintly indigo-tinted white          */
+  --bg-primary: #f6faff; /* faintly sky-tinted white — echoes the logo's white  */
   --bg-surface: #ffffff;
-  --bg-elevated: #eceeff;
+  --bg-elevated: #eaf2ff;
   --bg-glass: rgba(255, 255, 255, 0.75);
-  --canvas: #eceeff; /* section canvas behind cards          */
+  --canvas: #eaf2ff; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
 
-  --brand: #3c40b5; /* brand indigo stays constant          */
-  --brand-light: #2b2f9e; /* darker on hover against light bg     */
-  --brand-glow: rgba(60, 64, 181, 0.12);
+  --brand: #2563eb; /* logo-matching light/sky blue, AA vs white */
+  --brand-light: #1d4ed8; /* darker on hover against light bg     */
+  --brand-glow: rgba(37, 99, 235, 0.12);
   --gold: #b45309; /* darker amber for AA contrast on light */
   --gold-hover: #92400e;
-  --sky: #1d4ed8;
+  --sky: #0284c7;
 
-  --text-primary: #0d1030; /* deep navy text                       */
-  --text-secondary: #3b3f7a;
-  --text-muted: #6366a8;
+  --text-primary: #0b1220; /* deep cool navy text                  */
+  --text-secondary: #35507a;
+  --text-muted: #6b84ac;
 
-  --border-subtle: #d4d6f0;
-  --border-solid: #b0b3e0;
+  --border-subtle: #d7e6fb;
+  --border-solid: #aecbf2;
 
-  --elevation-1: 0 1px 3px rgba(60, 64, 181, 0.08);
-  --elevation-2: 0 4px 12px rgba(60, 64, 181, 0.12);
-  --elevation-3: 0 10px 30px rgba(60, 64, 181, 0.15);
-  --elevation-4: 0 20px 50px rgba(60, 64, 181, 0.18);
+  --elevation-1: 0 1px 3px rgba(37, 99, 235, 0.08);
+  --elevation-2: 0 4px 12px rgba(37, 99, 235, 0.12);
+  --elevation-3: 0 10px 30px rgba(37, 99, 235, 0.15);
+  --elevation-4: 0 20px 50px rgba(37, 99, 235, 0.18);
 }
