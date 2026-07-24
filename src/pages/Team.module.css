@@ -223,35 +223,164 @@
   color: #ffffff;
 }
 
+/*
+ * A top-level sub-team block. A full-width divider above and a big accent banner
+ * header make each one announce itself as a fresh team, with plenty of air
+ * between blocks so they never bleed into one river of cards.
+ */
 .section {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 34px 48px 0;
+  padding: 30px 48px 0;
   scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
 }
 
-.sectionTitle {
+/* The divider + banner. The rule spans the block; the header sits on top of it. */
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 24px;
+  padding-top: 30px;
+  border-top: 1px solid rgb(139 143 196 / 0.18);
+}
+
+/* Title + info chip sit together on the left of the header. */
+.sectionTitleGroup {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 0 0 18px;
-  font-size: 20px;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.sectionName {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  /* Big and bold — the header, not a caption. Tinted with the sub-team accent. */
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--accent, #f0910e);
+}
+
+/* Headcount pill — makes each sub-team read as a countable unit. */
+.sectionCount {
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #c3c8f2;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7a80b8;
 }
 
+/* The accent square before a name; sized up for the banner, reused smaller in
+ * nested headers. */
 .sectionMarker {
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: #f0910e;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--accent, #f0910e);
+  box-shadow: 0 0 16px -2px var(--accent, #f0910e);
 }
 
+/*
+ * Members are centred — a partial last row (or a small team) sits in the middle
+ * rather than hugging the left edge. Fixed-width cards keep every card the same
+ * size across sections; the flex row just centres and wraps them.
+ */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 22px;
+}
+
+.grid > * {
+  width: 216px;
+  max-width: 100%;
+}
+
+/* --- rank rows ----------------------------------------------------------- */
+
+/*
+ * The raised lead row: leads / vices / heads sit here, ABOVE the member grid,
+ * in physically bigger cards so rank reads before you've read a single label.
+ * It's centred and wraps, so a lone lead centres and a lead+vice pair sits
+ * together rather than stretching edge to edge.
+ */
+.leadRow {
+  display: flex;
+  flex-wrap: wrap;
+  /* Lead(s) sit centred above the member grid. */
+  justify-content: center;
+  gap: 22px;
+  margin-bottom: 26px;
+}
+
+.leadRow > * {
+  /* Bigger than a grid card (216px), so leads dominate their section. */
+  width: 300px;
+  max-width: 100%;
+}
+
+/* Division heads sit in the same centred, roomy row as section leads, with a
+ * touch more air above the sections below. */
+.divisionHeads {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 48px 8px;
+}
+
+.divisionHeads .leadRow {
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+/* --- nested subsections (Aerodesign → Wing / Tail) ----------------------- */
+
+/*
+ * No panel or box — just a light accent rule and a smaller header, so Wing and
+ * Tail & Stability read as belonging under Aerodesign without being caged in.
+ */
+.subGroup {
+  margin-top: 22px;
+}
+
+.subPanel {
+  margin-top: 26px;
+  padding-left: 20px;
+  border-left: 2px solid color-mix(in srgb, var(--accent, #f0910e) 45%, transparent);
+  scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
+}
+
+.subHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+}
+
+.subName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--accent, #f0910e);
+}
+
+/* The marker in a nested header is a touch smaller than the banner's. */
+.subName .sectionMarker {
+  width: 9px;
+  height: 9px;
 }
 
 /* --- footer line --------------------------------------------------------- */
@@ -274,16 +403,33 @@
   .heroCopy,
   .leadership,
   .divisionHeader,
+  .divisionHeads,
   .section,
   .pageFooter {
     padding-inline: 20px;
   }
+  /* Members go two-up, still centred, on a phone. */
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 14px;
   }
+  .grid > * {
+    width: calc(50% - 7px);
+  }
   /* Keep the last card clear of the fixed PULL tab. */
-  .section {
+  .section,
+  .divisionHeads {
     padding-right: 64px;
+  }
+  /* Lead cards drop to two-up so they still read as bigger than members
+   * without overflowing a phone. */
+  .leadRow {
+    gap: 14px;
+  }
+  .leadRow > * {
+    width: calc(50% - 7px);
+  }
+  /* Tighten the nested indent so cards keep room on a phone. */
+  .subPanel {
+    padding-left: 12px;
   }
 }

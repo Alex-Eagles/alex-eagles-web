@@ -1,14 +1,19 @@
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import crewPhoto from "@/assets/team/crew.jpg";
 import crew2025Photo from "@/assets/team/team-2025.jpg";
 import { JumpNav } from "@/components/team/JumpNav";
 import { MemberCardSolid } from "@/components/team/MemberCardSolid";
+import { SubTeamInfo } from "@/components/team/SubTeamInfo";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import {
   navGroups,
   ROSTER_YEARS,
   ROSTERS,
+  type Section,
+  splitByTier,
   subTeamAccent,
+  type TeamMember,
   type RosterYear,
 } from "@/data/team";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
@@ -38,6 +43,76 @@ export default function Team() {
    * anything while the cards are still off-screen. */
   const hintOpacity = Math.max(0, 1 - scrollY / 180);
   const hintShift = Math.min(40, scrollY * 0.7);
+
+  /* A row of cards for a set of members — used for both the raised lead row and
+   * the member grid, differing only by the class the caller passes. */
+  const cardRow = (members: TeamMember[], className: string) =>
+    members.length > 0 && (
+      <div className={className}>
+        {members.map((member) => (
+          <Card key={member.id} member={member} rosterYear={roster.year} />
+        ))}
+      </div>
+    );
+
+  /* Total headcount of a section including its nested subsections — shown in
+   * the header so each sub-team reads as a countable unit. */
+  const sectionCount = (section: Section): number =>
+    section.members.length +
+    (section.subsections?.reduce((n, s) => n + sectionCount(s), 0) ?? 0);
+
+  /*
+   * One sub-team block. Two visual modes, driven by the same data:
+   *   - top-level  → a big banner header + divider, cards below
+   *   - nested     → a lighter, indented header under an accent rule (Aerodesign
+   *                  → Wing / Tail), no box around it
+   * A themed info chip sits beside the title whenever the section has a blurb.
+   */
+  const renderSection = (section: Section, nested = false) => {
+    const { leads, grid } = splitByTier(section.members);
+    const accent = subTeamAccent(section.name);
+    const count = sectionCount(section);
+    const hasChildren = !!section.subsections?.length;
+
+    return (
+      <div
+        key={section.id}
+        id={section.id}
+        className={nested ? styles.subPanel : styles.section}
+        /* Accent drives the header, marker, and nested rule. */
+        style={{ "--accent": accent } as CSSProperties}
+      >
+        <div className={nested ? styles.subHeader : styles.sectionHeader}>
+          <div className={styles.sectionTitleGroup}>
+            <h3 className={nested ? styles.subName : styles.sectionName}>
+              <span className={styles.sectionMarker} aria-hidden />
+              {section.name}
+            </h3>
+            {section.blurb && (
+              <SubTeamInfo
+                name={section.name}
+                blurb={section.blurb}
+                accent={accent}
+                icon={section.icon}
+              />
+            )}
+          </div>
+          <span className={styles.sectionCount}>
+            {count} {count === 1 ? "member" : "members"}
+          </span>
+        </div>
+
+        {cardRow(leads, styles.leadRow)}
+        {cardRow(grid, styles.grid)}
+
+        {hasChildren && (
+          <div className={styles.subGroup}>
+            {section.subsections!.map((sub) => renderSection(sub, true))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className={styles.page}>
@@ -127,26 +202,14 @@ export default function Team() {
             </div>
           </div>
 
-          {division.sections.map((section) => (
-            <div key={section.id} id={section.id} className={styles.section}>
-              <h3
-                className={styles.sectionTitle}
-                style={{ color: subTeamAccent(section.name) }}
-              >
-                <span
-                  className={styles.sectionMarker}
-                  style={{ background: subTeamAccent(section.name) }}
-                  aria-hidden
-                />
-                {section.name}
-              </h3>
-              <div className={styles.grid}>
-                {section.members.map((member) => (
-                  <Card key={member.id} member={member} rosterYear={roster.year} />
-                ))}
-              </div>
+          {/* Division heads — Head / Vice — on a raised row above the sections. */}
+          {division.heads && division.heads.length > 0 && (
+            <div className={styles.divisionHeads}>
+              {cardRow(division.heads, styles.leadRow)}
             </div>
-          ))}
+          )}
+
+          {division.sections.map((section) => renderSection(section))}
         </section>
       ))}
 

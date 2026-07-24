@@ -233,3 +233,47 @@
   color: #ffffff;
   border-color: #f0910e;
 }
+
+/* ---------------------------------------------------------------------------
+ * RANK TIERS
+ * The card sizing (bigger lead cards, own row) is done by the grid in the page;
+ * here we add the per-card *treatment* that tells rank apart at a glance:
+ *   lead / vice / head  → accent ring (the role tag stays the top-left badge)
+ *   exec                → the raised trio, styled by the page
+ * `--accent` is set inline from the sub-team colour on lead-tier cards.
+ * -------------------------------------------------------------------------*/
+
+/* Accent ring around any lead-tier card. Uses an inset shadow so it hugs the
+ * rounded corners without a layout-shifting border. */
+.card[data-tier="lead"],
+.card[data-tier="vice"],
+.card[data-tier="head"] {
+  box-shadow:
+    0 8px 24px -14px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 2px color-mix(in srgb, var(--accent, #f0910e) 85%, transparent);
+}
+
+.card[data-tier="lead"]:hover,
+.card[data-tier="lead"]:focus-visible,
+.card[data-tier="vice"]:hover,
+.card[data-tier="vice"]:focus-visible,
+.card[data-tier="head"]:hover,
+.card[data-tier="head"]:focus-visible {
+  box-shadow:
+    0 34px 60px -30px color-mix(in srgb, var(--accent, #f0910e) 55%, transparent),
+    inset 0 0 0 2px var(--accent, #f0910e);
+}
+
+/* A vice reads as a lead's second — a dashed ring instead of a solid one. */
+.card[data-tier="vice"] {
+  box-shadow:
+    0 8px 24px -14px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 2px color-mix(in srgb, var(--accent, #f0910e) 55%, transparent);
+}
+
+/* A head card (division lead) gets a slightly heavier ring than a section lead. */
+.card[data-tier="head"] {
+  box-shadow:
+    0 10px 30px -14px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 2.5px var(--accent, #f0910e);
+}

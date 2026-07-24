@@ -1,11 +1,14 @@
+import type { CSSProperties } from "react";
 import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
+  isLeadTier,
   memberCutout,
   memberFirstName,
   memberName,
   memberPhoto,
   memberYearLabel,
+  roleTier,
   subTeamAccent,
   type TeamMember,
 } from "@/data/team";
@@ -31,10 +34,16 @@ export function MemberCardSolid({
   const name = memberName(member);
   const firstName = memberFirstName(member);
   const accent = subTeamAccent(member.department);
+  const tier = roleTier(member.role);
+  const lead = isLeadTier(tier);
 
   return (
     <article
       className={styles.card}
+      data-tier={tier}
+      /* Lead-tier cards tint their accent ring with the sub-team colour, set as
+       * a custom property so the stylesheet owns the actual treatment. */
+      style={lead ? ({ "--accent": accent } as CSSProperties) : undefined}
       tabIndex={0}
       aria-label={filled ? `${member.name}, ${member.role}` : `Unfilled ${member.role} slot`}
     >
