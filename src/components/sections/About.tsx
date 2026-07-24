@@ -71,7 +71,11 @@ export default function About() {
               backgroundSize: "34px 34px",
             }}
           />
-          {/* Swap this block for <img src=… alt="The Alex Eagles team" className="absolute inset-0 w-full h-full object-cover" /> */}
+          {/* Swap this block for:
+              <img src="/team/team-photo.webp" alt="The Alex Eagles team"
+                   loading="lazy" decoding="async"
+                   className="absolute inset-0 w-full h-full object-cover" />
+              Recommended export: 1200×900 (4:3), WebP. */}
           <div className="relative text-center text-fg-subtle">
             <ImageIcon size={48} strokeWidth={1.5} className="mx-auto mb-2.5" />
             <div className="font-sans text-[13px] tracking-[0.08em] uppercase">
