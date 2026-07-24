@@ -110,7 +110,7 @@ export const achievements: Achievement[] = [
     awards: [
       { place: "2nd Place", title: "Best Design", competition: "SAE Aero Design" },
     ],
-    portraits: ["/history/sae-2017.png"],
+    portraits: ["/history/sae-2017.webp"],
   },
   {
     id: "2018-sae-design",
@@ -119,7 +119,7 @@ export const achievements: Achievement[] = [
     awards: [
       { place: "1st Place", title: "Best Design", competition: "SAE Aero Design" },
     ],
-    portraits: ["/history/sae-2018.png"],
+    portraits: ["/history/sae-2018.webp"],
   },
   {
     id: "2019-sae-design",
@@ -128,7 +128,7 @@ export const achievements: Achievement[] = [
     awards: [
       { place: "3rd Place", title: "Best Design", competition: "SAE Aero Design" },
     ],
-    portraits: ["/history/sae-2019.jpeg"],
+    portraits: ["/history/sae-2019.webp"],
   },
   {
     id: "2020-sae-overall",
@@ -137,7 +137,7 @@ export const achievements: Achievement[] = [
     awards: [
       { place: "3rd Place", title: "Overall", competition: "SAE Aero Design" },
     ],
-    portraits: ["/history/sae-2020.png"],
+    portraits: ["/history/sae-2020.webp"],
   },
   {
     id: "2021-uavc-sae",
@@ -148,7 +148,7 @@ export const achievements: Achievement[] = [
       { place: "4th Place", title: "Overall", competition: "SAE Aero Design" },
     ],
     // Two awards → two frames: [ Image 1 ]  pole  [ Image 2 ]
-    portraits: ["/history/sae-2021.png"],
+    portraits: ["/history/sae-2021.webp"],
   },
   {
     id: "2022-sae-double",
@@ -163,7 +163,7 @@ export const achievements: Achievement[] = [
       },
     ],
     // Two awards → two frames: [ Image 1 ]  pole  [ Image 2 ]
-    portraits: ["/history/sae-2022-1.jpeg", "/history/sae-2022-2.jpeg"],
+    portraits: ["/history/sae-2022-1.webp", "/history/sae-2022-2.webp"],
   },
   {
     id: "2023-sae-overall",
@@ -172,14 +172,14 @@ export const achievements: Achievement[] = [
     awards: [
       { place: "11th Place", title: "Overall", competition: "SAE Aero Design" },
     ],
-    portraits: ["/history/suas-2023.jpg"],
+    portraits: ["/history/suas-2023.webp"],
   },
   {
     id: "2024-uavc",
     year: "2024",
     title: "5th Place",
     awards: [{ place: "5th Place", title: "Overall", competition: "UAVC" }],
-    portraits: ["/history/uavc-2024.jpg"],
+    portraits: ["/history/uavc-2024.webp"],
   },
   {
     id: "2025-uavc-suas",
@@ -192,8 +192,8 @@ export const achievements: Achievement[] = [
     ],
     // Three awards → three frames, arranged around the pole.
     portraits: [
-      "/history/uavc-2025.jpeg",
-      "/history/suas-2025.png",
+      "/history/uavc-2025.webp",
+      "/history/suas-2025.webp",
     ],
   },
 ];
@@ -206,7 +206,7 @@ export const achievements: Achievement[] = [
  * Rendered as a DOM <img> rather than a WebGL texture — crisp at any size, zero
  * GPU texture upload.
  */
-export const FLAG_SRC = "/history/eg-flag.png";
+export const FLAG_SRC = "/history/Flags/eg-flag.webp";
 
 /**
  * The logo flown on a stop's flag pole, per competition.
@@ -223,13 +223,13 @@ export function competitionLogo(
 ): string {
   switch (competition) {
     case "SUAS":
-      return "/history/suas.png";
+      return "/history/Flags/suas.webp";
     case "SAE Aero Design":
-      return "/history/sae-logo.png";
+      return "/history/Flags/sae-logo.svg";
     case "UAVC":
       // Only the years the team actually attended UAVC (2021, 2024, 2025)
       // have a logo on disk. Any other year would 404 → Egyptian fallback.
-      return `/history/UAVC-logo-${year}.png`;
+      return `/history/Flags/UAVC-logo-${year}.svg`;
   }
 }
 
