@@ -101,7 +101,7 @@ export const achievements: Achievement[] = [
     blurb:
       "Established in 2013, Alex Eagles is a dynamic and diverse group of 40 engineering students from Alexandria University, specializing in various fields, such as mechanical and computer engineering.",
     awards: [],
-    portraits: ["/history/very-oldimage-2016-cropped.jpg"],
+    portraits: ["/history/very-oldimage-2016-cropped.webp"],
   },
   {
     id: "2017-sae-design",
