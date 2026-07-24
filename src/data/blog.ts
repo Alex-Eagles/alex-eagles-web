@@ -37,7 +37,11 @@ export interface CategoryStyle {
   accent: string;
   /** Primary dark text (title, excerpt, meta values) — reads on `bg`. */
   text: string;
-  /** Secondary dark text (meta labels, footer date/dots) — reads on `bg`. */
+  /**
+   * Secondary dark text (meta labels, footer date/dots) — reads on `bg`.
+   * Tuned to clear WCAG AA (4.5:1) on BOTH `bg.light` and the darker
+   * `bg.dark`; the reference-sheet originals only passed on light.
+   */
   label: string;
 }
 
@@ -55,13 +59,13 @@ export const CATEGORY_STYLE: Record<BlogCategory, CategoryStyle> = {
     bg: { light: "#FAEEDA", dark: "#C8BEAE" },
     accent: "#FAC775",
     text: "#5F3A0A",
-    label: "#854F0B",
+    label: "#6E4109",
   },
   software: {
     bg: { light: "#E1F5EE", dark: "#B4C4BE" },
     accent: "#9FE1CB",
     text: "#085041",
-    label: "#0F6E56",
+    label: "#0C5744",
   },
   firmware: {
     bg: { light: "#EEEDFE", dark: "#BEBECB" },
@@ -73,25 +77,25 @@ export const CATEGORY_STYLE: Record<BlogCategory, CategoryStyle> = {
     bg: { light: "#FBEAF0", dark: "#C9BBC0" },
     accent: "#F4C0D1",
     text: "#4B1528",
-    label: "#993556",
+    label: "#812D49",
   },
   structure: {
     bg: { light: "#F1EFE8", dark: "#C1BFBA" },
     accent: "#D3D1C7",
     text: "#2C2C2A",
-    label: "#5F5E5A",
+    label: "#4C4B48",
   },
   aerodesign: {
     bg: { light: "#E6F1FB", dark: "#B8C1C9" },
     accent: "#B5D4F4",
     text: "#042C53",
-    label: "#185FA5",
+    label: "#144D86",
   },
   propulsion: {
     bg: { light: "#EAF3DE", dark: "#BBC2B2" },
     accent: "#C0DD97",
     text: "#173404",
-    label: "#3B6D11",
+    label: "#2E550D",
   },
 };
 

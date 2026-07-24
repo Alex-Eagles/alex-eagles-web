@@ -43,7 +43,7 @@ export default function BlogHeader({ activeFilter, onFilterChange }: BlogHeaderP
         }}
       />
 
-      <div className="relative z-10 max-w-[var(--maxw-content)] mx-auto px-6 pt-24 pb-10 md:pt-28 min-h-screen flex flex-col text-center">
+      <div className="relative z-10 max-w-[var(--maxw-content)] mx-auto px-6 pt-24 pb-6 md:pt-28 min-h-screen flex flex-col text-center">
         {/* Title block — vertically centered in the space above the pills,
             using the exact same treatment as the home hero's title. */}
         <div className="flex-1 flex flex-col justify-center">
