@@ -99,18 +99,17 @@ Client-side routing via React Router. Routes are declared in `src/App.tsx`:
 
 | Route       | Page       | Status        |
 | ----------- | ---------- | ------------- |
-| `/`         | Home       | ✅ Built      |
+| `/`         | Home       | ✅ Video landing page |
 | `/team`     | Team       | 🚧 Coming soon |
-| `/blog`     | Blog       | 🚧 Coming soon |
+| `/blog`     | Blog       | ✅ Video landing page |
 | `/vehicles` | Vehicles   | 🚧 Coming soon |
 | `/gallery`  | Gallery    | 🚧 Coming soon |
 | `/history`  | History    | 🚧 Coming soon |
 | `*`         | NotFound   | 404 fallback  |
 
-The **Home** page is fully designed (Hero → StatsBar → About → LatestUpdates →
-Sponsors). The remaining pages render a polished, on-brand `ComingSoon`
-placeholder so navigation works end-to-end today — swap each page's import for
-the real design as it lands; nothing else in the shell changes.
+The **Home** and **Blog** routes have video-led landing pages. Home remains
+clearly marked as being in active development; Team, Vehicles, Gallery, and
+History render a polished, on-brand `ComingSoon` placeholder.
 
 The layout shell (`App.tsx`) provides a skip link, a fixed theme toggle, the
 navbar, the routed `<main>`, and the footer. A `ScrollToTop` helper resets scroll
@@ -174,6 +173,8 @@ Editable content is kept out of components:
 - **`src/data/home.ts`** — Home page content (stats, latest updates, sponsors).
   Currently mock data; swap these arrays for a CMS/API later without touching the
   components.
+- **`public/media/`** — web-optimized H.264 footage and matching poster images
+  used by the Home and Blog pages.
 
 ---
 

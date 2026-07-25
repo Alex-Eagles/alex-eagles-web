@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import AeLogo from "@/components/ui/AeLogo";
+import AmbientVideo from "@/components/ui/AmbientVideo";
 import Button from "@/components/ui/Button";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -10,17 +11,11 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * Layering (back → front):
  *   1. Radial brand gradient      — always present; also the fallback if no
  *                                    video file is provided.
- *   2. Drone background <video>    — muted / autoplay / loop; drop your file at
- *                                    `public/media/hero-drone.mp4` (see below).
+ *   2. Drone background video      — muted / autoplay / loop.
  *   3. Darkening overlay           — keeps headline text readable over video.
  *   4. Animated indigo grid        — subtle aerospace texture.
  *   5. Bottom fade into the page.
  *   6. Floating brand crest + copy — parallaxes gently on scroll.
- *
- * ─── ADDING THE DRONE VIDEO ─────────────────────────────────────────────────
- * Place a muted, loop-friendly clip at `public/media/hero-drone.mp4` (and an
- * optional `hero-poster.jpg` alongside it). Until then, the gradient + grid
- * render on their own and the hero still looks complete.
  */
 export default function Hero() {
   const scrollY = useScrollPosition();
@@ -41,18 +36,17 @@ export default function Hero() {
         }}
       />
 
-      {/* 2. Drone background video. Fails silently to the gradient if absent. */}
-      <video
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/media/hero-poster.jpg"
-        aria-hidden="true"
-      >
-        <source src="/media/hero-drone.mp4" type="video/mp4" />
-      </video>
+      {/* 2. Drone background video. */}
+      <AmbientVideo
+        src="/media/homepage-background.mp4"
+        poster="/media/homepage-background-poster.jpg"
+        mobileSrc="/media/homepage-mobile.mp4"
+        mobilePoster="/media/homepage-mobile-poster.jpg"
+        label="homepage background video"
+        className="absolute inset-0"
+        preload="auto"
+        controlClassName="bottom-6 right-6 md:bottom-8 md:right-8"
+      />
 
       {/* 3. Darkening overlay for text contrast over the video. */}
       <div

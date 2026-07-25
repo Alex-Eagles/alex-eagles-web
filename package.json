@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "node --test scripts/*.test.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.0",
