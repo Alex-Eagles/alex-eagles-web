@@ -5,6 +5,7 @@
  *   HERO      normal scrolling — establishes context
  *   JOURNEY   pinned 3D scene, scrubbed by scroll (HistoryJourney)
  *   CLOSING   the same milestones as readable text (Timeline2D)
+ *   RECORD    press, publications and competitions (PressAndPublications)
  *
  * The hero earns its place beyond looking good: it gives the browser a few
  * hundred milliseconds to fetch the 3D chunk, create the WebGL context and
@@ -21,6 +22,7 @@
 import { motion } from "framer-motion";
 import SectionHeader from "@/components/ui/SectionHeader";
 import HistoryJourney from "@/components/history/HistoryJourney";
+import PressAndPublications from "@/components/history/PressAndPublications";
 import ScrollCue from "@/components/history/ScrollCue";
 import Timeline2D from "@/components/history/Timeline2D";
 import { fadeUp, viewportOnce } from "@/lib/motion";
@@ -143,6 +145,17 @@ export default function History() {
       </section>
 
       <Timeline2D />
+
+      {/* ── On the record ─────────────────────────────────────────────────
+          Press coverage, the team's own publications, and the competitions
+          it has flown at. Last on the page on purpose: the timeline above is
+          the story, and this is the paper trail behind it — someone who came
+          for the history has already got what they came for by here.
+
+          It sits on `bg-surface`, so it also closes the page on a different
+          surface from the timeline rather than running into it. Renders
+          nothing at all while its data file is empty; see the component. */}
+      <PressAndPublications />
     </>
   );
 }
