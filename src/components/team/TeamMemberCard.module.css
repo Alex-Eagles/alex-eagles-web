@@ -13,7 +13,7 @@
   --periwinkle: #aaaaaa;
   --periwinkle-dim: #999999;
   --muted: #666666;
-  --name-behind: #444444;
+  --name-behind: #6b6fc7;
   --ease-move: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-img: cubic-bezier(0.16, 0.84, 0.34, 1);
 
@@ -167,13 +167,15 @@
 .bigName {
   position: absolute;
   top: 6px;
-  left: 0;
-  right: 0;
-  font-size: 70px;
+  /* Roughly matches the cutout photo's own width (object-fit: contain
+     letterboxes it inside the card) instead of running full-bleed. */
+  left: 6%;
+  right: 6%;
+  font-size: 52px;
   line-height: 0.78;
   font-weight: 900;
   letter-spacing: -0.05em;
-  transform: scaleY(2.1);
+  transform: scaleY(1.5);
   transform-origin: top;
   white-space: nowrap;
   text-align: center;

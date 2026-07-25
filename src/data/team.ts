@@ -177,7 +177,7 @@ const PHOTOS = bySlug(
 );
 
 const CUTOUTS = bySlug(
-  import.meta.glob<{ default: string }>("../assets/members/cutout2/*.{png,webp}", {
+  import.meta.glob<{ default: string }>("../assets/members/cutout2/*.{png,webp,svg}", {
     eager: true,
   }),
 );
@@ -321,7 +321,10 @@ const ROSTER_2026: YearRoster = {
   year: "2026",
   leadership: [
     { ...slot("Vice Lead"), department: "Team Leadership" },
-    { ...slot("Team Leader"), department: "Team Leadership" },
+    {
+      ...slot("Team Leader", "Farah Harfoush", { photo: "farah-harfoush-2026" }),
+      department: "Team Leadership",
+    },
     { ...slot("EM Integration Lead"), department: "Team Leadership" },
   ],
   divisions: [

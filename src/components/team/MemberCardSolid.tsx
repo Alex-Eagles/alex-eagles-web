@@ -75,7 +75,7 @@ export function MemberCardSolid({
             fontWeight="900"
             fontSize="190"
             letterSpacing="-0.03em"
-            fill="#444444"
+            fill="#6b6fc7"
           >
             {firstName}
           </text>

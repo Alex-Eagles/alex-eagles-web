@@ -35,14 +35,14 @@
   box-shadow: 0 34px 60px -30px rgba(90, 91, 221, 0.22);
 }
 
-/* Dark texture, always visible. */
+/* Dark texture, always visible — same treatment as the 2026 card's cutout
+ * backdrop (TeamMemberCard's .backdrop/.backdropScrim), so the texture reads
+ * equally visible in both years instead of getting crushed dark here. */
 .backdrop {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  opacity: 0.85;
-  filter: brightness(0.38);
 }
 
 .scrim {
@@ -50,8 +50,8 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(15, 15, 15, 0.5),
-    rgba(15, 15, 15, 0.75)
+    rgba(15, 15, 15, 0.55),
+    rgba(15, 15, 15, 0.35)
   );
 }
 
