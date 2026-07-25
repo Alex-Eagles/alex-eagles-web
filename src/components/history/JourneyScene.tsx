@@ -358,6 +358,11 @@ export default function JourneyScene({
           position: poles[0].base
             .clone()
             .lerp(poles[poles.length - 1].base, vehicle.alongPoles)
+            // screenRight, not `right`: it never flips with path parity, so a
+            // positive lateralOffset is the viewer's right on every stop. It is
+            // also the ONLY sideways control that does anything on a one-pole
+            // stop, where the lerp above collapses to a single point.
+            .addScaledVector(screenRight, vehicle.lateralOffset)
             .addScaledVector(tangent, -vehicle.forwardOffset),
           shadowRadius: vehicle.shadowRadius,
           shadowMask: vehicle.shadowMask,

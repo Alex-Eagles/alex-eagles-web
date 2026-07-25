@@ -50,11 +50,17 @@
  * ║           groundOffset: 0,           // 0 = wheels on the floor          ║
  * ║         }],                                                              ║
  * ║                                                                          ║
- * ║  THE FOUR POSITION KNOBS, and which way each moves it:                   ║
- * ║     alongPoles    ←→  sideways. 0 sits on the first pole, 1 on the last, ║
- * ║                       0.5 midway. Values outside that range keep going,  ║
- * ║                       so −0.5 is out past the first pole, 2.7 is way     ║
- * ║                       out beyond the last.                               ║
+ * ║  THE POSITION KNOBS, and which way each moves it:                        ║
+ * ║     lateralOffset ←→  sideways in world units. + is the viewer's RIGHT.  ║
+ * ║                       ** START HERE. ** It works on every stop, and it   ║
+ * ║                       is the ONLY sideways control that does anything on ║
+ * ║                       a year with one pole — which is most years.        ║
+ * ║     alongPoles    ←→  sideways, as a fraction from the first pole to the ║
+ * ║                       last. Only useful on a MULTI-competition year      ║
+ * ║                       (2021, 2025): with one pole both ends of the       ║
+ * ║                       interpolation are the same point, so every value   ║
+ * ║                       lands identically. 0.5 is midway; values outside   ║
+ * ║                       0..1 keep going past the poles.                    ║
  * ║     forwardOffset  ↓   toward the viewer. Raise it to bring an aircraft  ║
  * ║                       out in FRONT of the poles and photos.              ║
  * ║     groundOffset   ↕   height off the floor. 0 = parked. This is the one ║
@@ -205,6 +211,18 @@ export interface Vehicle {
    * point, so the aircraft simply stands at that pole.
    */
   alongPoles: number;
+  /**
+   * Sideways nudge in WORLD UNITS, applied after `alongPoles`. Positive moves
+   * it to the viewer's right, negative to the left, on every stop regardless of
+   * which way the path is curving.
+   *
+   * This is the only sideways control that works on a stop with ONE pole.
+   * `alongPoles` interpolates between the first pole and the last, so when a
+   * year won at a single competition both ends are the same point and every
+   * value lands in the same place. Most years are single-competition, so this
+   * is the dial you'll usually want.
+   */
+  lateralOffset: number;
   /**
    * How far IN FRONT of the poles it stands, in world units — measured back
    * along the path toward the oncoming camera. Bigger = nearer the viewer.
@@ -370,6 +388,26 @@ export const achievements: Achievement[] = [
       { place: "11th Place", title: "Overall", competition: "SAE Aero Design" },
     ],
     portraits: ["/history/suas-2023.webp"],
+    // 2023 won at a single competition, so it has ONE pole — which means
+    // `alongPoles` can't move anything here (both ends of the lerp are the same
+    // point). `lateralOffset` is what puts the aircraft to the right of it. The
+    // year's photo hangs on the LEFT, so the right side is clear.
+    vehicles: [
+      {
+        name: "Hotwing",
+        render: "/history/vehicles/hotwing.webp",
+        renderLight: "/history/vehicles/hotwing-light.webp",
+        shadowMask: "/history/vehicles/hotwing-shadow.webp",
+        width: 600,
+        height: 177,
+        alongPoles: 0,
+        lateralOffset: 4.2,
+        forwardOffset: 2.8,
+        displayWidth: 205,
+        shadowRadius: 2.9,
+        groundOffset: 0,
+      },
+    ],
   },
   {
     id: "2024-uavc",
@@ -407,6 +445,7 @@ export const achievements: Achievement[] = [
         // Left of the UAVC pole, out in front of the UAVC photo. Pulled well
         // forward so it clears both the pole behind it and the drone beside it.
         alongPoles: -0.55,
+        lateralOffset: 0,
         forwardOffset: 3.2,
         displayWidth: 175,
         shadowRadius: 2.5,
@@ -422,6 +461,7 @@ export const achievements: Achievement[] = [
         // Over in front of the SUAS photo — far enough right of the fixed-wing
         // that the two never touch, and small enough not to cover the photo.
         alongPoles: 2.7,
+        lateralOffset: 0,
         forwardOffset: 3.4,
         displayWidth: 105,
         shadowRadius: 1.3,

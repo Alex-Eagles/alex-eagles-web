@@ -122,7 +122,7 @@ export const SHADOW = {
    * ⬅ FLAG-POLE shadows, dark mode. (In light mode the poles cast none — see
    * `poleShadowsInLight`.)
    */
-  poleOpacity: 0.5,
+  poleOpacity: 0.6,
   /**
    * ⬅ AIRCRAFT shadows, DARK mode. Deliberately heavier than the poles'.
    *
@@ -132,12 +132,12 @@ export const SHADOW = {
    * front of it. It also has to survive being spread over a wingspan, where
    * the same opacity that reads as solid under a narrow post looks thin.
    */
-  vehicleDarkOpacity: 0.7,
+  vehicleDarkOpacity: 7.0,
   /**
    * ⬅ AIRCRAFT shadows, LIGHT mode. Much lower: black on a near-white floor
    * reads far heavier than the same value on a near-black one.
    */
-  vehicleLightOpacity: 0.25,
+  vehicleLightOpacity: 1.0,
   /**
    * Whether the flag poles cast shadows in LIGHT mode.
    *

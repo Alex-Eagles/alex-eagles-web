@@ -40,9 +40,24 @@ LIGHT = dict(sat=0.97, gamma=1.0, ambient=np.array([0x8a,0x93,0xb0], np.float32)
 # mode only, since on the pale floor it reads fine.
 OVERRIDES = {
     ("do3soka", "dark"): dict(gamma=1.02, exposure=1.10),
+    # Hotwing takes the plain night grade — NOT Do3soka's dark override. That
+    # override exists purely to rescue a dark red airframe that was vanishing
+    # into the floor; applying a brightening curve to an already-bright sky-blue
+    # aircraft would leave it glowing at ~119 luminance next to 49 and 64,
+    # reading as lit by something the scene doesn't have.
+    # ...but it is a BRIGHT sky-blue airframe that already sits light, so in
+    # light mode it needs none of the lifting the darker aircraft do. Left
+    # essentially as rendered: de-fringed, a whisper of ambient, nothing else.
+    # Pushing exposure on something already this bright only clips the wings
+    # to flat white and loses the panel lines.
+    ("hotwing", "light"): dict(sat=1.0, gamma=1.0, tint=0.04, exposure=1.0),
 }
 
-for name, size, q in (("do3soka", (563, 563), 82), ("itay", (400, 400), 84)):
+for name, size, q in (
+    ("do3soka", (563, 563), 82),
+    ("itay", (400, 400), 84),
+    ("hotwing", (600, 600), 82),
+):
     src = Image.open(f"art-source/vehicles/{name}.png").convert("RGBA")
     src = src.crop(src.getbbox())
     rgb0, alpha = defringe(src)
