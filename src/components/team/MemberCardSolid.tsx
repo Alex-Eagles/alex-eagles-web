@@ -1,11 +1,15 @@
+import type { CSSProperties } from "react";
 import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
+  isLeadTier,
   memberCutout,
   memberFirstName,
   memberName,
   memberPhoto,
+  memberRoleLabel,
   memberYearLabel,
+  roleTier,
   subTeamAccent,
   type TeamMember,
 } from "@/data/team";
@@ -31,12 +35,19 @@ export function MemberCardSolid({
   const name = memberName(member);
   const firstName = memberFirstName(member);
   const accent = subTeamAccent(member.department);
+  const tier = roleTier(member.role);
+  const lead = isLeadTier(tier);
+  const roleLabel = memberRoleLabel(member);
 
   return (
     <article
       className={styles.card}
+      data-tier={tier}
+      /* Lead-tier cards tint their accent ring with the sub-team colour, set as
+       * a custom property so the stylesheet owns the actual treatment. */
+      style={lead ? ({ "--accent": accent } as CSSProperties) : undefined}
       tabIndex={0}
-      aria-label={filled ? `${member.name}, ${member.role}` : `Unfilled ${member.role} slot`}
+      aria-label={filled ? `${member.name}, ${roleLabel}` : `Unfilled ${roleLabel} slot`}
     >
       <div
         className={styles.backdrop}
@@ -64,7 +75,7 @@ export function MemberCardSolid({
             fontWeight="900"
             fontSize="190"
             letterSpacing="-0.03em"
-            fill="#5b62a0"
+            fill="#6b6fc7"
           >
             {firstName}
           </text>
@@ -81,14 +92,14 @@ export function MemberCardSolid({
 
       {/* Rest-state tags */}
       <span className={styles.badge} style={{ color: accent, borderColor: accent }}>
-        {member.role}
+        {roleLabel}
       </span>
       <span className={styles.restName}>{name}</span>
 
       {/* Hover info panel */}
       <div className={styles.panel}>
         <p className={styles.panelRole} style={{ color: accent }}>
-          {member.role}
+          {roleLabel}
         </p>
         <p className={styles.panelName}>{name}</p>
         <p className={styles.panelDept}>{member.department}</p>

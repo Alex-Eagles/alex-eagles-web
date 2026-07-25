@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
@@ -5,10 +6,52 @@ import {
   memberFirstName,
   memberName,
   memberPhoto,
+  memberRoleLabel,
   memberYearLabel,
   type TeamMember,
 } from "@/data/team";
 import styles from "./TeamMemberCard.module.css";
+
+/**
+ * The stretched first name behind the portrait — squeezed or stretched
+ * horizontally (via a measured `scaleX`) to exactly fill its box regardless
+ * of how many letters it has, the same way the 2025 card's SVG `textLength`
+ * does. Without this, short names looked fine but longer ones (YOUSSEF,
+ * ABDELRAHMAN, MARIYAM…) overflowed the box and got clipped by the card.
+ */
+function FitName({ children }: { children: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [scaleX, setScaleX] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return;
+
+    // A ResizeObserver (rather than a one-shot measurement) means this can't
+    // miss the case where the parent's box isn't sized yet the instant this
+    // effect runs — it re-fires the moment a real size is available, and
+    // again on any later change, so it always converges on the right fit.
+    const measure = () => {
+      const naturalWidth = el.scrollWidth;
+      const available = parent.clientWidth;
+      if (naturalWidth > 0 && available > 0) {
+        setScaleX(available / naturalWidth);
+      }
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [children]);
+
+  return (
+    <span ref={ref} className={styles.bigNameText} style={{ transform: `scaleX(${scaleX}) scaleY(1.5)` }}>
+      {children}
+    </span>
+  );
+}
 
 /**
  * Team member hover card.
@@ -34,13 +77,14 @@ export function TeamMemberCard({
   const name = memberName(member);
   const filled = hasName(member);
   const yearLabel = memberYearLabel(member, rosterYear);
+  const roleLabel = memberRoleLabel(member);
 
   return (
     <article
       className={styles.card}
       data-mode={cutout ? "cutout" : "photo"}
       tabIndex={0}
-      aria-label={filled ? `${member.name}, ${member.role}` : `Unfilled ${member.role} slot`}
+      aria-label={filled ? `${member.name}, ${roleLabel}` : `Unfilled ${roleLabel} slot`}
     >
       <div className={styles.inner}>
         {cutout && (
@@ -53,7 +97,7 @@ export function TeamMemberCard({
             <div className={styles.backdropScrim} aria-hidden />
             {firstName && (
               <span className={`${styles.bigName} ${styles.bigNameBack}`} aria-hidden>
-                {firstName}
+                <FitName>{firstName}</FitName>
               </span>
             )}
             <div className={styles.cutoutLayer} aria-hidden>
@@ -99,21 +143,21 @@ export function TeamMemberCard({
             <div className={styles.topScrim} aria-hidden />
             {firstName && (
               <span className={`${styles.bigName} ${styles.bigNameFront}`} aria-hidden>
-                {firstName}
+                <FitName>{firstName}</FitName>
               </span>
             )}
           </>
         )}
 
         {/* Visible at rest, hidden on hover */}
-        <p className={styles.restRole}>{member.role}</p>
+        <p className={styles.restRole}>{roleLabel}</p>
         <p className={styles.restName} data-placeholder={!filled}>
           {name}
         </p>
 
         {/* Hidden at rest, revealed on hover */}
         <div className={styles.panel}>
-          <p className={styles.panelRole}>{member.role}</p>
+          <p className={styles.panelRole}>{roleLabel}</p>
           <p className={styles.panelName} data-placeholder={!filled}>
             {name}
           </p>
