@@ -40,11 +40,14 @@ LIGHT = dict(sat=0.97, gamma=1.0, ambient=np.array([0x8a,0x93,0xb0], np.float32)
 # mode only, since on the pale floor it reads fine.
 OVERRIDES = {
     ("do3soka", "dark"): dict(gamma=1.02, exposure=1.10),
-    # Hotwing takes the plain night grade — NOT Do3soka's dark override. That
-    # override exists purely to rescue a dark red airframe that was vanishing
-    # into the floor; applying a brightening curve to an already-bright sky-blue
-    # aircraft would leave it glowing at ~119 luminance next to 49 and 64,
-    # reading as lit by something the scene doesn't have.
+    # Hotwing needs the OPPOSITE of Do3soka's dark override. Do3soka is a dark
+    # red airframe that had to be rescued from vanishing; Hotwing is bright
+    # sky-blue and starts at 119 luminance, so even the plain night grade left
+    # it at 91 against 49 and 64 — the brightest thing on a near-black floor,
+    # with a crisp rim and no fog on it (DOM overlays don't receive the scene's
+    # fog the way the 3D geometry does). That combination is exactly what reads
+    # as a sticker. Pulled down to ~63, level with Itay, it belongs to the scene.
+    ("hotwing", "dark"): dict(gamma=1.30, tint=0.50, exposure=0.72),
     # ...but it is a BRIGHT sky-blue airframe that already sits light, so in
     # light mode it needs none of the lifting the darker aircraft do. Left
     # essentially as rendered: de-fringed, a whisper of ambient, nothing else.
@@ -68,6 +71,8 @@ for name, size, q in (
         out = Image.fromarray(
             np.concatenate([rgb, alpha * 255.0], -1).astype(np.uint8), "RGBA")
         out.thumbnail(size, Image.LANCZOS)
+
+
         out.save(f"public/history/vehicles/{name}{suffix}.webp", "WEBP",
                  quality=q, method=6)
         print(f"  {name}{suffix}: {out.size} luminance {(rgb@L)[solid].mean():.1f}")

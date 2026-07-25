@@ -425,15 +425,15 @@ export const achievements: Achievement[] = [
         height: 177,
         alongPoles: 0,
         lateralOffset: -4.0,
-        forwardOffset: 3.4,
+        forwardOffset: 2.8,
         displayWidth: 205,
         shadowRadius: 2.9,
         groundOffset: 0,
         // ⬅ HOTWING'S OWN SHADOW DIALS. Independent of Do3soka and Itay, which
         // follow the scene-wide SHADOW values in sceneConfig. Adjust these two
         // freely without touching the others.
-        shadowOpacityDark: 0.7,
-        shadowOpacityLight: 0.25,
+        shadowOpacityDark: 9.0,
+        shadowOpacityLight: 2.5,
       },
     ],
   },
