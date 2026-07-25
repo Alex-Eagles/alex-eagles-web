@@ -93,6 +93,8 @@ interface StopOverlaysProps {
   achievements: Achievement[];
   uRef: React.MutableRefObject<number>;
   pathLength: number;
+  /** Active theme — selects which grade of each aircraft render to show. */
+  isDark: boolean;
 }
 
 export default function StopOverlays({
@@ -100,6 +102,7 @@ export default function StopOverlays({
   achievements,
   uRef,
   pathLength,
+  isDark,
 }: StopOverlaysProps) {
   // Which stops are currently mounted. Changes a handful of times per journey.
   const [visible, setVisible] = useState<number[]>([0, 1]);
@@ -158,6 +161,7 @@ export default function StopOverlays({
             index={index}
             stop={stop}
             achievement={achievement}
+            isDark={isDark}
             registerNodes={(nodes) => {
               if (nodes) nodesRef.current.set(index, nodes);
               else nodesRef.current.delete(index);
@@ -174,6 +178,7 @@ interface StopOverlayProps {
   stop: StopPlacement;
   achievement: Achievement;
   registerNodes: (nodes: HTMLElement[] | null) => void;
+  isDark: boolean;
 }
 
 function StopOverlay({
@@ -181,6 +186,7 @@ function StopOverlay({
   stop,
   achievement,
   registerNodes,
+  isDark,
 }: StopOverlayProps) {
   // Collected fresh each render — the number of frames varies per stop, so a
   // fixed set of refs won't do.
@@ -448,7 +454,11 @@ function StopOverlay({
         >
           <img
             ref={collect}
-            src={vehicle.render}
+            // Two grades of the same aircraft; only the one the current theme
+            // uses is ever requested, so this costs no extra bytes on a visit.
+            // The dark grade is dim enough to sit on a near-black floor and
+            // reads as a black blob on the pale one.
+            src={isDark ? vehicle.render : vehicle.renderLight}
             // Named, not decorative: these are the team's own aircraft, so the
             // alt text carries real information for screen readers even though
             // no name is drawn on screen.

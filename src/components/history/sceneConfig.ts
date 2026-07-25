@@ -103,6 +103,31 @@ export function scenePalette(isDark: boolean): ScenePalette {
 }
 
 /**
+ * Ground-shadow strength, per theme.
+ *
+ * ─── WHY LIGHT MODE NEEDS SO MUCH LESS ──────────────────────────────────────
+ * These are black pools, and how heavy black reads depends entirely on what
+ * it's sitting on. At 0.5 on the near-black floor (#0a0d26) a shadow is a
+ * subtle darkening — most of the contrast is already gone. Put the same 0.5 on
+ * the near-white light-mode floor (#e8e8f9) and it becomes an ink stain: the
+ * darkest thing on the page by a wide margin, and it reads as a hole in the
+ * floor rather than a shadow on it.
+ *
+ * Real shadows on a bright surface are also genuinely fainter, because there's
+ * far more bounced light filling them in. So the light-mode value is not a
+ * fudge — it's closer to correct.
+ */
+export const SHADOW = {
+  darkOpacity: 0.5,
+  lightOpacity: 0.12,
+} as const;
+
+/** Shadow strength for the active theme. */
+export function shadowOpacity(isDark: boolean): number {
+  return isDark ? SHADOW.darkOpacity : SHADOW.lightOpacity;
+}
+
+/**
  * Path layout. The curve is GENERATED from these — see `journeyCurve.ts`.
  * Stops are laid out marching into -Z, swinging left and right so the light
  * genuinely has curves to bank through (which is the whole point of the page).

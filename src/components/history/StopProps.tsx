@@ -45,6 +45,10 @@ export interface VehiclePlacement {
   position: Vector3;
   /** Half-width of its contact shadow, world units. */
   shadowRadius: number;
+  /** Greyscale silhouette used as this aircraft's ground shadow. */
+  shadowMask: string;
+  /** Which way the aircraft — and so its shadow — points. */
+  facing: number;
   /**
    * Height of the aircraft's bottom edge above the floor. Read by StopOverlays
    * for the <img> anchor; the shadow here deliberately ignores it and stays
@@ -112,6 +116,8 @@ interface StopPropsProps {
   pathLength: number;
   /** Active-theme palette. Both prop tints follow the theme. */
   palette: ScenePalette;
+  /** Ground-shadow strength for the active theme (see SHADOW in sceneConfig). */
+  shadowOpacity: number;
 }
 
 export default function StopProps({
@@ -120,6 +126,7 @@ export default function StopProps({
   uRef,
   pathLength,
   palette,
+  shadowOpacity,
 }: StopPropsProps) {
   const invalidate = useThree((state) => state.invalidate);
   const polesRef = useRef<InstancedMesh>(null);
@@ -154,26 +161,10 @@ export default function StopProps({
         shadows.push({ matrix: dummy.matrix.toArray(), stopIndex });
       });
 
-      // Contact shadow under each parked aircraft — the thing that sells it as
-      // standing ON the floor rather than pasted in front of it. Same instanced
-      // mesh as the pole shadows, so however many aircraft get added they never
-      // cost another draw call.
-      //
-      // ROTATION: laying the disc flat needs X = −90°. The Z term then spins it
-      // within the floor, and `facing` is exactly the angle that lines its long
-      // axis up with the aircraft's wingspan — the same rotation the billboard
-      // itself uses, so the shadow always points the way the aircraft does.
-      //
-      // SCALE: squashed to 40% in local Y, which after the flip is the world
-      // DEPTH axis. A circle would read as a ball's shadow; a wide, shallow
-      // ellipse reads as a wing's.
-      stop.vehicles.forEach((vehicle) => {
-        dummy.position.set(vehicle.position.x, 0.02, vehicle.position.z);
-        dummy.rotation.set(-Math.PI / 2, 0, stop.facing);
-        dummy.scale.set(vehicle.shadowRadius, vehicle.shadowRadius * 0.4, 1);
-        dummy.updateMatrix();
-        shadows.push({ matrix: dummy.matrix.toArray(), stopIndex });
-      });
+      // NB: aircraft shadows are NOT here. A stretched ellipse is fine under a
+      // pole, which really is a circular post, but under a fixed-wing it reads
+      // as a blob that has nothing to do with the aircraft above it. They get
+      // their own silhouette-shaped shadows — see VehicleShadows.
     });
 
     return { poles, shadows };
@@ -318,7 +309,7 @@ export default function StopProps({
             color="#000000"
             transparent
             alphaMap={shadowAlpha}
-            opacity={0.5}
+            opacity={shadowOpacity}
             depthWrite={false}
             side={DoubleSide}
             toneMapped={false}

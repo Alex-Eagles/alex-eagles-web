@@ -35,11 +35,13 @@ import StopProps, {
   type VehiclePlacement,
 } from "./StopProps";
 import StopOverlays from "./StopOverlays";
+import VehicleShadows from "./VehicleShadows";
 import { buildJourneyCurve, poleOffsetFor } from "./journeyCurve";
 import {
   LIGHT,
   QUALITY,
   scenePalette,
+  shadowOpacity,
   type QualitySettings,
   type ScenePalette,
 } from "./sceneConfig";
@@ -209,6 +211,9 @@ export default function JourneyScene({
   // blues it lights up stay exactly the same. See `scenePalette`.
   const { isDark } = useTheme();
   const palette = useMemo(() => scenePalette(isDark), [isDark]);
+  // Shadows are far weaker in light mode — a 0.5 black pool that reads as
+  // grounding on a near-black floor is an ink stain on a near-white one.
+  const shadowAlpha = useMemo(() => shadowOpacity(isDark), [isDark]);
 
   // Geometry is derived from the CONTENT, so editing achievements.ts reshapes
   // the path automatically — no hand-placed coordinates anywhere.
@@ -305,6 +310,8 @@ export default function JourneyScene({
             .lerp(poles[poles.length - 1].base, vehicle.alongPoles)
             .addScaledVector(tangent, -vehicle.forwardOffset),
           shadowRadius: vehicle.shadowRadius,
+          shadowMask: vehicle.shadowMask,
+          facing,
           groundOffset: vehicle.groundOffset,
         }),
       );
@@ -419,6 +426,15 @@ export default function JourneyScene({
         uRef={uRef}
         pathLength={journey.length}
         palette={palette}
+        shadowOpacity={shadowAlpha}
+      />
+
+      <VehicleShadows
+        stops={stops}
+        quality={quality}
+        uRef={uRef}
+        pathLength={journey.length}
+        shadowOpacity={shadowAlpha}
       />
 
       <StopOverlays
@@ -426,6 +442,7 @@ export default function JourneyScene({
         achievements={achievements}
         uRef={uRef}
         pathLength={journey.length}
+        isDark={isDark}
       />
     </Canvas>
   );

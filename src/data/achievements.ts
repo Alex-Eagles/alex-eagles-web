@@ -149,8 +149,33 @@ export interface Vehicle {
    * the edges of the canvas — any transparent padding baked into the file
    * becomes dead space in the scene and shrinks the aircraft on screen.
    * Roughly 600px on the long edge is plenty.
+   *
+   * This is the DARK-MODE grade. See `renderLight` for its twin.
    */
   render: string;
+  /**
+   * The same aircraft graded for LIGHT mode.
+   *
+   * Two files rather than a CSS filter, because only one is ever requested —
+   * the browser fetches the variant the current theme uses and never sees the
+   * other, so a visitor downloads exactly what they would have anyway. A
+   * filter would instead cost per-frame work on an element whose opacity is
+   * already being written every frame.
+   *
+   * The dark grade is deliberately dim to sit on a near-black floor; dropped
+   * onto the pale light-mode floor it reads as a black blob. The light grade
+   * lifts exposure and fills the darks with a pale bounce instead of navy.
+   *
+   * BOTH are de-fringed identically. That matters: the "sticker" look came
+   * from white contamination on the antialiased edges, NOT from brightness, so
+   * making this one brighter does not bring it back.
+   */
+  renderLight: string;
+  /**
+   * Greyscale silhouette used as the aircraft's ground shadow — its own
+   * outline squashed and blurred, rather than a generic ellipse.
+   */
+  shadowMask: string;
   /**
    * The render's REAL pixel dimensions.
    *
@@ -375,6 +400,8 @@ export const achievements: Achievement[] = [
       {
         name: "Do3soka",
         render: "/history/vehicles/do3soka.webp",
+        renderLight: "/history/vehicles/do3soka-light.webp",
+        shadowMask: "/history/vehicles/do3soka-shadow.webp",
         width: 563,
         height: 240,
         // Left of the UAVC pole, out in front of the UAVC photo. Pulled well
@@ -388,6 +415,8 @@ export const achievements: Achievement[] = [
       {
         name: "Itay",
         render: "/history/vehicles/itay.webp",
+        renderLight: "/history/vehicles/itay-light.webp",
+        shadowMask: "/history/vehicles/itay-shadow.webp",
         width: 400,
         height: 281,
         // Over in front of the SUAS photo — far enough right of the fixed-wing
