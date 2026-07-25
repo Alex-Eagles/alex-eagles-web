@@ -39,7 +39,7 @@ import {
   type Texture,
   TextureLoader,
 } from "three";
-import type { QualitySettings } from "./sceneConfig";
+import { SHADOW, type QualitySettings } from "./sceneConfig";
 import type { StopPlacement } from "./StopProps";
 import { stopIntensity } from "./journeyCurve";
 
@@ -48,8 +48,24 @@ interface VehicleShadowsProps {
   quality: QualitySettings;
   uRef: React.MutableRefObject<number>;
   pathLength: number;
-  /** Ground-shadow strength for the active theme. */
-  shadowOpacity: number;
+  /** Active theme — each aircraft resolves its own shadow strength from it. */
+  isDark: boolean;
+}
+
+/**
+ * How dark THIS aircraft's shadow is.
+ *
+ * An aircraft may carry its own value, because one number can't suit every
+ * silhouette: a mask that is mostly thin wing needs a heavier pool to register
+ * at all, while a dense one looks like an oil spill at the same setting. Any
+ * aircraft that doesn't care simply follows the scene-wide SHADOW values.
+ */
+function resolveOpacity(
+  vehicle: StopPlacement["vehicles"][number],
+  isDark: boolean,
+): number {
+  if (isDark) return vehicle.shadowOpacityDark ?? SHADOW.vehicleDarkOpacity;
+  return vehicle.shadowOpacityLight ?? SHADOW.vehicleLightOpacity;
 }
 
 export default function VehicleShadows({
@@ -57,7 +73,7 @@ export default function VehicleShadows({
   quality,
   uRef,
   pathLength,
-  shadowOpacity,
+  isDark,
 }: VehicleShadowsProps) {
   // Flatten to a plain list — the stop index is only needed to look the fade up.
   const shadows = useMemo(
@@ -80,7 +96,7 @@ export default function VehicleShadows({
           stopU={stop.u}
           uRef={uRef}
           pathLength={pathLength}
-          shadowOpacity={shadowOpacity}
+          shadowOpacity={resolveOpacity(vehicle, isDark)}
         />
       ))}
     </group>

@@ -45,6 +45,13 @@ export interface VehiclePlacement {
   position: Vector3;
   /** Half-width of its contact shadow, world units. */
   shadowRadius: number;
+  /**
+   * Optional per-aircraft shadow strength. Left UNRESOLVED here — VehicleShadows
+   * picks by theme — so that flipping the theme doesn't invalidate the whole
+   * stop layout and rebuild every Vector3 in the journey.
+   */
+  shadowOpacityDark?: number;
+  shadowOpacityLight?: number;
   /** Greyscale silhouette used as this aircraft's ground shadow. */
   shadowMask: string;
   /** Which way the aircraft — and so its shadow — points. */

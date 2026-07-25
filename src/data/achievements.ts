@@ -254,6 +254,20 @@ export interface Vehicle {
    */
   shadowRadius: number;
   /**
+   * OPTIONAL per-aircraft shadow strength, overriding the global SHADOW values
+   * in sceneConfig.
+   *
+   * Omit both and the aircraft follows SHADOW.vehicleDarkOpacity /
+   * SHADOW.vehicleLightOpacity like everything else. Set them when one
+   * aircraft needs its own answer — a render whose silhouette is mostly thin
+   * wing needs a heavier pool to read at all, while a dense one can look like
+   * an oil spill at the same value.
+   *
+   * Range is 0..1. Above 1 simply clamps to fully opaque.
+   */
+  shadowOpacityDark?: number;
+  shadowOpacityLight?: number;
+  /**
    * ⬆ HOW HIGH OFF THE FLOOR IT SITS, in world units. THIS IS THE KNOB FOR
    * "the aircraft is sinking into / floating above the ground".
    *
@@ -390,8 +404,17 @@ export const achievements: Achievement[] = [
     portraits: ["/history/suas-2023.webp"],
     // 2023 won at a single competition, so it has ONE pole — which means
     // `alongPoles` can't move anything here (both ends of the lerp are the same
-    // point). `lateralOffset` is what puts the aircraft to the right of it. The
-    // year's photo hangs on the LEFT, so the right side is clear.
+    // point). `lateralOffset` is the control that works.
+    //
+    // Parked to the LEFT of the pole and pulled forward. The offset is sized to
+    // clear the pole outright rather than relying on depth: the aircraft is a
+    // DOM overlay, so it draws OVER the WebGL pole wherever the two coincide on
+    // screen no matter which is nearer the camera. Standing "in front" of the
+    // pole therefore hides it instead of passing it — only real sideways
+    // separation keeps them from intersecting.
+    //
+    // NB: this stop's frame axis is parity-flipped (odd index), so 2023's photo
+    // hangs on the viewer's RIGHT. Left is the clear side here.
     vehicles: [
       {
         name: "Hotwing",
@@ -401,11 +424,16 @@ export const achievements: Achievement[] = [
         width: 600,
         height: 177,
         alongPoles: 0,
-        lateralOffset: 4.2,
-        forwardOffset: 2.8,
+        lateralOffset: -4.0,
+        forwardOffset: 3.4,
         displayWidth: 205,
         shadowRadius: 2.9,
         groundOffset: 0,
+        // ⬅ HOTWING'S OWN SHADOW DIALS. Independent of Do3soka and Itay, which
+        // follow the scene-wide SHADOW values in sceneConfig. Adjust these two
+        // freely without touching the others.
+        shadowOpacityDark: 0.7,
+        shadowOpacityLight: 0.25,
       },
     ],
   },
