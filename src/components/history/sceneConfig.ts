@@ -118,13 +118,42 @@ export function scenePalette(isDark: boolean): ScenePalette {
  * fudge — it's closer to correct.
  */
 export const SHADOW = {
+  /**
+   * ⬅ SHADOW STRENGTH ON THE DARK SCENE. Applies to both the pole shadows and
+   * the aircraft silhouettes.
+   */
   darkOpacity: 0.5,
-  lightOpacity: 0.12,
+  /**
+   * ⬅ SHADOW STRENGTH IN LIGHT MODE. Only the aircraft have shadows there (see
+   * `poleShadowsInLight`), so this is the aircraft dial. Raise it for heavier
+   * shadows, lower it for fainter.
+   */
+  lightOpacity: 0.25,
+  /**
+   * Whether the flag poles cast shadows in LIGHT mode.
+   *
+   * Off, deliberately. A pole is a thin stick, so its shadow is a small dark
+   * ellipse with nothing above it wide enough to explain it. On the near-black
+   * floor that's invisible; on the pale one, a dozen of them scattered across
+   * the journey read as smudges on the floor rather than shadows.
+   *
+   * The aircraft keep theirs because those are silhouette-shaped and sit under
+   * an object big enough to justify them — they still do their job, which is
+   * proving the aircraft is standing on the ground.
+   *
+   * Dark mode is unaffected: poles keep their shadows there.
+   */
+  poleShadowsInLight: false,
 } as const;
 
 /** Shadow strength for the active theme. */
 export function shadowOpacity(isDark: boolean): number {
   return isDark ? SHADOW.darkOpacity : SHADOW.lightOpacity;
+}
+
+/** Whether the flag poles should cast shadows in the active theme. */
+export function showPoleShadows(isDark: boolean): boolean {
+  return isDark || SHADOW.poleShadowsInLight;
 }
 
 /**

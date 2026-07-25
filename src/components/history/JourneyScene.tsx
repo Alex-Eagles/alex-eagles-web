@@ -42,6 +42,7 @@ import {
   QUALITY,
   scenePalette,
   shadowOpacity,
+  showPoleShadows,
   type QualitySettings,
   type ScenePalette,
 } from "./sceneConfig";
@@ -183,6 +184,47 @@ function SceneBackground({ palette }: { palette: ScenePalette }) {
   return null;
 }
 
+/**
+ * Repaints the whole canvas when the theme flips.
+ *
+ * ─── WHY A SINGLE invalidate() ISN'T ENOUGH ─────────────────────────────────
+ * With `frameloop="demand"` the render loop is asleep whenever the reader is
+ * holding still — which is exactly when someone reaches for the theme toggle.
+ * Nothing redraws until something asks, so the scene sits there in its old
+ * colours until the next scroll. That is the "it only changes if I refresh"
+ * symptom.
+ *
+ * Every palette consumer does call invalidate() from its own effect, but that
+ * correctness rests on each one remembering to — and it breaks down for
+ * anything that reads the theme inside useFrame instead of holding it in a
+ * material, because there is no palette effect to hang the call on. The
+ * aircraft shadows are exactly that case: their opacity is written per frame,
+ * so with no frame, no update.
+ *
+ * Asking centrally removes the requirement from every consumer. Asking across
+ * a HANDFUL of consecutive frames, rather than one, also removes an ordering
+ * question: sibling effects commit in tree order, so a lone invalidate fired
+ * here can be spent on a frame drawn before another consumer has swapped its
+ * colour. Four frames on a theme toggle costs nothing and is unconditionally
+ * correct.
+ */
+function ThemeRepaint({ palette }: { palette: ScenePalette }) {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    let drawn = 0;
+    let raf = 0;
+    const pump = () => {
+      invalidate();
+      if (++drawn < 4) raf = requestAnimationFrame(pump);
+    };
+    pump();
+    return () => cancelAnimationFrame(raf);
+  }, [palette, invalidate]);
+
+  return null;
+}
+
 interface JourneySceneProps {
   achievements: Achievement[];
   progressRef: React.MutableRefObject<number>;
@@ -214,6 +256,7 @@ export default function JourneyScene({
   // Shadows are far weaker in light mode — a 0.5 black pool that reads as
   // grounding on a near-black floor is an ink stain on a near-white one.
   const shadowAlpha = useMemo(() => shadowOpacity(isDark), [isDark]);
+  const poleShadows = useMemo(() => showPoleShadows(isDark), [isDark]);
 
   // Geometry is derived from the CONTENT, so editing achievements.ts reshapes
   // the path automatically — no hand-placed coordinates anywhere.
@@ -375,6 +418,7 @@ export default function JourneyScene({
       <directionalLight position={[12, 24, 8]} intensity={1.5} color="#cfe0ff" />
 
       <SceneBackground palette={palette} />
+      <ThemeRepaint palette={palette} />
 
       <SceneController
         curve={journey.curve}
@@ -427,6 +471,7 @@ export default function JourneyScene({
         pathLength={journey.length}
         palette={palette}
         shadowOpacity={shadowAlpha}
+        showPoleShadows={poleShadows}
       />
 
       <VehicleShadows

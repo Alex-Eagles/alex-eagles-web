@@ -118,6 +118,12 @@ interface StopPropsProps {
   palette: ScenePalette;
   /** Ground-shadow strength for the active theme (see SHADOW in sceneConfig). */
   shadowOpacity: number;
+  /**
+   * Whether the POLES cast shadows. False in light mode: a pole's shadow is a
+   * small dark ellipse with nothing above it wide enough to explain it, which
+   * on the pale floor reads as a smudge. See SHADOW.poleShadowsInLight.
+   */
+  showPoleShadows: boolean;
 }
 
 export default function StopProps({
@@ -127,6 +133,7 @@ export default function StopProps({
   pathLength,
   palette,
   shadowOpacity,
+  showPoleShadows,
 }: StopPropsProps) {
   const invalidate = useThree((state) => state.invalidate);
   const polesRef = useRef<InstancedMesh>(null);
@@ -296,7 +303,7 @@ export default function StopProps({
       {/* Fake contact shadows. A real shadow map would re-render the scene from
           the light's viewpoint every frame; at this camera angle a soft dark
           ellipse is indistinguishable and effectively free. */}
-      {quality.blobShadows && (
+      {quality.blobShadows && showPoleShadows && (
         <instancedMesh
           ref={shadowsRef}
           args={[undefined, undefined, layout.shadows.length]}
