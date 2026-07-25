@@ -121,6 +121,14 @@
   body {
     margin: 0;
     padding: 0;
+  }
+
+  /* Clip horizontal overflow on <body> only, NOT <html>. Setting overflow-x on
+   * the root <html> makes it a scroll container, which silently breaks
+   * programmatic smooth scrolling (window.scrollTo({behavior:'smooth'}) and
+   * anchor jumps) — e.g. the vehicle page's "Skip build" control. Keeping it on
+   * <body> clips the same horizontal overflow without hijacking root scroll. */
+  body {
     overflow-x: hidden; /* never allow horizontal scroll (responsive rule) */
   }
 

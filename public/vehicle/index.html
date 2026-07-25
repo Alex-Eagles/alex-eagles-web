@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&amp;family=Barlow:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#07091c; }
+  * { box-sizing:border-box; }
+  ::selection { background:#3c40b5; color:#fff; }
+  @media (max-width:760px) {
+    .vp-grow { grid-template-columns:1fr !important; }
+    .vp-grow > * { order:0 !important; }
+    .vp-grow .vp-media { order:-1 !important; }
+  }
+  /* ---- HERO: on phones the desktop corner-pinned layout collides (specs over
+     the name, scroll cue over the buttons). Reflow into a comfortable stack:
+     specs pinned top-right (smaller), name + buttons pinned bottom-left, and
+     drop the scroll cue (the "Explore the build" button already leads down). */
+  @media (max-width:760px) {
+    .vp-hero-specs {
+      right:20px !important; left:auto !important;
+      top:calc(80px + 20px) !important;
+      align-items:flex-end !important;
+    }
+    .vp-hero-specs > div:first-child { font-size:11px !important; letter-spacing:.12em !important; margin-bottom:14px !important; text-align:right; }
+    /* compact the spec numbers so four rows never reach the name */
+    .vp-hero-specs > div:last-child > div { padding:8px 0 !important; }
+    .vp-hero-specs > div:last-child > div > div:first-child { font-size:22px !important; }
+    .vp-hero-specs > div:last-child > div > div:last-child { font-size:10px !important; margin-top:2px !important; }
+    .vp-hero-name { left:20px !important; right:20px !important; bottom:32px !important; }
+    .vp-hero-name h3 { font-size:clamp(52px,17vw,76px) !important; }
+    .vp-hero-name > div:last-child { margin-top:18px !important; }
+    .vp-hero-name a { font-size:13px !important; padding:12px 22px !important; }
+    .vp-hero-cue { display:none !important; }
+    /* Middle floating build label: hidden on phones only (kept on desktop). The
+       readout below the canvas still labels each part. Overrides the inline
+       opacity the scroll JS sets on this element. */
+    #vp-build-callout { display:none !important; }
+  }
+  @media (max-width:400px) {
+    .vp-hero-specs > div:last-child > div > div:first-child { font-size:19px !important; }
+  }
+  /* ---- EXPLORE detail card: the 0.9fr / 1.1fr two-column grid squishes the
+     photo into a tall sliver on phones (the "stretched" look). Stack it and
+     give the photo panel a natural, roomy aspect so object-fit:contain sits
+     comfortably. */
+  @media (max-width:760px) {
+    .vp-exp-card { grid-template-columns:1fr !important; }
+    #vp-exp-photobg { min-height:0 !important; aspect-ratio:4/3; border-right:none !important; border-bottom:1px solid rgba(60,64,181,0.25); }
+    .vp-exp-photo { padding:26px !important; }
+  }
+  /* ---- GALLERY: the desktop 4-column grid (with 2-col spanning tiles) squishes
+     every tile to an unreadable sliver on phones. Drop to 2 columns, cancel the
+     spans so each tile fills a cell, and give rows real height. The JS sets
+     display:grid inline, so these need !important to hold. */
+  @media (max-width:760px) {
+    .vpg-page {
+      grid-template-columns:repeat(2,1fr) !important;
+      grid-auto-rows:44vw !important;
+    }
+    .vpg-tile { grid-column:span 1 !important; grid-row:span 1 !important; }
+  }
+  @media (max-width:460px) {
+    .vpg-page { grid-template-columns:1fr !important; grid-auto-rows:64vw !important; }
+  }
+  @keyframes vp-grid { from { background-position:0 0; } to { background-position:64px 64px; } }
+  @keyframes vp-bounce { 0%,100% { transform:translateY(0); opacity:.45; } 50% { transform:translateY(9px); opacity:1; } }
+  @keyframes vp-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+  a { color:#60a5fa; text-decoration:none; }
+  a:hover { color:#93c5fd; }
+  @keyframes vp-pulse-ring { 0%,100% { box-shadow:0 0 0 0 rgba(245,158,11,0.35); } 50% { box-shadow:0 0 0 8px rgba(245,158,11,0); } }
+  @keyframes vp-mount-in { from { opacity:0; transform:translateY(9px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
+  @keyframes vp-num-flash { 0% { color:#fff; text-shadow:0 0 14px rgba(245,158,11,0.9); } 100% { color:#f59e0b; text-shadow:none; } }
+  @keyframes vp-callout-in { from { opacity:0; transform:translateY(9px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
+  @keyframes vp-callout-pop { 0% { transform:scale(0); } 62% { transform:scale(1.3); } 100% { transform:scale(1); } }
+  #vp-build-skip:hover { background:rgba(60,64,181,0.92)!important; border-color:#60a5fa!important; color:#fff!important; }
+</style>
+<script src="./image-slot.js"></script>
+</helmet>
+
+<div style="background:#07091c; color:#f0f2ff; font-family:'Inter',-apple-system,sans-serif; width:100%; overflow-x:clip;">
+
+  <!-- ============================ HERO ============================ -->
+  <header id="vp-hero" style="position:relative; height:100vh; min-height:640px; width:100%; overflow:hidden; background:#07091c;">
+    <!-- MEDIA: full-bleed during landing, slides to the right half when the clip ends -->
+    <div id="vp-hero-media" style="position:absolute; top:0; left:0; right:0; bottom:0; z-index:1; overflow:hidden; transition:left 1.15s cubic-bezier(.45,.05,.2,1);">
+      <video id="vp-hero-video" muted="" playsinline="" preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 45%;">
+        <source src="assets/landing.mp4" type="video/mp4">
+      </video>
+      <div data-dim="" aria-hidden="true" style="position:absolute; inset:0; transition:opacity 1.15s ease; background:radial-gradient(120% 90% at 50% -10%, rgba(22,26,80,0.35) 0%, rgba(7,9,28,0.35) 45%, rgba(7,9,28,0.85) 100%);"></div>
+      <div data-dim="" aria-hidden="true" style="position:absolute; inset:0; transition:opacity 1.15s ease; background:linear-gradient(to bottom, rgba(7,9,28,0.55) 0%, rgba(7,9,28,0.1) 30%, rgba(7,9,28,0.55) 62%, #07091c 100%);"></div>
+      <div id="vp-hero-grid" aria-hidden="true" style="position:absolute; inset:0; opacity:.4; background-image:linear-gradient(rgba(60,64,181,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(60,64,181,0.18) 1px, transparent 1px); background-size:64px 64px; animation:vp-grid 18s linear infinite; -webkit-mask-image:radial-gradient(80% 70% at 50% 50%, #000 0%, transparent 78%); mask-image:radial-gradient(80% 70% at 50% 50%, #000 0%, transparent 78%);"></div>
+    </div>
+
+    <!-- INFO: overlays the video, then occupies the left half on landing -->
+    <div id="vp-hero-info" style="position:absolute; top:0; left:0; right:0; bottom:0; z-index:3; display:flex; flex-direction:column; justify-content:flex-end; transition:right 1.15s cubic-bezier(.45,.05,.2,1), background 1.15s ease; pointer-events:none;">
+      <!-- ============ editorial "1b" layout: corners pinned to the viewport ============
+           NAVH = 80px (real height of the floating nav pill: top:35px + ~45px pill). -->
+
+      <!-- spec rail + eyebrow, top-right (offset below the fixed nav pill) -->
+      <div class="vp-hero-specs" style="position:absolute; right:40px; top:calc(80px + 60px); display:flex; flex-direction:column; align-items:flex-end; z-index:3;">
+        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); font-family:'Inter'; font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#c3c6ea; display:flex; align-items:center; gap:10px; margin-bottom:22px;">SUAS 2026 · Competition Vehicle<span style="width:8px; height:8px; border-radius:9999px; background:#f59e0b; box-shadow:0 0 10px #f59e0b;"></span></div>
+        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); display:flex; flex-direction:column; text-align:right; border-right:2px solid rgba(245,158,11,0.6); padding-right:22px;">
+          <div style="padding:14px 0;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">6.4<span style="font-size:15px; color:#8b8fc8;"> kg</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Dry weight</div></div>
+          <div style="padding:14px 0; border-top:1px solid rgba(60,64,181,0.3);"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">28<span style="font-size:15px; color:#8b8fc8;"> Ah</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Battery</div></div>
+          <div style="padding:14px 0; border-top:1px solid rgba(60,64,181,0.3);"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">40<span style="font-size:15px; color:#8b8fc8;"> min</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Endurance</div></div>
+          <div style="padding:14px 0; border-top:1px solid rgba(60,64,181,0.3);"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">19<span style="font-size:15px; color:#8b8fc8;"> m/s</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Cruise speed</div></div>
+        </div>
+      </div>
+
+      <!-- name + buttons, bottom-left -->
+      <div class="vp-hero-name" style="position:absolute; left:44px; bottom:88px; z-index:3;">
+        <h3 data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1.1s ease, transform 1.1s cubic-bezier(.2,.7,.2,1); font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(64px,9vw,120px); line-height:.84; letter-spacing:-0.02em; margin:0; background:linear-gradient(135deg,#f0f2ff 0 50%,#60a5fa 50% 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;">CLOVER</h3>
+        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); display:flex; gap:14px; margin-top:26px; flex-wrap:wrap; pointer-events:auto;">
+          <a href="#vp-build-scroll" style="text-decoration:none; font-family:'Inter'; font-weight:600; font-size:14px; padding:13px 30px; border-radius:9999px; color:#fff; border:1px solid rgba(96,165,250,0.55); background:linear-gradient(115deg,#3c40b5 50%, rgba(96,165,250,0.10) 50%); background-size:220% 100%; background-position:100% 0; transition:background-position .45s ease;" onmouseover="this.style.backgroundPosition='0 0'" onmouseout="this.style.backgroundPosition='100% 0'">Explore the build</a>
+          <a href="#vp-gallery" style="text-decoration:none; font-family:'Inter'; font-weight:600; font-size:14px; padding:13px 30px; border-radius:9999px; color:#f0f2ff; border:1px solid rgba(60,64,181,0.55); background:linear-gradient(115deg,rgba(60,64,181,0.65) 50%, rgba(60,64,181,0.06) 50%); background-size:220% 100%; background-position:100% 0; transition:background-position .45s ease;" onmouseover="this.style.backgroundPosition='0 0'" onmouseout="this.style.backgroundPosition='100% 0'">See more of Clover</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- scroll cue -->
+    <div class="vp-hero-cue" style="position:absolute; bottom:26px; left:50%; transform:translateX(-50%); z-index:4; display:flex; flex-direction:column; align-items:center; gap:8px;">
+      <span style="font-family:'Inter'; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#565a94;">Scroll to build</span>
+      <div style="width:16px; height:16px; border-right:2px solid #565a94; border-bottom:2px solid #565a94; transform:rotate(45deg); animation:vp-bounce 1.8s ease-in-out infinite;"></div>
+    </div>
+  </header>
+
+  <!-- ============================ MISSION ============================ -->
+  
+
+  <!-- ==================== SCROLL-BUILD SEQUENCE ==================== -->
+  <section id="vp-build-scroll" style="position:relative; height:300vh; background:#07091c; padding:0;">
+    <div style="position:sticky; top:0; height:100vh; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      <!-- ambient glow -->
+      <div aria-hidden="true" style="position:absolute; inset:0; background:radial-gradient(60% 60% at 50% 45%, rgba(60,64,181,0.18) 0%, transparent 70%);"></div>
+
+      <!-- direction-aware skip control (jumps past the build, or back up, depending on scroll direction) -->
+      <button id="vp-build-skip" aria-label="Skip build animation" style="position:absolute; left:50%; bottom:24px; transform:translateX(-50%) translateY(12px); z-index:6; display:flex; align-items:center; gap:9px; cursor:pointer; font-family:'JetBrains Mono'; font-weight:600; font-size:11px; letter-spacing:.1em; padding:10px 17px; border-radius:9999px; border:1px solid rgba(96,165,250,0.35); background:rgba(13,16,53,0.68); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); color:#c3c6ea; opacity:0; pointer-events:none; transition:opacity .35s ease, transform .35s ease, background .18s, border-color .18s, color .18s;">
+        <span id="vp-build-skip-label">SKIP BUILD</span>
+        <span id="vp-build-skip-arrow" style="font-size:13px;">↓</span>
+      </button>
+
+      <div style="position:relative; z-index:2; width:100%; max-width:1180px; height:100%; padding:72px 32px 44px; margin:0 auto; display:flex; flex-direction:column; justify-content:space-between; gap:20px;">
+        <!-- section label -->
+        <div style="flex:0 0 auto;">
+          <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:10px;">How it comes together</div>
+          <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(30px,4.4vw,48px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">From bare frame to flight-ready.</h2>
+          <div style="height:2px; width:52px; background:#f59e0b; margin-top:14px;"></div>
+        </div>
+
+        <!-- canvas fills the middle; crossfades to the clean render at flight-ready -->
+        <div style="flex:1 1 auto; min-height:0; position:relative; display:flex; align-items:center; justify-content:center;">
+          <div id="vp-build-stagebox" style="position:relative; display:inline-flex; max-width:100%; max-height:100%;">
+            <canvas id="vp-build-canvas" width="1280" height="571" style="display:block; max-width:100%; max-height:100%; object-fit:contain;"></canvas>
+            <img id="vp-build-render" src="assets/drone.png" alt="Clover flight-ready render" aria-hidden="true" style="position:absolute; inset:0; margin:auto; max-width:100%; max-height:100%; object-fit:contain; opacity:0; transition:opacity .45s ease;">
+            <!-- cinematic on-frame callout: caption naming the part being mounted -->
+            <div id="vp-build-callout" aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; z-index:3; opacity:0; transition:opacity .4s ease;">
+              <div id="vp-callout-card" style="position:absolute; left:50%; top:20%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center;">
+                <div id="vp-callout-inner" style="display:flex; flex-direction:column; align-items:center; gap:3px; background:rgba(8,10,28,0.82); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px); border:1px solid rgba(245,158,11,0.5); border-radius:9px; padding:9px 15px; box-shadow:0 10px 30px rgba(0,0,0,0.55); white-space:nowrap;">
+                  <span id="vp-callout-index" style="font-family:'JetBrains Mono'; font-weight:700; font-size:10px; letter-spacing:.16em; color:#f59e0b;">01 &middot; NOW MOUNTING</span>
+                  <span id="vp-callout-name" style="font-family:'Barlow'; font-weight:600; font-size:clamp(16px,1.7vw,20px); line-height:1.05; color:#f4f6ff;">Carbon-fiber bottom plate</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- build stage readout + progress -->
+        <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
+            <span style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; color:#565a94;">NOW INSTALLING</span>
+            <span id="vp-stage-num" style="font-family:'JetBrains Mono'; font-weight:700; font-size:15px; color:#f59e0b;">01 / 11</span>
+            <span id="vp-stage-phase" style="margin-left:auto; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.12em; color:#60a5fa;">FRAME</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; min-height:34px;">
+            <span aria-hidden="true" style="flex:0 0 auto; width:7px; height:7px; border-radius:9999px; background:#f59e0b; box-shadow:0 0 12px rgba(245,158,11,.8); animation:vp-float 1.6s ease-in-out infinite;"></span>
+            <span id="vp-stage-label" style="font-family:'Barlow'; font-weight:600; font-size:clamp(20px,2.4vw,27px); line-height:1.1; color:#f0f2ff;">Carbon-fiber bottom plate</span>
+          </div>
+          <div style="position:relative; height:3px; width:100%; background:rgba(60,64,181,0.25); border-radius:9999px; overflow:hidden;">
+            <div id="vp-build-bar" style="position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg,#3c40b5,#f59e0b); border-radius:9999px; transition:width .1s linear;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.06em; color:#565a94;">
+            <span data-step="0">FRAME</span>
+            <span data-step="1">POWERTRAIN</span>
+            <span data-step="2">AVIONICS</span>
+            <span data-step="3">ASSEMBLED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== COMPONENT EXPLORER (drone carries in from the render) ==================== -->
+  <section id="vp-explorer" style="position:relative; background:#07091c; padding:110px 32px 120px; overflow:hidden;">
+    <div aria-hidden="true" style="position:absolute; inset:0; background:radial-gradient(60% 55% at 50% 42%, rgba(60,64,181,0.16) 0%, transparent 70%);"></div>
+    <div style="position:relative; max-width:1120px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Explore the build</div>
+        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Every component, up close.</h2>
+        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:480px; line-height:1.6;">Tap a number on the aircraft — or a chip below — to inspect the part.</p>
+      </div>
+
+      <!-- drone stage: sits centered, markers reveal on entry -->
+      <div style="display:flex; align-items:center; justify-content:center; margin-top:36px;">
+        <div id="vp-exp-stage" style="position:relative; display:inline-block; width:100%; max-width:600px;">
+          <img src="assets/drone.png" alt="Clover quad" style="display:block; width:100%; filter:drop-shadow(0 26px 60px rgba(0,0,0,0.5));">
+          <svg id="vp-exp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; opacity:0; transition:opacity .6s ease;">
+            <line x1="50" y1="6" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="79.6" y1="16.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="95.3" y1="42.4" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="89.8" y1="72" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="65.7" y1="91.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="34.3" y1="91.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="10.2" y1="72" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="4.7" y1="42.4" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="20.4" y1="16.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+          </svg>
+          <div data-exp-marker="cube" style="position:absolute; left:50%; top:6%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:#f59e0b; color:#07091c; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">1</div>
+          <div data-exp-marker="gnss" style="position:absolute; left:79.6%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">2</div>
+          <div data-exp-marker="cam" style="position:absolute; left:95.3%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">3</div>
+          <div data-exp-marker="link" style="position:absolute; left:89.8%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">4</div>
+          <div data-exp-marker="pdb" style="position:absolute; left:65.7%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">5</div>
+          <div data-exp-marker="bec" style="position:absolute; left:34.3%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">6</div>
+          <div data-exp-marker="custom" style="position:absolute; left:10.2%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #f59e0b; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">7</div>
+          <div data-exp-marker="prop" style="position:absolute; left:4.7%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #f59e0b; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">8</div>
+          <div data-exp-marker="batt" style="position:absolute; left:20.4%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">9</div>
+        </div>
+      </div>
+
+      <!-- nav chips -->
+      <div id="vp-exp-nav" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:36px;">
+        <button data-exp="cube" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">1 · FC</button>
+        <button data-exp="gnss" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">2 · GNSS</button>
+        <button data-exp="cam" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">3 · Camera</button>
+        <button data-exp="link" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">4 · Link</button>
+        <button data-exp="pdb" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">5 · PDB</button>
+        <button data-exp="bec" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">6 · BEC</button>
+        <button data-exp="custom" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">7 · Our PCB</button>
+        <button data-exp="prop" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">8 · Motors</button>
+        <button data-exp="batt" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">9 · Battery</button>
+      </div>
+
+      <!-- detail card -->
+      <div data-reveal="" class="vp-exp-card" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); margin:28px auto 0; max-width:860px; background:#0d1035; border:1px solid rgba(60,64,181,0.3); border-radius:18px; overflow:hidden; display:grid; grid-template-columns:0.9fr 1.1fr;">
+        <div id="vp-exp-photobg" style="position:relative; min-height:240px; background:#161b40; border-right:1px solid rgba(60,64,181,0.25);">
+          <img class="vp-exp-photo" id="vp-exp-cube" src="assets/components/cut/cube-orange.png" alt="Cube Orange 2" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px;">
+          <img class="vp-exp-photo" id="vp-exp-gnss" src="assets/components/cut/here3.png" alt="Here3+ GNSS" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px; display:none;">
+          <img class="vp-exp-photo" id="vp-exp-cam" src="assets/components/cut/siyi.png" alt="SIYI A8 Mini" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px; display:none;">
+          <img class="vp-exp-photo" id="vp-exp-link" src="assets/components/cut/herelink.png" alt="Herelink" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px; display:none;">
+          <img class="vp-exp-photo" id="vp-exp-pdb" src="assets/components/cut/matek.png" alt="Matek FCHUB" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px; display:none;">
+          <img class="vp-exp-photo" id="vp-exp-bec" src="assets/components/cut/mauch.png" alt="MAUCH BEC" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px; display:none;">
+          <img class="vp-exp-photo" id="vp-exp-custom" src="assets/components/cut/pdb.png" alt="Custom power board" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px; display:none;">
+          <img class="vp-exp-photo" id="vp-exp-prop" src="assets/components/cut/motor.png" alt="T-Motor 6007 II" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px; display:none;">
+          <img class="vp-exp-photo" id="vp-exp-batt" src="assets/components/cut/battery.png" alt="Tattu battery" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:22px; display:none;">
+        </div>
+        <div style="padding:28px 30px;">
+          <div data-exp-panel="cube">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">01 · COMPUTE — FLIGHT CONTROLLER</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Pixhawk Cube Orange 2</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every decision starts here. A high-performance STM32 runs the entire autonomy loop in real time — fusing every sensor into one trusted picture of attitude and position and commanding the props thousands of times per second.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> redundant IMU stack, deterministic execution and vibration-isolated sensors.</p>
+          </div>
+          <div data-exp-panel="gnss" style="display:none;">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">02 · SENSING — POSITIONING</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Here3+ GNSS Module</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The absolute reference behind every waypoint. Mast-mounted, it delivers global position, velocity and precise timing over the CAN bus; every fix folds into the Cube's Extended Kalman Filter.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> DroneCAN-native and raised 9–15 cm above the frame, clear of propulsion EMI.</p>
+          </div>
+          <div data-exp-panel="cam" style="display:none;">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">03 · PAYLOAD — GIMBAL CAMERA</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">SIYI A8 Mini</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Eyes that stay level while the aircraft doesn't. A 4K 8MP Sony sensor rides a 3-axis FOC-stabilised gimbal with 6× digital zoom, feeding imagery down the ground link over HDMI and Ethernet.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
+          </div>
+          <div data-exp-panel="link" style="display:none;">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · COMMS — DATA LINK</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Herelink</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Three links collapsed into one. A single 2.4 GHz digital pipe carries RC control, MAVLink telemetry and 1080p video together — up to 20 km at roughly 110 ms latency.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> pilot, operator and observer all work from one link; the handheld becomes a full ground station.</p>
+          </div>
+          <div data-exp-panel="pdb" style="display:none;">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">05 · POWER — DISTRIBUTION</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Matek PDB HEX</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every amp passes through here. Heavy copper carries 2–12S / 6–60 V to the ESCs while an onboard sensor reads current to 264 A and streams voltage and current back to the Cube, alongside PWM routing and BLHeli32 telemetry.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> the six-output variant on a quad leaves distribution headroom for payload growth — one board instead of a harness.</p>
+          </div>
+          <div data-exp-panel="bec" style="display:none;">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">06 · POWER — REGULATION</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">MAUCH BEC</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Clean power, guarded from the noise of flight. It converts raw LiPo voltage into stable rails for the flight controller, GPS and LiDAR, absorbing ripple, transients and motor/ESC interference before they reach a sensor.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> removes the separate receiver battery while isolating noise-sensitive systems from the high-current bus.</p>
+          </div>
+          <div data-exp-panel="custom" style="display:none;">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Alex Eagles Power Board</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The only board on this aircraft we designed ourselves — drawn, routed, fabricated and flown by the team. It splits the MAUCH feed into dedicated rails: input decoupling, two buck converters for 12 V and 5 V, and an LDO for a low-noise 5 V rail for the most sensitive electronics.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> a modular power stage tailored to this airframe — less wiring, cleaner separation, revisable in-house.</p>
+          </div>
+          <div data-exp-panel="prop" style="display:none;">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">08 · PROPULSION — ×4</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">T-Motor 6007 II System</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF22 props — one factory-tuned system per arm across the quad.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
+          </div>
+          <div data-exp-panel="batt" style="display:none;">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER — MAIN BATTERY</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Tattu 28 000 mAh 6S</h3>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission — a 28 000 mAh 6S LiPo feeding the entire platform through the distribution stage.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> high capacity for long-endurance autonomous flights without swapping packs mid-mission.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- shared-element flyer: bridges the build render into the explorer drone -->
+  <img id="vp-flyer" src="assets/drone.png" alt="" aria-hidden="true" style="position:fixed; left:0; top:0; width:0; height:0; object-fit:contain; pointer-events:none; z-index:40; opacity:0; will-change:left,top,width,height,transform; filter:drop-shadow(0 26px 60px rgba(0,0,0,0.55));">
+
+
+  <!-- ========================= GALLERY ========================= -->
+  <section id="vp-gallery" style="position:relative; background:#0d1035; padding:120px 32px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+        <div>
+          <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">In the field</div>
+          <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Clover in action.</h2>
+          <div style="height:2px; width:52px; background:#f59e0b; margin-top:16px;"></div>
+        </div>
+      </div>
+
+      <div id="vpg" style="margin-top:clamp(48px,7vh,80px);">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div id="vpg-prev" role="button" tabindex="0" aria-label="Previous page" style="flex:0 0 auto; width:48px; height:48px; border-radius:9999px; background:rgba(60,64,181,0.16); border:1px solid rgba(96,165,250,0.32); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:24px; user-select:none; transition:background .2s ease;">‹</div>
+          <div style="flex:1 1 auto; min-width:0; overflow:hidden;">
+            <div id="vpg-page-0" class="vpg-page" style="display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,19vw,210px); grid-auto-flow:dense; gap:14px;">
+              <div class="vpg-tile" data-idx="0" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
+                <video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Flight-ready.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="1" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Airborne.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="2" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <video src="assets/gallery/cnc-cut.mp4" poster="assets/gallery/cnc-cut.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">FABRICATION</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Cut in-house.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="3" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
+                <img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(5,6,26,0.92), transparent 60%);"></div>
+                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">PROTOTYPE</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Where it started.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+            </div>
+            <div id="vpg-page-1" class="vpg-page" style="display:none; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,19vw,210px); grid-auto-flow:dense; gap:14px;">
+              <div class="vpg-tile" data-idx="0" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
+                <img src="assets/gallery/flight-ready.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 05</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Ground test.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="1" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/first-flight.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 06</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Climb-out.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="2" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/cnc-cut.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 07</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Toolpath.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="3" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
+                <img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(5,6,26,0.92), transparent 60%);"></div>
+                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 08</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Bench check.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+            </div>
+          </div>
+          <div id="vpg-next" role="button" tabindex="0" aria-label="Next page" style="flex:0 0 auto; width:48px; height:48px; border-radius:9999px; background:rgba(60,64,181,0.16); border:1px solid rgba(96,165,250,0.32); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:24px; user-select:none; transition:background .2s ease;">›</div>
+        </div>
+        <div id="vpg-dots" style="display:flex; justify-content:center; align-items:center; gap:9px; margin-top:18px;">
+          <div class="vpg-dot" data-page="0" role="button" tabindex="0" style="width:24px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:#f59e0b;"></div>
+          <div class="vpg-dot" data-page="1" role="button" tabindex="0" style="width:9px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:rgba(96,165,250,0.35);"></div>
+        </div>
+      </div>
+
+      <div id="vpg-focus" style="display:none; margin-top:22px;">
+        <div style="display:flex; gap:14px; height:min(66vh,540px);">
+          <div id="vpg-stage" style="position:relative; flex:1 1 auto; min-width:0; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; will-change:transform;">
+            <div class="vpg-sm" data-idx="0" style="display:block;"><video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="1" style="display:none;"><video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="2" style="display:none;"><video src="assets/gallery/cnc-cut.mp4" poster="assets/gallery/cnc-cut.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="3" style="display:none;"><img src="assets/gallery/wooden-prototype.png" alt="Wooden prototype" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div style="position:absolute; left:0; right:0; bottom:0; padding:22px 20px 18px; background:linear-gradient(to top, rgba(5,6,26,0.92), transparent); pointer-events:none;">
+              <div id="vpg-kicker" style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#f59e0b; margin-bottom:8px;"></div>
+              <div id="vpg-title" style="font-family:'Barlow Condensed'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-bottom:8px;"></div>
+              <p id="vpg-desc" style="font-family:'Inter'; font-size:13.5px; line-height:1.6; color:#c3c6ea; margin:0; max-width:560px;"></p>
+            </div>
+            <div id="vpg-prevm" role="button" tabindex="0" aria-label="Previous" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:9999px; background:rgba(8,10,28,0.66); backdrop-filter:blur(6px); border:1px solid rgba(96,165,250,0.35); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:22px;">‹</div>
+            <div id="vpg-nextm" role="button" tabindex="0" aria-label="Next" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:9999px; background:rgba(8,10,28,0.66); backdrop-filter:blur(6px); border:1px solid rgba(96,165,250,0.35); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:22px;">›</div>
+            <div id="vpg-back" role="button" tabindex="0" style="position:absolute; right:14px; top:14px; display:flex; align-items:center; gap:7px; height:34px; padding:0 13px; border-radius:9px; background:rgba(8,10,28,0.66); backdrop-filter:blur(6px); border:1px solid rgba(96,165,250,0.35); color:#f0f2ff; cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.08em;">▦ GRID</div>
+            <div id="vpg-counter" style="position:absolute; left:14px; top:14px; font-family:'JetBrains Mono'; font-size:11px; color:#8b8fc8; background:rgba(8,10,28,0.5); padding:4px 9px; border-radius:6px; white-space:nowrap;"></div>
+          </div>
+          <div id="vpg-rail" class="rail" style="flex:0 0 128px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; padding-right:4px;">
+            <div class="vpg-railitem" data-idx="0" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/flight-ready.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Flight-ready</div></div>
+            <div class="vpg-railitem" data-idx="1" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/first-flight.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Airborne</div></div>
+            <div class="vpg-railitem" data-idx="2" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/cnc-cut.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Cut in-house</div></div>
+            <div class="vpg-railitem" data-idx="3" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Prototype</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= CTA ========================= -->
+  <section style="position:relative; background:#07091c; padding:120px 32px; text-align:center;">
+    <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:720px; margin:0 auto;">
+      <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0; color:#f0f2ff;">Watch it fly.</h2>
+      <p style="font-size:18px; color:#c3c6ea; margin:20px 0 36px; line-height:1.6;">See Clover in action and follow the team through the SUAS 2026 campaign.</p>
+
+      <!-- FRR flight video (Vimeo) — 16:9 responsive embed, starts at 2:00 (#t=120s) -->
+      <div style="position:relative; width:100%; max-width:960px; margin:0 auto 36px; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+        <iframe src="https://player.vimeo.com/video/1207205400#t=120s" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Clover — flight-readiness review"></iframe>
+      </div>
+
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+        <a style="font-family:'Inter'; font-weight:600; font-size:15px; padding:14px 28px; border-radius:4px; background:transparent; color:#f0f2ff; border:1px solid rgba(60,64,181,0.5); transition:border-color .25s ease;" onmouseover="this.style.borderColor='#5458cc'" onmouseout="this.style.borderColor='rgba(60,64,181,0.5)'" href="/team" target="_top">Meet the team</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;gridTexture&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;heroLoop&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;scrubReverse&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;buildDuration&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:35.5,&quot;min&quot;:3,&quot;max&quot;:40,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;buildScrollLength&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:575,&quot;min&quot;:150,&quot;max&quot;:900,&quot;step&quot;:25,&quot;unit&quot;:&quot;vh&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;frameBlend&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;scrubSmoothing&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.65,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;showCallouts&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;explorerBg&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Spotlight&quot;,&quot;options&quot;:[&quot;Spotlight&quot;,&quot;Studio&quot;,&quot;Indigo&quot;,&quot;Carbon&quot;,&quot;Halo blue&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Explorer&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    const muteAll = () => document.querySelectorAll('video').forEach(v => { v.muted = true; v.defaultMuted = true; v.volume = 0; v.setAttribute('muted', ''); });
+    muteAll();
+    document.addEventListener('play', (e) => { if (e.target && e.target.tagName === 'VIDEO') { e.target.muted = true; e.target.volume = 0; } }, true);
+    // gallery videos: load + play only when scrolled on-screen (one at a time), so the
+    // preview server isn't hit with several large clips at once. Poster shows until then.
+    const io = new IntersectionObserver((ents) => {
+      ents.forEach(en => {
+        const v = en.target;
+        if (v.closest && v.closest('#vp-hero')) return; // leave the hero video alone
+        v.muted = true; v.volume = 0;
+        if (en.isIntersecting) { const p = v.play(); if (p && p.catch) p.catch(()=>{}); }
+        else { v.pause(); }
+      });
+    }, { threshold: 0.2 });
+    setTimeout(() => document.querySelectorAll('#vp-gallery video').forEach(v => { v.removeAttribute('autoplay'); io.observe(v); }), 60);
+
+    // ---- gallery: arrow-paged mosaic + click-to-expand focus ----
+    setTimeout(() => {
+      const grid = document.getElementById('vpg');
+      const focus = document.getElementById('vpg-focus');
+      if (!grid || !focus) return;
+      const pages = [document.getElementById('vpg-page-0'), document.getElementById('vpg-page-1')];
+      const dots = [...document.querySelectorAll('.vpg-dot')];
+      const sms = [...document.querySelectorAll('.vpg-sm')];
+      const rails = [...document.querySelectorAll('.vpg-railitem')];
+      const meta = [
+        { k: 'Field note 01 · Display',     t: 'Flight-ready.',     d: 'The finished Clover on show — every system integrated, wired, and cleared to fly.' },
+        { k: 'Field note 02 · Flight',      t: 'Airborne.',         d: 'Clover in the air during a test sortie — holding attitude under its own power.' },
+        { k: 'Field note 03 · Fabrication', t: 'Cut in-house.',     d: 'Machining the carbon-fiber top plate on our CNC, tuned to the exact build layout.' },
+        { k: 'Field note 04 · Prototype',   t: 'Where it started.', d: 'The wooden proof-of-concept frame that validated the geometry before carbon.' },
+      ];
+      const N = meta.length, PAGES = pages.length;
+      let page = 0, active = 0, from = null;
+      const ez = 'cubic-bezier(.19,1,.22,1)';
+
+      const revealPage = (dir) => {
+        const pg = pages[page]; if (!pg) return;
+        pg.animate([{ opacity: 0, transform: `translateX(${dir * 46}px)` }, { opacity: 1, transform: 'none' }], { duration: 380, easing: ez });
+        [...pg.children].forEach((t, i) => t.animate([{ opacity: 0, transform: 'translateY(16px) scale(.95)' }, { opacity: 1, transform: 'none' }], { duration: 460, delay: 60 + i * 75, easing: ez, fill: 'backwards' }));
+      };
+      const setPage = (p, dir) => {
+        page = (p + PAGES) % PAGES;
+        pages.forEach((pg, i) => { if (pg) pg.style.display = i === page ? 'grid' : 'none'; });
+        dots.forEach((d, i) => { d.style.width = i === page ? '24px' : '9px'; d.style.background = i === page ? '#f59e0b' : 'rgba(96,165,250,0.35)'; });
+        revealPage(dir);
+      };
+      const setActive = (i) => {
+        active = (i + N) % N;
+        sms.forEach(sm => { sm.style.display = Number(sm.dataset.idx) === active ? 'block' : 'none'; });
+        const m = meta[active];
+        document.getElementById('vpg-kicker').textContent = m.k;
+        document.getElementById('vpg-title').textContent = m.t;
+        document.getElementById('vpg-desc').textContent = m.d;
+        document.getElementById('vpg-counter').textContent = (active + 1) + ' / ' + N;
+        rails.forEach(r => { const on = Number(r.dataset.idx) === active; r.style.border = on ? '2px solid #f59e0b' : '1px solid rgba(60,64,181,0.4)'; r.style.boxShadow = on ? '0 0 0 1px rgba(245,158,11,0.4)' : 'none'; });
+      };
+      const step = () => { const st = document.getElementById('vpg-stage'); if (st) st.animate([{ opacity: 0.35, transform: 'scale(.985)' }, { opacity: 1, transform: 'none' }], { duration: 340, easing: 'ease' }); };
+      const flipIn = (r) => {
+        const st = document.getElementById('vpg-stage'); if (!st) return;
+        const to = st.getBoundingClientRect();
+        if (r && to.width) {
+          const dx = r.left - to.left, dy = r.top - to.top, sx = Math.max(.05, r.width / to.width), sy = Math.max(.05, r.height / to.height);
+          st.style.transformOrigin = 'top left';
+          st.animate([{ transform: `translate(${dx}px,${dy}px) scale(${sx},${sy})`, opacity: .85, borderRadius: '12px' }, { transform: 'none', opacity: 1, borderRadius: '14px' }], { duration: 500, easing: ez });
+        }
+        const rl = document.getElementById('vpg-rail');
+        if (rl) rl.animate([{ opacity: 0, transform: 'translateX(20px)' }, { opacity: 1, transform: 'none' }], { duration: 440, easing: ez, delay: 100, fill: 'backwards' });
+      };
+      const openFocus = (idx, rect) => { from = rect; grid.style.display = 'none'; focus.style.display = 'block'; setActive(idx); requestAnimationFrame(() => flipIn(from)); };
+      const back = () => {
+        const st = document.getElementById('vpg-stage');
+        const done = () => { focus.style.display = 'none'; grid.style.display = 'block'; };
+        if (st) { const a = st.animate([{ transform: 'none', opacity: 1 }, { transform: 'scale(.9)', opacity: 0 }], { duration: 300, easing: 'cubic-bezier(.4,0,.6,1)' }); a.onfinish = done; a.oncancel = done; }
+        else done();
+      };
+
+      document.getElementById('vpg-prev').addEventListener('click', () => setPage(page - 1, -1));
+      document.getElementById('vpg-next').addEventListener('click', () => setPage(page + 1, 1));
+      dots.forEach((d, i) => d.addEventListener('click', () => setPage(i, i >= page ? 1 : -1)));
+      pages.forEach(pg => pg && [...pg.querySelectorAll('.vpg-tile')].forEach(t => t.addEventListener('click', () => openFocus(Number(t.dataset.idx), t.getBoundingClientRect()))));
+      rails.forEach(r => r.addEventListener('click', () => { setActive(Number(r.dataset.idx)); step(); }));
+      document.getElementById('vpg-prevm').addEventListener('click', () => { setActive(active - 1); step(); });
+      document.getElementById('vpg-nextm').addEventListener('click', () => { setActive(active + 1); step(); });
+      document.getElementById('vpg-back').addEventListener('click', back);
+      setActive(0);
+    }, 80);
+
+    const p = this.props || {};
+    const gridOn = p.gridTexture ?? true;
+    // explorer photo-tile background (tweakable)
+    const EXP_BG = {
+      'Spotlight': { img: 'radial-gradient(44% 48% at 50% 42%, #6a5f6e 0%, #2a2a4a 42%, #171a38 72%, #0e1130 100%)' },
+      'Studio':    { img: 'radial-gradient(60% 62% at 50% 40%, #5b6392 0%, #222a54 55%, #141838 100%)' },
+      'Indigo':    { img: 'linear-gradient(160deg,#2a3160,#151a3c)' },
+      'Carbon':    { img: 'linear-gradient(rgba(96,165,250,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,0.07) 1px,transparent 1px),linear-gradient(160deg,#212750,#12163a)', size: '22px 22px,22px 22px,cover' },
+      'Halo blue': { img: 'radial-gradient(55% 58% at 50% 40%, #4f61ac 0%, #1c2148 60%, #12163a 100%)' },
+    };
+    const expBgEl = document.getElementById('vp-exp-photobg');
+    if (expBgEl) { const m = EXP_BG[p.explorerBg] || EXP_BG.Spotlight; expBgEl.style.backgroundImage = m.img; expBgEl.style.backgroundSize = m.size || 'cover'; expBgEl.style.backgroundColor = '#161b40'; }
+    const heroLoop = p.heroLoop ?? false;
+    const reverse = p.scrubReverse ?? false;
+    // build-sequence tweakables
+    const buildDurMs = (p.buildDuration ?? 12) * 1000;
+    const buildScroll = p.buildScrollLength ?? 300;
+    const frameBlend = p.frameBlend ?? false;
+    const scrubSmooth = p.scrubSmoothing ?? 0.5;
+    const showCallouts = p.showCallouts ?? false;   // middle floating label removed; the readout below the canvas carries the labelling
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---- grid toggle ----
+    if (!gridOn) {
+      const g = document.getElementById('vp-hero-grid');
+      if (g) g.style.display = 'none';
+    }
+
+    // ---- hero video + staggered reveal (name lands with the drone) ----
+    const hero = document.getElementById('vp-hero-video');
+    // header reveal order: 0 eyebrow, 1 name(h1), 2 tagline, 3 spec pills
+    const heroReveals = Array.from(document.querySelectorAll('header [data-reveal]'));
+    const show = (i) => {
+      const el = heroReveals[i];
+      if (el) { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }
+    };
+    // DOM order of header reveals: 0 eyebrow, 1 tagline, 2 spec pills, 3 name(h1)
+    // Reveal the info in sequence over the (frozen) video, ending with the name.
+    let revealed = false;
+    const revealInfo = () => {
+      if (revealed) return;
+      revealed = true;
+      show(0);                          // eyebrow
+      setTimeout(() => show(1), 240);   // spec pills
+      setTimeout(() => show(2), 520);   // name
+      setTimeout(() => show(3), 900);   // buttons
+    };
+    // reveal the info as soon as the page opens — don't make people wait for the drone to land
+    if (!reduced) setTimeout(revealInfo, 350);
+
+    const FREEZE_AT = 14;   // the clip zooms onto the drone at ~14s — hold there, then reveal
+
+    if (reduced) {
+      heroReveals.forEach((_, i) => show(i));
+    } else if (hero) {
+      let frozen = false;
+      const initHero = () => {
+        hero.muted = true;              // React drops the attribute; needed for autoplay
+        hero.setAttribute('muted', '');
+        hero.play().catch(() => revealInfo());   // autoplay blocked → just show the info
+        hero.addEventListener('timeupdate', () => {
+          const d = hero.duration || 16.85;
+          if (heroLoop) {
+            if (hero.currentTime >= d - 0.12) { try { hero.currentTime = 0; hero.play(); } catch (e) {} }
+          } else if (!frozen && hero.currentTime >= Math.min(FREEZE_AT, d - 0.1)) {
+            frozen = true;
+            try { hero.pause(); } catch (e) {}    // hold on the zoom-in frame
+            revealInfo();
+          }
+        });
+      };
+      if (hero.readyState >= 1) initHero();
+      else hero.addEventListener('loadedmetadata', initHero, { once: true });
+      hero.addEventListener('error', revealInfo);
+      hero.addEventListener('ended', revealInfo);
+      setTimeout(revealInfo, (FREEZE_AT + 1.5) * 1000);   // safety net
+    } else {
+      heroReveals.forEach((_, i) => show(i));
+    }
+
+    // ---- scroll-reveal for the rest of the page ----
+    const revealEls = Array.from(document.querySelectorAll('section [data-reveal]'));
+    if (reduced) {
+      revealEls.forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; });
+    } else if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+      revealEls.forEach(el => io.observe(el));
+    } else {
+      revealEls.forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; });
+    }
+
+    // ---- scroll-scrub build sequence ----
+    const scroller = document.getElementById('vp-build-scroll');
+    if (scroller) scroller.style.height = buildScroll + 'vh';
+    const bar = document.getElementById('vp-build-bar');
+    const numEl = document.getElementById('vp-stage-num');
+    const labelEl = document.getElementById('vp-stage-label');
+    const steps = Array.from(document.querySelectorAll('[data-step]'));
+    const phaseEl = document.getElementById('vp-stage-phase');
+    const skipBtn = document.getElementById('vp-build-skip');
+    const skipLabel = document.getElementById('vp-build-skip-label');
+    const skipArrow = document.getElementById('vp-build-skip-arrow');
+    const phases = ['FRAME', 'POWERTRAIN', 'AVIONICS', 'ASSEMBLED'];
+    // granular "now installing" events mapped along the scrub — tweak names/timings freely
+    const events = [
+      { at: 0.00, phase: 0, n: 1,  name: 'Carbon-fiber bottom plate',   ax: 50, ay: 66 },
+      { at: 0.06, phase: 0, n: 2,  name: 'Lower frame deck',            ax: 50, ay: 56 },
+      { at: 0.12, phase: 0, n: 3,  name: 'Foldable arm hinges',         ax: 40, ay: 52 },
+      { at: 0.24, phase: 0, n: 4,  name: 'Quick-release leg hinges',    ax: 60, ay: 58 },
+      { at: 0.30, phase: 0, n: 5,  name: 'Landing legs',                ax: 46, ay: 70 },
+      { at: 0.35, phase: 2, n: 6,  name: 'Antennas',                    ax: 57, ay: 36 },
+      { at: 0.41, phase: 1, n: 7,  name: 'ESC power board & camera',    ax: 50, ay: 58 },
+      { at: 0.48, phase: 2, n: 8,  name: 'Component board & air unit',  ax: 45, ay: 48 },
+      { at: 0.54, phase: 1, n: 9,  name: 'MAUCH BEC',                   ax: 56, ay: 50 },
+      { at: 0.60, phase: 0, n: 9,  name: 'Carbon-fiber top plate',      ax: 50, ay: 42 },
+      { at: 0.64, phase: 2, n: 9,  name: 'Here3+ GPS',                  ax: 55, ay: 38 },
+      { at: 0.70, phase: 1, n: 10, name: 'Motors & props \u00d74',       ax: 38, ay: 44 },
+      { at: 0.75, phase: 1, n: 10, name: 'Tattu battery',               ax: 52, ay: 48 },
+      { at: 0.80, phase: 2, n: 11, name: 'Payload drop mechanism',      ax: 50, ay: 68 },
+      { at: 0.90, phase: 3, n: 11, name: 'Systems check \u2014 flight-ready', ax: 50, ay: 50 },
+    ];
+    const canvas = document.getElementById('vp-build-canvas');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    const renderImg = document.getElementById('vp-build-render');
+    const callout = document.getElementById('vp-build-callout');
+    const coLine = document.getElementById('vp-callout-line');
+    const coDot = document.getElementById('vp-callout-dot');
+    const coCard = document.getElementById('vp-callout-card');
+    const coName = document.getElementById('vp-callout-name');
+    const coIndex = document.getElementById('vp-callout-index');
+    if (!showCallouts && callout) callout.style.display = 'none';
+    const setCallout = (ev) => {
+      if (!callout || !coCard) return;
+      // craft stays centered in every frame while the camera zooms/rotates, so the pointer holds
+      // on the craft centre — only the caption text changes as each part lands. Always accurate.
+      if (coName) coName.textContent = ev.name;
+      if (coIndex) coIndex.textContent = String(ev.n).padStart(2, '0') + ' \u00b7 NOW MOUNTING';
+      const inner = document.getElementById('vp-callout-inner');
+      if (inner && !reduced) { inner.style.animation = 'none'; void inner.offsetWidth; inner.style.animation = 'vp-callout-in .55s cubic-bezier(.2,.7,.2,1)'; }
+      if (!reduced && coDot) { coDot.style.animation = 'none'; void coDot.offsetWidth; coDot.style.animation = 'vp-callout-pop .5s cubic-bezier(.34,1.56,.64,1)'; }
+    };
+    if (scroller && ctx) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      const FRAMES = 140;
+      const imgs = [];
+      let curF = 0, targetF = 0;
+      // frame draw: clean by default; optional cross-dissolve smoothing (tweakable — smooths motion but
+      // can lightly ghost the rotating frames)
+      const drawFrame = (f) => {
+        const clamped = Math.max(0, Math.min(FRAMES - 1, f));
+        if (!frameBlend) {
+          const a = imgs[Math.round(clamped)];
+          if (!a || !a.complete || !a.naturalWidth) return;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = 1;
+          ctx.drawImage(a, 0, 0, canvas.width, canvas.height);
+          return;
+        }
+        const lo = Math.floor(clamped), hi = Math.min(FRAMES - 1, lo + 1), t = clamped - lo;
+        const a = imgs[lo], b = imgs[hi];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (a && a.complete && a.naturalWidth) { ctx.globalAlpha = 1; ctx.drawImage(a, 0, 0, canvas.width, canvas.height); }
+        if (t > 0.001 && b && b.complete && b.naturalWidth) { ctx.globalAlpha = t; ctx.drawImage(b, 0, 0, canvas.width, canvas.height); ctx.globalAlpha = 1; }
+      };
+      for (let i = 0; i < FRAMES; i++) {
+        const im = new Image();
+        im.decoding = 'async';
+        im.src = 'assets/frames/f' + String(i).padStart(3, '0') + '.png';
+        im.onload = () => { drawFrame(curF); };
+        imgs.push(im);
+      }
+
+      let lastEi = -1;
+      const updateUI = (prog) => {
+        if (bar) bar.style.width = (prog * 100).toFixed(1) + '%';
+        let ei = 0;
+        for (let i = 0; i < events.length; i++) if (prog >= events[i].at) ei = i;
+        const ev = events[ei];
+        if (numEl) numEl.textContent = String(ev.n).padStart(2, '0') + ' / 11';
+        if (phaseEl) { phaseEl.textContent = phases[ev.phase]; phaseEl.style.color = ev.phase === 3 ? '#f59e0b' : '#60a5fa'; }
+        if (ei !== lastEi) {
+          lastEi = ei;
+          setCallout(ev);
+          if (labelEl) {
+            labelEl.textContent = ev.name;
+            labelEl.style.animation = 'none'; void labelEl.offsetWidth;
+            labelEl.style.animation = reduced ? 'none' : 'vp-mount-in .5s cubic-bezier(.2,.7,.2,1)';
+          }
+          if (numEl && !reduced) { numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = 'vp-num-flash .6s ease'; }
+        }
+        steps.forEach((s, i) => {
+          s.style.color = i <= ev.phase ? '#f59e0b' : '#565a94';
+          s.style.fontWeight = i === ev.phase ? '700' : '400';
+        });
+      };
+
+      let prevY = window.scrollY || 0;
+      let scrollDir = 1;
+      const updateSkip = () => {
+        const y = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        if (y > prevY + 1) scrollDir = 1; else if (y < prevY - 1) scrollDir = -1;
+        prevY = y;
+        if (!skipBtn) return;
+        const r = scroller.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const inView = r.top <= 1 && r.bottom > vh + 1;
+        skipBtn.style.opacity = inView ? '1' : '0';
+        skipBtn.style.transform = 'translateX(-50%) translateY(' + (inView ? '0' : '12px') + ')';
+        skipBtn.style.pointerEvents = inView ? 'auto' : 'none';
+        if (scrollDir >= 0) { if (skipLabel) skipLabel.textContent = 'SKIP BUILD'; if (skipArrow) skipArrow.textContent = '\u2193'; }
+        else { if (skipLabel) skipLabel.textContent = 'SKIP BACK UP'; if (skipArrow) skipArrow.textContent = '\u2191'; }
+      };
+
+      if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+          const y = window.scrollY || 0;
+          const pageTop = scroller.getBoundingClientRect().top + y;
+          const dest = scrollDir >= 0 ? pageTop + scroller.offsetHeight : Math.max(0, pageTop - 4);
+          window.scrollTo({ top: dest, behavior: reduced ? 'auto' : 'smooth' });
+        });
+      }
+      window.addEventListener('scroll', updateSkip, { passive: true });
+      document.addEventListener('scroll', updateSkip, { passive: true, capture: true });
+      window.addEventListener('resize', updateSkip, { passive: true });
+      let last = -1;
+      const poll = () => {
+        const y = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        if (y !== last) { last = y; updateSkip(); }
+        requestAnimationFrame(poll);
+      };
+      requestAnimationFrame(poll);
+      updateSkip();
+
+      // ---- hybrid playback: cinematic autoplay on enter, but hands over to scroll-scrub the moment the user scrolls ----
+      const DUR = buildDurMs; // ms — autoplay clip length (tweakable via "Build speed")
+      // trapezoid velocity: soft ease-in, long constant-speed middle, soft ease-out — far more natural than a peaky cubic
+      const easeInOut = (x) => {
+        const a = 0.2, area = 1 - a;              // a = ramp fraction at each end
+        if (x < a) return (x * x / (2 * a)) / area;
+        if (x > 1 - a) { const y = 1 - x; return (area - y * y / (2 * a)) / area; }
+        return (x - a / 2) / area;
+      };
+      let t0 = 0, playing = false, done = false, rafId = 0;
+      let mode = 'auto';       // 'auto' = timed clip · 'scrub' = follows scroll
+      let lastE = 0;           // last eased progress applied (for smooth mode handoff)
+      let curScrub = 0;        // smoothed scrub position
+      const applyFrame = (e) => {
+        lastE = e;
+        updateUI(e);
+        const f = e * (FRAMES - 1);
+        curF = f; targetF = f; drawFrame(f);
+        if (renderImg) { const o = e > 0.93 ? Math.min(1, (e - 0.93) / 0.05) : 0; renderImg.style.opacity = o.toFixed(2); canvas.style.opacity = (1 - o).toFixed(2); }
+        if (callout) callout.style.opacity = (e > 0.955 || e < 0.004) ? '0' : '1';
+      };
+      const tick = (now) => {
+        if (mode !== 'auto') return;   // user took over → stop the clip
+        if (!t0) t0 = now;
+        const p = Math.min(1, (now - t0) / DUR);
+        applyFrame(easeInOut(p));
+        if (p < 1) rafId = requestAnimationFrame(tick);
+        else { playing = false; done = true; }
+      };
+      const play = () => {
+        if (mode !== 'auto' || playing || done) return;
+        playing = true; t0 = 0;
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(tick);
+      };
+      const rewind = () => {
+        cancelAnimationFrame(rafId);
+        playing = false; done = false; t0 = 0;
+        mode = 'auto'; curScrub = 0;
+        applyFrame(0);
+      };
+
+      // scroll progress through the pinned section (0 at pin start, 1 at pin end)
+      const scrubProgress = () => {
+        const r = scroller.getBoundingClientRect();
+        const range = scroller.offsetHeight - window.innerHeight;
+        return range > 0 ? Math.min(1, Math.max(0, -r.top / range)) : 0;
+      };
+      const toScrub = () => {
+        if (mode === 'scrub') return;
+        mode = 'scrub';
+        playing = false;
+        cancelAnimationFrame(rafId);
+        curScrub = lastE;   // start scrub from wherever the clip was → no jump
+      };
+      // continuous scrub loop: frame-rate-independent exponential smoothing (no rubber-band wobble)
+      let scrubPrev = 0;
+      const scrubTick = (now) => {
+        if (mode === 'scrub') {
+          const dt = scrubPrev ? Math.min(0.05, (now - scrubPrev) / 1000) : 0.016;
+          const target = scrubProgress();
+          // time-based lerp: settles at a consistent speed regardless of fps
+          const base = 0.02 + scrubSmooth * 0.2; // higher smoothing = gentler catch-up
+          const k = 1 - Math.pow(base, dt);
+          curScrub += (target - curScrub) * k;
+          if (Math.abs(target - curScrub) < 0.0004) curScrub = target;
+          applyFrame(curScrub);
+        }
+        scrubPrev = now;
+        requestAnimationFrame(scrubTick);
+      };
+      requestAnimationFrame(scrubTick);
+
+      // any intentional scroll input while the section is engaged snaps to scrub
+      const onUserScroll = () => {
+        if (mode !== 'auto') return;
+        const r = scroller.getBoundingClientRect();
+        const mid = window.innerHeight * 0.5;
+        if (r.top <= mid && r.bottom > mid) toScrub();
+      };
+      ['wheel', 'touchmove', 'keydown'].forEach((evt) =>
+        window.addEventListener(evt, onUserScroll, { passive: true }));
+
+      applyFrame(0);
+      if (reduced) { applyFrame(1); done = true; }
+      else if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((ents) => {
+          ents.forEach((e) => {
+            if (e.isIntersecting && e.intersectionRatio > 0.55) play();
+            else if (!e.isIntersecting && e.boundingClientRect.top > 0) rewind();
+          });
+        }, { threshold: [0, 0.55] });
+        io.observe(scroller.firstElementChild || scroller);
+      } else { play(); }
+    }
+
+    // ---- component explorer: markers reveal on entry, tap to inspect ----
+    const exp = document.getElementById('vp-explorer');
+    if (exp) {
+      const navBtns = Array.from(exp.querySelectorAll('[data-exp]'));
+      const panels = Array.from(exp.querySelectorAll('[data-exp-panel]'));
+      const slots = Array.from(exp.querySelectorAll('img.vp-exp-photo'));
+      const marks = Array.from(exp.querySelectorAll('[data-exp-marker]'));
+      const lines = document.getElementById('vp-exp-lines');
+      const goldSet = { cube: 1, cam: 1, custom: 1, prop: 1 };
+      const pick = (id) => {
+        navBtns.forEach((b) => {
+          const on = b.dataset.exp === id, ac = goldSet[b.dataset.exp] ? '#f59e0b' : '#60a5fa';
+          b.style.background = on ? ac : 'transparent';
+          b.style.color = on ? '#07091c' : '#c3c6ea';
+          b.style.borderColor = on ? ac : 'rgba(60,64,181,0.4)';
+          b.style.fontWeight = on ? '700' : '400';
+        });
+        panels.forEach((p) => { p.style.display = p.dataset.expPanel === id ? 'block' : 'none'; });
+        slots.forEach((s) => { s.style.display = s.id === 'vp-exp-' + id ? 'block' : 'none'; });
+        marks.forEach((m) => {
+          const on = m.dataset.expMarker === id, gold = goldSet[m.dataset.expMarker], ac = gold ? '#f59e0b' : '#60a5fa';
+          m.style.background = on ? ac : 'rgba(13,16,53,0.92)';
+          m.style.color = on ? '#07091c' : '#c3c6ea';
+          m.style.borderColor = ac;
+          m.style.borderStyle = 'solid';
+          m.style.borderWidth = on ? '0' : '1.5px';
+          m.style.zIndex = on ? '4' : '2';
+          m.style.boxShadow = on ? ('0 0 0 6px ' + (gold ? 'rgba(245,158,11,0.22)' : 'rgba(96,165,250,0.22)')) : 'none';
+        });
+      };
+      navBtns.forEach((b) => b.addEventListener('click', () => pick(b.dataset.exp)));
+      marks.forEach((m) => m.addEventListener('click', () => pick(m.dataset.expMarker)));
+      pick('cube');
+
+      let revealedExp = false;
+      const revealExp = () => {
+        if (revealedExp) return; revealedExp = true;
+        if (lines) lines.style.opacity = '1';
+        marks.forEach((m, i) => setTimeout(() => { m.style.opacity = '1'; m.style.transform = 'scale(1)'; }, 120 + i * 70));
+      };
+      if (reduced) revealExp();
+      else if ('IntersectionObserver' in window) {
+        const stage = document.getElementById('vp-exp-stage');
+        const io2 = new IntersectionObserver((ents) => { ents.forEach((e) => { if (e.isIntersecting) { revealExp(); io2.disconnect(); } }); }, { threshold: 0.35 });
+        if (stage) io2.observe(stage);
+      } else revealExp();
+    }
+
+    // ---- shared-element flight: build render → explorer drone ----
+    const flyer = document.getElementById('vp-flyer');
+    const expStage = document.getElementById('vp-exp-stage');
+    const buildRender = document.getElementById('vp-build-render');
+    const expDrone = expStage ? expStage.querySelector('img') : null;
+    if (!reduced && flyer && expStage && buildRender) {
+      const clamp01 = (v) => Math.max(0, Math.min(1, v));
+      let startBox = null; // build render's on-screen box, captured once at handoff
+      const bridge = () => {
+        const vh = window.innerHeight;
+        const s = expStage.getBoundingClientRect();
+        const t = clamp01((vh - s.top) / (vh * 0.62));
+        if (t <= 0.001) {              // before the handoff
+          flyer.style.opacity = '0';
+          buildRender.style.display = '';
+          startBox = null;
+          return;
+        }
+        if (t >= 0.999) {              // landed — hand off to the static drone
+          flyer.style.opacity = '0';
+          if (expDrone) expDrone.style.visibility = 'visible';
+          return;
+        }
+        if (!startBox) {               // capture while build render is still visible
+          const r = buildRender.getBoundingClientRect();
+          if (r.width && r.height) startBox = { left: r.left, top: r.top, width: r.width, height: r.height };
+        }
+        const b = startBox || buildRender.getBoundingClientRect();
+        const e = expStage.getBoundingClientRect();
+        const k = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // easeInOutQuad
+        flyer.style.left = (b.left + (e.left - b.left) * k).toFixed(1) + 'px';
+        flyer.style.top = (b.top + (e.top - b.top) * k).toFixed(1) + 'px';
+        flyer.style.width = (b.width + (e.width - b.width) * k).toFixed(1) + 'px';
+        flyer.style.height = (b.height + (e.height - b.height) * k).toFixed(1) + 'px';
+        flyer.style.transform = 'rotate(' + ((1 - k) * -7).toFixed(2) + 'deg)';
+        flyer.style.opacity = '1';
+        buildRender.style.display = 'none';
+        if (expDrone) expDrone.style.visibility = 'hidden';
+      };
+      window.addEventListener('scroll', bridge, { passive: true });
+      window.addEventListener('resize', bridge, { passive: true });
+      const bp = () => { bridge(); requestAnimationFrame(bp); };
+      requestAnimationFrame(bp);
+    }
+  }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
