@@ -128,8 +128,8 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Flight Controller v3: Revising the Design",
     excerpt:
       "Back into the flight controller design, working through a new iteration based on lessons from the PCBWay contest board. Testing is planned in the coming weeks.",
-    image:
-      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/flight-controller-v3.png",
+    imageFit: "contain",
     category: "hardware",
     date: "Jul 2026 – Present",
     author: "Hardware Team",
@@ -221,8 +221,8 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Designing Our Custom Power Distribution Board",
     excerpt:
       "Designed, built, and tested a custom power distribution board to power every onboard electronic system on the team's UAV.",
-    image:
-      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/power-distribution-board.png",
+    imageFit: "contain",
     category: "hardware",
     date: "Feb – Mar 2026",
     author: "Hardware Team",
@@ -245,24 +245,80 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Onboarding the Hardware Team on Altium Designer",
     excerpt:
       "Trained new members to proficiency in Altium Designer, building the team's core PCB design capability from the ground up.",
-    image:
-      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/altium-designer.png",
+    imageFit: "contain",
     category: "hardware",
     date: "Sep – Nov 2025",
     author: "Hardware Team",
     readTime: "4 min read",
   },
   {
-    id: 4,
-    title: "3D Printed Carbon Fiber Frame Design",
+    id: 28,
+    title: "Final Structural Assembly",
     excerpt:
-      "Engineering a lightweight yet durable frame using advanced materials and manufacturing techniques. Stress testing results included.",
-    image:
-      "https://images.unsplash.com/photo-1715322506425-2fc19fe0fc5f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWNoYW5pY2FsJTIwZW5naW5lZXJpbmclMjBnZWFyc3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "The complete airframe was assembled by integrating the carbon fiber plates, folding arms, landing gear, payload mechanism, and structural hardware. All components were aligned, secured, and inspected to verify rigidity, dimensional accuracy, and readiness for electronics integration and flight testing.",
+    image: "/images/blog/structure-final-assembly.png",
     category: "structure",
-    date: "Mar 3, 2026",
-    author: "Jessica Park",
-    readTime: "7 min read",
+    date: "Jul 5, 2026",
+    author: "Structure Team",
+    readTime: "4 min read",
+  },
+  {
+    id: 27,
+    title: "Payload Mechanism Construction",
+    excerpt:
+      "The payload delivery mechanism was designed and fabricated to accommodate the rescue car while maintaining structural integrity and balanced weight distribution. The mechanism was integrated into the airframe to ensure reliable payload deployment during mission execution.",
+    image: "/images/blog/structure-payload-mechanism.png",
+    imageFit: "contain",
+    category: "structure",
+    date: "Jul 1, 2026",
+    author: "Structure Team",
+    readTime: "4 min read",
+  },
+  {
+    id: 26,
+    title: "Hinge Assembly and Arm Installation",
+    excerpt:
+      "The folding hinges, arm mounts, and structural brackets were assembled using precision fasteners. This stage established the primary structural framework and ensured proper alignment and smooth operation of the folding arm mechanism.",
+    image: "/images/blog/structure-hinge-assembly.png",
+    category: "structure",
+    date: "Jun 3, 2026",
+    author: "Structure Team",
+    readTime: "4 min read",
+  },
+  {
+    id: 25,
+    title: "Carbon Fiber Plate Manufacturing",
+    excerpt:
+      "The structural plates were manufactured from carbon fiber sheets using CNC machining. The machining process produced accurate profiles, mounting holes, and slots directly from the CAD model, ensuring high dimensional accuracy while maintaining a lightweight and rigid structure.",
+    image: "/images/blog/structure-carbon-fiber-cnc.png",
+    category: "structure",
+    date: "Jun 2, 2026",
+    author: "Structure Team",
+    readTime: "4 min read",
+  },
+  {
+    id: 24,
+    title: "Wooden Prototype Fabrication",
+    excerpt:
+      "A full-scale wooden prototype was fabricated to validate the structural layout and overall dimensions. This prototype allowed verification of the assembly process, component positioning, and payload accommodation while minimizing manufacturing costs before machining the carbon fiber parts.",
+    image: "/images/blog/structure-wooden-prototype.png",
+    category: "structure",
+    date: "May 31, 2026",
+    author: "Structure Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 23,
+    title: "CAD Design (Fusion 360)",
+    excerpt:
+      "The drone structure was fully designed in Fusion 360, where all structural components, including the frame, folding arms, payload compartment, landing gear, and mounting interfaces, were modeled. The CAD model ensured proper component integration, manufacturability, and dimensional accuracy before fabrication.",
+    image: "/images/blog/structure-cad-design.png",
+    imageFit: "contain",
+    category: "structure",
+    date: "May 15, 2026",
+    author: "Structure Team",
+    readTime: "4 min read",
   },
   {
     id: 14,
@@ -289,15 +345,15 @@ export const BLOG_POSTS: BlogPostFull[] = [
     readTime: "4 min read",
   },
   {
-    id: 6,
-    title: "Power Management System Design",
+    id: 22,
+    title: "Propulsion System Design & Configuration Selection",
     excerpt:
-      "Creating an intelligent battery management system with safety features and real-time monitoring capabilities.",
-    image:
-      "https://images.unsplash.com/photo-1694466464626-7bd06595cf2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYXJkd2FyZSUyMGVsZWN0cm9uaWNzJTIwY29tcG9uZW50c3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "The propulsion system was designed based on the required payload capacity, target endurance, and thrust-to-weight ratio. Propulsion calculations were performed to determine the required motor thrust, propeller diameter, and battery configuration. Based on this analysis, the MN6007-II brushless motors coupled with MF2211 propellers were selected to provide sufficient thrust while maintaining high efficiency. A Quad-X configuration was adopted due to its structural simplicity, balanced load distribution, high maneuverability, and ease of control.",
+    image: "/images/blog/propulsion-system-design.png",
+    imageFit: "contain",
     category: "propulsion",
-    date: "Feb 25, 2026",
-    author: "Emma Watson",
+    date: "Feb 13, 2026",
+    author: "Propulsion Team",
     readTime: "5 min read",
   },
   {
