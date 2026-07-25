@@ -26,8 +26,13 @@ import styles from "./Team.module.css";
  * The site navbar is fixed and transparent until scrolled, so it sits over the
  * hero rather than pushing it down.
  */
-export default function Team() {
-  const [year, setYear] = useState<RosterYear>(ROSTER_YEARS[0]);
+export default function Team({
+  initialYear,
+}: {
+  /** Overrides the default starting tab — used by the static-export script. */
+  initialYear?: RosterYear;
+} = {}) {
+  const [year, setYear] = useState<RosterYear>(initialYear ?? ROSTER_YEARS[0]);
   const scrollY = useScrollPosition();
 
   const roster = ROSTERS[year];
@@ -66,7 +71,7 @@ export default function Team() {
    * A themed info chip sits beside the title whenever the section has a blurb.
    */
   const renderSection = (section: Section, nested = false) => {
-    const { leads, grid } = splitByTier(section.members);
+    const { leads, vices, grid } = splitByTier(section.members);
     const accent = subTeamAccent(section.name);
     const count = sectionCount(section);
     const hasChildren = !!section.subsections?.length;
@@ -99,8 +104,17 @@ export default function Team() {
           </span>
         </div>
 
-        {cardRow(leads, styles.leadRow)}
-        {cardRow(grid, styles.grid)}
+        <div className={styles.sectionBody}>
+          {cardRow(leads, styles.leadRow)}
+          {leads.length > 0 && (vices.length > 0 || grid.length > 0) && (
+            <div className={styles.sectionDivider} aria-hidden />
+          )}
+          <div className={styles.sectionRight}>
+            {/* Vices sit in member-sized cards, one row above the rest of the members. */}
+            {cardRow(vices, styles.grid)}
+            {cardRow(grid, styles.grid)}
+          </div>
+        </div>
 
         {hasChildren && (
           <div className={styles.subGroup}>

@@ -94,6 +94,14 @@ export interface TeamMember {
    */
   cutout?: string;
   linkedIn?: string;
+  /**
+   * Academic major, from the roster intake form — e.g. "Mechatronics",
+   * "Computer and Communication Engineering". Not the same thing as
+   * `department` (that's the sub-team, e.g. "Hardware"). Captured for
+   * completeness; no card shows it yet — nowhere on the design has a slot
+   * for it currently.
+   */
+  major?: string;
 }
 
 /**
@@ -283,15 +291,6 @@ const section = (
   ...(opts.subsections?.length ? { subsections: opts.subsections } : {}),
 });
 
-/** The four-slot shape every section starts from. */
-const standardSection = (name: string): Section =>
-  section(name, [
-    slot("Section Lead"),
-    slot("Vice Section Lead"),
-    slot("Member"),
-    slot("Member"),
-  ]);
-
 /**
  * Split a member list into the raised lead row and the member grid, in one
  * pass, so page code never re-derives the rule. Leads/vices/heads float up;
@@ -299,14 +298,19 @@ const standardSection = (name: string): Section =>
  */
 export function splitByTier(members: TeamMember[]): {
   leads: TeamMember[];
+  vices: TeamMember[];
   grid: TeamMember[];
 } {
   const leads: TeamMember[] = [];
+  const vices: TeamMember[] = [];
   const grid: TeamMember[] = [];
   for (const m of members) {
-    (isLeadTier(roleTier(m.role)) ? leads : grid).push(m);
+    const tier = roleTier(m.role);
+    if (tier === "lead" || tier === "head") leads.push(m);
+    else if (tier === "vice") vices.push(m);
+    else grid.push(m);
   }
-  return { leads, grid };
+  return { leads, vices, grid };
 }
 
 /** A division-head card (Head / Vice), stamped with the division name. */
@@ -320,23 +324,250 @@ const head = (
 const ROSTER_2026: YearRoster = {
   year: "2026",
   leadership: [
-    { ...slot("Vice Lead"), department: "Team Leadership" },
     {
-      ...slot("Team Leader", "Farah Harfoush", { photo: "farah-harfoush-2026" }),
+      ...slot("Vice Lead", "Youssef Hozayen", {
+        photo: "youssef-hozayen-2026",
+        linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
+        gradYear: "2027",
+        major: "Mechatronics and robotics engineering",
+      }),
       department: "Team Leadership",
     },
-    { ...slot("EM Integration Lead"), department: "Team Leadership" },
+    {
+      ...slot("Team Leader", "Farah Harfoush", {
+        photo: "farah-harfoush-2026",
+        linkedIn: "https://www.linkedin.com/in/farah-harfoush-9297ab280",
+        gradYear: "2026",
+        major: "Mechatronics and Robotics",
+      }),
+      department: "Team Leadership",
+    },
+    { ...slot("EM Integration Lead", "Ziad Essam", {
+        photo: "ziad-essam",
+        linkedIn: "https://www.linkedin.com/in/ziad-essam-a202b3244",
+      }), department: "Team Leadership" },
   ],
   divisions: [
     {
       num: "01",
       name: "Mechanical",
-      sections: ["Aerodesign", "Structure", "Propulsion"].map(standardSection),
+      sections: [
+        section("Aerodesign", [
+          slot("Section Lead", "Mohamed Elbarbary", {
+            photo: "mohamed-barbary",
+            linkedIn: "https://www.linkedin.com/in/muhammed-barbary",
+            gradYear: "2026",
+            major: "Mechanical",
+          }),
+          slot("Member", "Dani Georges", {
+            photo: "dani-georges",
+            linkedIn: "https://www.linkedin.com/in/dani-georges-813989276",
+            gradYear: "2027",
+            major: "Electromechanical",
+          }),
+          slot("Member", "Yahia Haitham", {
+            photo: "yahia-haitham",
+            linkedIn: "https://www.linkedin.com/in/yahia-haitham-377202292/",
+            gradYear: "2028",
+            major: "Mechatronics & Robotics",
+          }),
+        ], {
+          blurb:
+            "We shape how the aircraft flies — the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+        }),
+        section("Structure", [
+          slot("Section Lead", "Mira Barsoum", {
+            linkedIn: "https://www.linkedin.com/in/mira-barsoum-457531297/",
+            gradYear: "2026",
+            major: "Mechatronics and Robotics",
+          }),
+          slot("Vice Section Lead", "Momen Ashraf", {
+            photo: "momen-ahraf",
+            linkedIn: "https://www.linkedin.com/in/mo-men-ashraf-b73647423/",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
+          // Also promoted to vice, per the intake form.
+          slot("Vice Section Lead", "Youssef Ibrahim", {
+            photo: "youssef-ibrahim-2026",
+            linkedIn: "https://www.linkedin.com/in/youssef-ibrahim-ba6761354/",
+            gradYear: "2027",
+            major: "Electromechanical",
+          }),
+          slot("Member", "Amr Hosny", {
+            photo: "amr-hosny",
+            linkedIn: "https://www.linkedin.com/in/amr-monib-4740361b7",
+            gradYear: "2028",
+            major: "Electromechanical",
+          }),
+        ], {
+          blurb:
+            "We design and build the airframe that holds everything together — sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
+        }),
+        // Co-leads — Hana and Rodyna run Propulsion together, no vice.
+        section("Propulsion", [
+          slot("Section Lead", "Hana Waleed", {
+            photo: "hana-waleed-2026",
+            linkedIn: "https://www.linkedin.com/in/hana-waleed-4688b1379/",
+            gradYear: "2028",
+            major: "Mechatronics",
+          }),
+          slot("Section Lead", "Rodyna Amr", {
+            photo: "rodyna-amr-2026",
+            linkedIn: "https://www.linkedin.com/in/rodyna-amr-5843772b0",
+            gradYear: "2028",
+            major: "Mechatronics",
+          }),
+        ], {
+          blurb:
+            "We power the aircraft — selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
+        }),
+      ],
     },
     {
       num: "02",
       name: "Autonomous",
-      sections: ["Software", "Hardware", "AI"].map(standardSection),
+      // Ziad Essam also heads Autonomous, on top of his top-level EM Integration Lead card.
+      heads: [
+        head("Head of Autonomous", "Ziad Essam", "Autonomous", {
+          photo: "ziad-essam",
+          linkedIn: "https://www.linkedin.com/in/ziad-essam-a202b3244",
+        }),
+        head("Vice Lead of Autonomous", "Mazen Asser", "Autonomous", {
+          photo: "mazen-asser-2026",
+          linkedIn: "https://www.linkedin.com/in/mazen-asser-8751a3244/",
+          gradYear: "2026",
+          major: "Computer and communication",
+        }),
+      ],
+      sections: [
+        section("AI", [
+          slot("Section Lead", "Mohamed Bassem", {
+            photo: "mohamed-bassem-2026",
+            linkedIn: "https://www.linkedin.com/in/mohamed-bassem-abbas/",
+            gradYear: "2026",
+            major: "Computer & Communication Engineering",
+          }),
+          slot("Member", "Abdelrahman Aboelwafa", {
+            photo: "abdelrahman-yasser",
+            linkedIn: "https://www.linkedin.com/in/abdelrahmanaboelwafa",
+            gradYear: "2028+",
+            major: "CCE",
+          }),
+          slot("Member", "Ahmed ElMetwalli", {
+            photo: "ahmed-elmetwalli",
+            linkedIn: "https://www.linkedin.com/in/ahmed-el-mitwally-71385433b/",
+            gradYear: "2028",
+            major: "Computer and Communications",
+          }),
+          slot("Member", "Dina Shiha", {
+            photo: "dina-shiha",
+            linkedIn: "https://www.linkedin.com/in/dina-shiha-822b43203",
+            gradYear: "2026",
+            major: "Electromechanical Engineering",
+          }),
+          slot("Member", "Fai Raafat", {
+            photo: "fai-raafat",
+            linkedIn: "https://linkedin.com/in/fai-rotan-6832b835a",
+            gradYear: "2027",
+            major: "CCE",
+          }),
+          slot("Member", "Reem Eldalil", {
+            photo: "reem-eldalil-2026",
+            linkedIn: "https://eg.linkedin.com/in/reem-eldalil-645127223",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
+          // Submitted the form, no photo yet.
+          slot("Member", "Hossam Eldin Elshazly", {
+            linkedIn: "https://www.linkedin.com/in/hossam-eldeen-2158a4284/",
+            gradYear: "2027",
+            major: "Computer and communication",
+          }),
+        ], {
+          blurb:
+            "We give the aircraft its eyes — detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
+          icon: "computer-vision",
+        }),
+        // Youssef Hozayen also runs Hardware, on top of his top-level Vice Lead card.
+        section("Hardware", [
+          slot("Section Lead", "Youssef Hozayen", {
+            photo: "youssef-hozayen-2026",
+            linkedIn: "https://www.linkedin.com/in/youssef-hozayen-40478",
+            gradYear: "2027",
+            major: "Mechatronics and robotics engineering",
+          }),
+          slot("Vice Section Lead", "Menna Ezzat", {
+            photo: "menna-ezzat-2026",
+            linkedIn: "https://www.linkedin.com/in/menna-ezzat-bba468267/",
+            gradYear: "2026",
+            major: "Mechatronics",
+          }),
+          slot("Vice Section Lead", "Lina Tarek", {
+            linkedIn: "https://www.linkedin.com/in/lina-ahmed-baa06a232",
+            gradYear: "2027",
+            major: "Mechatronics and Robotics",
+          }),
+          slot("Member", "Rewan Gomaa", {
+            photo: "rewan-gomaa",
+            linkedIn: "https://www.linkedin.com/in/rewan-mohamed-b5549624a/",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
+          slot("Member", "Youssef Mohamed Fawzy", {
+            photo: "youssef-fawzy",
+            linkedIn: "https://www.linkedin.com/in/youssef-fawzy-1b93242a6/",
+            gradYear: "2027",
+            major: "Mechatronics and robotics",
+          }),
+          slot("Member", "Youssef Morgan", {
+            photo: "youssef-morgan",
+            linkedIn: "https://www.linkedin.com/in/youssefadell11",
+            gradYear: "2027",
+            major: "Mechatronics and Robotics Engineering",
+          }),
+        ], {
+          blurb:
+            "We build the electronics that make the aircraft think — the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
+        }),
+        // Co-leads — Mazen and Sara run Software together, no vice.
+        section("Software", [
+          slot("Section Lead", "Mazen Nazeih", {
+            photo: "mazen-nazieh",
+            linkedIn: "https://www.linkedin.com/in/mazen-nazeih-85a3b4277/",
+            gradYear: "2026",
+            major: "Computer and Communication",
+          }),
+          slot("Section Lead", "Sara Yasser Gharib", {
+            photo: "sara-gharib-2026",
+            linkedIn: "https://www.linkedin.com/in/sara-gharib-93a742322",
+            gradYear: "2027",
+            major: "Biomedical",
+          }),
+          slot("Member", "Ahmed Hisham EL Tantawy", {
+            photo: "ahmed-tantawy",
+            linkedIn: "https://www.linkedin.com/in/ahmed-tantawy-154025318/",
+            gradYear: "2027",
+            major: "Electromechanics",
+          }),
+          slot("Member", "Mariyam Ramadan", {
+            photo: "mariyam-ramdan",
+            linkedIn: "https://www.linkedin.com/in/mariyam-ramadan",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
+          slot("Member", "Ahmed Ibrahim"),
+          // Submitted the form, no photo yet.
+          slot("Member", "Tarek Mohamed", {
+            linkedIn: "https://www.linkedin.com/in/tarek-mohamed-elsaye",
+            gradYear: "2027",
+            major: "Computer and Communication",
+          }),
+        ], {
+          blurb:
+            "We write the software that flies the aircraft on its own — the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
+        }),
+      ],
     },
   ],
 };

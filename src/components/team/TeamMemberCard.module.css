@@ -45,8 +45,10 @@
   overflow: hidden;
   background: linear-gradient(165deg, #2e2e2e, #242424);
   /* kills the white anti-alias fringe on the rounded edges when the image
-     scales on hover — do not remove */
-  -webkit-mask-image: -webkit-radial-gradient(white, black);
+     scales on hover — do not remove. Fade confined to the outermost rim
+     (97%→100%) rather than a full center-to-corner gradient — the wider
+     fade was visibly dimming the stretched name text near the box edges. */
+  -webkit-mask-image: -webkit-radial-gradient(white 97%, black 100%);
   transform: translateZ(0);
 }
 
@@ -171,17 +173,24 @@
      letterboxes it inside the card) instead of running full-bleed. */
   left: 6%;
   right: 6%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* The actual text — sized naturally, then squeezed/stretched horizontally by
+   FitName's measured `scaleX` so any name (5 letters or 12) fills the same
+   box width without overflowing it. */
+.bigNameText {
+  display: inline-block;
   font-size: 52px;
   line-height: 0.78;
   font-weight: 900;
   letter-spacing: -0.05em;
-  transform: scaleY(1.5);
-  transform-origin: top;
   white-space: nowrap;
-  text-align: center;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
+  transform-origin: center top;
 }
 
 .bigNameBack {
