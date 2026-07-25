@@ -45,3 +45,18 @@ for (const placement of mediaPlacements) {
     assert.ok(component.includes(`/${placement.poster.replace("public/", "")}`));
   });
 }
+
+test("Vercel caches published media for repeat visits", async () => {
+  const config = JSON.parse(await readFile("vercel.json", "utf8"));
+  const mediaRule = config.headers.find(
+    (rule) => rule.source === "/media/(.*)",
+  );
+  const cacheHeader = mediaRule?.headers.find(
+    (header) => header.key.toLowerCase() === "cache-control",
+  );
+
+  assert.equal(
+    cacheHeader?.value,
+    "public, max-age=86400, stale-while-revalidate=604800",
+  );
+});
