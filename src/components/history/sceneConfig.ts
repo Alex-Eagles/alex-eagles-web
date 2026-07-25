@@ -119,16 +119,25 @@ export function scenePalette(isDark: boolean): ScenePalette {
  */
 export const SHADOW = {
   /**
-   * ⬅ SHADOW STRENGTH ON THE DARK SCENE. Applies to both the pole shadows and
-   * the aircraft silhouettes.
+   * ⬅ FLAG-POLE shadows, dark mode. (In light mode the poles cast none — see
+   * `poleShadowsInLight`.)
    */
-  darkOpacity: 0.5,
+  poleOpacity: 0.5,
   /**
-   * ⬅ SHADOW STRENGTH IN LIGHT MODE. Only the aircraft have shadows there (see
-   * `poleShadowsInLight`), so this is the aircraft dial. Raise it for heavier
-   * shadows, lower it for fainter.
+   * ⬅ AIRCRAFT shadows, DARK mode. Deliberately heavier than the poles'.
+   *
+   * The two are separate dials because they're doing different jobs. A pole's
+   * shadow is incidental; an aircraft's is load-bearing — it's the only thing
+   * proving a flat billboard is standing on the floor rather than hovering in
+   * front of it. It also has to survive being spread over a wingspan, where
+   * the same opacity that reads as solid under a narrow post looks thin.
    */
-  lightOpacity: 0.25,
+  vehicleDarkOpacity: 0.7,
+  /**
+   * ⬅ AIRCRAFT shadows, LIGHT mode. Much lower: black on a near-white floor
+   * reads far heavier than the same value on a near-black one.
+   */
+  vehicleLightOpacity: 0.25,
   /**
    * Whether the flag poles cast shadows in LIGHT mode.
    *
@@ -146,9 +155,9 @@ export const SHADOW = {
   poleShadowsInLight: false,
 } as const;
 
-/** Shadow strength for the active theme. */
-export function shadowOpacity(isDark: boolean): number {
-  return isDark ? SHADOW.darkOpacity : SHADOW.lightOpacity;
+/** Aircraft contact-shadow strength for the active theme. */
+export function vehicleShadowOpacity(isDark: boolean): number {
+  return isDark ? SHADOW.vehicleDarkOpacity : SHADOW.vehicleLightOpacity;
 }
 
 /** Whether the flag poles should cast shadows in the active theme. */

@@ -41,8 +41,9 @@ import {
   LIGHT,
   QUALITY,
   scenePalette,
-  shadowOpacity,
+  SHADOW,
   showPoleShadows,
+  vehicleShadowOpacity,
   type QualitySettings,
   type ScenePalette,
 } from "./sceneConfig";
@@ -255,7 +256,13 @@ export default function JourneyScene({
   const palette = useMemo(() => scenePalette(isDark), [isDark]);
   // Shadows are far weaker in light mode — a 0.5 black pool that reads as
   // grounding on a near-black floor is an ink stain on a near-white one.
-  const shadowAlpha = useMemo(() => shadowOpacity(isDark), [isDark]);
+  // Poles and aircraft carry SEPARATE shadow strengths: an aircraft's shadow
+  // is the only thing proving a flat billboard stands on the floor, so it is
+  // deliberately heavier than the incidental pool under a pole.
+  const vehicleShadowAlpha = useMemo(
+    () => vehicleShadowOpacity(isDark),
+    [isDark],
+  );
   const poleShadows = useMemo(() => showPoleShadows(isDark), [isDark]);
 
   // Geometry is derived from the CONTENT, so editing achievements.ts reshapes
@@ -470,7 +477,7 @@ export default function JourneyScene({
         uRef={uRef}
         pathLength={journey.length}
         palette={palette}
-        shadowOpacity={shadowAlpha}
+        shadowOpacity={SHADOW.poleOpacity}
         showPoleShadows={poleShadows}
       />
 
@@ -479,7 +486,7 @@ export default function JourneyScene({
         quality={quality}
         uRef={uRef}
         pathLength={journey.length}
-        shadowOpacity={shadowAlpha}
+        shadowOpacity={vehicleShadowAlpha}
       />
 
       <StopOverlays

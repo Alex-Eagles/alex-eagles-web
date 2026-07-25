@@ -33,12 +33,22 @@ DARK = dict(sat=0.88, gamma=1.12, ambient=np.array([0x23,0x2a,0x55], np.float32)
 LIGHT = dict(sat=0.97, gamma=1.0, ambient=np.array([0x8a,0x93,0xb0], np.float32),
              tint=0.10, exposure=1.15)
 
+# Per-aircraft overrides. The shared grade suits a mid-tone subject; Do3soka is
+# a dark red aircraft that lands much further down the tonal range than the
+# grey quadcopter, so the same treatment leaves it nearly invisible against the
+# night floor. It gets its own exposure and a gentler highlight rolloff — dark
+# mode only, since on the pale floor it reads fine.
+OVERRIDES = {
+    ("do3soka", "dark"): dict(gamma=1.02, exposure=1.10),
+}
+
 for name, size, q in (("do3soka", (563, 563), 82), ("itay", (400, 400), 84)):
     src = Image.open(f"art-source/vehicles/{name}.png").convert("RGBA")
     src = src.crop(src.getbbox())
     rgb0, alpha = defringe(src)
     solid = alpha[..., 0] >= 0.95
     for suffix, cfg in (("", DARK), ("-light", LIGHT)):
+        cfg = {**cfg, **OVERRIDES.get((name, "dark" if suffix == "" else "light"), {})}
         rgb = grade(rgb0.copy(), **cfg)
         out = Image.fromarray(
             np.concatenate([rgb, alpha * 255.0], -1).astype(np.uint8), "RGBA")
