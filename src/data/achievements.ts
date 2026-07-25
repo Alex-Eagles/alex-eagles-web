@@ -429,11 +429,11 @@ export function competitionLogo(
     case "SUAS":
       return "/history/Flags/suas.webp";
     case "SAE Aero Design":
-      return "/history/Flags/sae-logo.svg";
+      return "/history/Flags/sae-logo.webp";
     case "UAVC":
       // Only the years the team actually attended UAVC (2021, 2024, 2025)
       // have a logo on disk. Any other year would 404 → Egyptian fallback.
-      return `/history/Flags/UAVC-logo-${year}.svg`;
+      return `/history/Flags/UAVC-logo-${year}.webp`;
   }
 }
 
