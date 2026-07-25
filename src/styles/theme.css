@@ -81,6 +81,26 @@
   --transition-base: 250ms ease-out; /* hovers, cards             */
   --transition-slow: 400ms ease-out; /* theme swap, big reveals   */
 
+  /* ── Scroll-cue "breathe" ─────────────────────────────────────────────────
+   * How far the scroll-cue LABEL fades at the bottom of its pulse (see
+   * @keyframes ae-cue-pulse in global.css).
+   *
+   * ⚠ This is a floor, not a free dial. The label is real text, and WCAG AA
+   * wants 4.5:1 for the whole time it's on screen — not just at the bright end
+   * of a loop. 0.82 is where --text-secondary lands at ~4.6:1 on the dark page
+   * and ~5.3:1 on the light one; both are the tightest case, so anything lower
+   * puts the text under the bar for part of every cycle. Push it DOWN only if
+   * you re-check the contrast, or raise it freely.
+   *
+   * The ARROW is the loud half of the gesture on purpose: it's decorative and
+   * aria-hidden, so it carries no contrast obligation and swings much further
+   * (see ae-cue-arrow). That split is what lets the cue read as a strong pulse
+   * without the words ever going faint. */
+  --cue-fade-floor: 0.82;
+  /* One cycle of the pulse. Both the label and the arrow share it, so they
+   * read as a single gesture rather than two things blinking near each other. */
+  --cue-cycle: 2.8s;
+
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
 }
@@ -105,6 +125,31 @@
   --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
   --gold-hover: #fbbf24;
   --sky: #60a5fa; /* technical links / data accent       */
+  /* Halo behind --sky elements (timeline markers). On the near-black page a
+   * real glow is what sells the marker as lit; see the light block for why the
+   * same value cannot survive the swap. */
+  --sky-glow: rgba(96, 165, 250, 0.45);
+
+  /* ── The History journey's travelling light, as DOM colours ───────────────
+   * MIRRORS `PALETTE.lightGlow` in src/components/history/sceneConfig.ts —
+   * the same duplication that file already documents (three.js cannot read CSS
+   * variables, so the scene keeps raw numbers and the DOM keeps these). Change
+   * one, change the other.
+   *
+   * The scene's light is a near-white core inside a cyan halo, and the halo is
+   * what you actually perceive its colour to BE — it covers far more area. So
+   * the halo value is the honest "colour of the ball" here, not the core. */
+  --journey-light: #39c6ff;
+  /* The ball glows in the scene, so its progress readout does too. */
+  --journey-glow: 0 0 10px rgba(57, 198, 255, 0.45);
+  /* Unfilled progress segments: light grey, translucent so the glass reads
+   * through them rather than sitting behind an opaque chip. */
+  --journey-track: rgba(240, 242, 255, 0.14);
+  /* Jump-list rows. These live here (rather than with the rail's own local
+   * glass) because :hover and [data-active] are pseudo/attribute states, and
+   * inline styles can't express those — they have to be real CSS rules. */
+  --jump-row-hover: rgba(255, 255, 255, 0.09);
+  --jump-row-active: rgba(57, 198, 255, 0.16);
 
   /* Text (indigo-tinted, per brand) */
   --text-primary: #f0f2ff;
@@ -141,6 +186,28 @@
   --gold: #b45309; /* darker amber for AA contrast on light */
   --gold-hover: #92400e;
   --sky: #1d4ed8;
+  /* Deliberately NOT a glow on light. A luminous halo only reads as "lit" when
+   * it is brighter than what surrounds it — on a near-white page it just smears
+   * the marker's edge into a fuzzy blue bruise, which is the single most
+   * eye-tiring artefact a light theme can inherit from a dark one. This is a
+   * faint tint of the marker's own hue instead: it softens the edge without
+   * emitting anything. */
+  --sky-glow: rgba(29, 78, 216, 0.16);
+
+  /* Mirrors `PALETTE_LIGHT_OVERRIDES.lightCore` in sceneConfig.ts. In light
+   * mode the ball's intensity is carried by DEPTH rather than brightness, so
+   * the deepest, most saturated part — the core — is what reads as its colour,
+   * and the halo is the incidental part. Exactly inverted from dark mode, for
+   * the reasons written up in that file. */
+  --journey-light: #1436a8;
+  /* No glow. A luminous halo needs somewhere brighter to go, and on a pale
+   * surface there isn't one — it would only smear the segment's edge. */
+  --journey-glow: none;
+  /* Light grey on the pale glass, from the page's own ink rather than pure
+   * black, so it stays in the indigo family the rest of the theme uses. */
+  --journey-track: rgba(13, 16, 48, 0.12);
+  --jump-row-hover: rgba(60, 64, 181, 0.10);
+  --jump-row-active: rgba(20, 54, 168, 0.13);
 
   --text-primary: #0d1030; /* deep navy text                       */
   --text-secondary: #3b3f7a;

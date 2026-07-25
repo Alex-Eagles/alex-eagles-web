@@ -174,6 +174,36 @@
   }
 }
 
+/* ── Scroll cues (History) ──────────────────────────────────────────────────
+ * A slow two-part "breathe" that keeps a standing instruction noticeable
+ * without it ever becoming the loudest thing on screen. The label and the
+ * arrow run the SAME duration so they rise and fall together as one gesture.
+ *
+ * They differ only in depth, and that difference is deliberate: the label is
+ * real text and has to hold 4.5:1 at the bottom of every cycle, so it only
+ * dips to --cue-fade-floor. The arrow is decorative and aria-hidden, so it can
+ * swing to 0.45 and travel, which is where the visible energy comes from. */
+@keyframes ae-cue-pulse {
+  0%,
+  100% {
+    opacity: var(--cue-fade-floor);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes ae-cue-arrow {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(5px);
+    opacity: 1;
+  }
+}
+
 /* ----------------------------------------------------------------------------
  * SMALL REUSABLE HELPERS (kept as plain classes; used by several components).
  * --------------------------------------------------------------------------*/
@@ -195,12 +225,41 @@
   }
 
   /* ------------------------------------------------------------------------
+   * History jump-list rows (see JourneyProgressRail).
+   *
+   * These are CSS rather than inline styles because :hover and [data-active]
+   * are states the style attribute cannot express. `data-active` is written
+   * imperatively on scroll — never through React — so the "you are here"
+   * marker costs no renders.
+   *
+   * The active row is marked TWICE over, by background AND by weight. Colour
+   * alone would be the only signal otherwise, which fails anyone who can't
+   * separate these two tints. Bolding the year is free of layout shift because
+   * the year is set in a monospace face, where every weight shares an advance.
+   * ----------------------------------------------------------------------*/
+  .ae-jump-row {
+    transition: background-color var(--transition-fast);
+  }
+  .ae-jump-row:hover {
+    background-color: var(--jump-row-hover);
+  }
+  .ae-jump-row[data-active] {
+    background-color: var(--jump-row-active);
+  }
+  .ae-jump-row[data-active] .ae-jump-year {
+    font-weight: 700;
+  }
+
+  /* ------------------------------------------------------------------------
    * Z-INDEX SCALE (documented so layers never fight):
    *   10  in-flow content raised above decorative backdrops (hero copy, etc.)
+   *   30  scene-local HUD: the History journey's progress rail. Above the
+   *       scene's own DOM overlays (drei <Html> tops out at 20 there) and
+   *       below the site chrome, which must always win.
    *   40  fixed chrome: navbar, theme toggle, mobile hamburger
    *   50  overlays: full-screen mobile menu
    *   60  skip link (must sit above everything, incl. the open menu)
-   * Use Tailwind `z-10` / `z-40` / `z-50`; the skip link uses 60 below.
+   * Use Tailwind `z-10` / `z-30` / `z-40` / `z-50`; the skip link uses 60 below.
    * ----------------------------------------------------------------------*/
 
   /* Skip-to-content link: hidden until focused (keyboard accessibility). */

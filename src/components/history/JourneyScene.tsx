@@ -225,6 +225,58 @@ function ThemeRepaint({ palette }: { palette: ScenePalette }) {
   return null;
 }
 
+/**
+ * Keeps a lost GPU context recoverable instead of terminal.
+ *
+ * ─── ONE LINE DECIDES WHETHER THE SCENE EVER COMES BACK ─────────────────────
+ * Browsers take WebGL contexts away routinely and for reasons that have
+ * nothing to do with this page: the GPU process restarts, a driver resets,
+ * another tab allocates heavily, a laptop switches between integrated and
+ * discrete graphics, or the machine wakes from sleep. This is normal, expected
+ * behaviour, and it is meant to be survivable.
+ *
+ * But only if you ask. The default action of the `webglcontextlost` event is
+ * to make the loss PERMANENT — `webglcontextrestored` is never fired unless
+ * the event was cancelled. Without the preventDefault() below, every one of
+ * those routine, transient interruptions became a dead canvas, which surfaced
+ * as an error, tripped the boundary, and dropped the visitor onto the 2D
+ * timeline for the rest of their visit. Cancelling the event is what tells the
+ * browser we intend to come back.
+ *
+ * three.js reinitialises its own GL state on restore; all this has to add is
+ * the redraw, because a demand-driven canvas won't repaint on its own and
+ * would otherwise sit blank until the next scroll.
+ */
+function ContextLossGuard() {
+  const gl = useThree((state) => state.gl);
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    const canvas = gl.domElement;
+
+    const onLost = (event: Event) => {
+      event.preventDefault();
+      console.warn("History scene: WebGL context lost — awaiting restore.");
+    };
+    const onRestored = () => {
+      console.info("History scene: WebGL context restored.");
+      // Several frames, not one: the first repaint after a restore lands while
+      // three is still rebuilding programs and buffers.
+      invalidate();
+      requestAnimationFrame(() => invalidate());
+    };
+
+    canvas.addEventListener("webglcontextlost", onLost);
+    canvas.addEventListener("webglcontextrestored", onRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", onLost);
+      canvas.removeEventListener("webglcontextrestored", onRestored);
+    };
+  }, [gl, invalidate]);
+
+  return null;
+}
+
 interface JourneySceneProps {
   achievements: Achievement[];
   progressRef: React.MutableRefObject<number>;
@@ -234,6 +286,17 @@ interface JourneySceneProps {
   onGiveUp: () => void;
   isMobile: boolean;
   reducedMotion: boolean;
+  /**
+   * Reports where each achievement sits along the curve, once it's built.
+   *
+   * The progress rail lives outside the Canvas and needs these to know when an
+   * achievement has actually been passed. It can't compute them itself:
+   * `buildJourneyCurve` needs three.js, and the rail is rendered by
+   * HistoryJourney, which is on the main bundle and must stay clear of it (see
+   * that file's header on the lazy boundary). So the scene — which is already
+   * paying for three.js — hands the numbers out. Fires once per mount.
+   */
+  onStopUs: (stopUs: number[]) => void;
 }
 
 export default function JourneyScene({
@@ -245,6 +308,7 @@ export default function JourneyScene({
   onGiveUp,
   isMobile,
   reducedMotion,
+  onStopUs,
 }: JourneySceneProps) {
   const quality: QualitySettings = QUALITY[tier];
 
@@ -263,6 +327,12 @@ export default function JourneyScene({
     () => buildJourneyCurve(achievements.length),
     [achievements.length],
   );
+
+  // Hand the stop positions to the progress rail outside the Canvas. One call
+  // per journey rebuild, which is once per mount in practice.
+  useEffect(() => {
+    onStopUs(journey.stopUs);
+  }, [journey, onStopUs]);
 
   const stops: StopPlacement[] = useMemo(() => {
     const up = new Vector3(0, 1, 0);
@@ -423,6 +493,7 @@ export default function JourneyScene({
       <ambientLight intensity={1.15} color="#8ea0d8" />
       <directionalLight position={[12, 24, 8]} intensity={1.5} color="#cfe0ff" />
 
+      <ContextLossGuard />
       <SceneBackground palette={palette} />
       <ThemeRepaint palette={palette} />
 
@@ -468,7 +539,12 @@ export default function JourneyScene({
         palette={palette}
       />
 
-      <TravellingLight quality={quality} groupRef={lightGroupRef} />
+      <TravellingLight
+        quality={quality}
+        groupRef={lightGroupRef}
+        palette={palette}
+        isDark={isDark}
+      />
 
       <StopProps
         stops={stops}

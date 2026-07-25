@@ -31,7 +31,7 @@ import { useEffect, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
 import { Color } from "three";
 import type { Vector3 } from "three";
-import { PALETTE, type QualitySettings, type ScenePalette } from "./sceneConfig";
+import { type QualitySettings, type ScenePalette } from "./sceneConfig";
 
 const vertexShader = /* glsl */ `
   varying vec3 vWorldPos;
@@ -97,7 +97,7 @@ interface GroundDotsProps {
   quality: QualitySettings;
   /** Shared ref holding the light's current world position. */
   lightPosRef: React.MutableRefObject<Vector3>;
-  /** Active-theme palette. Only the ground + idle dots re-tint; `dotLit` stays. */
+  /** Active-theme palette. Ground, idle dots AND lit dots all re-tint. */
   palette: ScenePalette;
 }
 
@@ -121,12 +121,15 @@ export default function GroundDots({
   const uniforms = useMemo(
     () => ({
       uLightPos: { value: lightPosRef.current },
-      // Ground + idle dots follow the theme; `dotLit` (the blue the light
-      // paints) is constant. Initialised from the current palette so the first
-      // frame is already correct; kept in sync by the effect below.
+      // All three follow the theme, `uDotLit` included: it used to be pinned to
+      // the dark-mode hot cyan, which on the pale floor left the excited dots
+      // barely distinguishable from the idle ones — so the pool of light the
+      // dots exist to describe had nothing to describe. Initialised from the
+      // current palette so the first frame is already correct; kept in sync by
+      // the effect below.
       uGround: { value: new Color(palette.ground) },
       uDotIdle: { value: new Color(palette.dotIdle) },
-      uDotLit: { value: new Color(PALETTE.dotLit) },
+      uDotLit: { value: new Color(palette.dotLit) },
       uSpacing: { value: quality.dotSpacing },
       // 0.115 of the spacing. Larger values (0.16 was the first attempt) read
       // as bold polka dots up close rather than the fine technical grid in the
@@ -139,11 +142,12 @@ export default function GroundDots({
     [quality.dotSpacing],
   );
 
-  // Re-tint the ground + idle dots when the theme flips, then draw one frame so
-  // the change shows without waiting for the next scroll (frameloop="demand").
+  // Re-tint on theme flip, then draw one frame so the change shows without
+  // waiting for the next scroll (frameloop="demand").
   useEffect(() => {
     uniforms.uGround.value.set(palette.ground);
     uniforms.uDotIdle.value.set(palette.dotIdle);
+    uniforms.uDotLit.value.set(palette.dotLit);
     invalidate();
   }, [palette, uniforms, invalidate]);
 

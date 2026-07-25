@@ -33,8 +33,17 @@ export default function Timeline2D({
   achievements = defaultAchievements,
   isFallback = false,
 }: Timeline2DProps) {
+  // As a FALLBACK this is a standalone section and needs symmetric air. As the
+  // CLOSING section it sits directly under its own SectionHeader in History.tsx
+  // — a full section's worth of padding there reads as a gap between the
+  // heading and the list it introduces, so they drift apart into two unrelated
+  // blocks. Tighter on top; the bottom air is unchanged either way.
+  const padding = isFallback
+    ? "py-20 md:py-28"
+    : "pt-12 md:pt-16 pb-20 md:pb-28";
+
   return (
-    <section className="relative px-6 py-20 md:py-28">
+    <section className={`relative px-6 ${padding}`}>
       <div className="mx-auto" style={{ maxWidth: "var(--maxw-content)" }}>
         {isFallback && (
           <p className="font-mono text-caption text-fg-muted uppercase tracking-[0.14em] text-center mb-10">
@@ -71,9 +80,13 @@ export default function Timeline2D({
                   index % 2 === 0 ? "" : "md:flex-row-reverse"
                 }`}
               >
-                {/* Year rail */}
+                {/* Year rail. On mobile the two halves stack, so the year sits
+                    directly on top of a 22px headline with only its own leading
+                    between them — too tight to read as a label for what follows.
+                    The margin is mobile-only; on md+ they're side by side and
+                    it would do nothing but skew the row. */}
                 <div
-                  className={`md:w-1/2 ${
+                  className={`mb-1.5 md:mb-0 md:w-1/2 ${
                     index % 2 === 0 ? "md:text-right" : "md:text-left"
                   }`}
                 >
@@ -100,7 +113,11 @@ export default function Timeline2D({
                             {award.place ? `${award.place} — ` : ""}
                             {award.title}
                           </h3>
-                          <span className="font-mono text-[12px] tracking-[0.12em] uppercase text-[var(--text-muted)] mt-1.5 inline-block">
+                          {/* --text-secondary, matching the same line on the
+                              3D stop label. --text-muted was ~2.3:1 on the dark
+                              page — under half the AA floor, and this is the
+                              only place a reader learns WHERE an award was won. */}
+                          <span className="font-mono text-[12px] tracking-[0.12em] uppercase text-[var(--text-secondary)] mt-1.5 inline-block">
                             {award.competition}
                           </span>
                         </li>
@@ -130,7 +147,11 @@ export default function Timeline2D({
                 style={{
                   background: "var(--bg-primary)",
                   borderColor: "var(--sky)",
-                  boxShadow: "0 0 14px rgba(96,165,250,0.45)",
+                  // Tokenised, because the halo cannot be one value: on the
+                  // dark page it's what makes the marker read as lit, and the
+                  // same halo on the light page is just a fuzzy blue bruise.
+                  // See --sky-glow in theme.css.
+                  boxShadow: "0 0 14px var(--sky-glow)",
                 }}
               />
             </motion.li>

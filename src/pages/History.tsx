@@ -21,22 +21,45 @@
 import { motion } from "framer-motion";
 import SectionHeader from "@/components/ui/SectionHeader";
 import HistoryJourney from "@/components/history/HistoryJourney";
+import ScrollCue from "@/components/history/ScrollCue";
 import Timeline2D from "@/components/history/Timeline2D";
 import { fadeUp, viewportOnce } from "@/lib/motion";
 import { achievements } from "@/data/achievements";
 
 export default function History() {
   const firstYear = achievements[0]?.year ?? "2013";
-  const latestYear = achievements[achievements.length - 1]?.year ?? "2025";
   const awardCount = achievements.reduce(
     (total, achievement) => total + achievement.awards.length,
     0,
   );
 
+  /**
+   * The range and the span both run to TODAY, not to the last award.
+   *
+   * These used to come from the data — `achievements[last].year` for the range
+   * and `achievements.length` for the span — and both were answering a
+   * different question from the one the copy asks. The range closed at 2025
+   * because that's the most recent year with an award on file, which reads as
+   * though the team stopped. And `achievements.length` is a count of ENTRIES,
+   * not of years: 2013 is the founding year with no awards at all, and
+   * 2014-2016 aren't listed, so ten entries were being described as ten years
+   * of competition.
+   *
+   * Deriving from the current year fixes both and keeps them fixed. The
+   * headline stays honest on its own every January instead of quietly going
+   * stale the way a hardcoded "2026" would.
+   */
+  const currentYear = new Date().getFullYear();
+  const yearsActive = currentYear - Number(firstYear);
+
   return (
     <>
       {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[70vh] flex items-center px-6 overflow-hidden">
+      {/* `pb-24` reserves the bottom strip for the scroll cue. The section
+          centres its content with `items-center`, and padding is outside the
+          box that centres — so the copy sits centred in the space ABOVE the
+          cue rather than being overlapped by it on short viewports. */}
+      <section className="relative min-h-[70vh] flex items-center px-6 pb-24 overflow-hidden">
         {/* Same grid texture used elsewhere on the site, masked to a soft pool. */}
         <div
           aria-hidden="true"
@@ -60,7 +83,7 @@ export default function History() {
           style={{ maxWidth: "var(--maxw-content)" }}
         >
           <SectionHeader
-            eyebrow={`${firstYear} — ${latestYear}`}
+            eyebrow={`${firstYear} — ${currentYear}`}
             title={
               <>
                 A decade of
@@ -70,15 +93,26 @@ export default function History() {
             }
           />
 
+          {/* No bottom margin: this is the last child of a vertically CENTRED
+              flex container, so trailing margin would be counted into the
+              block's height and silently lift the copy off centre by half of
+              it. Space below the hero is the section's job (`pb-24` above),
+              where it can be reserved deliberately. */}
           <p
-            className="font-sans text-body-lg text-fg-muted leading-[1.7] mt-6 mb-8"
+            className="font-sans text-body-lg text-fg-muted leading-[1.7] mt-6"
             style={{ maxWidth: "var(--maxw-prose)" }}
           >
-            {awardCount} awards across {achievements.length} years of
-            competition. Follow the path to travel through the team&rsquo;s
-            history, one milestone at a time.
+            {awardCount} awards across {yearsActive} years of competition.
+            Follow the path to travel through the team&rsquo;s history, one
+            milestone at a time.
           </p>
         </motion.div>
+
+        {/* Permanent, not dismiss-on-scroll: someone who scrolls down, doesn't
+            understand what they're looking at, and comes back up is exactly who
+            this is for — and a one-shot dismissal would have removed it before
+            their second look. `z-10` puts it over the grid backdrop. */}
+        <ScrollCue label="Scroll down to discover our history" className="z-10" />
       </section>
 
       {/* ── The journey ─────────────────────────────────────────────────────

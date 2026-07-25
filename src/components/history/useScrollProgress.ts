@@ -32,6 +32,16 @@ export interface ScrollProgress {
   subscribe: (listener: () => void) => () => void;
   /** True while the pinned scene is on screen. Used to skip work when it isn't. */
   isActive: boolean;
+  /**
+   * Drive the journey TO a progress value by scrolling the page there.
+   *
+   * The inverse of `measure()` below, and it lives here for that reason: this
+   * hook already owns the one piece of knowledge the conversion needs — that
+   * progress is measured against `rect.height - innerHeight` from the
+   * container's top. Duplicating that anywhere else would mean two definitions
+   * of "progress" that could quietly disagree.
+   */
+  scrollToProgress: (progress: number, smooth?: boolean) => void;
 }
 
 export function useScrollProgress(): ScrollProgress {
@@ -100,5 +110,41 @@ export function useScrollProgress(): ScrollProgress {
     };
   }, []);
 
-  return { containerRef, progressRef, subscribe, isActive };
+  /**
+   * Scroll the page so the journey lands on `progress`.
+   *
+   * ─── WHY THIS MOVES THE PAGE AND NOT THE SCENE ──────────────────────────
+   * The tempting implementation is to write the target straight into
+   * `progressRef` and let the scene fly there. Don't: the page's real scroll
+   * position wouldn't have moved, so the very next scroll event would call
+   * measure(), find the old position, and yank the journey back. Scroll is the
+   * single source of truth here, so the only correct way to move the journey
+   * is to move the scroll.
+   *
+   * Doing it this way also means nothing else has to cooperate. The scene
+   * already eases toward whatever `progressRef` says (SceneController), so the
+   * light flies along the path to the new position — forward or backward, with
+   * the camera banking through the curves — with no travel logic written
+   * anywhere. The whole animation is a side effect of scrolling.
+   */
+  const scrollToProgress = useCallback((progress: number, smooth = true) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const scrollable = rect.height - window.innerHeight;
+    if (scrollable <= 0) return;
+
+    // rect.top is viewport-relative, so this is the container's position in the
+    // document — the origin progress is measured from.
+    const containerTop = window.scrollY + rect.top;
+    const clamped = Math.min(Math.max(progress, 0), 1);
+
+    window.scrollTo({
+      top: containerTop + clamped * scrollable,
+      behavior: smooth ? "smooth" : "auto",
+    });
+  }, []);
+
+  return { containerRef, progressRef, subscribe, isActive, scrollToProgress };
 }

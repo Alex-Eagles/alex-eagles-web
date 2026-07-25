@@ -62,16 +62,9 @@ export const PALETTE = {
 export type ScenePalette = { [K in keyof typeof PALETTE]: number };
 
 /**
- * Light-mode ENVIRONMENT overrides.
+ * Light-mode overrides — the ENVIRONMENT *and* the light itself.
  *
- * ─── WHAT CHANGES AND WHAT DOESN'T ──────────────────────────────────────────
- * In light mode we only re-tint the scene's *background* layer — the page
- * backdrop, the ground plane, the resting (unlit) dot grid, the idle path and
- * the props. The travelling light and everything it lights up (`dotLit`,
- * `pathLit`, `lightCore`, `lightGlow`) are DELIBERATELY left as the same blues,
- * so the blue light and the blue dots trailing it read identically in both
- * themes — only the canvas they move across turns pale.
- *
+ * ─── THE ENVIRONMENT HALF ───────────────────────────────────────────────────
  * Values come from the light-mode design tokens (the light column of the brand
  * colour-usage map / `theme.css`), so the 3D backdrop matches the rest of the
  * page in light mode:
@@ -81,6 +74,41 @@ export type ScenePalette = { [K in keyof typeof PALETTE]: number };
  *   pathIdle    → --border-strong  (#b0b0d8) dim path, a shade more defined
  *   prop        → --text-secondary (#4a4a7a) dark figures, high contrast on white
  *   propDimmed  → --text-muted     (#9090ba) dimmed figures recede toward the bg
+ *
+ * ─── THE LIGHT HALF, AND WHY IT USED TO BE LEFT ALONE ───────────────────────
+ * This block once deliberately kept the travelling light and everything it
+ * paints (`lightCore`, `lightGlow`, `pathLit`, `dotLit`) at their dark-mode
+ * blues, on the theory that the light should "read identically in both themes
+ * — only the canvas turns pale". That reasoning does not survive contact with
+ * a pale canvas.
+ *
+ * Those four are all HOT values: a near-white core (#d8f6ff) and hot cyans
+ * (#4fd8ff / #6fe3ff). They were picked to be the brightest thing in a
+ * near-black scene, and brightness is the entire mechanism by which they read
+ * as light. Put a near-white core on a #f7f8ff floor and there is nothing left
+ * to see — you are drawing white on white. The light didn't get subtle in light
+ * mode; it disappeared, and its trail went with it.
+ *
+ * On a pale ground the intensity axis simply flips. A bright source is
+ * perceived by how far it departs from the surface around it, and on white the
+ * only available direction is DOWN — deeper and more saturated. So light mode
+ * gets the same hue family carried by depth instead of by brightness, anchored
+ * on the page's own light-mode blue (`--sky` #1d4ed8) so the scene's light
+ * belongs to the same system as the timeline markers on the page below it.
+ *
+ * The intensity ORDER is preserved exactly, just mirrored:
+ *   dark  → core #d8f6ff (near-white) > pathLit #6fe3ff > dotLit #4fd8ff > idle
+ *   light → core #1436a8 (deepest)    < pathLit #1a48c8 < dotLit #2358d4 < idle
+ * So the trail is still hotter than the floor dots, and the core is still the
+ * most intense point on the screen. Only the direction of "more" changed.
+ *
+ * Contrast against the pale floor: core ≈ 9.3:1 on the page background, path
+ * ≈ 7:1 and dots ≈ 5.5:1 on the ground plane — all comfortably clear of the
+ * washed-out cyans they replace, which measured well under 1.5:1.
+ *
+ * NB: darkening these colours is only half the fix. The glow sprites blend
+ * ADDITIVELY, which on a white background adds up to white no matter what
+ * colour you feed it — see `glowStyle` below.
  */
 const PALETTE_LIGHT_OVERRIDES = {
   background: 0xf7f8ff,
@@ -89,17 +117,79 @@ const PALETTE_LIGHT_OVERRIDES = {
   pathIdle: 0xb0b0d8,
   prop: 0x4a4a7a,
   propDimmed: 0x9090ba,
+  /** Deepest point of the light — also the inner glow sprite's tint. */
+  lightCore: 0x1436a8,
+  /** The wide halo. A shade brighter than the core so it fades out cleanly. */
+  lightGlow: 0x2b62dd,
+  /** The trail at the light. Deeper than the dots — it's the hotter of the two. */
+  pathLit: 0x1a48c8,
+  /** Floor dots directly under the light. Sits closest to --sky. */
+  dotLit: 0x2358d4,
 } satisfies Partial<ScenePalette>;
 
-/** The full light-mode palette: dark blues kept, environment re-tinted pale. */
+/** The full light-mode palette: pale environment, and a light carried by depth. */
 export const PALETTE_LIGHT: ScenePalette = {
   ...PALETTE,
   ...PALETTE_LIGHT_OVERRIDES,
 };
 
-/** Pick the palette for the active theme. Blues are identical either way. */
+/** Pick the palette for the active theme. */
 export function scenePalette(isDark: boolean): ScenePalette {
   return isDark ? PALETTE : PALETTE_LIGHT;
+}
+
+/**
+ * How the travelling light's glow sprites are composited, per theme.
+ *
+ * ─── ADDITIVE BLENDING CANNOT WORK ON A WHITE FLOOR ─────────────────────────
+ * The glow is two soft radial sprites blended ADDITIVELY — the cheap stand-in
+ * for a real bloom pass (see TravellingLight's header for why bloom is off the
+ * table). Additive means `result = source + destination`, and that is genuinely
+ * how light behaves *on a dark background*: overlapping brightness sums toward
+ * white, exactly as bloom would.
+ *
+ * On a near-white destination it degenerates completely. #f7f8ff is already at
+ * ~0.97 of the channel range, so adding ANY colour to it clamps straight to
+ * pure white. Not faint — mathematically absent. The glow sprites in light mode
+ * were not merely low-contrast, they were painting white on white, and worse,
+ * they were doing it OVER the core sphere and washing that out too. This is why
+ * simply darkening `lightCore` would have accomplished almost nothing on its
+ * own: the additive halo would have erased the darker core right back to white.
+ *
+ * TravellingLight's own header called this years ago — "on a light background
+ * this trick falls apart and you'd be forced into real bloom". It's half right.
+ * You are forced off ADDITIVE, but not into bloom, because on a pale surface a
+ * glow doesn't brighten anything — there's no headroom left to brighten into.
+ * It tints. A blue lamp on white paper photographs as a saturated blue core
+ * washing out to white, which is ordinary alpha compositing of a saturated
+ * colour through the same gradient ramp. Same texture, same two sprites, same
+ * cost — one blending constant.
+ *
+ * The three.js constant itself is resolved in TravellingLight. This file is
+ * imported by HistoryJourney, which must never pull three.js into the main
+ * bundle, so it stays a plain boolean here.
+ */
+export interface GlowStyle {
+  /** True → AdditiveBlending (dark). False → NormalBlending (light). */
+  additive: boolean;
+  /** Opacity of the wide, soft outer halo sprite. */
+  haloOpacity: number;
+  /** Opacity of the tight, hot inner sprite stacked on top of it. */
+  coreOpacity: number;
+}
+
+export const GLOW: Record<"dark" | "light", GlowStyle> = {
+  dark: { additive: true, haloOpacity: 0.55, coreOpacity: 0.9 },
+  // Alpha-composited, so these read as literal coverage rather than as added
+  // brightness. The halo is pulled back a little: at 0.55 a 9-unit disc of
+  // saturated blue laid straight over the pale floor stops being a glow and
+  // becomes a flat blue puddle travelling down the page.
+  light: { additive: false, haloOpacity: 0.45, coreOpacity: 0.85 },
+};
+
+/** Glow compositing for the active theme. */
+export function glowStyle(isDark: boolean): GlowStyle {
+  return isDark ? GLOW.dark : GLOW.light;
 }
 
 /**
@@ -163,6 +253,78 @@ export function vehicleShadowOpacity(isDark: boolean): number {
 /** Whether the flag poles should cast shadows in the active theme. */
 export function showPoleShadows(isDark: boolean): boolean {
   return isDark || SHADOW.poleShadowsInLight;
+}
+
+/**
+ * DOM-overlay depth cues, per theme.
+ *
+ * ─── THE SAME LESSON AS `SHADOW`, ONE LAYER UP ──────────────────────────────
+ * `SHADOW` above fixes the WebGL blob shadows for light mode. The overlays —
+ * labels, photo frames, flags — are DOM, so they never went through that fix
+ * and kept firing dark-mode values at a near-white floor. Every value below is
+ * the DOM half of the same rule: how heavy a shadow reads depends entirely on
+ * what it sits on.
+ *
+ * ─── WHY THE LABEL SHADOW WAS THE WORST OF THEM ─────────────────────────────
+ * A 10px black blur behind the label is a legibility scrim in dark mode: the
+ * text is near-white, so the dark halo is the thing separating it from the
+ * floor. Flip the theme and BOTH sides invert — the text becomes deep navy and
+ * the floor becomes near-white — but the halo stayed black. A dark blur behind
+ * dark text does not separate anything; it just bleeds a grey smear out of
+ * every glyph. That reads as a glow, it destroys the crispness that keeping
+ * this text as real DOM bought in the first place, and it is tiring to look at.
+ *
+ * Light mode gets a tight, nearly-white lift instead. It has one job — stop the
+ * dotted floor grid from interfering with the glyph edges — and at 2px of blur
+ * it cannot halo. It needs no more than that: deep navy on the pale floor is
+ * already about 14:1, so the shadow is not carrying contrast here, only
+ * cleaning up the background behind the letterforms.
+ *
+ * ─── WHY LIGHT-MODE SHADOWS ARE NAVY, NOT BLACK ─────────────────────────────
+ * Pure black against a page whose neutrals are all indigo-tinted reads as a
+ * foreign hole punched in the floor. Tinting the shadow with the page's own ink
+ * colour (`--text-primary`, #0d1030) keeps it in the family, so it recedes as
+ * depth instead of announcing itself as a dark shape.
+ */
+export interface OverlayStyle {
+  /** Legibility scrim under the floating label. */
+  labelTextShadow: string;
+  /** The photo frame's mat — a thin edge around the picture. */
+  frameMat: string;
+  /** Drop shadow proving the frame floats above the floor. */
+  frameShadow: string;
+  /** The soft ellipse pooled on the ground beneath each frame. */
+  frameCastShadow: string;
+  /** Flags are small and hang in mid-air, so they get their own lighter dial. */
+  flagShadow: string;
+}
+
+const OVERLAY_DARK: OverlayStyle = {
+  labelTextShadow: "0 2px 10px rgba(0,0,0,0.75)",
+  frameMat:
+    "linear-gradient(160deg, rgba(111,227,255,0.5), rgba(60,64,181,0.25))",
+  frameShadow: "0 26px 46px rgba(0,0,0,0.72), 0 10px 20px rgba(0,0,0,0.5)",
+  frameCastShadow:
+    "radial-gradient(ellipse at center, rgba(0,0,0,0.55), rgba(0,0,0,0) 72%)",
+  flagShadow: "drop-shadow(0 5px 10px rgba(0,0,0,0.55))",
+};
+
+const OVERLAY_LIGHT: OverlayStyle = {
+  labelTextShadow: "0 1px 2px rgba(255,255,255,0.9)",
+  // The cyan edge is a lit highlight; there is nothing lighting it on a pale
+  // floor, so at 50% alpha it just goes pastel and looks accidental. Light mode
+  // uses the brand indigo at a strength that reads as a deliberate mat.
+  frameMat:
+    "linear-gradient(160deg, rgba(60,64,181,0.34), rgba(60,64,181,0.16))",
+  frameShadow: "0 18px 34px rgba(13,16,48,0.16), 0 6px 12px rgba(13,16,48,0.10)",
+  frameCastShadow:
+    "radial-gradient(ellipse at center, rgba(13,16,48,0.18), rgba(13,16,48,0) 72%)",
+  flagShadow: "drop-shadow(0 4px 8px rgba(13,16,48,0.18))",
+};
+
+/** Depth cues for the DOM overlays in the active theme. */
+export function overlayStyle(isDark: boolean): OverlayStyle {
+  return isDark ? OVERLAY_DARK : OVERLAY_LIGHT;
 }
 
 /**
@@ -412,6 +574,21 @@ export const LABEL = {
   /** Founding-year description. */
   blurbSize: 15,
 } as const;
+
+/**
+ * How many segments the progress rail is divided into.
+ *
+ * Deliberately FEWER than there are achievements. One segment per stop would
+ * give ten slivers that each creep forward by a tenth — a readout too fine to
+ * glance at, which is the only way anyone ever reads a progress indicator.
+ * Five chunky segments answer "roughly how far in am I" instantly, and at ten
+ * achievements each one stands for a pair.
+ *
+ * It does NOT have to divide the achievement count evenly. The rail groups
+ * stops with `Math.floor`, so an eleventh year simply makes one segment cover
+ * three stops instead of two rather than breaking the layout.
+ */
+export const PROGRESS_SEGMENTS = 5;
 
 /** Scroll length per stop, in viewport heights. Sets the pace of the journey. */
 export const SCROLL_PER_STOP = 0.85;

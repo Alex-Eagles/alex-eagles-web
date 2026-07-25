@@ -41,7 +41,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import { FRAME, LABEL, STOP, VEHICLE } from "./sceneConfig";
+import { FRAME, LABEL, STOP, VEHICLE, overlayStyle } from "./sceneConfig";
 import { frameSlots, stopIntensity } from "./journeyCurve";
 import type { StopPlacement } from "./StopProps";
 import type { Achievement } from "@/data/achievements";
@@ -69,7 +69,11 @@ function Portrait({ src, year }: { src: string; year: string }) {
             "linear-gradient(150deg, var(--bg-elevated), var(--bg-surface))",
         }}
       >
-        <span className="font-mono text-[11px] tracking-[0.14em] text-[var(--text-muted)]">
+        {/* --text-secondary, not --text-muted: muted lands at ~1.9:1 on the
+            elevated surface behind it, and the year is the ONLY thing in this
+            placeholder — it can't be the one piece of text on the stop nobody
+            can read. */}
+        <span className="font-mono text-[11px] tracking-[0.14em] text-[var(--text-secondary)]">
           {year}
         </span>
       </div>
@@ -270,6 +274,11 @@ function StopOverlay({
 
   const counter = String(index + 1).padStart(2, "0");
 
+  // Shadows and mats are the one thing on the stop that CANNOT be shared across
+  // themes: they're all dark values, and dark reads completely differently on a
+  // near-black floor than on a near-white one. See `overlayStyle`.
+  const overlay = overlayStyle(isDark);
+
   // Every frame and flag shares the stop's facing rotation, so they all square
   // up to the path and to each other.
   const facing: [number, number, number] = [0, stop.facing, 0];
@@ -298,7 +307,9 @@ function StopOverlay({
             transform: "translate(-50%, -100%)",
             // Soft shadow, NOT a box scrim — keeps the headlines legible over
             // the dotted floor without the ugly dark rectangle behind them.
-            textShadow: "0 2px 10px rgba(0,0,0,0.75)",
+            // Per-theme: a dark halo lifts light text off a dark floor, and the
+            // exact inverse is needed once both invert. See `overlayStyle`.
+            textShadow: overlay.labelTextShadow,
           }}
           className="pointer-events-none select-none text-center w-[320px]"
         >
@@ -382,12 +393,11 @@ function StopOverlay({
             <div
               className="w-[150px] h-[100px] p-[3px] rounded-[8px]"
               style={{
-                background:
-                  "linear-gradient(160deg, rgba(111,227,255,0.5), rgba(60,64,181,0.25))",
+                background: overlay.frameMat,
                 // A purely DARK drop shadow, no coloured glow. Cast down and
-                // out so the frame reads as floating ABOVE the ground.
-                boxShadow:
-                  "0 26px 46px rgba(0,0,0,0.72), 0 10px 20px rgba(0,0,0,0.5)",
+                // out so the frame reads as floating ABOVE the ground — at a
+                // weight the current floor can carry (see `overlayStyle`).
+                boxShadow: overlay.frameShadow,
               }}
             >
               <Portrait
@@ -404,8 +414,7 @@ function StopOverlay({
               aria-hidden="true"
               className="w-[128px] h-[16px] mx-auto mt-[12px] rounded-[50%]"
               style={{
-                background:
-                  "radial-gradient(ellipse at center, rgba(0,0,0,0.55), rgba(0,0,0,0) 72%)",
+                background: overlay.frameCastShadow,
                 filter: "blur(3px)",
               }}
             />
@@ -534,9 +543,7 @@ function StopOverlay({
               {/* Plain rectangular flag. Adjust w-[..]/h-[..] to resize it. */}
               <div
                 className="w-[64px] h-[40px] rounded-[2px] overflow-hidden"
-                style={{
-                  filter: "drop-shadow(0 5px 10px rgba(0,0,0,0.55))",
-                }}
+                style={{ filter: overlay.flagShadow }}
               >
                 <img
                   src={flag.logo}

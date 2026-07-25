@@ -37,12 +37,23 @@ import { useScrollProgress } from "./useScrollProgress";
 import { detectCapability, type Tier } from "./capability";
 import { SCROLL_PER_STOP, SCROLL_PADDING } from "./sceneConfig";
 import WebGLBoundary from "./WebGLBoundary";
+import JourneyProgressRail from "./JourneyProgressRail";
+import ScrollCue from "./ScrollCue";
 import Timeline2D from "./Timeline2D";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { achievements } from "@/data/achievements";
 
 // three.js is pulled in only when we actually mount the scene.
 const JourneyScene = lazy(() => import("./JourneyScene"));
+
+/**
+ * How many times to try mounting the 3D scene before giving up on it.
+ *
+ * Two, not one: most WebGL failures are transient and external (see the
+ * `crashCount` note below). Bounded, so a device that fails deterministically
+ * settles onto the 2D timeline immediately rather than looping.
+ */
+const MAX_SCENE_ATTEMPTS = 2;
 
 /** Tracks whether we're on a small/touch screen, for FOV and layout. */
 function useIsMobile(): boolean {
@@ -61,7 +72,8 @@ function useIsMobile(): boolean {
 }
 
 export default function HistoryJourney() {
-  const { containerRef, progressRef, subscribe, isActive } = useScrollProgress();
+  const { containerRef, progressRef, subscribe, isActive, scrollToProgress } =
+    useScrollProgress();
   const isMobile = useIsMobile();
   const reducedMotion = useReducedMotion();
 
@@ -71,7 +83,26 @@ export default function HistoryJourney() {
 
   const [tier, setTier] = useState<Tier>(capability.tier);
   const [gaveUp, setGaveUp] = useState(false);
-  const [crashed, setCrashed] = useState(false);
+
+  /**
+   * How many times the 3D scene has thrown.
+   *
+   * ─── ONE BAD MOMENT USED TO END THE SCENE FOR THE WHOLE VISIT ─────────────
+   * This was a boolean, so the FIRST error — ever, for any reason — retired
+   * the 3D journey permanently. Most of what takes a WebGL scene down is
+   * transient and not about this page at all: a GPU process restart, a driver
+   * reset, a laptop switching graphics cards, a wake from sleep. Every one of
+   * those is survivable, and every one of them was being treated as proof that
+   * this device can't render the scene.
+   *
+   * So the first failure now buys a fresh attempt (the boundary below is keyed
+   * on this count, which remounts it with a clean slate and rebuilds the
+   * canvas). A second failure is taken at face value and the 2D timeline takes
+   * over for good — the retry is bounded, so a genuinely broken device can't
+   * be caught in a mount/crash loop.
+   */
+  const [crashCount, setCrashCount] = useState(0);
+  const crashed = crashCount >= MAX_SCENE_ATTEMPTS;
 
   /**
    * Once mounted, the scene stays mounted.
@@ -85,6 +116,18 @@ export default function HistoryJourney() {
   useEffect(() => {
     if (isActive) setHasEntered(true);
   }, [isActive]);
+
+  /**
+   * Where each achievement sits along the curve, reported by the scene.
+   *
+   * The progress rail needs these to fill by achievement rather than by raw
+   * scroll distance, and it can't derive them without three.js — which this
+   * file must not import (see the header). `setStopUs` is passed straight down
+   * as the callback: a setState function is referentially stable, so the
+   * scene's publishing effect doesn't re-fire on every render. One state
+   * update per visit, in the same category as `tier` and `hasEntered`.
+   */
+  const [stopUs, setStopUs] = useState<number[] | null>(null);
 
   const canRender3D =
     capability.webgl && !reducedMotion && !gaveUp && !crashed;
@@ -114,8 +157,11 @@ export default function HistoryJourney() {
             which is the same deep navy as the scene, so the seam is invisible. */}
         <div className="absolute inset-x-0 bottom-0 top-0 md:top-[104px]">
           <WebGLBoundary
+            // Keyed on the attempt count so a failure remounts the boundary
+            // with a clean slate rather than latching `hasError` forever.
+            key={crashCount}
             fallback={<SceneMessage>Loading the timeline…</SceneMessage>}
-            onError={() => setCrashed(true)}
+            onError={() => setCrashCount((count) => count + 1)}
           >
             <Suspense fallback={<SceneMessage>Preparing the flight path…</SceneMessage>}>
               {hasEntered && (
@@ -128,13 +174,31 @@ export default function HistoryJourney() {
                   onGiveUp={() => setGaveUp(true)}
                   isMobile={isMobile}
                   reducedMotion={reducedMotion}
+                  onStopUs={setStopUs}
                 />
               )}
             </Suspense>
           </WebGLBoundary>
         </div>
 
-        <ScrollHint />
+        {/* Sits outside the canvas inset above, so it stays vertically centred
+            on the viewport rather than on the canvas — the navbar strip would
+            otherwise push it 52px low on desktop. */}
+        <JourneyProgressRail
+          progressRef={progressRef}
+          subscribe={subscribe}
+          stopUs={stopUs}
+          achievements={achievements}
+          scrollToProgress={scrollToProgress}
+        />
+
+        {/* Stays up for the whole journey. This is ~9 viewports in which the
+            page never visibly moves, so "keep scrolling" is the section's
+            operating instruction rather than a fact you learn once — and the
+            scrollbar can't convey it, having reported steady downward motion
+            the entire time the view sat still. It's inside the sticky
+            container, so the journey ending removes it with no extra logic. */}
+        <ScrollCue label="Scroll to follow the path" />
       </div>
     </div>
   );
@@ -151,31 +215,3 @@ function SceneMessage({ children }: { children: React.ReactNode }) {
   );
 }
 
-/**
- * A quiet nudge that this section is scroll-driven.
- *
- * Pinned sections are genuinely confusing without one — the page stops moving
- * while the scene changes, and a visitor can reasonably conclude it's stuck.
- * It fades out on its own once they've started, so it never nags.
- */
-function ScrollHint() {
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const onScroll = () => setVisible(false);
-    window.addEventListener("scroll", onScroll, { passive: true, once: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <div
-      aria-hidden="true"
-      className="absolute bottom-8 left-1/2 -translate-x-1/2 pointer-events-none transition-opacity duration-500"
-      style={{ opacity: visible ? 1 : 0 }}
-    >
-      <span className="font-mono text-caption uppercase tracking-[0.16em] text-fg-muted">
-        Scroll to follow the path
-      </span>
-    </div>
-  );
-}

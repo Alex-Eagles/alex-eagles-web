@@ -12,9 +12,24 @@
  * on top of the scene. On a DARK background additive blending is genuinely
  * how light behaves: overlapping brightness sums toward white, exactly as
  * bloom would. The result is near-indistinguishable here for a rounding error
- * of the cost. (This is precisely why the dark palette was chosen over the
- * pale reference — on a light background this trick falls apart and you'd be
- * forced into real bloom.)
+ * of the cost.
+ *
+ * ─── AND WHY LIGHT MODE COMPOSITES DIFFERENTLY ──────────────────────────────
+ * This header used to end by conceding that on a light background the trick
+ * "falls apart and you'd be forced into real bloom". Half of that is true: it
+ * does fall apart, because adding anything to a #f7f8ff floor clamps to pure
+ * white, so both sprites rendered as literally nothing while still washing out
+ * the core sphere underneath them.
+ *
+ * But the conclusion doesn't follow. Bloom is a way to make something look
+ * BRIGHTER than the surface around it, and on a near-white surface there is no
+ * headroom left to be brighter into. What a glow does on white paper is tint:
+ * a saturated core washing out to the paper. That is plain alpha compositing of
+ * the same gradient through a saturated colour — same texture, same two
+ * sprites, same cost, one blending constant. So light mode keeps every bit of
+ * the cheap approach and just stops pretending it's adding light.
+ *
+ * See `glowStyle` / `PALETTE_LIGHT_OVERRIDES` in sceneConfig for the numbers.
  *
  * ─── WHY SPRITES AND NOT PLANES ─────────────────────────────────────────────
  * A glow must always face the camera, or you'd catch it edge-on and watch it
@@ -24,14 +39,21 @@
  */
 
 import { useEffect, useMemo } from "react";
+import { useThree } from "@react-three/fiber";
 import {
   AdditiveBlending,
   CanvasTexture,
   Color,
+  NormalBlending,
   SRGBColorSpace,
   type Group,
 } from "three";
-import { PALETTE, LIGHT, type QualitySettings } from "./sceneConfig";
+import {
+  LIGHT,
+  glowStyle,
+  type QualitySettings,
+  type ScenePalette,
+} from "./sceneConfig";
 
 /**
  * Generates the soft radial gradient used by both glow sprites.
@@ -77,20 +99,46 @@ interface TravellingLightProps {
   quality: QualitySettings;
   /** The scene controller moves this group along the path each frame. */
   groupRef: React.RefObject<Group>;
+  /** Active-theme palette. The light re-tints with it — see the header. */
+  palette: ScenePalette;
+  /** Selects the compositing mode for the glow sprites. */
+  isDark: boolean;
 }
 
 export default function TravellingLight({
   quality,
   groupRef,
+  palette,
+  isDark,
 }: TravellingLightProps) {
+  const invalidate = useThree((state) => state.invalidate);
   const glowTexture = useMemo(createGlowTexture, []);
 
   // Textures hold GPU memory — release it when the page unmounts. Without
   // this, navigating between routes repeatedly would leak a texture each time.
   useEffect(() => () => glowTexture.dispose(), [glowTexture]);
 
-  const glowColor = useMemo(() => new Color(PALETTE.lightGlow), []);
-  const coreColor = useMemo(() => new Color(PALETTE.lightCore), []);
+  const glow = glowStyle(isDark);
+  const blending = isDark ? AdditiveBlending : NormalBlending;
+
+  const glowColor = useMemo(
+    () => new Color(palette.lightGlow),
+    [palette.lightGlow],
+  );
+  const coreColor = useMemo(
+    () => new Color(palette.lightCore),
+    [palette.lightCore],
+  );
+
+  // The canvas is frameloop="demand", so it only draws when something asks it
+  // to. A theme flip changes no scroll position and settles no spring, so
+  // without this the new colours would sit in the materials unseen until the
+  // visitor happened to scroll.
+  // (Block body, not a concise arrow: React treats an effect's return value as
+  // a cleanup function, and matches how GroundDots/JourneyPath do the same.)
+  useEffect(() => {
+    invalidate();
+  }, [palette, isDark, invalidate]);
 
   return (
     <group ref={groupRef}>
@@ -107,32 +155,51 @@ export default function TravellingLight({
         <meshBasicMaterial color={coreColor} toneMapped={false} />
       </mesh>
 
-      {/* Wide, soft halo — the bulk of the perceived glow. */}
-      <sprite scale={[LIGHT.glowSize, LIGHT.glowSize, 1]}>
+      {/* Wide, soft halo — the bulk of the perceived glow.
+
+          ─── THE `key` IS LOAD-BEARING ───────────────────────────────────────
+          `blending` is not an ordinary uniform: three bakes the blend equation
+          into the material's compiled program, so mutating it on a live
+          material needs an explicit `needsUpdate` to force a recompile —
+          which there is no declarative way to express here. Keying the sprite
+          on the theme sidesteps the question entirely: React unmounts it and
+          mounts a fresh one, with a correctly-compiled material, on toggle.
+          It costs one remount per theme flip and nothing at all per frame.
+          (The texture is NOT remounted with it — it's memoised above and
+          shared by both sprites, so no GPU upload happens here either.) */}
+      <sprite
+        key={isDark ? "halo-dark" : "halo-light"}
+        scale={[LIGHT.glowSize, LIGHT.glowSize, 1]}
+      >
         <spriteMaterial
           map={glowTexture}
           color={glowColor}
-          blending={AdditiveBlending}
+          blending={blending}
           transparent
-          // Additive glows must never write depth, or they'd punch a hole in
-          // everything drawn behind them.
+          // Glows must never write depth, or they'd punch a hole in everything
+          // drawn behind them.
           depthWrite={false}
           toneMapped={false}
-          opacity={0.55}
+          opacity={glow.haloOpacity}
         />
       </sprite>
 
-      {/* Tight, hot inner glow. Stacking two gradients gives a bright core
-          with a wide falloff — the shape real bloom produces. */}
-      <sprite scale={[LIGHT.glowSize * 0.35, LIGHT.glowSize * 0.35, 1]}>
+      {/* Tight, hot inner glow. Stacking two gradients gives a concentrated
+          centre with a wide falloff — the shape real bloom produces.
+          In light mode this is also what makes the very centre of the light
+          the deepest point on screen, since it's tinted with `lightCore`. */}
+      <sprite
+        key={isDark ? "core-dark" : "core-light"}
+        scale={[LIGHT.glowSize * 0.35, LIGHT.glowSize * 0.35, 1]}
+      >
         <spriteMaterial
           map={glowTexture}
           color={coreColor}
-          blending={AdditiveBlending}
+          blending={blending}
           transparent
           depthWrite={false}
           toneMapped={false}
-          opacity={0.9}
+          opacity={glow.coreOpacity}
         />
       </sprite>
     </group>
