@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
 import GlassCard from "@/components/ui/GlassCard";
 import { useTheme } from "@/context/ThemeContext";
 import { CATEGORY_STYLE, CATEGORY_LABEL, type BlogPostFull } from "@/data/blog";
 
-type BlogCardProps = BlogPostFull;
+interface BlogCardProps extends BlogPostFull {
+  /** Opens the post in the focused <BlogPostModal/> instead of navigating away. */
+  onClick: () => void;
+}
 
 /**
  * BlogCard — post card for the Figma-sourced blog page: a cover photo with a
@@ -18,7 +20,6 @@ type BlogCardProps = BlogPostFull;
  * deep tone (not just a grayed pastel), so dark mode reads as genuinely dark.
  */
 export default function BlogCard({
-  id,
   title,
   excerpt,
   image,
@@ -26,6 +27,7 @@ export default function BlogCard({
   category,
   date,
   readTime,
+  onClick,
 }: BlogCardProps) {
   const style = CATEGORY_STYLE[category];
   const { isDark } = useTheme();
@@ -39,7 +41,12 @@ export default function BlogCard({
   };
 
   return (
-    <Link to={`/blog/${id}`} className="block h-full" aria-label={`Read "${title}"`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className="block w-full h-full text-left appearance-none bg-transparent border-0 p-0 m-0 cursor-pointer"
+      aria-label={`Read "${title}"`}
+    >
       <GlassCard className="overflow-hidden flex flex-col h-full group" style={cardStyle}>
         {/* Cover photo + category badge — the one piece of chrome the home
             page's text-only cards don't need. */}
@@ -107,7 +114,7 @@ export default function BlogCard({
           </div>
         </div>
       </GlassCard>
-    </Link>
+    </button>
   );
 }
 

@@ -61,7 +61,7 @@ export const CATEGORY_STYLE: Record<BlogCategory, CategoryStyle> = {
     badgeText: "#5F3A0A",
   },
   software: {
-    bg: { light: "#D2EEE2", dark: "#10241D" },
+    bg: { light: "#9FD1BA", dark: "#10241D" },
     accent: "#9FE1CB",
     text: { light: "#085041", dark: "#B7ECD9" },
     label: { light: "#0C5744", dark: "#59C79E" },
@@ -122,6 +122,7 @@ export interface BlogPostFull {
   readTime: string;
 }
 
+/** Posts are kept newest-first (matching each `date`'s end-of-range), oldest at the bottom. */
 export const BLOG_POSTS: BlogPostFull[] = [
   {
     id: 16,
@@ -132,123 +133,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     imageFit: "contain",
     category: "hardware",
     date: "Jul 2026 – Present",
-    author: "Hardware Team",
-    readTime: "4 min read",
-  },
-  {
-    id: 17,
-    title: "Manufacturing a UGV for ICMTC",
-    excerpt:
-      "Applied our hardware design expertise to a new platform, manufacturing a ground vehicle for the ICMTC competition.",
-    image:
-      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "hardware",
-    date: "May – Jun 2026",
-    author: "Hardware Team",
-    readTime: "5 min read",
-  },
-  {
-    id: 18,
-    title: "PDB Design Review: What We'd Change Next",
-    excerpt:
-      "Reviewed our power distribution board's first revision, identified key improvement areas, and kicked off development of a next-generation version.",
-    image:
-      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "hardware",
-    date: "Apr – Jun 2026",
-    author: "Hardware Team",
-    readTime: "5 min read",
-  },
-  {
-    id: 9,
-    title: "Auditing the Team Website",
-    excerpt:
-      "We started editing the team website itself — auditing what was already in place, identifying what was missing, and mapping out the requirements it still needed to meet.",
-    image: "/images/blog/website-audit.jpg",
-    category: "software",
-    date: "Feb 15, 2026",
-    author: "Software Team",
-    readTime: "4 min read",
-  },
-  {
-    id: 10,
-    title: "Sprint 3: Front End Structure, Live Tracking & MAVLink",
-    excerpt:
-      "This sprint tied the front end's main structure together, connected the endpoints to our Drone class, improved live drone tracking on the map, and simulated our MavlinkController class against PX4 firmware.",
-    image: "/images/blog/mavlink.png",
-    category: "software",
-    date: "Dec 5, 2025",
-    author: "Software Team",
-    readTime: "6 min read",
-  },
-  {
-    id: 11,
-    title: "Sprint 2: Ground Station UI, Satellite Maps & the Drone Class",
-    excerpt:
-      "Sprint 2 covered a lot of ground: building the ground station's UI and layout, researching satellite map integration, implementing our core Drone class, and standing up the API gateway.",
-    image: "/images/blog/ground-station.jpg",
-    category: "software",
-    date: "Nov 23, 2025",
-    author: "Software Team",
-    readTime: "6 min read",
-  },
-  {
-    id: 12,
-    title: "Sprint 1: GCS Architecture & Simulation",
-    excerpt:
-      "Kicked off our first sprint by reviewing the ground control station's overall architecture and running early simulations to validate our approach before writing production code.",
-    image:
-      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "software",
-    date: "Oct 24, 2025",
-    author: "Software Team",
-    readTime: "5 min read",
-  },
-  {
-    id: 13,
-    title: "Getting Up to Speed with React",
-    excerpt:
-      "Before sprint work began, the team spent the week studying React fundamentals — components, hooks, and state management — to build a shared foundation for the ground station front end.",
-    image: "/images/blog/react.png",
-    imageFit: "contain",
-    category: "software",
-    date: "Oct 21, 2025",
-    author: "Software Team",
-    readTime: "3 min read",
-  },
-  {
-    id: 19,
-    title: "Designing Our Custom Power Distribution Board",
-    excerpt:
-      "Designed, built, and tested a custom power distribution board to power every onboard electronic system on the team's UAV.",
-    image: "/images/blog/power-distribution-board.png",
-    imageFit: "contain",
-    category: "hardware",
-    date: "Feb – Mar 2026",
-    author: "Hardware Team",
-    readTime: "6 min read",
-  },
-  {
-    id: 20,
-    title: "Entering the PCBWay Design Contest",
-    excerpt:
-      "Entered the PCBWay Design Contest with an original flight controller module, engineered entirely in-house from schematic to layout.",
-    image:
-      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "hardware",
-    date: "Nov 2025 – Jan 2026",
-    author: "Hardware Team",
-    readTime: "7 min read",
-  },
-  {
-    id: 21,
-    title: "Onboarding the Hardware Team on Altium Designer",
-    excerpt:
-      "Trained new members to proficiency in Altium Designer, building the team's core PCB design capability from the ground up.",
-    image: "/images/blog/altium-designer.png",
-    imageFit: "contain",
-    category: "hardware",
-    date: "Sep – Nov 2025",
     author: "Hardware Team",
     readTime: "4 min read",
   },
@@ -274,6 +158,30 @@ export const BLOG_POSTS: BlogPostFull[] = [
     date: "Jul 1, 2026",
     author: "Structure Team",
     readTime: "4 min read",
+  },
+  {
+    id: 17,
+    title: "Manufacturing a UGV for ICMTC",
+    excerpt:
+      "Applied our hardware design expertise to a new platform, manufacturing a ground vehicle for the ICMTC competition.",
+    image:
+      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "hardware",
+    date: "May – Jun 2026",
+    author: "Hardware Team",
+    readTime: "5 min read",
+  },
+  {
+    id: 18,
+    title: "PDB Design Review: What We'd Change Next",
+    excerpt:
+      "Reviewed our power distribution board's first revision, identified key improvement areas, and kicked off development of a next-generation version.",
+    image:
+      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "hardware",
+    date: "Apr – Jun 2026",
+    author: "Hardware Team",
+    readTime: "5 min read",
   },
   {
     id: 26,
@@ -321,27 +229,83 @@ export const BLOG_POSTS: BlogPostFull[] = [
     readTime: "4 min read",
   },
   {
-    id: 14,
-    title: "Sprint 2: Diffusion Models, Gimbal Control & Camera Streaming",
+    id: 19,
+    title: "Designing Our Custom Power Distribution Board",
     excerpt:
-      "Sprint 2 explored diffusion models for 3D texturing, implemented gimbal control via Herelink, and got camera stream acquisition working through Herelink.",
-    image:
-      "https://images.unsplash.com/photo-1612338762643-298feee70520?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb2JvdGljcyUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzczNjM2NTEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "computerVision",
-    date: "Nov 17, 2025",
-    author: "AI Team",
-    readTime: "5 min read",
+      "Designed, built, and tested a custom power distribution board to power every onboard electronic system on the team's UAV.",
+    image: "/images/blog/power-distribution-board.png",
+    imageFit: "contain",
+    category: "hardware",
+    date: "Feb – Mar 2026",
+    author: "Hardware Team",
+    readTime: "6 min read",
   },
   {
-    id: 15,
-    title: "Sprint 1: Dataset Generation with Blender",
+    id: 34,
+    title: "SUAS/UAVC: Mapping & GPS Synchronization",
     excerpt:
-      "Kicked off with a synthetic dataset generation pipeline built in Blender — the foundation we'd use to train our computer vision models.",
-    image:
-      "https://images.unsplash.com/photo-1612338762643-298feee70520?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb2JvdGljcyUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzczNjM2NTEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "To figure out exactly where a detected target sits in the real world, we configured the onboard camera to tag every captured image with precise GPS coordinates and flight data. This synchronized data lets us stitch the images into an accurate map and pinpoint the exact real-world coordinates of each target.",
+    image: "/images/blog/mapping-gps-sync.jpg",
     category: "computerVision",
-    date: "Oct 21, 2025",
+    date: "Mar 16, 2026",
     author: "AI Team",
+    readTime: "4 min read",
+  },
+  {
+    id: 8,
+    title: "Wing Profile Selection for Cruise Efficiency",
+    excerpt:
+      "Comparing airfoil candidates in simulation to maximize lift-to-drag at cruise speed, then validating the winner on the test range. Here's how we picked our final wing profile.",
+    image:
+      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "aerodesign",
+    date: "Mar 14, 2026",
+    author: "Lina Farouk",
+    readTime: "6 min read",
+  },
+  {
+    id: 7,
+    title: "Real-Time Flight Controller Firmware",
+    excerpt:
+      "Rewriting our flight controller's real-time loop for a deterministic 1kHz update rate. Why we moved off the RTOS scheduler and what it took to keep every control cycle on time.",
+    image:
+      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "firmware",
+    date: "Mar 12, 2026",
+    author: "Youssef Adel",
+    readTime: "7 min read",
+  },
+  {
+    id: 33,
+    title: "SUAS/UAVC: Aerial AI Model Selection (RF-DETR)",
+    excerpt:
+      "We evaluated several AI systems to act as the visual processor for our drone and selected RF-DETR. We chose it for its stability and its ability to more accurately spot small, irregularly shaped targets from high altitudes compared to other standard detection models.",
+    image: "/images/blog/rf-detr-aerial.png",
+    category: "computerVision",
+    date: "Mar 2, 2026",
+    author: "AI Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 32,
+    title: "SUAS/UAVC: Synthetic Data Generation Pipeline",
+    excerpt:
+      "To train our AI without needing thousands of real photos, we built an automated pipeline that generates synthetic training images. Using Blender, we placed target objects into virtual environments to generate roughly 30,000 realistic images, teaching our detection model what to look for before it ever saw a real flight.",
+    image: "/images/blog/suas-synthetic-data-pipeline.webp",
+    category: "computerVision",
+    date: "Feb 16, 2026",
+    author: "AI Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 9,
+    title: "Auditing the Team Website",
+    excerpt:
+      "We started editing the team website itself — auditing what was already in place, identifying what was missing, and mapping out the requirements it still needed to meet.",
+    image: "/images/blog/website-audit.jpg",
+    category: "software",
+    date: "Feb 15, 2026",
+    author: "Software Team",
     readTime: "4 min read",
   },
   {
@@ -357,28 +321,131 @@ export const BLOG_POSTS: BlogPostFull[] = [
     readTime: "5 min read",
   },
   {
-    id: 7,
-    title: "Real-Time Flight Controller Firmware",
+    id: 31,
+    title: "AIC: Fine-Tuning & Knowledge Retention",
     excerpt:
-      "Rewriting our flight controller's real-time loop for a deterministic 1kHz update rate. Why we moved off the RTOS scheduler and what it took to keep every control cycle on time.",
+      "When we tried training our chosen baseline model on new drone footage, it started forgetting how to track general objects — a common AI issue known as catastrophic forgetting. To fix this, we used a training strategy that mixed our new aerial data with old general data, teaching the model new skills without erasing its foundational knowledge.",
+    image: "/images/blog/aic-fine-tuning.jpg",
+    category: "computerVision",
+    date: "Feb 2, 2026",
+    author: "AI Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 20,
+    title: "Entering the PCBWay Design Contest",
+    excerpt:
+      "Entered the PCBWay Design Contest with an original flight controller module, engineered entirely in-house from schematic to layout.",
     image:
-      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "firmware",
-    date: "Mar 12, 2026",
-    author: "Youssef Adel",
+      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "hardware",
+    date: "Nov 2025 – Jan 2026",
+    author: "Hardware Team",
     readTime: "7 min read",
   },
   {
-    id: 8,
-    title: "Wing Profile Selection for Cruise Efficiency",
+    id: 30,
+    title: "AIC: Dataset Analysis & Scoring Strategy",
     excerpt:
-      "Comparing airfoil candidates in simulation to maximize lift-to-drag at cruise speed, then validating the winner on the test range. Here's how we picked our final wing profile.",
-    image:
-      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "aerodesign",
-    date: "Mar 14, 2026",
-    author: "Lina Farouk",
+      "We analyzed the competition's data and realized much of it came from public sources, with only one set being a \"secret\" custom dataset. Because the competition leaderboard didn't tell us our exact score on that secret data, we developed a reverse-engineering method to calculate our true performance on this hidden data, letting us track our real progress.",
+    image: "/images/blog/aic-scoring-strategy.png",
+    imageFit: "contain",
+    category: "computerVision",
+    date: "Jan 19, 2026",
+    author: "AI Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 29,
+    title: "AIC: Baseline Selection & Efficiency Screening",
+    excerpt:
+      "We tested several existing AI tracking models to see which one performed best out-of-the-box on drone footage. We ultimately chose a model that was not only highly accurate but also fast and lightweight enough to run within the competition's strict hardware limits.",
+    image: "/images/blog/aic-baseline-selection.svg",
+    imageFit: "contain",
+    category: "computerVision",
+    date: "Jan 5, 2026",
+    author: "AI Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 10,
+    title: "Sprint 3: Front End Structure, Live Tracking & MAVLink",
+    excerpt:
+      "This sprint tied the front end's main structure together, connected the endpoints to our Drone class, improved live drone tracking on the map, and simulated our MavlinkController class against PX4 firmware.",
+    image: "/images/blog/mavlink.png",
+    category: "software",
+    date: "Dec 5, 2025",
+    author: "Software Team",
     readTime: "6 min read",
+  },
+  {
+    id: 21,
+    title: "Onboarding the Hardware Team on Altium Designer",
+    excerpt:
+      "Trained new members to proficiency in Altium Designer, building the team's core PCB design capability from the ground up.",
+    image: "/images/blog/altium-designer.png",
+    imageFit: "contain",
+    category: "hardware",
+    date: "Sep – Nov 2025",
+    author: "Hardware Team",
+    readTime: "4 min read",
+  },
+  {
+    id: 11,
+    title: "Sprint 2: Ground Station UI, Satellite Maps & the Drone Class",
+    excerpt:
+      "Sprint 2 covered a lot of ground: building the ground station's UI and layout, researching satellite map integration, implementing our core Drone class, and standing up the API gateway.",
+    image: "/images/blog/ground-station.jpg",
+    category: "software",
+    date: "Nov 23, 2025",
+    author: "Software Team",
+    readTime: "6 min read",
+  },
+  {
+    id: 14,
+    title: "Sprint 2: Diffusion Models, Gimbal Control & Camera Streaming",
+    excerpt:
+      "Sprint 2 explored diffusion models for 3D texturing, implemented gimbal control via Herelink, and got camera stream acquisition working through Herelink.",
+    image: "/images/blog/gimbal-camera-streaming.png",
+    category: "computerVision",
+    date: "Nov 17, 2025",
+    author: "AI Team",
+    readTime: "5 min read",
+  },
+  {
+    id: 12,
+    title: "Sprint 1: GCS Architecture & Simulation",
+    excerpt:
+      "Kicked off our first sprint by reviewing the ground control station's overall architecture and running early simulations to validate our approach before writing production code.",
+    image:
+      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    category: "software",
+    date: "Oct 24, 2025",
+    author: "Software Team",
+    readTime: "5 min read",
+  },
+  {
+    id: 13,
+    title: "Getting Up to Speed with React",
+    excerpt:
+      "Before sprint work began, the team spent the week studying React fundamentals — components, hooks, and state management — to build a shared foundation for the ground station front end.",
+    image: "/images/blog/react.png",
+    imageFit: "contain",
+    category: "software",
+    date: "Oct 21, 2025",
+    author: "Software Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 15,
+    title: "Sprint 1: Dataset Generation with Blender",
+    excerpt:
+      "Kicked off with a synthetic dataset generation pipeline built in Blender — the foundation we'd use to train our computer vision models.",
+    image: "/images/blog/dataset-generation-blender.png",
+    category: "computerVision",
+    date: "Oct 21, 2025",
+    author: "AI Team",
+    readTime: "4 min read",
   },
 ];
 

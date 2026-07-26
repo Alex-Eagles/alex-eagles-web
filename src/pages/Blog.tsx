@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import BlogHeader from "@/components/blog/BlogHeader";
 import BlogCard from "@/components/blog/BlogCard";
+import BlogPostModal from "@/components/blog/BlogPostModal";
 import { fadeUp, staggerParent, viewportOnce } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTheme } from "@/context/ThemeContext";
-import { BLOG_POSTS, type BlogFilter } from "@/data/blog";
+import { BLOG_POSTS, type BlogFilter, type BlogPostFull } from "@/data/blog";
 
 /** Posts shown per "page" before Load more reveals the next batch. */
 const PAGE_SIZE = 6;
@@ -22,6 +23,7 @@ const PAGE_SIZE = 6;
 export default function Blog() {
   const [activeFilter, setActiveFilter] = useState<BlogFilter["id"]>("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [selectedPost, setSelectedPost] = useState<BlogPostFull | null>(null);
   const reduced = useReducedMotion();
   const { isDark } = useTheme();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -76,7 +78,7 @@ export default function Blog() {
               >
                 {visiblePosts.map((post) => (
                   <motion.div key={post.id} variants={reduced ? undefined : fadeUp}>
-                    <BlogCard {...post} />
+                    <BlogCard {...post} onClick={() => setSelectedPost(post)} />
                   </motion.div>
                 ))}
               </motion.div>
@@ -100,6 +102,12 @@ export default function Blog() {
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedPost && (
+          <BlogPostModal post={selectedPost} onClose={() => setSelectedPost(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
