@@ -5,7 +5,9 @@
  *   HERO      normal scrolling — establishes context
  *   JOURNEY   pinned 3D scene, scrubbed by scroll (HistoryJourney)
  *   CLOSING   the same milestones as readable text (Timeline2D)
- *   RECORD    press, publications and competitions (PressAndPublications)
+ *   PRESS     where the team has been covered (MediaCoverage)
+ *   PAPERS    the peer-reviewed record (Publications)
+ *   EVENTS    the competitions it builds for (Competitions)
  *
  * The hero earns its place beyond looking good: it gives the browser a few
  * hundred milliseconds to fetch the 3D chunk, create the WebGL context and
@@ -22,7 +24,9 @@
 import { motion } from "framer-motion";
 import SectionHeader from "@/components/ui/SectionHeader";
 import HistoryJourney from "@/components/history/HistoryJourney";
-import PressAndPublications from "@/components/history/PressAndPublications";
+import Competitions from "@/components/history/Competitions";
+import MediaCoverage from "@/components/history/MediaCoverage";
+import Publications from "@/components/history/Publications";
 import ScrollCue from "@/components/history/ScrollCue";
 import Timeline2D from "@/components/history/Timeline2D";
 import { fadeUp, viewportOnce } from "@/lib/motion";
@@ -146,16 +150,28 @@ export default function History() {
 
       <Timeline2D />
 
-      {/* ── On the record ─────────────────────────────────────────────────
-          Press coverage, the team's own publications, and the competitions
-          it has flown at. Last on the page on purpose: the timeline above is
-          the story, and this is the paper trail behind it — someone who came
-          for the history has already got what they came for by here.
+      {/* ── Media coverage ────────────────────────────────────────────────
+          The press wall. After the timeline on purpose: the milestones above
+          are the team's own account of itself, and this is everyone else's.
 
-          It sits on `bg-surface`, so it also closes the page on a different
-          surface from the timeline rather than running into it. Renders
-          nothing at all while its data file is empty; see the component. */}
-      <PressAndPublications />
+          On `bg-surface` so it reads as a new chapter rather than running on
+          from the timeline. Renders nothing when its data file is empty. */}
+      <MediaCoverage />
+
+      {/* ── Publications ──────────────────────────────────────────────────
+          The peer-reviewed record. No `bg-surface` here: it alternates with
+          the press wall above so the two read as separate chapters rather
+          than one long shelf of links. */}
+      <Publications />
+
+      {/* ── Competitions ──────────────────────────────────────────────────
+          Closes the page. Deliberately last of the three: press coverage and
+          papers are things the team produced, and this is the standing context
+          they were produced in — the events it builds for, year after year.
+
+          Back onto `bg-surface`, keeping the alternation going so no two
+          adjacent sections share a background. */}
+      <Competitions />
     </>
   );
 }

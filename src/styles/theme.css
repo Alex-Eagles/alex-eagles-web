@@ -81,6 +81,13 @@
   --transition-base: 250ms ease-out; /* hovers, cards             */
   --transition-slow: 400ms ease-out; /* theme swap, big reveals   */
 
+  /* A stronger ease-out than the CSS keyword. `ease-out` is a gentle curve;
+   * this one leaves hard and settles late, which is what makes a hover read as
+   * an immediate response rather than a slow drift. Use it for anything the
+   * pointer triggers — the moment right after the cursor lands is exactly when
+   * the user is watching most closely. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+
   /* ── Scroll-cue "breathe" ─────────────────────────────────────────────────
    * How far the scroll-cue LABEL fades at the bottom of its pulse (see
    * @keyframes ae-cue-pulse in global.css).
@@ -165,6 +172,28 @@
   --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.5);
   --elevation-3: 0 10px 30px rgba(0, 0, 0, 0.6);
   --elevation-4: 0 20px 50px rgba(0, 0, 0, 0.7);
+
+  /* ── Card shadows, at rest and lifted ─────────────────────────────────────
+   * Layered rather than single, because one big soft blur reads as fog while
+   * a tight contact shadow under a wide ambient one reads as an object with a
+   * definite bottom edge sitting above a surface.
+   *
+   * These are the DARK values, and they are deliberately close to the levels
+   * above: on a near-black page a shadow has almost nothing to darken, so
+   * depth here comes mostly from the card's own lighter surface. The light
+   * theme is where these earn their keep — see the pair further down. */
+  --elevation-card: 0 10px 30px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+  --elevation-card-hover: 0 22px 48px rgba(0, 0, 0, 0.68),
+    0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* A tray holding cards, rather than a card itself — bigger, so it sits
+   * further off the page and casts further. The `inset` line is the important
+   * part: a 1px lighter edge along the top reads as the light source catching
+   * the panel's near edge, which is what makes it a surface with a thickness
+   * instead of a rectangle of different colour. */
+  --elevation-panel: inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 14px rgba(0, 0, 0, 0.45), 0 28px 64px rgba(0, 0, 0, 0.6);
 }
 
 /* ----------------------------------------------------------------------------
@@ -220,4 +249,32 @@
   --elevation-2: 0 4px 12px rgba(60, 64, 181, 0.12);
   --elevation-3: 0 10px 30px rgba(60, 64, 181, 0.15);
   --elevation-4: 0 20px 50px rgba(60, 64, 181, 0.18);
+
+  /* ── Card shadows, at rest and lifted (LIGHT) ─────────────────────────────
+   * Much heavier than the levels above, and deliberately so. A white card on a
+   * near-white page has no surface contrast to separate it, so the shadow is
+   * the ONLY thing telling the eye the card sits above the page — at
+   * `--elevation-3`'s 0.15 alpha it was reading as a flat panel painted on.
+   *
+   * Three layers, each doing a different job:
+   *   · a tight 1px contact edge, which gives the card a definite bottom
+   *   · a short mid shadow for the near-surface falloff
+   *   · a wide, offset ambient shadow for the sense of height
+   * Tinted with the brand indigo instead of neutral grey: a grey shadow on a
+   * faintly indigo page reads as dirt, a same-hue shadow reads as light. */
+  --elevation-card: 0 1px 2px rgba(30, 34, 88, 0.09),
+    0 4px 10px -3px rgba(30, 34, 88, 0.13),
+    0 14px 32px -12px rgba(30, 34, 88, 0.26);
+  --elevation-card-hover: 0 1px 2px rgba(30, 34, 88, 0.1),
+    0 8px 18px -6px rgba(30, 34, 88, 0.18),
+    0 28px 56px -18px rgba(30, 34, 88, 0.34);
+
+  /* The tray, in light mode — where it does the most work. A pale panel on a
+   * white page has no colour contrast to separate the two, so without a real
+   * shadow the section reads as one flat sheet. The inset highlight is nearly
+   * pure white here rather than the faint 6% used on the dark theme, because
+   * on a light surface the catch-light IS the brightest thing available. */
+  --elevation-panel: inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(30, 34, 88, 0.1), 0 12px 26px -8px rgba(30, 34, 88, 0.2),
+    0 40px 80px -28px rgba(30, 34, 88, 0.4);
 }
