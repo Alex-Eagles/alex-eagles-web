@@ -31,6 +31,56 @@ export interface Capability {
   reducedMotion: boolean;
   /** Best initial guess at how much this device can handle. */
   tier: Tier;
+  /**
+   * True when the visitor has asked not to be sent heavy things, or is on a
+   * connection that cannot carry them. See `detectFrugalConnection`.
+   */
+  frugal: boolean;
+}
+
+/**
+ * Has this visitor asked us to go easy on their data, or is their connection
+ * too slow to carry the scene?
+ *
+ * The 3D journey is a ~230KB gzipped chunk that then has to be parsed and have
+ * its shaders compiled. That is a fine trade on a wifi connection and a bad one
+ * on a metered 3G plan, and the browser will tell us which we are on if asked.
+ *
+ * ─── TWO SIGNALS, ONE OF WHICH IS AN EXPLICIT REQUEST ───────────────────────
+ *   · `saveData` is Data Saver being on. It is not an inference about the
+ *     network — it is the visitor having gone into settings and asked sites not
+ *     to send them large optional things. A decorative WebGL scene is exactly
+ *     what that setting is for, and honouring it is not a judgement call.
+ *   · `effectiveType` is the browser's own round-trip-time and bandwidth
+ *     estimate, bucketed. `2g` and `slow-2g` mean the chunk would take long
+ *     enough that the visitor reaches the section, sees "Preparing the flight
+ *     path…", and scrolls past before anything renders — strictly worse than
+ *     the timeline they would otherwise have been reading.
+ *
+ * `3g` is deliberately NOT included. It is slow but survivable, the chunk is
+ * fetched well before the section is reached, and cutting it would take the
+ * page's centrepiece away from a large share of real mobile visitors.
+ *
+ * Both live on a non-standard API that Safari and Firefox do not implement, so
+ * both are optional and absence means "no reason to hold back" — the default
+ * has to be the full experience, or every Safari visitor would be downgraded by
+ * a feature detection failing.
+ */
+function detectFrugalConnection(): boolean {
+  if (typeof navigator === "undefined") return false;
+
+  const connection = (
+    navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }
+  ).connection;
+
+  if (!connection) return false;
+  if (connection.saveData) return true;
+
+  return (
+    connection.effectiveType === "2g" || connection.effectiveType === "slow-2g"
+  );
 }
 
 /**
@@ -96,12 +146,33 @@ function detectInitialTier(): Tier {
   return "medium";
 }
 
-/** One-shot capability check. Safe to call during render. */
+/**
+ * The static half of the probe, cached for the life of the page.
+ *
+ * Neither answer can change without a reload — the browser does not grow WebGL2
+ * support or CPU cores mid-visit — and the WebGL half is not free: it builds a
+ * canvas, creates a real GL context and throws it away. Two callers now ask
+ * (the page, to decide whether the journey exists at all, and the journey
+ * itself), and each React StrictMode double-render would ask again, so an
+ * uncached probe is several throwaway contexts against a browser limit of
+ * roughly sixteen. See detectWebGL for why a leaked probe context is a black
+ * screen that only reproduces after a few navigations.
+ */
+let staticProbe: { webgl: boolean; tier: Tier } | null = null;
+
+/**
+ * One-shot capability check. Safe to call during render, and safe to call from
+ * more than one component.
+ */
 export function detectCapability(): Capability {
-  const webgl = detectWebGL();
+  staticProbe ??= { webgl: detectWebGL(), tier: detectInitialTier() };
+
+  // NOT cached: both of these genuinely can change mid-visit — the visitor can
+  // flip the OS motion setting, and a phone can walk off wifi onto 2G — and
+  // both are cheap property reads.
   const reducedMotion =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  return { webgl, reducedMotion, tier: detectInitialTier() };
+  return { ...staticProbe, reducedMotion, frugal: detectFrugalConnection() };
 }

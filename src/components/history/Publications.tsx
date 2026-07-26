@@ -46,13 +46,32 @@ import { publications, FIELD_LABELS } from "@/data/publications";
 import type { Publication } from "@/data/publications";
 
 /**
- * Accent per research strand. Both tokens are theme-aware and already meet AA
- * on their own backgrounds in light and dark, so the tag doesn't need a
- * per-theme override.
+ * Accent per research strand — the SUB-TEAM's own colour, so a paper is
+ * labelled in the same hue as the people who wrote it. Aerospace work carries
+ * Aerodesign's blue and vision work carries Computer Vision's pink, matching
+ * the palette the Team page uses for its section headings and card badges.
+ *
+ * ─── WHY THE TAG IS A SOLID CHIP AND NOT COLOURED TEXT ──────────────────────
+ * It used to be `--gold`/`--sky` text inside a matching outline, which worked
+ * because both of those tokens are theme-aware and re-tuned for the light
+ * page. The sub-team accents are not: they are one pastel per discipline, in
+ * both themes, picked to read on a dark card. Used as text they measure about
+ * 2.1:1 on the white light-mode card — under half the AA floor, and the tag
+ * would have been unreadable for exactly the readers who most need a label.
+ *
+ * Filling the chip instead turns the problem inside out. The accent becomes a
+ * background, which carries no contrast obligation of its own, and the label
+ * sits on it in --ink-on-accent — 8.8:1 on the Aerodesign blue and 8.3:1 on
+ * the Computer Vision pink. The discipline's real colour shows at full
+ * strength, identically in both themes, and the tag reads at a glance rather
+ * than as tinted small caps.
+ *
+ * Adding a third strand? Check the new accent against --ink-on-accent first:
+ * the palette is mostly pastels, but not entirely. See the note on that token.
  */
 const FIELD_ACCENT = {
-  aerospace: "var(--gold)",
-  "computer-vision": "var(--sky)",
+  aerospace: "var(--team-aerodesign)",
+  "computer-vision": "var(--team-computer-vision)",
 } as const;
 
 export default function Publications() {
@@ -134,7 +153,17 @@ function PublicationRow({
           "motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         }
       >
-        <div className="flex gap-5 md:gap-8">
+        {/* ── The card stacks below `sm` ─────────────────────────────────────
+            Side by side, this row gave the text about 170px on a 390px phone —
+            a 22px headline in a 170px column wraps to five lines, the author
+            list becomes a ribbon one or two names wide, and the abstract is a
+            column of three-word lines. The preview was 104px, too small to read
+            as a page.
+
+            Stacked, the text gets the card's whole width and the preview gets
+            to be large enough to recognise. Nothing changes from `sm` upward,
+            where there is room for both. */}
+        <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 md:gap-8">
           {/* ⚠ The `self-*` here is load-bearing — it just must never be
               `self-stretch` (the flex default). A flex child stretches to the
               row's full height, and a stretched height BEATS aspect-ratio: the
@@ -146,7 +175,11 @@ function PublicationRow({
               `self-center` rather than `self-start` so the page sits centred
               against the citation block. It also means expanding an abstract
               grows the card around a preview that stays put, instead of
-              stretching it into a strip. */}
+              stretching it into a strip.
+
+              It carries its weight twice over now: in the stacked layout the
+              same class centres the preview HORIZONTALLY, because align-self
+              works across whichever axis is the cross axis. */}
           <a
             href={paper.href}
             target="_blank"
@@ -159,7 +192,9 @@ function PublicationRow({
             tabIndex={-1}
             className={
               "self-center shrink-0 block overflow-hidden rounded-lg " +
-              "w-[104px] sm:w-[136px] md:w-[172px] " +
+              // Nearly twice its old mobile size, because it is no longer
+              // competing with the text for the same row.
+              "w-[190px] sm:w-[136px] md:w-[172px] " +
               "border border-border shadow-[var(--elevation-2)] " +
               "transition-shadow duration-[220ms] [transition-timing-function:var(--ease-out-strong)] " +
               "group-hover:shadow-[var(--elevation-card)]"
@@ -184,20 +219,41 @@ function PublicationRow({
             />
           </a>
 
-          <div className="min-w-0 flex-1">
+          {/* ── Reading order, and how it differs on a phone ──────────────────
+              A flex column, so `order` can put the TITLE first on mobile and
+              the year/strand row first from `sm` up.
+
+              Stacked, the reader has just been shown a picture of the paper and
+              the next thing they need is its name — leading with "2022 ·
+              AEROSPACE" makes them read a filing label before they know what
+              they are filing. Side by side that row is doing a different job:
+              it sits in the column beside the preview as the card's header, and
+              it carries the outbound arrow, which has to stay at the top right
+              corner where it lines up across every card in the list.
+
+              DOM order still puts the header first, so the tab order and the
+              screen-reader order are the desktop reading order in both layouts
+              — `order` moves boxes, not semantics, and the title is a link. */}
+          <div className="min-w-0 flex-1 flex flex-col">
             {/* Year + strand, and the outbound arrow pinned opposite them.
                 The arrow used to sit inline after the title, where a long title
                 pushed it onto a line of its own — an arrow floating under the
                 headline with nothing beside it. Anchored to this row it can't
-                wrap, and it lines up across every card in the list. */}
-            <div className="flex items-center justify-between gap-3 mb-3">
+                wrap, and it lines up across every card in the list.
+
+                The margin flips with the order: below the title on mobile it
+                needs air above, above the title on desktop it needs air below. */}
+            <div className="order-2 sm:order-1 flex items-center justify-between gap-3 mt-3 sm:mt-0 mb-0 sm:mb-3">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                 <span className="font-mono text-[12px] tracking-[0.12em] text-fg-subtle">
                   {paper.year}
                 </span>
+                {/* No border: on a solid chip an outline in the same colour
+                    does nothing, and one in any other colour would be a second
+                    edge competing with the fill. */}
                 <span
-                  className="font-mono text-[11px] uppercase tracking-[0.14em] rounded-full border px-2.5 py-1"
-                  style={{ color: accent, borderColor: accent }}
+                  className="font-mono text-[11px] uppercase tracking-[0.14em] rounded-full px-2.5 py-1"
+                  style={{ background: accent, color: "var(--ink-on-accent)" }}
                 >
                   {FIELD_LABELS[paper.field]}
                 </span>
@@ -215,7 +271,7 @@ function PublicationRow({
               />
             </div>
 
-            <h3 className="font-display font-bold text-h4 md:text-h3 text-fg leading-[1.15] m-0">
+            <h3 className="order-1 sm:order-2 font-display font-bold text-h4 md:text-h3 text-fg leading-[1.15] m-0">
               <a
                 href={paper.href}
                 target="_blank"
@@ -230,11 +286,11 @@ function PublicationRow({
             {/* The citation. Authors first, then where it ran — the order a
                 reader scans in when they're checking whether they know the
                 work or the people. */}
-            <p className="font-sans text-small text-fg-muted leading-[1.6] m-0 mt-3">
+            <p className="order-3 font-sans text-small text-fg-muted leading-[1.6] m-0 mt-3">
               {paper.authors.join(", ")}
             </p>
 
-            <p className="font-mono text-[12px] uppercase tracking-[0.12em] text-fg m-0 mt-2">
+            <p className="order-4 font-mono text-[12px] uppercase tracking-[0.12em] text-fg m-0 mt-2">
               {paper.venue}
               {paper.venueDetail && (
                 <span className="block normal-case tracking-[0.04em] text-fg-subtle mt-1">
@@ -246,7 +302,14 @@ function PublicationRow({
             <p
               id={abstractId}
               className={
-                "font-sans text-small text-fg-muted leading-[1.7] m-0 mt-4 " +
+                // 16px on a phone, the site's `small` 14px from `sm` up. This
+                // is the longest prose on the page and, stacked, it is the
+                // card's main reading content — 14px academic prose in a 294px
+                // column is under the readable floor for body text on mobile.
+                // From `sm` it goes back to the shared scale, where it sits in
+                // a wide column beside the preview and matches every other
+                // secondary paragraph on the site.
+                "order-5 font-sans text-body sm:text-small text-fg-muted leading-[1.7] m-0 mt-4 " +
                 (expanded ? "" : "line-clamp-4")
               }
             >
@@ -259,7 +322,15 @@ function PublicationRow({
               aria-expanded={expanded}
               aria-controls={abstractId}
               className={
-                "mt-3 cursor-pointer bg-transparent border-0 p-0 " +
+                // `self-start` because this is now a flex child: left to
+                // stretch it would span the card and centre its own label,
+                // which reads as a full-width bar rather than a text link.
+                "order-6 self-start mt-3 cursor-pointer bg-transparent border-0 p-0 " +
+                // A 12px line of text is a ~16px tap target. The vertical
+                // padding brings it to the 44px floor without moving the text,
+                // since the negative margin gives the space straight back to
+                // the layout.
+                "py-3 -my-1 " +
                 "font-mono text-[12px] uppercase tracking-[0.12em] text-[var(--sky)] " +
                 "hover:underline underline-offset-4 transition-colors duration-[150ms]"
               }

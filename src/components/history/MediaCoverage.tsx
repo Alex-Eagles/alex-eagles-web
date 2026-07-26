@@ -52,7 +52,11 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import ScrubbedText from "@/components/ui/ScrubbedText";
 import { fadeUp, staggerParent, viewportOnce } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { mediaCoverage } from "@/data/mediaCoverage";
+import {
+  mediaCoverage,
+  thumbnailSrcSet,
+  THUMBNAIL_SIZES,
+} from "@/data/mediaCoverage";
 import type { CoverageItem } from "@/data/mediaCoverage";
 
 /** The caption under each tile's logo, and what the link promises. */
@@ -85,8 +89,13 @@ export default function MediaCoverage() {
   // never leave a heading standing over a blank grid.
   if (mediaCoverage.length === 0) return null;
 
+  // No background of its own. The History page bands the whole scroll and this
+  // section sits in one of them (see the band notes in History.tsx) — a
+  // `bg-surface` here would paint over the seam that fades the previous chapter
+  // into this one, and would silently break the alternation if the section were
+  // ever moved.
   return (
-    <section id="media-coverage" className="relative bg-surface px-6 py-32 md:py-48">
+    <section id="media-coverage" className="relative px-6 py-32 md:py-48">
       <div className="mx-auto" style={{ maxWidth: "var(--maxw-content)" }}>
         <motion.div
           variants={reduced ? undefined : fadeUp}
@@ -118,9 +127,10 @@ export default function MediaCoverage() {
             depth. It also means the light theme has an actual object on the
             page instead of white cards on a white background.
 
-            `bg-elevated` is a real step up from the section's `bg-surface` in
-            both themes (#161a50 on #0d1035 dark, #eceeff on #ffffff light), so
-            the panel is legible as a surface before its shadow does any work. */}
+            `bg-elevated` is a real step up from the lifted band this section
+            sits in, in both themes (#161a50 on #0d1035 dark, #eceeff on #ffffff
+            light), so the panel is legible as a surface before its shadow does
+            any work. */}
         <div
           className={
             "mt-12 rounded-2xl border border-border bg-elevated " +
@@ -226,6 +236,12 @@ function CoverageTile({
         <div className="relative aspect-video overflow-hidden">
           <img
             src={item.thumbnail}
+            // The 800px master is the `src` fallback; `srcSet` offers the
+            // smaller cuts and `sizes` tells the browser how wide the tile
+            // really is, without which it assumes 100vw and takes the master
+            // on every device — see mediaCoverage.ts.
+            srcSet={thumbnailSrcSet(item.thumbnail)}
+            sizes={THUMBNAIL_SIZES}
             // Describes the still itself. The link's own label (above) covers
             // where it goes, so this doesn't repeat it.
             alt={`Still from the ${item.outlet} ${KIND_LABELS[

@@ -64,6 +64,14 @@ export interface VehiclePlacement {
   groundOffset: number;
 }
 
+/** One photo frame standing at a stop. */
+export interface FramePlacement {
+  /** World position of the frame's centre. */
+  position: Vector3;
+  /** The photo to draw in it. */
+  portrait: string;
+}
+
 /** One flag pole standing at a stop. */
 export interface PolePlacement {
   /** World position of the pole's foot. */
@@ -102,9 +110,24 @@ export interface StopPlacement {
    * rather than dropped in at a random angle.
    */
   facing: number;
-  /** How many image frames to show (one per provided photo, min 1). */
-  frameCount: number;
-  /** Centre the frames, poles and label cluster around. */
+  /**
+   * Every photo frame at this stop, already placed.
+   *
+   * Resolved in JourneyScene rather than in StopOverlays, which is where it
+   * used to happen. Two layouts exist now — the frames clustered around a
+   * single pole, and one frame per side for a stop that straddles the path
+   * (`splitCompetitions`) — and a stop's photos, poles and aircraft all have to
+   * agree about which one is in force. Deciding it in the file that already
+   * places the poles and the aircraft is what makes that agreement structural
+   * instead of two files independently reaching the same conclusion.
+   */
+  frames: FramePlacement[];
+  /**
+   * Where the label, and the cluster generally, is centred. On a split stop
+   * this is the FIRST pole's side — the label is pulled back toward the path by
+   * `labelPull` anyway (see fitScene), so on a narrow screen it lands near the
+   * middle either way.
+   */
   poleBase: Vector3;
   /** One pole per distinct competition. 1 or 2 in the current data. */
   poles: PolePlacement[];
@@ -131,6 +154,16 @@ interface StopPropsProps {
    * on the pale floor reads as a smudge. See SHADOW.poleShadowsInLight.
    */
   showPoleShadows: boolean;
+  /**
+   * How much the screen shrank this stop by (see fitScene). The poles are the
+   * only part of a stop drawn as real geometry rather than as a DOM overlay, so
+   * they have to be scaled here by hand — everything else gets it for free from
+   * its `<Html>` scale.
+   *
+   * Height AND radius, both: scaling only the height leaves a stubby phone
+   * screen with poles as thick as a full-size one, which reads as scaffolding.
+   */
+  stopScale: number;
 }
 
 export default function StopProps({
@@ -141,7 +174,10 @@ export default function StopProps({
   palette,
   shadowOpacity,
   showPoleShadows,
+  stopScale,
 }: StopPropsProps) {
+  const poleHeight = STOP.poleHeight * stopScale;
+  const poleRadius = STOP.poleRadius * stopScale;
   const invalidate = useThree((state) => state.invalidate);
   const polesRef = useRef<InstancedMesh>(null);
   const shadowsRef = useRef<InstancedMesh>(null);
@@ -161,7 +197,7 @@ export default function StopProps({
       // handed in via stop.poles — one pole per distinct competition. Render a
       // cylinder and a shadow at each.
       stop.poles.forEach((pole) => {
-        dummy.position.set(pole.base.x, STOP.poleHeight / 2, pole.base.z);
+        dummy.position.set(pole.base.x, poleHeight / 2, pole.base.z);
         dummy.rotation.set(0, 0, 0);
         dummy.scale.set(1, 1, 1);
         dummy.updateMatrix();
@@ -170,7 +206,7 @@ export default function StopProps({
         // Blob shadow beneath the pole.
         dummy.position.set(pole.base.x, 0.02, pole.base.z);
         dummy.rotation.set(-Math.PI / 2, 0, 0);
-        dummy.scale.setScalar(0.6);
+        dummy.scale.setScalar(0.6 * stopScale);
         dummy.updateMatrix();
         shadows.push({ matrix: dummy.matrix.toArray(), stopIndex });
       });
@@ -182,7 +218,7 @@ export default function StopProps({
     });
 
     return { poles, shadows };
-  }, [stops]);
+  }, [stops, poleHeight, stopScale]);
 
   /**
    * Push the baked matrices into the instanced meshes.
@@ -302,7 +338,7 @@ export default function StopProps({
         frustumCulled={false}
       >
         <cylinderGeometry
-          args={[STOP.poleRadius, STOP.poleRadius, STOP.poleHeight, 6]}
+          args={[poleRadius, poleRadius, poleHeight, 6]}
         />
         <meshLambertMaterial toneMapped={false} />
       </instancedMesh>

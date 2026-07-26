@@ -68,7 +68,7 @@ export type ScenePalette = { [K in keyof typeof PALETTE]: number };
  * Values come from the light-mode design tokens (the light column of the brand
  * colour-usage map / `theme.css`), so the 3D backdrop matches the rest of the
  * page in light mode:
- *   background  → --bg-primary  (#f7f8ff)  keeps the seam with the page invisible
+ *   background  → --band-deep   (#f0f2fb)  keeps the seam with the page invisible
  *   ground      → --bg-tertiary (#e8e8f9)  a touch deeper, so it reads as surface
  *   dotIdle     → --border-default (#d0d0ed) faint grid on the pale floor
  *   pathIdle    → --border-strong  (#b0b0d8) dim path, a shade more defined
@@ -111,7 +111,13 @@ export type ScenePalette = { [K in keyof typeof PALETTE]: number };
  * colour you feed it — see `glowStyle` below.
  */
 const PALETTE_LIGHT_OVERRIDES = {
-  background: 0xf7f8ff,
+  /* Mirrors --band-deep in the light block of theme.css, NOT --bg-primary.
+   * The journey is pinned inside the History page's first background band, and
+   * on desktop the canvas is inset below the navbar — so a strip of that band
+   * is visible above the scene at all times. The two have to be the same
+   * colour or there is a hairline seam across the top of the whole journey.
+   * Change one, change the other. */
+  background: 0xf0f2fb,
   ground: 0xe8e8f9,
   dotIdle: 0xd0d0ed,
   pathIdle: 0xb0b0d8,
@@ -395,15 +401,134 @@ export const CAMERA = {
    * constantly and threw away the entire effect.
    */
   bankScale: 0.0009,
-  /** Field of view. Narrower on phones so stops still read on a small screen. */
-  fov: 42,
-  fovMobile: 55,
+  /**
+   * Field of view is no longer a constant — it is solved for, per screen, by
+   * `fitScene` in journeyCurve.ts. See FIT below.
+   *
+   * This used to be a pair, `fov: 42` and `fovMobile: 55`, chosen by a
+   * `innerWidth < 768` boolean. Both halves of that were wrong on a phone.
+   *
+   * three.js FOV is VERTICAL, and what a stop needs is HORIZONTAL room — so the
+   * field you actually get depends on the aspect ratio, which a boolean cannot
+   * see. On a 1920x796 desktop canvas, fov 42 gives a 79° horizontal field. On
+   * a 390x740 phone, fov 55 gives 30°. The phone was handed a THIRD of the
+   * horizontal field while being asked to show exactly the same stop, and a
+   * stop reaches nearly 20 world units to the side of the path. The pole, the
+   * flag and every photo but the innermost were simply off-screen.
+   */
   /**
    * Below this speed (units/sec) the camera stops banking. Without it, the
    * light creeping at near-zero speed produces jittery micro-rolls.
    */
   bankSpeedFloor: 0.6,
 } as const;
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  ADAPTIVE FIT — how a stop is made to fit the screen it is being shown on.
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Solved once per screen size by `fitScene` in journeyCurve.ts, which returns
+ * three numbers: a field of view, a scale for the whole stop cluster, and how
+ * many photos a stop may show. The dials here are the inputs.
+ *
+ * ─── WHY IT IS SOLVED AND NOT LISTED ────────────────────────────────────────
+ * The thing that has to be true is one inequality: the stop's outermost edge
+ * has to land inside the horizontal field of view at the distance the camera
+ * watches it from. Every screen shape satisfies that differently, and phones,
+ * tablets, split-screen windows, landscape phones and foldables are a
+ * continuum, not two cases. A breakpoint list would be a set of guesses at
+ * points on that continuum; the inequality is the thing itself.
+ *
+ * ─── THE THREE LEVERS, IN THE ORDER THEY ARE PULLED ─────────────────────────
+ *   1. PHOTO COUNT. A three-photo stop is nearly twice as wide as a one-photo
+ *      stop, and it is the cheapest thing to give up: every award is still
+ *      listed, in full, in the label above the pole and again in the written
+ *      timeline below the journey. Only the extra pictures go.
+ *   2. FIELD OF VIEW, up to `fovMax`. Free — it costs no content and no
+ *      fidelity. It is capped because past about 60° a portrait phone starts
+ *      visibly fisheyeing the ground plane, which looks worse than a tight
+ *      framing does.
+ *   3. STOP SCALE, last. Shrinking the cluster is the only lever that makes
+ *      things smaller on screen, so it is what absorbs whatever the first two
+ *      could not, and never more than that.
+ *
+ * On a wide screen levers 2 and 3 do nothing at all: the fit resolves to
+ * exactly `fov 42, stopScale 1, 3 photos`, which is what this scene was tuned
+ * to by eye. Desktop cannot drift.
+ */
+export const FIT = {
+  /**
+   * The narrowest field of view — the tuned desktop value. The fit never goes
+   * BELOW this, only above: it is allowed to widen the view to fit a stop in,
+   * never to narrow it past the composition the scene was designed at.
+   */
+  fovMin: 42,
+  /**
+   * The widest. Past roughly 60° a tall portrait viewport starts stretching the
+   * ground plane at the edges of frame badly enough to notice, and the banking
+   * — the whole point of the chase camera — starts reading as warping instead
+   * of rolling.
+   */
+  fovMax: 60,
+  /**
+   * Roughly how far the camera is from the stop it is looking at, in world
+   * units. `followDistance` (20) is the along-path part; the stop also sits off
+   * to one side, so the true distance is a little more.
+   *
+   * It is a constant rather than a per-stop measurement because the fit has to
+   * be decided ONCE, before the curve is walked — a field of view that changed
+   * per stop would be a zoom lens nobody asked for.
+   */
+  viewDistance: 24,
+  /**
+   * Fraction of the half-field a stop is allowed to fill. The remainder is
+   * margin for the fact that the camera is CHASING the light rather than
+   * parked on it, so a stop is rarely perfectly centred when you read it.
+   */
+  safeArea: 0.95,
+  /**
+   * How small a stop may be shrunk. A floor, because past a point the photos
+   * stop being photographs and become coloured rectangles — at which point a
+   * tighter framing would have been the better trade after all.
+   */
+  minStopScale: 0.45,
+  /**
+   * Aspect ratios at or below which a stop drops to two photos, then one.
+   *
+   * Aspect, not width: a 1024px-wide phone in landscape has far more room for a
+   * stop than a 1024px-tall tablet in portrait, and a width breakpoint cannot
+   * tell them apart.
+   */
+  twoPhotoAspect: 1.5,
+  onePhotoAspect: 0.95,
+} as const;
+
+/** What `fitScene` resolves to for a given screen. */
+export interface SceneFit {
+  /** Vertical field of view, in degrees. */
+  fov: number;
+  /**
+   * Multiplier on every lateral distance AND every overlay's world size at a
+   * stop. One number for both, so a shrunk stop is the same object seen
+   * smaller rather than a differently-proportioned one — halve the spacing but
+   * not the photos and they overlap.
+   */
+  stopScale: number;
+  /** Most photos any one stop will draw. */
+  maxFrames: number;
+  /**
+   * How far along the pole's own lateral offset the floating label sits, 0
+   * (over the path) to 1 (over the pole).
+   *
+   * The label is drawn in SCREEN space, not world space, so it does not shrink
+   * with `stopScale` — which is correct, because it is the text and it has to
+   * stay readable. But that means a label centred over a pole near the edge of
+   * a narrow screen hangs off it. Pulling its anchor back toward the path
+   * centres the words without touching their size.
+   */
+  labelPull: number;
+}
 
 /** Travelling light + its glow. */
 export const LIGHT = {
@@ -514,7 +639,50 @@ export const FRAME = {
   height: 3.3,
   /** Minimum distance any frame must keep from the path. */
   minPathClearance: 3.6,
+  /**
+   * How wide a frame actually is in WORLD units. Derived, not chosen — see
+   * PX_PER_WORLD_UNIT: the frame markup is 150 CSS px wide, so
+   * 150 / 25 = 6.0 world units at OVERLAY_SCALE.
+   *
+   * Nothing positions anything with this; the fit maths uses it to know where a
+   * stop's outer EDGE is, which is the difference between a frame that touches
+   * the edge of the screen and one that hangs off it. Keep it in step with the
+   * `w-[150px]` in StopOverlays.
+   */
+  worldWidth: 6.0,
 } as const;
+
+/**
+ * How wide a flag's cloth is in world units — 64 CSS px / 25. Same derivation
+ * and same purpose as FRAME.worldWidth: a flag streams OUTWARD from its pole,
+ * so on a stop with one photo it, not the photo, is the rightmost thing there.
+ */
+export const FLAG_WORLD_WIDTH = 2.56;
+
+/**
+ * CSS pixels per world unit for a drei `<Html transform>` overlay.
+ *
+ * Not a dial — it is drei's own constant, and writing it down is the only way
+ * the fit maths can reason about how big an overlay is in the world. drei maps
+ * a transformed element at `(distanceFactor || 10) / 400` world units per CSS
+ * pixel, i.e. 1/40, and every overlay here is additionally scaled by
+ * OVERLAY_SCALE — so 40 / 1.6 = 25 CSS px per world unit.
+ *
+ * If drei changes that ratio, or OVERLAY_SCALE changes, the derived widths
+ * above go stale and stops will be mis-fitted on small screens. There is no way
+ * to measure it at runtime without reading back layout every frame.
+ */
+export const PX_PER_WORLD_UNIT = 25;
+
+/**
+ * The scale every `<Html transform>` overlay is rendered at — frames, flags and
+ * aircraft alike, so they all share one depth and one pixel density.
+ *
+ * The adaptive fit multiplies this by `stopScale` (see fitScene), which is what
+ * shrinks a whole stop to fit a narrow screen without any of its parts drifting
+ * out of proportion with the others.
+ */
+export const OVERLAY_SCALE = 1.6;
 
 /**
  * The team's aircraft, PARKED ON THE GROUND at the stop.

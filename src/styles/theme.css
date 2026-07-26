@@ -110,6 +110,65 @@
 
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
+
+  /* ------------------------------------------------------------------------
+   * SUB-TEAM ACCENT COLORS
+   * One accent per sub-team, tuned to read on the dark team cards. Change a
+   * hue here, once, and every section heading + card badge for that sub-team
+   * updates. Slug must match slugify(subTeamName): "Tail & Stability" →
+   * `--team-tail-stability`, "Computer Vision" → `--team-computer-vision`.
+   *
+   * ⚠ MERGE NOTE: this block is a verbatim copy of the one on the team-page
+   * branch, names and values identical, so the two reconcile without anyone
+   * having to decide which palette wins. If you edit a hue, edit it there too
+   * — or the History page and the Team page will disagree about what colour a
+   * discipline is, which is the one thing an accent palette exists to prevent.
+   *
+   * ⚠ THEME-INDEPENDENT, AND THEREFORE NOT SAFE AS TEXT. These are pastels
+   * picked against a dark card: on the light theme they land around 2.1:1 on
+   * white, well under half the AA floor. Use them as FILLS — a dot, a bar, a
+   * solid chip with --ink-on-accent on top — never as a text colour. See the
+   * publication tags for the chip pattern.
+   * --------------------------------------------------------------------- */
+  --team-management: #3d3ecc; /* brand blue (accent)    */
+  --team-aerodesign: #85b7eb; /* sky blue               */
+  --team-wing: #6ad1d8; /* cyan                   */
+  --team-tail-stability: #f0a07a; /* coral                  */
+  --team-structure: #c2c0b4; /* warm gray              */
+  --team-propulsion: #97c459; /* green                  */
+  --team-software: #5dcaa5; /* teal                   */
+  --team-hardware: #f0b24a; /* gold                   */
+  --team-computer-vision: #ed93b1; /* pink                   */
+  --team-ai: #ed93b1; /* pink — same discipline as Computer Vision */
+  --team-firmware: #afa9ec; /* lavender               */
+
+  /* The ink that goes ON one of those accents.
+   *
+   * Fixed in both themes, which is the whole point: the chip underneath it is
+   * the same pastel in dark and light, so its label cannot follow
+   * --text-primary — that would turn near-white in dark mode and put pale text
+   * on a pale chip. This is the light theme's ink, used unconditionally.
+   *
+   * Measured against every accent above: 8.3:1 on Computer Vision's pink,
+   * 8.8:1 on Aerodesign's blue, and 8.5–10.3:1 on the rest.
+   *
+   * ⚠ ONE EXCEPTION. --team-management (#3d3ecc) is a saturated brand blue,
+   * not a pastel like the other ten, and dark ink on it measures 2.43:1 — a
+   * clear fail. A Management chip needs WHITE ink instead. Nothing uses one
+   * today; this is here so that whoever adds the first one does not have to
+   * rediscover it. */
+  --ink-on-accent: #0d1030;
+
+  /* ── Chapter-band seam height ─────────────────────────────────────────────
+   * How tall the crossfade is where one background band meets the next (see
+   * the --band-deep / --band-lift pair in the colour blocks, and .ae-band in
+   * global.css).
+   *
+   * It scales with the viewport because the thing it has to look right against
+   * is the section padding either side of it (py-32 → py-48, itself fluid). A
+   * fixed 120px seam that reads as a soft dissolve on a laptop reads as a hard
+   * line under a 48-unit gutter on a 4K display. */
+  --band-seam: clamp(96px, 11vw, 176px);
 }
 
 /* ----------------------------------------------------------------------------
@@ -124,6 +183,24 @@
   --bg-glass: rgba(22, 26, 80, 0.6); /* glassmorphic overlays (navbar etc.) */
   --canvas: #0d1035; /* alias: section canvas behind cards   */
   --card: #161a50; /* the card surface itself             */
+
+  /* ── Chapter bands ────────────────────────────────────────────────────────
+   * The two — and only two — background tones a long page alternates between
+   * so consecutive sections read as separate chapters. Used by .ae-band in
+   * global.css; the History page is what composes them.
+   *
+   * These are deliberately the SAME values as --bg-primary / --bg-surface
+   * above, not new colours: dark mode already had a legible alternation and
+   * this refactor must not move a single pixel of it. They exist as their own
+   * names because LIGHT mode needs a different step size (see the light block)
+   * and because a band is a page-composition decision, not a surface level —
+   * a section on --band-lift still puts --card and --bg-elevated on top of it.
+   *
+   * The step between them is ~1.07:1 in luminance, or ΔL* ≈ 3.5. That is the
+   * number the light pair is tuned against, so the two themes alternate with
+   * the same perceived strength rather than one shouting and one whispering. */
+  --band-deep: #07091c;
+  --band-lift: #0d1035;
 
   /* Brand + accents */
   --brand: #3c40b5; /* Alex Eagles royal indigo            */
@@ -208,6 +285,35 @@
   --bg-glass: rgba(255, 255, 255, 0.75);
   --canvas: #eceeff; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
+
+  /* ── Chapter bands (LIGHT) ────────────────────────────────────────────────
+   * The light theme was already alternating in the right DIRECTION — the
+   * deeper tone first, the lifted one second, exactly as dark does — but at
+   * --bg-primary #f7f8ff against --bg-surface #ffffff the step was ΔL* ≈ 2.4
+   * with essentially no chroma difference. On a screen that is not a rhythm,
+   * it is one flat white sheet, which is why the page read as unbanded in
+   * light mode while the identical structure read clearly in dark.
+   *
+   * #f0f2fb restores the step: ΔL* ≈ 4.4 against white, so it lands just past
+   * the dark theme's own 3.5 — near-white bands need slightly more separation
+   * than near-black ones because there is no glow or halo helping the eye — and
+   * it carries a real indigo tint, which is the second cue dark mode gets for
+   * free from --bg-surface being the more saturated of its pair.
+   *
+   * ⚠ This is the DARKEST surface the light theme puts body copy on, so it is
+   * the binding constraint for every muted text token. Verified at this value:
+   *   --text-muted     #6366a8 → 4.70:1  (AA, with margin)
+   *   --text-secondary #3b3f7a → 9.6:1
+   *   --sky            #1d4ed8 → 6.0:1
+   *   --gold           #b45309 → 5.2:1
+   * Push --band-deep any darker and --text-muted is the first thing to fail —
+   * it is already the tightest of the four. Re-measure before you do.
+   *
+   * NB: PALETTE_LIGHT_OVERRIDES.background in sceneConfig.ts mirrors this
+   * value, so the 3D canvas and the band it sits in have no visible seam.
+   * Change one, change the other. */
+  --band-deep: #f0f2fb;
+  --band-lift: #ffffff;
 
   --brand: #3c40b5; /* brand indigo stays constant          */
   --brand-light: #2b2f9e; /* darker on hover against light bg     */

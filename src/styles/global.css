@@ -225,6 +225,80 @@
   }
 
   /* ------------------------------------------------------------------------
+   * CHAPTER BANDS
+   *
+   * A long page alternates its background between exactly TWO tones so that
+   * consecutive sections read as separate chapters rather than one endless
+   * scroll. Wrap each run of sections in `.ae-band .ae-band--deep` or
+   * `.ae-band .ae-band--lift` and alternate; the tones themselves are
+   * --band-deep / --band-lift in theme.css, one pair per theme.
+   *
+   * ─── THE SEAM IS A CROSSFADE, NOT A CUT ─────────────────────────────────
+   * Each band paints its own tone flat, then lays ONE two-stop gradient over
+   * its top edge that starts in the OTHER tone and resolves into its own over
+   * --band-seam. Because the band above is flat in exactly that other tone at
+   * the point they meet, the join is continuous — the eye reads a dissolve
+   * between chapters instead of a hard rule across the page.
+   *
+   * Two colours, two stops, no third tone anywhere: a gradient that wanders
+   * through an intermediate hue is precisely what makes a banded page look
+   * muddy at the joins, and it is the failure this shape is chosen to avoid.
+   *
+   * ─── WHY A BACKGROUND LAYER AND NOT A ::before ──────────────────────────
+   * An absolutely-positioned pseudo-element would paint in the positioned
+   * layer, i.e. potentially OVER the section content, and would need a z-index
+   * contract with every child to stay behind it. Backgrounds paint behind
+   * content unconditionally. It also keeps the band element free of
+   * `transform`, `filter`, `contain` and `overflow`, ANY of which would create
+   * a containing block and break the `position: sticky` pin that the History
+   * page's 3D journey depends on. Do not add them here.
+   * ----------------------------------------------------------------------*/
+  .ae-band {
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: 100% var(--band-seam);
+    /* Matches the body's own theme crossfade so a band and the page behind it
+     * swap together rather than a beat apart. */
+    transition: background-color var(--transition-slow);
+  }
+
+  .ae-band--deep {
+    background-color: var(--band-deep);
+    background-image: linear-gradient(
+      to bottom,
+      var(--band-lift),
+      var(--band-deep)
+    );
+  }
+
+  .ae-band--lift {
+    background-color: var(--band-lift);
+    background-image: linear-gradient(
+      to bottom,
+      var(--band-deep),
+      var(--band-lift)
+    );
+  }
+
+  /* The FIRST band on a page has no band above it to fade from — only the
+   * navbar and the top of the document. Fading in from the opposite tone there
+   * would hang an unexplained stripe under the site chrome. */
+  .ae-band--flush {
+    background-image: none;
+  }
+
+  /* Sections on this site render nothing when their data file is empty, which
+   * leaves their band wrapper childless. A childless band still has a seam
+   * gradient, and a seam with no chapter under it is a stray stripe across the
+   * page — so it removes itself, and the two chapters either side of the gap
+   * simply run together as one. Declarative on purpose: the page composing the
+   * bands does not have to import and re-check every section's data to know
+   * whether that section decided to exist. */
+  .ae-band:empty {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------------------
    * History jump-list rows (see JourneyProgressRail).
    *
    * These are CSS rather than inline styles because :hover and [data-active]

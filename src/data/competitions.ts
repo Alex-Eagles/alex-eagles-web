@@ -48,6 +48,15 @@ import type { Award, Competition } from "@/data/achievements";
 export interface CompetitionProfile {
   /** Expanded name, where the short name is an acronym. */
   fullName?: string;
+  /**
+   * The competition's own site. Optional: a competition without one still
+   * renders in full, its name simply isn't a link.
+   *
+   * These are the organisers' pages, not ours, so they can move or go dark
+   * without anything here noticing. If one starts 404ing, delete the line —
+   * the row keeps working.
+   */
+  href?: string;
   /** One or two sentences on what the competition involves. */
   blurb: string;
   /**
@@ -77,6 +86,7 @@ export interface CompetitionProfile {
 export const PROFILES: Record<Competition, CompetitionProfile> = {
   "SAE Aero Design": {
     fullName: "SAE International — Aero Design",
+    href: "https://www.sae.org/events/student/about/aero-design",
     blurb:
       "An esteemed international aerospace engineering event, conducted under the supervision of Lockheed Martin Co., challenges aspiring students to design and construct cutting-edge aircraft.",
     bannerDark: "/competitions/sae-dark.webp",
@@ -84,6 +94,7 @@ export const PROFILES: Record<Competition, CompetitionProfile> = {
   },
   UAVC: {
     fullName: "Unmanned Aerial Vehicle Challenge",
+    href: "https://uavc.conferences.ekb.eg/",
     blurb:
       "This competition immerses student teams in the domain of unmanned aerial systems (UAS) or drones. Teams engage in the intricate process of designing, constructing, and operating autonomous aerial vehicles for competitive missions.",
     bannerDark: "/competitions/uavc-dark.webp",
@@ -91,6 +102,7 @@ export const PROFILES: Record<Competition, CompetitionProfile> = {
   },
   SUAS: {
     fullName: "Student Unmanned Aerial Systems",
+    href: "https://suas-competition.org/competitions/",
     blurb:
       "An arena for student teams in unmanned aerial systems (UAS) or drones, this competition involves designing, building, and operating autonomous aerial vehicles for diverse and challenging missions.",
     bannerDark: "/competitions/suas-dark.webp",

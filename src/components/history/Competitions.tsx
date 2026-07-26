@@ -28,6 +28,7 @@
 
 import { motion } from "framer-motion";
 import { useMemo } from "react";
+import { ArrowUpRight } from "lucide-react";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ScrubbedText from "@/components/ui/ScrubbedText";
 import { fadeUp, staggerParent, viewportOnce } from "@/lib/motion";
@@ -45,8 +46,10 @@ export default function Competitions() {
 
   if (entries.length === 0) return null;
 
+  // No background of its own — the History page bands the scroll and this
+  // section sits in one of them. See the band notes in History.tsx.
   return (
-    <section id="competitions" className="relative bg-surface px-6 py-32 md:py-48">
+    <section id="competitions" className="relative px-6 py-32 md:py-48">
       <div className="mx-auto" style={{ maxWidth: "var(--maxw-content)" }}>
         <motion.div
           variants={reduced ? undefined : fadeUp}
@@ -112,9 +115,13 @@ function CompetitionRow({
   return (
     <motion.li variants={reduced ? undefined : fadeUp}>
       {/* Same surface vocabulary as the publication rows — border, --card, the
-          card shadow pair — so the page's cards stay one family. There's no
-          hover lift here because, unlike a paper, a competition has nowhere to
-          click through to: we have no URL for these we can vouch for. */}
+          card shadow pair — so the page's cards stay one family.
+
+          Still no hover lift, even though the heading is now a link to the
+          organisers' site. A publication row lifts because the row IS the
+          paper — title and preview both go to the same place. Here the link is
+          one line of a card that is mostly the team's own record, so lifting
+          the whole thing would promise that anywhere on it is clickable. */}
       <div
         className={
           "group rounded-xl border border-border bg-[var(--card)] " +
@@ -133,10 +140,11 @@ function CompetitionRow({
               the image while IT held the radius would square off its corners
               mid-animation.
 
-              A slow push-in and nothing else — no lift. The row has nowhere to
-              click through to (we have no URL for these worth vouching for),
-              and a card that rises to meet the pointer is a promise of
-              navigation it can't keep. */}
+              A slow push-in and nothing else — no lift, and deliberately not a
+              link either. The banner is the competition's branding, so making
+              it clickable would read as the obvious way off to their site and
+              quietly duplicate the heading's link for every pointer user while
+              adding a second stop to the tab order for the same URL. */}
           <div
             className={
               "shrink-0 w-full md:w-[38%] lg:w-[380px] overflow-hidden " +
@@ -160,8 +168,51 @@ function CompetitionRow({
           </div>
 
           <div className="min-w-0 flex-1">
+            {/* ── The name, and the only link on the row ──────────────────
+                The heading carries it, not the card and not the banner. A
+                whole-card link would put the organisers' site behind the
+                blurb and behind the record strip, which are OUR text about
+                OUR results — clicking either to be sent off-site is not what
+                they promise.
+
+                The arrow is there so the link is visible as one WITHOUT
+                hovering. A colour change on hover is no affordance at all on a
+                phone, which is where this section is most read, and this is
+                the same mark the publication rows use for the same job. */}
             <h3 className="font-display font-bold text-h4 md:text-h3 text-fg leading-[1.15] m-0">
-              {entry.name}
+              {entry.href ? (
+                <a
+                  href={entry.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  // The visible text is an acronym on two of the three rows.
+                  // This is where a screen reader gets the expansion and the
+                  // warning that the link leaves the site.
+                  aria-label={`${entry.fullName ?? entry.name} — official website (opens in a new tab)`}
+                  className={
+                    "inline-flex items-baseline gap-1.5 no-underline text-fg " +
+                    "hover:text-[var(--sky)] focus-visible:text-[var(--sky)] " +
+                    "transition-colors duration-[220ms] [transition-timing-function:var(--ease-out-strong)]"
+                  }
+                >
+                  {entry.name}
+                  <ArrowUpRight
+                    size={20}
+                    aria-hidden="true"
+                    className={
+                      // `self-center`, because an icon aligned to a text
+                      // BASELINE sits low against a 33px display face — the
+                      // arrow would hang off the bottom of the word.
+                      "self-center shrink-0 opacity-70 " +
+                      "transition-[opacity,transform] duration-[220ms] [transition-timing-function:var(--ease-out-strong)] " +
+                      "group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 " +
+                      "motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0"
+                    }
+                  />
+                </a>
+              ) : (
+                entry.name
+              )}
             </h3>
 
             {entry.fullName && (

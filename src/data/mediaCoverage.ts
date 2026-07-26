@@ -105,6 +105,58 @@ export interface CoverageItem {
   language?: string;
 }
 
+/* ---- responsive stills ---------------------------------------------------- */
+
+/**
+ * The widths each still is ALSO published at, beside its 800px master.
+ *
+ * MUST match WIDTHS in `art-source/press/responsive.py`, which is what actually
+ * writes the files. Add a width in one place only and the srcset below will
+ * advertise a file that 404s.
+ *
+ * ─── WHY THESE TWO ──────────────────────────────────────────────────────────
+ * A tile is drawn at roughly 300px wide on a phone and 355px at the widest
+ * desktop layout. So the useful sizes are about 355 (a DPR 1 screen), 610-710
+ * (DPR 2, the overwhelming majority of phones) and 800+ (DPR 3). 400 and 640
+ * cover the first two; the master covers the third.
+ *
+ * Every device was being sent the 800px master — around 1.3x more pixels than a
+ * DPR 2 phone can display and more than double what a DPR 1 screen can, six
+ * times over.
+ */
+const RESPONSIVE_WIDTHS = [400, 640] as const;
+
+/**
+ * Build a `srcset` for a still from its master's path, by convention:
+ * `/press/cbc-interview.webp` also exists as `-400` and `-640`.
+ *
+ * Derived rather than listed per item on purpose. Written out in the data, the
+ * three paths for six stills would be eighteen strings to keep in step with a
+ * script's output by hand, and the failure mode of getting one wrong is a
+ * broken image that only appears at one screen width on one device.
+ *
+ * The master is included at its true width, so a DPR 3 phone still gets it.
+ */
+export function thumbnailSrcSet(thumbnail: string): string {
+  const base = thumbnail.replace(/\.webp$/, "");
+  const smaller = RESPONSIVE_WIDTHS.map(
+    (width) => `${base}-${width}.webp ${width}w`,
+  );
+  return [...smaller, `${thumbnail} 800w`].join(", ");
+}
+
+/**
+ * How wide a tile actually is, so the browser can pick a width instead of
+ * assuming the image fills the viewport.
+ *
+ * Without this the default is `100vw` and every phone takes the 800px master —
+ * i.e. the srcset above would buy nothing at all. The values track the grid in
+ * MediaCoverage: three columns inside a 1180px shell at lg, two from sm, one
+ * below that, minus the section's padding and the panel's.
+ */
+export const THUMBNAIL_SIZES =
+  "(min-width: 1024px) 355px, (min-width: 640px) 46vw, calc(100vw - 88px)";
+
 /**
  * Every appearance, in the order shown.
  *

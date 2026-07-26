@@ -41,8 +41,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import { FRAME, LABEL, STOP, VEHICLE, overlayStyle } from "./sceneConfig";
-import { frameSlots, stopIntensity } from "./journeyCurve";
+import {
+  FRAME,
+  LABEL,
+  OVERLAY_SCALE,
+  STOP,
+  overlayStyle,
+  type SceneFit,
+} from "./sceneConfig";
+import { stopIntensity } from "./journeyCurve";
 import type { StopPlacement } from "./StopProps";
 import type { Achievement } from "@/data/achievements";
 
@@ -99,6 +106,8 @@ interface StopOverlaysProps {
   pathLength: number;
   /** Active theme — selects which grade of each aircraft render to show. */
   isDark: boolean;
+  /** The screen's solved framing — see fitScene. */
+  fit: SceneFit;
 }
 
 export default function StopOverlays({
@@ -107,6 +116,7 @@ export default function StopOverlays({
   uRef,
   pathLength,
   isDark,
+  fit,
 }: StopOverlaysProps) {
   // Which stops are currently mounted. Changes a handful of times per journey.
   const [visible, setVisible] = useState<number[]>([0, 1]);
@@ -166,6 +176,7 @@ export default function StopOverlays({
             stop={stop}
             achievement={achievement}
             isDark={isDark}
+            fit={fit}
             registerNodes={(nodes) => {
               if (nodes) nodesRef.current.set(index, nodes);
               else nodesRef.current.delete(index);
@@ -183,6 +194,7 @@ interface StopOverlayProps {
   achievement: Achievement;
   registerNodes: (nodes: HTMLElement[] | null) => void;
   isDark: boolean;
+  fit: SceneFit;
 }
 
 function StopOverlay({
@@ -191,7 +203,19 @@ function StopOverlay({
   achievement,
   registerNodes,
   isDark,
+  fit,
 }: StopOverlayProps) {
+  /**
+   * The scale every element on this stop is drawn at.
+   *
+   * One number for all of them, and the SAME number the stop's positions were
+   * scaled by in JourneyScene. That is the whole trick: shrink the spacing
+   * without shrinking the photos and they overlap; shrink the photos without
+   * the spacing and the stop develops gaps. Scaling both by one factor makes a
+   * narrow-screen stop the identical object, seen smaller.
+   */
+  const overlayScale = OVERLAY_SCALE * fit.stopScale;
+  const poleHeight = STOP.poleHeight * fit.stopScale;
   // Collected fresh each render — the number of frames varies per stop, so a
   // fixed set of refs won't do.
   const collected = useRef<HTMLElement[]>([]);
@@ -213,24 +237,24 @@ function StopOverlay({
     // about where the stop is.
     const poleBase = stop.poleBase;
 
-    // A multi-competition stop with one frame per competition lays its frames
-    // out in SCREEN space (screenRight), matching how its poles are placed, so
-    // portrait[0] sits under competition[0]'s flag on the LEFT and they read
-    // left-to-right in label order. Single-competition stops keep using `right`
-    // so their lone photo still alternates sides down the path.
-    const frameAxis =
-      stop.poles.length > 1 && stop.frameCount > 1 ? stop.screenRight : stop.right;
-    const frames = frameSlots(stop.frameCount).map((slot) => {
-      const position = poleBase
-        .clone()
-        .addScaledVector(frameAxis, slot * FRAME.spacing);
-      return [position.x, FRAME.height, position.z] as [number, number, number];
-    });
+    // Frames arrive already placed. Their lateral positions were resolved in
+    // JourneyScene, where the choice between the clustered and the
+    // straddle-the-path layouts is made — see StopPlacement.frames for why that
+    // decision cannot live in two files. All that is left here is the height,
+    // which is the same for every frame on every stop.
+    const frames = stop.frames.map(
+      (frame) =>
+        [
+          frame.position.x,
+          FRAME.height * fit.stopScale,
+          frame.position.z,
+        ] as [number, number, number],
+    );
 
     // Per-pole flag anchor: right at the pole's TOP. The flag div is
     // top-anchored, so the cloth hangs down from the pole top like a real flag.
     const flags = stop.poles.map((pole) => ({
-      position: [pole.base.x, STOP.poleHeight, pole.base.z] as [
+      position: [pole.base.x, poleHeight, pole.base.z] as [
         number,
         number,
         number,
@@ -239,13 +263,31 @@ function StopOverlay({
       side: pole.side,
     }));
 
+    /**
+     * The label's anchor, pulled back toward the path on narrow screens.
+     *
+     * Everything else on a stop shrinks with `stopScale`; the label does not,
+     * because it is drawn in screen space (`distanceFactor`, not `transform`)
+     * and it is the TEXT — shrinking it to fit would be fitting nothing worth
+     * reading. So it keeps its size and gives up its position instead.
+     *
+     * Left over the pole on a phone, a full-size label centred on something
+     * three-quarters of the way to the edge of frame simply hangs off it.
+     * `labelPull` slides the anchor along the same lateral axis the pole sits
+     * on, from the pole (1, every wide screen) toward the path itself, which
+     * re-centres the words without touching a single font size.
+     */
+    const labelAnchor = stop.anchor
+      .clone()
+      .lerp(poleBase, fit.labelPull);
+
     return {
       // Floats LABEL.heightAbovePole above the pole tops, bottom-anchored so it
       // grows upward and never dips onto the flags. Tune the gap in sceneConfig.
       label: [
-        poleBase.x,
-        STOP.poleHeight + LABEL.heightAbovePole,
-        poleBase.z,
+        labelAnchor.x,
+        poleHeight + LABEL.heightAbovePole * fit.stopScale,
+        labelAnchor.z,
       ] as [number, number, number],
       // The aircraft parked on the ground at this stop. The world positions
       // were resolved in JourneyScene, which is also what StopProps pools each
@@ -269,8 +311,9 @@ function StopOverlay({
     };
     // `achievement` is in here for the aircraft: their positions are read from
     // its `vehicles`, so a stop whose data changed but whose geometry didn't
-    // would otherwise keep stale anchors.
-  }, [stop, achievement]);
+    // would otherwise keep stale anchors. `fit` because a change of screen
+    // shape moves the frames, the flag height and the label anchor.
+  }, [stop, achievement, fit, poleHeight]);
 
   const counter = String(index + 1).padStart(2, "0");
 
@@ -382,7 +425,7 @@ function StopOverlay({
           position={position}
           rotation={facing}
           transform
-          scale={1.6}
+          scale={overlayScale}
           zIndexRange={[9, 0]}
         >
           <div
@@ -400,8 +443,12 @@ function StopOverlay({
                 boxShadow: overlay.frameShadow,
               }}
             >
+              {/* The photo is chosen with the position, in JourneyScene: on a
+                  stop cut down to one frame it is the year's nominated shot,
+                  and on a stop straddling the path it is the one belonging to
+                  the competition standing on that side. */}
               <Portrait
-                src={achievement.portraits[i] ?? ""}
+                src={stop.frames[i]?.portrait ?? ""}
                 year={achievement.year}
               />
             </div>
@@ -458,7 +505,7 @@ function StopOverlay({
           position={anchors.vehicles[i]}
           rotation={facing}
           transform
-          scale={VEHICLE.scale}
+          scale={overlayScale}
           zIndexRange={[9, 0]}
         >
           <img
@@ -525,7 +572,7 @@ function StopOverlay({
             position={flag.position}
             rotation={facing}
             transform
-            scale={1.6}
+            scale={overlayScale}
             zIndexRange={[9, 0]}
           >
             <div

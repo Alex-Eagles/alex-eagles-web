@@ -12,10 +12,25 @@ def defringe(im):
 
 L = np.array([0.299, 0.587, 0.114], dtype=np.float32)
 
-def grade(rgb, sat, gamma, ambient, tint, exposure):
+def grade(rgb, sat, gamma, ambient, tint, exposure, contrast=1.0, pivot=128.0):
+    """`contrast`/`pivot` default to identity, so an aircraft that doesn't ask
+    for them is graded exactly as before.
+
+    They exist because gamma and exposure cannot separate LEVEL from RANGE.
+    Both are monotonic squashes: pulling a too-bright aircraft down with them
+    flattens it in the same motion, and a flat silhouette is precisely what
+    reads as a sticker. Expanding around a pivot lets an aircraft be brought
+    down to the scene's level while keeping — or regaining — its own modelling.
+
+    PIVOT MATTERS. It should sit near the subject's OWN midpoint, not at 128.
+    Taco's median is 165, so pivoting at 128 pushed most of the airframe upward
+    into the ceiling and clipped its highlights flat: p95 and p99 came out
+    identical, which is the signature of blown highlights."""
     lum = rgb @ L
     rgb = lum[..., None] + (rgb - lum[..., None]) * sat
     rgb = 255.0 * np.power(np.clip(rgb, 0, 255) / 255.0, gamma)
+    if contrast != 1.0:
+        rgb = np.clip(pivot + (rgb - pivot) * contrast, 0, 255)
     lum2 = rgb @ L
     w = (np.power(1.0 - lum2 / 255.0, 1.5) * tint)[..., None]
     rgb = rgb * (1.0 - w) + ambient * w
@@ -54,12 +69,46 @@ OVERRIDES = {
     # Pushing exposure on something already this bright only clips the wings
     # to flat white and loses the panel lines.
     ("hotwing", "light"): dict(sat=1.0, gamma=1.0, tint=0.04, exposure=1.0),
+    # Taco is the brightest airframe of the four — bare balsa and white film,
+    # landing at 137 under the plain night grade where Itay and Hotwing sit at
+    # 64 and 63.
+    #
+    # The first attempt treated that as Hotwing's problem and applied Hotwing's
+    # medicine harder: gamma 1.60, exposure 0.55, down to a mean of 66. It read
+    # as MUD. Matching Hotwing's mean was the wrong target, because the two
+    # aircraft fail for opposite reasons — and the giveaway is in the spread,
+    # not the average:
+    #
+    #     source spread (p95-p05)    dark p95
+    #     Hotwing   79   flat        76    <- flat AND bright = sticker
+    #     Itay     222   wide       192    <- far brighter, reads fine
+    #     Taco     109   moderate   101    <- crushed to 101 by gamma 1.60
+    #
+    # Itay is the proof: the scene happily holds an aircraft whose highlights
+    # reach 192, because it has real modelling. Hotwing had to come down
+    # because it is a single flat tone. Taco has modelling of its own, and
+    # gamma flattened it away while dragging the level down.
+    #
+    # So: gamma back to neutral, level set by exposure alone, and `contrast`
+    # around Taco's own median to give back the range gamma took. Lands at
+    # mean 94 with p05 46 / p95 136 — clearly lit, still under Itay's ceiling.
+    ("taco", "dark"): dict(
+        gamma=1.0, contrast=1.30, pivot=170.0, tint=0.50, exposure=0.60
+    ),
+    # ...and it is the ONLY aircraft that needs pulling DOWN in light mode too.
+    # The others are darker than the pale floor and get lifted onto it; Taco is
+    # a near-white aircraft that came out at 192, close enough to the #e8e8f9
+    # ground to lose its silhouette against it. Backing exposure off to 0.92
+    # (against the shared grade's 1.15) puts it at 149 — still clearly the
+    # lightest of the four, but with an edge again.
+    ("taco", "light"): dict(gamma=1.08, tint=0.12, exposure=0.92),
 }
 
 for name, size, q in (
     ("do3soka", (563, 563), 82),
     ("itay", (400, 400), 84),
     ("hotwing", (600, 600), 82),
+    ("taco", (600, 600), 82),
 ):
     src = Image.open(f"art-source/vehicles/{name}.png").convert("RGBA")
     src = src.crop(src.getbbox())

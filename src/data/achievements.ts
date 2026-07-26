@@ -314,12 +314,68 @@ export interface Achievement {
    */
   portraits: string[];
   /**
+   * Which photo to keep when the screen only has room for one.
+   *
+   * A narrow phone shows a single frame per stop (see fitScene), and without
+   * this it is always `portraits[0]` — which is an accident of the order they
+   * were listed in, not a choice about which picture best represents the year.
+   * Index into `portraits`; defaults to 0. Ignored whenever every photo fits.
+   */
+  primaryPortrait?: number;
+  /**
+   * Put this stop's two competitions on OPPOSITE SIDES of the path instead of
+   * clustering them together on one side.
+   *
+   * Named in SCREEN ORDER, left to right. Each side then carries its own flag
+   * pole and its own photo, with the photo INSIDE — between the path and the
+   * pole — so the stop reads outward from the line in both directions:
+   *
+   *     pole   photo  │ path │  photo   pole
+   *      ▲       ▲    │      │    ▲       ▲
+   *     [0]     [0]   │      │   [1]     [1]
+   *
+   * ─── IT IS A FIT DECISION AS MUCH AS A COMPOSITION ONE ────────────────────
+   * A two-photo stop clustered on one side reaches ~15 world units off the
+   * path; split, each side reaches ~10.5 — the same as a one-photo stop. So a
+   * split stop shows BOTH photos on a phone where a clustered one would have
+   * been cut to a single frame, and it does it without shrinking anything.
+   *
+   * ⚠ It changes what `alongPoles` means for this stop's aircraft. The lerp
+   * runs from the first pole to the last, and those are now on either side of
+   * the path — so 0.5 is ON the line, and an aircraft belonging to the right
+   * hand competition wants roughly 0.75, not a small number. Re-tune both
+   * together or an aircraft ends up parked in the wrong country.
+   */
+  splitCompetitions?: [Competition, Competition];
+  /**
    * The aircraft flown this year, parked on the ground at the stop. Optional:
    * a year without any simply doesn't render one, and nothing else about the
    * stop moves. A year may list several — see `alongPoles` for how they're
    * spaced out between the flag poles.
    */
   vehicles?: Vehicle[];
+}
+
+/**
+ * The photos a stop should actually draw, given how many the screen can hold.
+ *
+ * When everything fits this is just `portraits`. When it does not, the list is
+ * taken starting from `primaryPortrait` and wrapping — so the year's chosen
+ * picture is the one that survives, and a stop cut from three to two keeps the
+ * primary plus its neighbour rather than an arbitrary pair.
+ */
+export function visiblePortraits(
+  achievement: Achievement,
+  count: number,
+): string[] {
+  const { portraits } = achievement;
+  if (portraits.length === 0 || count >= portraits.length) return portraits;
+
+  const start = achievement.primaryPortrait ?? 0;
+  return Array.from(
+    { length: count },
+    (_, offset) => portraits[(start + offset) % portraits.length],
+  );
 }
 
 export const achievements: Achievement[] = [
@@ -393,6 +449,9 @@ export const achievements: Achievement[] = [
     ],
     // Two awards → two frames: [ Image 1 ]  pole  [ Image 2 ]
     portraits: ["/history/sae-2022-1.webp", "/history/sae-2022-2.webp"],
+    // The second shot is the better single image for this year, so it is the
+    // one a phone keeps when there is only room for one frame.
+    primaryPortrait: 1,
   },
   {
     id: "2023-sae-overall",
@@ -427,12 +486,12 @@ export const achievements: Achievement[] = [
         lateralOffset: -4.0,
         forwardOffset: 2.8,
         displayWidth: 205,
-        shadowRadius: 2.9,
+        shadowRadius: 3.9,
         groundOffset: 0,
         // ⬅ HOTWING'S OWN SHADOW DIALS. Independent of Do3soka and Itay, which
         // follow the scene-wide SHADOW values in sceneConfig. Adjust these two
         // freely without touching the others.
-        shadowOpacityDark: 9.0,
+        shadowOpacityDark: 13.0,
         shadowOpacityLight: 2.5,
       },
     ],
@@ -443,6 +502,41 @@ export const achievements: Achievement[] = [
     title: "5th Place",
     awards: [{ place: "5th Place", title: "Overall", competition: "UAVC" }],
     portraits: ["/history/uavc-2024.webp"],
+    // 2024 won at a single competition, so this stop has ONE pole — which
+    // means `alongPoles` cannot move anything here (both ends of the lerp are
+    // the same point). `lateralOffset` is the control that works.
+    //
+    // Parked BETWEEN the photo and the pole, pulled forward so it stands in
+    // front of both. The photo hangs one FRAME.spacing (4.4 units) out along
+    // this stop's frame axis, so half of that — 2.2 — is the midpoint, and the
+    // sign puts it on the photo's side.
+    //
+    // NB on the sign: this stop's index is EVEN, the opposite parity to 2023,
+    // so its photo hangs on the viewer's LEFT where 2023's hangs right. If it
+    // turns out on the wrong side, flip this one number's sign — nothing else
+    // needs to change.
+    vehicles: [
+      {
+        name: "Taco",
+        render: "/history/vehicles/taco.webp",
+        renderLight: "/history/vehicles/taco-light.webp",
+        shadowMask: "/history/vehicles/taco-shadow.webp",
+        width: 600,
+        height: 305,
+        alongPoles: 0,
+        lateralOffset: -2.3,
+        forwardOffset: 4.6,
+        displayWidth: 190,
+        shadowRadius: 3.5,
+        groundOffset: -0.5,
+        // ⬅ TACO'S OWN SHADOW DIALS. Seeded at the scene-wide defaults
+        // (SHADOW.vehicleDarkOpacity 7.0 / vehicleLightOpacity 1.0), so
+        // changing them here moves only this aircraft and leaves Do3soka,
+        // Itay and Hotwing alone.
+        shadowOpacityDark: 10.0,
+        shadowOpacityLight: 1.5,
+      },
+    ],
   },
   {
     id: "2025-uavc-suas",
@@ -453,15 +547,24 @@ export const achievements: Achievement[] = [
       { title: "Best Technical Design Report", competition: "UAVC" },
       { title: "Best Technical Design Report", competition: "SUAS" },
     ],
-    // Three awards → three frames, arranged around the pole.
+    // One photo per competition, matched to the pole order `polesFor` returns
+    // (UAVC first, since it is the first competition named in `awards`).
     portraits: [
       "/history/uavc-2025.webp",
       "/history/suas-2025.webp",
     ],
-    // The fixed-wing sits back between the two poles; the quadcopter stands
-    // well to its right, in front of the SUAS photo. They're kept apart on
-    // BOTH axes — sideways so they don't intersect, and in depth so neither
-    // reads as growing out of the other.
+    // The two competitions straddle the path rather than crowding one side of
+    // it: SUAS to the left of the line, UAVC to the right. Both photos survive
+    // on a phone this way — see `splitCompetitions`.
+    splitCompetitions: ["SUAS", "UAVC"],
+    // Each aircraft parks in front of ITS OWN competition's photo. `alongPoles`
+    // runs from the left pole (0) to the right pole (1) and the path is the
+    // midpoint, so a photo sitting between the line and its pole is at roughly
+    // a quarter or three quarters — not the small numbers this stop used while
+    // both poles were on the same side.
+    //
+    // ⚠ These are geometric estimates, not values tuned by eye. Nudge them
+    // toward 0.5 to bring an aircraft closer to the path.
     vehicles: [
       {
         name: "Do3soka",
@@ -470,13 +573,14 @@ export const achievements: Achievement[] = [
         shadowMask: "/history/vehicles/do3soka-shadow.webp",
         width: 563,
         height: 240,
-        // Left of the UAVC pole, out in front of the UAVC photo. Pulled well
-        // forward so it clears both the pole behind it and the drone beside it.
-        alongPoles: -0.55,
+        // In front of the UAVC photo, which sits on the RIGHT of the path
+        // between the line and the UAVC pole. Pulled well forward so it clears
+        // the pole behind it.
+        alongPoles: 0.72,
         lateralOffset: 0,
         forwardOffset: 3.2,
         displayWidth: 175,
-        shadowRadius: 2.5,
+        shadowRadius: 3.5,
         groundOffset: 0,
       },
       {
@@ -486,13 +590,14 @@ export const achievements: Achievement[] = [
         shadowMask: "/history/vehicles/itay-shadow.webp",
         width: 400,
         height: 281,
-        // Over in front of the SUAS photo — far enough right of the fixed-wing
-        // that the two never touch, and small enough not to cover the photo.
-        alongPoles: 2.7,
+        // In front of the SUAS photo, on the LEFT of the path. The whole width
+        // of the line now separates it from the fixed-wing, so the two cannot
+        // touch however far forward either is pulled.
+        alongPoles: 0.28,
         lateralOffset: 0,
         forwardOffset: 3.4,
         displayWidth: 105,
-        shadowRadius: 1.3,
+        shadowRadius: 2.5,
         groundOffset: 0,
       },
     ],

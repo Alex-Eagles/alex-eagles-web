@@ -34,7 +34,14 @@ import {
   CatmullRomCurve3,
   Vector3,
 } from "three";
-import { FRAME, LAYOUT, STOP } from "./sceneConfig";
+import {
+  FIT,
+  FLAG_WORLD_WIDTH,
+  FRAME,
+  LAYOUT,
+  STOP,
+  type SceneFit,
+} from "./sceneConfig";
 
 /** Sample count for the arc-length lookup table. Built once, then reused. */
 const ARC_LUT_DIVISIONS = 800;
@@ -202,10 +209,102 @@ export function frameSlots(count: number): number[] {
  *
  * Bigger years push further out, because their outermost-left frame reaches
  * further back toward the path — see FRAME.minPathClearance.
+ *
+ * `stopScale` shrinks the whole arrangement toward the path for narrow screens
+ * (see fitScene). It multiplies the RESULT rather than the inputs on purpose:
+ * `minPathClearance` is the clearance a frame needs from the path, and the
+ * frames shrink by the same factor, so scaling at the end keeps a scaled frame
+ * exactly as clear of the line as a full-size one is.
  */
-export function poleOffsetFor(frameCount: number): number {
+export function poleOffsetFor(frameCount: number, stopScale = 1): number {
   const slots = frameSlots(Math.max(1, frameCount));
   const innermost = slots[0]; // most negative — the closest to the path
   const needed = FRAME.minPathClearance - innermost * FRAME.spacing;
-  return Math.max(LAYOUT.stopOffset, needed);
+  return Math.max(LAYOUT.stopOffset, needed) * stopScale;
+}
+
+/**
+ * How far a stop reaches sideways from the path, in world units at
+ * `stopScale = 1`. This is the number the fit has to get inside the screen.
+ *
+ * Three candidates, because which one is outermost depends on the year:
+ *   · the flag, which streams OUTWARD from the pole and is the widest thing on
+ *     a one-photo stop — the photo sits between the pole and the path, so
+ *     forgetting the flag fits the stop and clips the flag;
+ *   · the outermost photo, which wins on any multi-photo year;
+ *   · half the pole pair's gap, for stops flying two competitions' flags.
+ */
+/**
+ * Half the gap between the two poles on a stop that flew at two competitions.
+ * Mirrors POLE_PAIR_GAP in JourneyScene, which is where the poles are actually
+ * placed; it is here only so the width below accounts for the outer one.
+ */
+const POLE_PAIR_HALF_GAP = 1.0;
+
+export function stopHalfWidth(frameCount: number): number {
+  const slots = frameSlots(Math.max(1, frameCount));
+  const pole = poleOffsetFor(frameCount);
+  const outermost = slots[slots.length - 1];
+  const halfFrame = FRAME.worldWidth / 2;
+
+  return Math.max(
+    pole + POLE_PAIR_HALF_GAP + FLAG_WORLD_WIDTH,
+    pole + outermost * FRAME.spacing + halfFrame,
+  );
+}
+
+/**
+ * Solve the framing for a screen of the given aspect ratio (canvas width /
+ * canvas height).
+ *
+ * ─── THE ONE INEQUALITY ─────────────────────────────────────────────────────
+ * three.js `fov` is the VERTICAL field. The horizontal half-field is therefore
+ *
+ *     tan(hFov / 2) = tan(fov / 2) · aspect
+ *
+ * and at distance d the camera can see `d · tan(fov/2) · aspect` world units to
+ * either side of centre. A stop reaching `stopHalfWidth` units off the path
+ * fits when that is at least as large. Everything below is that one inequality,
+ * solved for each lever in turn.
+ *
+ * See the FIT block in sceneConfig for why the levers are pulled in this order,
+ * and what each one costs.
+ */
+export function fitScene(aspect: number): SceneFit {
+  // Guard: a zero or NaN aspect (a canvas measured before layout) must not
+  // produce a NaN fov and take the whole scene down.
+  const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1.6;
+
+  // 1. Photos. Decided first, because it changes how wide a stop even is.
+  const maxFrames =
+    safeAspect <= FIT.onePhotoAspect ? 1 : safeAspect <= FIT.twoPhotoAspect ? 2 : 3;
+
+  const need = stopHalfWidth(maxFrames);
+
+  /** World units visible either side of centre, at the stop's distance. */
+  const halfFieldAt = (fovDegrees: number) =>
+    FIT.viewDistance *
+    Math.tan((fovDegrees * Math.PI) / 360) *
+    safeAspect *
+    FIT.safeArea;
+
+  // 2. Field of view. Left alone entirely when the tuned value already fits,
+  //    which is every wide screen — this is what pins desktop to fov 42.
+  // Annotated, because FIT is `as const` and would otherwise narrow this to the
+  // literal 42 and reject the solved angle below.
+  let fov: number = FIT.fovMin;
+  if (halfFieldAt(fov) < need) {
+    const tanHalf = need / (FIT.viewDistance * safeAspect * FIT.safeArea);
+    fov = Math.min(FIT.fovMax, (Math.atan(tanHalf) * 360) / Math.PI);
+  }
+
+  // 3. Whatever widening the view could not buy comes out of the stop's size.
+  //    `min(1, …)` is what stops a very wide screen from scaling stops UP past
+  //    the composition they were designed at.
+  const stopScale = Math.min(
+    1,
+    Math.max(FIT.minStopScale, halfFieldAt(fov) / need),
+  );
+
+  return { fov, stopScale, maxFrames, labelPull: stopScale };
 }
