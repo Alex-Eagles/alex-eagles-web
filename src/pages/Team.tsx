@@ -1,6 +1,9 @@
 import type { CSSProperties } from "react";
 import { useState } from "react";
-import crewPhoto from "@/assets/team/crew.jpg";
+import crew2026_1280 from "@/assets/team/crew-2026-1280.webp";
+import crew2026_1920 from "@/assets/team/crew-2026-1920.webp";
+import crew2026_2560 from "@/assets/team/crew-2026-2560.webp";
+import crew2026_3840 from "@/assets/team/crew-2026-3840.webp";
 import crew2025Photo from "@/assets/team/team-2025.jpg";
 import { JumpNav } from "@/components/team/JumpNav";
 import { MemberCardSolid } from "@/components/team/MemberCardSolid";
@@ -130,10 +133,24 @@ export default function Team({
       {/* ---- Hero -------------------------------------------------------- */}
       <header className={styles.hero}>
         {/* Both crew photos stay mounted so switching years crossfades
-            instead of popping — only the active year's photo is visible. */}
+            instead of popping — only the active year's photo is visible.
+
+            The hero is the one image on this page that scales with the
+            viewport (100% of a 100svh header, object-fit: cover), so the
+            pixels it needs grow with both screen width and DPR — a 2560px
+            monitor at 2x wants ~5120px of image. `srcset` + `sizes="100vw"`
+            lets the browser pull only the variant its screen actually needs
+            instead of everyone paying for the 4K file.
+
+            2025 has no srcset: 1280x960 is the largest copy of that photo
+            that exists anywhere in the repo, so there is nothing to offer a
+            bigger screen. It will soften past ~1280px wide until someone
+            digs out the original. */}
         <img
           className={`${styles.heroPhoto} ${year === "2026" ? styles.heroPhotoActive : ""}`}
-          src={crewPhoto}
+          src={crew2026_1920}
+          srcSet={`${crew2026_1280} 1280w, ${crew2026_1920} 1920w, ${crew2026_2560} 2560w, ${crew2026_3840} 3840w`}
+          sizes="100vw"
           alt="The Alex Eagles team"
         />
         <img
