@@ -164,8 +164,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Manufacturing a UGV for ICMTC",
     excerpt:
       "Applied our hardware design expertise to a new platform, manufacturing a ground vehicle for the ICMTC competition.",
-    image:
-      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/ugv-icmtc.jpg",
     category: "hardware",
     date: "May – Jun 2026",
     author: "Hardware Team",
@@ -176,8 +175,8 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "PDB Design Review: What We'd Change Next",
     excerpt:
       "Reviewed our power distribution board's first revision, identified key improvement areas, and kicked off development of a next-generation version.",
-    image:
-      "https://images.unsplash.com/photo-1760842543713-108c3cadbba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYm9hcmQlMjB0ZWNobm9sb2d5fGVufDF8fHx8MTc3MzY2MjE5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/pdb-design-review.webp",
+    imageFit: "contain",
     category: "hardware",
     date: "Apr – Jun 2026",
     author: "Hardware Team",
@@ -336,8 +335,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Entering the PCBWay Design Contest",
     excerpt:
       "Entered the PCBWay Design Contest with an original flight controller module, engineered entirely in-house from schematic to layout.",
-    image:
-      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/blog/pcbway-contest-board.webp",
     category: "hardware",
     date: "Nov 2025 – Jan 2026",
     author: "Hardware Team",
