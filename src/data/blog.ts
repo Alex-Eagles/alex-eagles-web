@@ -134,7 +134,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "hardware",
     date: "Jul 2026 – Present",
     author: "Hardware Team",
-    readTime: "4 min read",
+    readTime: "2 min read",
   },
   {
     id: 28,
@@ -145,7 +145,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "Jul 5, 2026",
     author: "Structure Team",
-    readTime: "4 min read",
+    readTime: "2 min read",
   },
   {
     id: 27,
@@ -157,7 +157,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "Jul 1, 2026",
     author: "Structure Team",
-    readTime: "4 min read",
+    readTime: "2 min read",
   },
   {
     id: 17,
@@ -169,7 +169,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "hardware",
     date: "May – Jun 2026",
     author: "Hardware Team",
-    readTime: "5 min read",
+    readTime: "1 min read",
   },
   {
     id: 18,
@@ -181,7 +181,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "hardware",
     date: "Apr – Jun 2026",
     author: "Hardware Team",
-    readTime: "5 min read",
+    readTime: "1 min read",
   },
   {
     id: 26,
@@ -192,7 +192,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "Jun 3, 2026",
     author: "Structure Team",
-    readTime: "4 min read",
+    readTime: "2 min read",
   },
   {
     id: 25,
@@ -203,7 +203,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "Jun 2, 2026",
     author: "Structure Team",
-    readTime: "4 min read",
+    readTime: "2 min read",
   },
   {
     id: 24,
@@ -214,7 +214,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "May 31, 2026",
     author: "Structure Team",
-    readTime: "3 min read",
+    readTime: "2 min read",
   },
   {
     id: 23,
@@ -226,7 +226,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "May 15, 2026",
     author: "Structure Team",
-    readTime: "4 min read",
+    readTime: "2 min read",
   },
   {
     id: 19,
@@ -238,7 +238,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "hardware",
     date: "Feb – Mar 2026",
     author: "Hardware Team",
-    readTime: "6 min read",
+    readTime: "1 min read",
   },
   {
     id: 34,
@@ -249,7 +249,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Mar 16, 2026",
     author: "AI Team",
-    readTime: "4 min read",
+    readTime: "3 min read",
   },
   {
     id: 8,
@@ -261,7 +261,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "aerodesign",
     date: "Mar 14, 2026",
     author: "Lina Farouk",
-    readTime: "6 min read",
+    readTime: "2 min read",
   },
   {
     id: 7,
@@ -273,7 +273,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "firmware",
     date: "Mar 12, 2026",
     author: "Youssef Adel",
-    readTime: "7 min read",
+    readTime: "2 min read",
   },
   {
     id: 33,
@@ -284,7 +284,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Mar 2, 2026",
     author: "AI Team",
-    readTime: "3 min read",
+    readTime: "2 min read",
   },
   {
     id: 32,
@@ -306,7 +306,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Feb 15, 2026",
     author: "Software Team",
-    readTime: "4 min read",
+    readTime: "2 min read",
   },
   {
     id: 22,
@@ -318,7 +318,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "propulsion",
     date: "Feb 13, 2026",
     author: "Propulsion Team",
-    readTime: "5 min read",
+    readTime: "3 min read",
   },
   {
     id: 31,
@@ -341,7 +341,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "hardware",
     date: "Nov 2025 – Jan 2026",
     author: "Hardware Team",
-    readTime: "7 min read",
+    readTime: "1 min read",
   },
   {
     id: 30,
@@ -365,7 +365,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Jan 5, 2026",
     author: "AI Team",
-    readTime: "3 min read",
+    readTime: "2 min read",
   },
   {
     id: 10,
@@ -376,7 +376,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Dec 5, 2025",
     author: "Software Team",
-    readTime: "6 min read",
+    readTime: "2 min read",
   },
   {
     id: 21,
@@ -388,7 +388,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "hardware",
     date: "Sep – Nov 2025",
     author: "Hardware Team",
-    readTime: "4 min read",
+    readTime: "1 min read",
   },
   {
     id: 11,
@@ -399,7 +399,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Nov 23, 2025",
     author: "Software Team",
-    readTime: "6 min read",
+    readTime: "2 min read",
   },
   {
     id: 14,
@@ -410,7 +410,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Nov 17, 2025",
     author: "AI Team",
-    readTime: "5 min read",
+    readTime: "1 min read",
   },
   {
     id: 12,
@@ -422,7 +422,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Oct 24, 2025",
     author: "Software Team",
-    readTime: "5 min read",
+    readTime: "1 min read",
   },
   {
     id: 13,
@@ -434,7 +434,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Oct 21, 2025",
     author: "Software Team",
-    readTime: "3 min read",
+    readTime: "2 min read",
   },
   {
     id: 15,
@@ -445,7 +445,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Oct 21, 2025",
     author: "AI Team",
-    readTime: "4 min read",
+    readTime: "1 min read",
   },
 ];
 

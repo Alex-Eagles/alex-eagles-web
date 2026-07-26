@@ -53,7 +53,7 @@ export default function BlogPostModal({ post, onClose }: BlogPostModalProps) {
       />
 
       <motion.div
-        className="relative w-full max-w-[820px] max-h-[85vh] overflow-y-auto rounded-2xl border p-8 md:p-10 shadow-2xl"
+        className="relative w-full max-w-[720px] rounded-2xl border p-6 md:p-8 shadow-2xl"
         style={{ backgroundColor: cardBg, borderColor: style.accent }}
         initial={{ opacity: 0, scale: 0.94, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -64,46 +64,46 @@ export default function BlogPostModal({ post, onClose }: BlogPostModalProps) {
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-5 right-5 md:top-6 md:right-6 inline-flex items-center justify-center w-9 h-9 rounded-full transition-opacity duration-200 hover:opacity-70"
+          className="absolute top-4 right-4 md:top-5 md:right-5 inline-flex items-center justify-center w-9 h-9 rounded-full transition-opacity duration-200 hover:opacity-70"
           style={{ backgroundColor: style.accent, color: style.badgeText }}
         >
           <X className="w-4 h-4" />
         </button>
 
         <span
-          className="inline-flex items-center rounded-full px-3 py-0.5 font-sans text-caption font-semibold mb-5"
+          className="inline-flex items-center rounded-full px-3 py-0.5 font-sans text-caption font-semibold mb-3"
           style={{ backgroundColor: style.accent, color: style.badgeText }}
         >
           {CATEGORY_LABEL[post.category]}
         </span>
 
         <h2
-          className="font-display font-extrabold text-h1 leading-[1.05] tracking-[-0.02em] m-0 mb-5 pr-10"
+          className="font-display font-bold text-h3 leading-[1.05] tracking-[-0.01em] m-0 mb-3 pr-10"
           style={{ color: text }}
         >
           {post.title}
         </h2>
 
         <div
-          className="mb-8 font-mono text-[13px] tracking-[0.04em] uppercase font-semibold"
+          className="mb-4 font-mono text-[13px] tracking-[0.04em] uppercase font-semibold"
           style={{ color: label }}
         >
           {post.date} · {post.readTime}
         </div>
 
-        <div className="rounded-xl overflow-hidden mb-8">
+        <div className="rounded-xl overflow-hidden mb-4">
           <img
             src={post.image}
             alt={`Cover image for "${post.title}"`}
             className={
               post.imageFit === "contain"
-                ? "w-full h-auto object-contain p-10 bg-white"
-                : "w-full h-[340px] md:h-[420px] object-cover"
+                ? "w-full h-auto max-h-[220px] object-contain p-6 bg-white"
+                : "w-full h-[200px] md:h-[240px] object-cover"
             }
           />
         </div>
 
-        <p className="font-sans text-body-lg leading-[1.75] m-0" style={{ color: text }}>
+        <p className="font-sans text-[15px] leading-[1.65] m-0" style={{ color: text }}>
           {post.excerpt}
         </p>
       </motion.div>
