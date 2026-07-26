@@ -24,7 +24,18 @@ export default function BlogHeader({ activeFilter, onFilterChange }: BlogHeaderP
       {/* Background video — muted/loop/autoplay, no controls. The poster (and
           the container's navy bg) is the fallback shown while the clip buffers
           or when autoplay is blocked (iOS Low Power Mode, data-saver), so the
-          hero stays on-brand instead of going black on mobile. */}
+          hero stays on-brand instead of going black on mobile.
+
+          Hosted on Cloudinary (cloud "deqkkrtk") instead of committed to the
+          repo. The transformation segment after /upload/ keeps credit use low:
+            • so_16,eo_118  → use only 0:16–1:58 of the source (shorter = fewer
+                              MB per load, the biggest bandwidth lever)
+            • f_auto        → serve VP9/AV1/WebM where supported (much smaller)
+            • q_auto:eco    → aggressive auto-quality; invisible under the scrim
+            • w_960         → cap width; it's a darkened background, not 4K art
+          The poster stays a local SVG so the fallback frame costs zero credits.
+          Looping replays from the browser cache, so it does NOT re-download per
+          loop — bandwidth is spent once per page load. */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
         autoPlay
@@ -34,7 +45,10 @@ export default function BlogHeader({ activeFilter, onFilterChange }: BlogHeaderP
         poster="/media/blog-hero-poster.svg"
         aria-hidden="true"
       >
-        <source src="/media/blog-hero.mp4" type="video/mp4" />
+        <source
+          src="https://res.cloudinary.com/deqkkrtk/video/upload/so_16,eo_118,f_auto,q_auto:eco,w_960/v1785007301/blog-hero_zx5stt.mp4"
+          type="video/mp4"
+        />
       </video>
 
       {/* Darkening scrim so the title/tagline/filters stay readable over the footage. */}
