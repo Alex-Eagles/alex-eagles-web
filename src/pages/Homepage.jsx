@@ -2,11 +2,15 @@ import "../styles/Homepage.css";
 
 import { useTheme } from "@/context/ThemeContext";
 
-// TODO: replace with the hosted URLs once dark.mp4 / light.mp4 are uploaded
-// externally (they were removed from the repo — see /alex-eagles-media next
-// to the project folder for the original files).
-const BG_VIDEO_DARK_URL = "";
-const BG_VIDEO_LIGHT_URL = "";
+// Theme background clips, hosted on Cloudinary (cloud "deqkkrtk") — the source
+// files were removed from the repo. Same credit-saving delivery transforms as
+// the blog hero: f_auto (modern codecs), q_auto:eco (aggressive auto-quality,
+// hidden under the scrim), w_960 (background, not 4K). Not trimmed — each plays
+// its full length.
+const BG_VIDEO_DARK_URL =
+  "https://res.cloudinary.com/deqkkrtk/video/upload/f_auto,q_auto:eco,w_960/v1785007301/bck_dark_bhfj2m.mp4";
+const BG_VIDEO_LIGHT_URL =
+  "https://res.cloudinary.com/deqkkrtk/video/upload/f_auto,q_auto:eco,w_960/v1785007302/bck_light_p3nbxr.mp4";
 import Hero from "./Hero";
 import Features from "./Features";
 import Video from "./Video";
