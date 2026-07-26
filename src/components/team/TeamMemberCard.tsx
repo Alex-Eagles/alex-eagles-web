@@ -112,7 +112,8 @@ export function TeamMemberCard({
           ) : (
             /*
              * Empty slot. Not an uploader — adding a portrait means dropping a
-             * file into src/assets/members/, so the hint names the file to add.
+             * file into src/assets/members/photos/, so the hint names the file
+             * to add.
              */
             <div className={styles.emptyPortrait}>
               <svg
@@ -132,7 +133,7 @@ export function TeamMemberCard({
               </svg>
               <p className={styles.emptyTitle}>Drop portrait</p>
               <p className={styles.emptyHint}>
-                {member.photo ? `${member.photo}.jpg not found` : "assets/members/"}
+                {member.photo ? `${member.photo}.jpg not found` : "assets/members/photos/"}
               </p>
             </div>
           )}

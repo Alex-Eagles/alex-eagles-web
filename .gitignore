@@ -31,5 +31,3 @@ Thumbs.db
 
 # Claude Code agent state / worktrees
 .claude/
-# Normalized cut-out working PNGs (webp in cutout2/ ships instead)
-src/assets/members/cutouts/

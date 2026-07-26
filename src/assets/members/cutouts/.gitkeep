@@ -1,6 +1,0 @@
-Background-removed portraits go here, named with the same slug as the
-portrait in ../<slug>.<ext> — e.g. ../ziad-essam.jpg → ziad-essam.png.
-
-Dropping a file in here switches that member's card from the
-grayscale→colour hover to the blue-backdrop cut-out reveal. No code change.
-Deleting it reverts the card. See src/data/team.ts → memberCutout().

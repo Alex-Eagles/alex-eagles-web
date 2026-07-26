@@ -16,13 +16,19 @@
  * empty state. To fill one in:
  *
  *   1. name:  set `name: "Ziad Essam"`
- *   2. photo: drop a kebab-case file into src/assets/members/<slug>.<ext>
+ *   2. photo: drop a kebab-case file into src/assets/members/photos/<slug>.<ext>
  *             then set `photo: "ziad-essam"`
  *   3. hover reveal (optional): drop a background-removed WebP into
- *             src/assets/members/cutout2/<slug>.webp — same slug as the photo.
+ *             src/assets/members/cutouts/<slug>.webp — same slug as the photo.
  *             That alone switches the card from the grayscale→colour hover to
  *             the blue-backdrop cut-out reveal. No code change. Delete the file
  *             and the card reverts.
+ *
+ *             If the background-removal tool hands you an SVG, run it through
+ *             `node scripts/cutout-svg-to-webp.mjs src/assets/members/cutouts`
+ *             first — those exports embed the photo twice at full resolution
+ *             (~2.5 MB each) and browsers rasterise their mask at the SVG's
+ *             declared size, so the portrait looks pixelated on the card.
  *
  * Add or remove slots by editing the arrays — the grid and the jump nav both
  * follow whatever is here.
@@ -85,10 +91,10 @@ export interface TeamMember {
   department: string;
   /** Defaults to the roster year. Set only to override one person. */
   gradYear?: string;
-  /** Slug of the photo in src/assets/members/ */
+  /** Slug of the photo in src/assets/members/photos/ */
   photo?: string;
   /**
-   * Slug of the background-removed cut-out in src/assets/members/cutout2/.
+   * Slug of the background-removed cut-out in src/assets/members/cutouts/.
    * Omit it and we look for a cutout under the `photo` slug, so matching
    * filenames pair up automatically. Set it only to point at a different file.
    */
@@ -179,13 +185,13 @@ const bySlug = (mods: Record<string, { default: string }>): Record<string, strin
   );
 
 const PHOTOS = bySlug(
-  import.meta.glob<{ default: string }>("../assets/members/*.{jpg,jpeg,png,webp}", {
+  import.meta.glob<{ default: string }>("../assets/members/photos/*.{jpg,jpeg,png,webp}", {
     eager: true,
   }),
 );
 
 const CUTOUTS = bySlug(
-  import.meta.glob<{ default: string }>("../assets/members/cutout2/*.{png,webp,svg}", {
+  import.meta.glob<{ default: string }>("../assets/members/cutouts/*.{png,webp}", {
     eager: true,
   }),
 );
