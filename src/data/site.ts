@@ -49,7 +49,7 @@ export interface SocialLink {
 export const SOCIALS: SocialLink[] = [
   {
     label: "Instagram",
-    href: "https://www.instagram.com/alex_eagles.aerodesign?igsh=ZHUxcDM4cmIyZG0x",
+    href: "https://www.instagram.com/alex_eagles.aerodesign?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
     Icon: Instagram,
   },
   {

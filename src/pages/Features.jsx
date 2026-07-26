@@ -13,7 +13,7 @@ function Features() {
 
       <div className="features-content">
         <div className="features-image">
-          <img src="/team.jpg" alt="team" />
+          <img src="/members.jpg" alt="Alex Eagles team" />
         </div>
 
         <div className="features-text">

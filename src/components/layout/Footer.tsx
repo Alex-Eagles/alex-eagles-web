@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, ChevronRight, Mail, MapPin } from "lucide-react";
+import emailjs from "@emailjs/browser";
 import AeLogo from "@/components/ui/AeLogo";
 import {
   BRAND,
@@ -10,12 +11,50 @@ import {
   VEHICLE_NAMES,
 } from "@/data/site";
 
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+type NewsletterStatus = "idle" | "sending" | "sent" | "error";
+
 /**
  * Footer — 4-column site footer (translated from Home.dc.html): brand + socials,
  * quick links, vehicles, and a contact + newsletter column. Shared across every
  * page via the layout in App.tsx.
  */
 export default function Footer() {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] =
+    useState<NewsletterStatus>("idle");
+
+  const handleNewsletterSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
+      setNewsletterStatus("error");
+      return;
+    }
+
+    setNewsletterStatus("sending");
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name: "Newsletter signup",
+          email: newsletterEmail,
+          subject: "Newsletter signup",
+          message: `${newsletterEmail} subscribed via the footer "Stay informed" form.`,
+        },
+        { publicKey: EMAILJS_PUBLIC_KEY },
+      );
+      setNewsletterStatus("sent");
+      setNewsletterEmail("");
+    } catch {
+      setNewsletterStatus("error");
+    }
+  };
+
   return (
     <footer className="bg-canvas border-t border-border-strong relative overflow-hidden">
       <div className="max-w-[var(--maxw-content)] mx-auto px-6 pt-[72px] pb-7 relative z-10">
@@ -97,10 +136,10 @@ export default function Footer() {
               </a>
             </div>
 
-            {/* Newsletter — presentational (wire to a real endpoint later). */}
+            {/* Newsletter — sends to CONTACT.email via EmailJS. */}
             <form
               className="bg-elevated border border-border rounded-[10px] p-4"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleNewsletterSubmit}
             >
               <label
                 htmlFor="footer-email"
@@ -113,16 +152,30 @@ export default function Footer() {
                   id="footer-email"
                   type="email"
                   placeholder="Email"
+                  required
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                   className="flex-1 min-w-0 h-11 bg-surface border border-border rounded-md px-3 font-sans text-sm text-fg outline-none"
                 />
                 <button
                   type="submit"
                   aria-label="Subscribe"
-                  className="flex-none w-11 h-11 rounded-md bg-gold text-canvas cursor-pointer flex items-center justify-center hover:bg-gold-hover transition-colors"
+                  disabled={newsletterStatus === "sending"}
+                  className="flex-none w-11 h-11 rounded-md bg-gold text-canvas cursor-pointer flex items-center justify-center hover:bg-gold-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <ArrowUpRight size={18} strokeWidth={2.4} />
                 </button>
               </div>
+              {newsletterStatus === "sent" && (
+                <p className="mt-2 font-sans text-xs text-[#16a34a]">
+                  Thanks — you're on the list.
+                </p>
+              )}
+              {newsletterStatus === "error" && (
+                <p className="mt-2 font-sans text-xs text-[#dc2626]">
+                  Something went wrong. Please try again.
+                </p>
+              )}
             </form>
           </div>
         </div>

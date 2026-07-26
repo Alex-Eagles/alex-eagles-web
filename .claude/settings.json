@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Read(//c/Users/Admin/AppData/Local/Temp/claude/e--alex-eagles-web/41a63904-5591-4543-8a7f-3701563cb319/scratchpad/**)",
+      "Read(//c/Users/Admin/AppData/Local/Temp/claude/**)",
+      "Bash(find \"/c/Users/Admin/AppData/Local/Temp\" -newer \"/e/alex-eagles-web/package.json\" \\\\\\( -iname \"*.jpg\" -o -iname \"*.jpeg\" -o -iname \"*.png\" -o -iname \"*.webp\" \\\\\\) 2>/dev/null | head -30)",
+      "Read(//c/Users/Admin/AppData/Local/Temp/**)",
+      "Bash(sort -k6,7)"
     ]
   }
 }
