@@ -44,12 +44,22 @@
   aspect-ratio: 0.8;
   overflow: hidden;
   background: linear-gradient(165deg, #2e2e2e, #242424);
-  /* kills the white anti-alias fringe on the rounded edges when the image
-     scales on hover — do not remove. Fade confined to the outermost rim
-     (97%→100%) rather than a full center-to-corner gradient — the wider
-     fade was visibly dimming the stretched name text near the box edges. */
-  -webkit-mask-image: -webkit-radial-gradient(white 97%, black 100%);
-  transform: translateZ(0);
+  /* Rounds this box itself instead of relying on .card's overflow clip. That
+     is what kills the white anti-alias fringe on the corners when the photo
+     scales on hover — the clip now happens on the same box that paints the
+     content, so there is no seam between a square child and a rounded parent.
+
+     This replaces an older `-webkit-mask-image` + `transform: translateZ(0)`
+     pair that did the same job by force-promoting the card to its own GPU
+     layer. That promotion is what made the portraits look pixelated: Chromium
+     rasterises such a layer at a fixed scale that can ignore the display's
+     device pixel ratio, so on a HiDPI screen the card was drawn at ~1x and
+     scaled up. The giveaway was that browser-zooming *sharpened* the image —
+     a genuinely low-res file only gets worse as you zoom in, but a stale
+     layer raster gets regenerated at the new scale. Don't reintroduce
+     translateZ(0) / will-change here to "help" compositing. */
+  border-radius: inherit;
+  isolation: isolate;
 }
 
 /* --- portrait ------------------------------------------------------------ */
