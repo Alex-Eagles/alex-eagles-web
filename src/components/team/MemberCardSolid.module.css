@@ -254,6 +254,58 @@
   border-color: var(--card-accent);
 }
 
+/* --- narrow cards ---------------------------------------------------------
+ *
+ * Keyed off the card's own width, not the viewport: on a phone a lead card is
+ * ~230px and a member card ~153px, so a media query would compact both or
+ * neither. Below 190px "CLASS OF 2025" beside the LinkedIn pill needs more
+ * room than the card has, so the footer stacks and the scale steps down.
+ * (.restName already tracks the width on its own, via 7cqw.)
+ * -------------------------------------------------------------------------*/
+@container (max-width: 190px) {
+  .panel {
+    padding: 32px 11px 11px;
+  }
+  .panelRole {
+    margin-bottom: 5px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+  .panelName {
+    font-size: 15px;
+  }
+  .panelDept {
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    padding-top: 8px;
+  }
+  .year {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+  .linkedin {
+    padding: 4px 9px;
+    font-size: 10px;
+  }
+  .badge {
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .restName {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+}
+
 /* ---------------------------------------------------------------------------
  * RANK TIERS
  * The card sizing (bigger lead cards, own row) is done by the grid in the page;

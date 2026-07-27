@@ -466,6 +466,22 @@
   margin: 0;
 }
 
+/* --- phones --------------------------------------------------------------
+ *
+ * Same DOM, read top-to-bottom instead of left-to-right:
+ *
+ *   division name
+ *   ───────────────────────  (.sectionHeader's rule, full width)
+ *   sub-team name · count
+ *   the lead
+ *        ─────────          (.sectionDivider, short and centred)
+ *   the members
+ *
+ * The lead/divider/members split is already three flex children of
+ * .sectionBody, so turning that row into a column puts them in exactly that
+ * order — the rule that was vertical between the lead column and the grid
+ * simply becomes the horizontal one under the lead.
+ * -------------------------------------------------------------------------*/
 @media (max-width: 640px) {
   .heroCopy,
   .leadership,
@@ -473,38 +489,72 @@
   .divisionHeads,
   .section,
   .pageFooter {
-    padding-inline: 20px;
+    padding-inline: 16px;
   }
-  /* Members go two-up, still centred, on a phone. */
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-  }
-  /* Keep the last card clear of the fixed PULL tab. */
+  /* Keep content clear of the fixed PULL tab — 40px wide at right:10px on this
+     breakpoint, so 56px leaves it a hair of daylight. */
   .section,
   .divisionHeads {
-    padding-right: 64px;
+    padding-right: 56px;
   }
-  /* Lead cards drop to two-up so they still read as bigger than members
-   * without overflowing a phone. */
-  .leadRow {
-    gap: 14px;
-  }
-  .leadRow > * {
-    width: calc(50% - 7px);
-  }
-  /* The left-column/divider/right-grid layout only works with room to
-   * spread out — stack it back to leads-then-members on a phone. */
+
   .sectionBody {
     flex-direction: column;
-    gap: 18px;
+    align-items: center;
+    gap: 16px;
   }
-  .sectionDivider {
-    display: none;
-  }
+
+  /* The lead sits alone and centred. Wider than a member card, since stacking
+     costs the size contrast the desktop lead column gets from sitting in its
+     own 280px track. Co-leads wrap to their own line rather than shrinking. */
   .sectionBody .leadRow {
     flex-direction: row;
+    justify-content: center;
     width: 100%;
+    gap: 12px;
+  }
+  .sectionBody .leadRow > * {
+    width: min(58%, 230px);
+  }
+
+  /* Was the vertical rule beside the lead column. Short and centred so it
+     reads as a divider *inside* the sub-team, not another section break. */
+  .sectionDivider {
+    align-self: center;
+    width: min(132px, 38%);
+    height: 1px;
+  }
+
+  .sectionRight {
+    width: 100%;
+    flex: none;
+  }
+
+  /*
+   * Members size themselves rather than being pinned to a fixed count: as many
+   * columns as fit at a readable width, which lands on 2 across a phone and 3
+   * across a large phone or small tablet.
+   *
+   * Why not a hard 3: the content box on a 390px screen is 318px, so three
+   * tracks would be ~98px a card — 98x132 including the portrait, the name and
+   * the info panel that touch devices show outright. That is smaller than a
+   * thumbnail, and unreadable cards are the thing this breakpoint exists to
+   * fix. 148px is the narrowest the card still reads at, so it's the floor the
+   * column count is derived from.
+   */
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Division heads stay two-up — they're a pair, not a lead-plus-grid. */
+  .divisionHeads .leadRow {
+    gap: 12px;
+  }
+  .divisionHeads .leadRow > * {
+    width: calc(50% - 6px);
   }
 }
 

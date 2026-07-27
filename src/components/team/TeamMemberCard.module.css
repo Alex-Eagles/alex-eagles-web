@@ -2,8 +2,17 @@
  * Team member card. Values come from the design handoff and are final —
  * see design_handoff_team_card/README.md ("Fidelity: high").
  *
- * Hover is CSS-only (:hover / :focus-within) so the component never re-renders
- * on pointer movement, which matters with ~30 cards on screen.
+ * Hover is CSS-only so the component never re-renders on pointer movement,
+ * which matters with ~30 cards on screen.
+ *
+ * The reveal is keyed off :hover and :focus-visible — deliberately NOT
+ * :focus-within. The card is tabbable (tabIndex=0), and clicking a tabbable
+ * element focuses it, so :focus-within left the card stuck in its revealed
+ * state after the pointer had already left. :focus-visible only matches
+ * keyboard focus, so a click now does nothing at all and the reveal follows
+ * the pointer, matching the 2025 card. :has(:focus-visible) keeps the panel
+ * open while the LinkedIn link inside it is tabbed to — that link is only
+ * reachable once the panel is revealed.
  * -------------------------------------------------------------------------*/
 
 .card {
@@ -31,6 +40,8 @@
   position: relative;
   display: block;
   width: 100%;
+  /* Establish a container so the panel can compact to the card's own width. */
+  container-type: inline-size;
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
@@ -39,7 +50,7 @@
   transition: transform 0.45s var(--ease-move), box-shadow 0.45s ease;
 }
 
-.card:is(:hover, :focus-within) {
+.card:is(:hover, :focus-visible, :has(:focus-visible)) {
   transform: translateY(-6px);
   /* Lift glow carries the sub-team colour rather than a fixed blue, so hovering
      a Structure card no longer throws blue light under a warm-grey section. */
@@ -100,13 +111,13 @@
 }
 
 /* mode A — no cutout: grayscale → colour, slight zoom */
-.card[data-mode="photo"]:is(:hover, :focus-within) .photoLayer {
+.card[data-mode="photo"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
   filter: grayscale(0) contrast(1) brightness(1);
   transform: scale(1.05);
 }
 
 /* mode B — cutout present: the flat portrait gets out of the way */
-.card[data-mode="cutout"]:is(:hover, :focus-within) .photoLayer {
+.card[data-mode="cutout"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
   opacity: 0;
 }
 
@@ -168,7 +179,7 @@
   background: linear-gradient(180deg, rgb(15 15 15 / 0.55), rgb(15 15 15 / 0.35));
 }
 
-.card:is(:hover, :focus-within) :is(.backdrop, .backdropScrim) {
+.card:is(:hover, :focus-visible, :has(:focus-visible)) :is(.backdrop, .backdropScrim) {
   opacity: 1;
 }
 
@@ -189,7 +200,7 @@
   display: block;
 }
 
-.card:is(:hover, :focus-within) .cutoutLayer {
+.card:is(:hover, :focus-visible, :has(:focus-visible)) .cutoutLayer {
   opacity: 1;
   transform: scale(0.9);
 }
@@ -232,11 +243,11 @@
   text-shadow: 0 3px 24px rgb(0 0 0 / 0.6);
 }
 
-.card:is(:hover, :focus-within) .bigNameBack {
+.card:is(:hover, :focus-visible, :has(:focus-visible)) .bigNameBack {
   opacity: 1;
 }
 
-.card:is(:hover, :focus-within) .bigNameFront {
+.card:is(:hover, :focus-visible, :has(:focus-visible)) .bigNameFront {
   opacity: 0.9;
 }
 
@@ -257,7 +268,7 @@
   transition: opacity 0.5s ease;
 }
 
-.card:is(:hover, :focus-within) .topScrim {
+.card:is(:hover, :focus-visible, :has(:focus-visible)) .topScrim {
   opacity: 0.9;
 }
 
@@ -300,7 +311,7 @@
   color: rgb(255 255 255 / 0.55);
 }
 
-.card:is(:hover, :focus-within) :is(.restRole, .restName) {
+.card:is(:hover, :focus-visible, :has(:focus-visible)) :is(.restRole, .restName) {
   opacity: 0;
 }
 
@@ -323,7 +334,7 @@
   transition: opacity 0.45s ease, transform 0.5s var(--ease-move);
 }
 
-.card:is(:hover, :focus-within) .panel {
+.card:is(:hover, :focus-visible, :has(:focus-visible)) .panel {
   opacity: 1;
   transform: translateY(0);
 }
@@ -388,6 +399,61 @@
   border-color: var(--card-accent);
 }
 
+/* --- narrow cards ---------------------------------------------------------
+ *
+ * Keyed off the card's own width rather than the viewport: on a phone a lead
+ * card is ~230px and a member card ~153px, so a media query would compact both
+ * or neither. Below 190px the panel's default type no longer fits — "CLASS OF
+ * 2026" beside the LinkedIn pill needs ~185px on its own and was overflowing —
+ * so the footer stacks and the scale steps down.
+ * -------------------------------------------------------------------------*/
+@container (max-width: 190px) {
+  .panel {
+    padding: 32px 11px 11px;
+  }
+  .panelRole {
+    margin-bottom: 5px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+  .panelName {
+    font-size: 15px;
+  }
+  .panelDepartment {
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+  /* Stacked, so the year and the pill each get the full width instead of
+     fighting over it. */
+  .panelFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    padding-top: 8px;
+  }
+  .panelYear {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+  .linkedIn {
+    margin-left: 0;
+    padding: 4px 9px;
+    font-size: 10px;
+  }
+  .restRole {
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .restName {
+    left: 10px;
+    bottom: 10px;
+    font-size: 13px;
+  }
+}
+
 /* --- touch + accessibility ------------------------------------------------ */
 
 /* No hover on touch: show the info panel outright instead of hiding the
@@ -422,10 +488,10 @@
   .card * {
     transition-duration: 0.01ms !important;
   }
-  .card:is(:hover, :focus-within) {
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) {
     transform: none;
   }
-  .card[data-mode="photo"]:is(:hover, :focus-within) .photoLayer {
+  .card[data-mode="photo"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
     transform: none;
   }
 }

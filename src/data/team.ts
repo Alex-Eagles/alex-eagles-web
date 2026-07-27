@@ -769,8 +769,10 @@ const ROSTER_2025: YearRoster = {
             slot("Member", "Mazen Nazeih", { photo: "mazen-amr" }),
             slot("Member", "Sara Gharib", { photo: "sara-gharib" }),
             // Four members wrap 3 + 1 on their own, leaving John alone on the
-            // last line. Splitting 2 + 2 puts Zeyad beside him instead.
-            slot("Member", "Zeyad Essam", { photo: "zeyad-essam", breakBefore: true }),
+            // last line. Splitting 2 + 2 puts Ziad beside him instead.
+            // Spelled to match his 2026 cards. The photo slug keeps the older
+            // spelling — that's the filename on disk, not a display name.
+            slot("Member", "Ziad Essam", { photo: "zeyad-essam", breakBefore: true }),
             slot("Member", "John Ayman", { photo: "john-ayman" }),
           ],
           {
