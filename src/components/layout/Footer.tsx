@@ -52,7 +52,7 @@ export default function Footer() {
               <li key={link.path}>
                 <Link
                   to={link.path}
-                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
+                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg py-1 -my-1"
                 >
                   <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
                   {link.label}
@@ -67,7 +67,7 @@ export default function Footer() {
               <li key={name}>
                 <Link
                   to="/vehicles"
-                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
+                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg py-1 -my-1"
                 >
                   <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
                   {name}

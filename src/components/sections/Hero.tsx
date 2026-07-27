@@ -3,6 +3,7 @@ import AeLogo from "@/components/ui/AeLogo";
 import Button from "@/components/ui/Button";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useTheme } from "@/context/ThemeContext";
 
 /**
  * Hero — the full-viewport opening section.
@@ -25,6 +26,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 export default function Hero() {
   const scrollY = useScrollPosition();
   const reduced = useReducedMotion();
+  const { isDark } = useTheme();
 
   // Gentle parallax; disabled when the visitor prefers reduced motion.
   const contentParallax = reduced ? undefined : `translateY(${scrollY * 0.12}px)`;
@@ -36,8 +38,9 @@ export default function Hero() {
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          background:
-            "radial-gradient(120% 80% at 50% -10%, #161A50 0%, #0A0D2B 45%, var(--bg-primary) 100%)",
+          background: isDark
+            ? "radial-gradient(120% 80% at 50% -10%, #161A50 0%, #0A0D2B 45%, var(--bg-primary) 100%)"
+            : "radial-gradient(120% 80% at 50% -10%, #E4E6FA 0%, #EEF0FC 45%, var(--bg-primary) 100%)",
         }}
       />
 
@@ -59,8 +62,9 @@ export default function Hero() {
         aria-hidden="true"
         className="absolute inset-0"
         style={{
-          background:
-            "linear-gradient(to bottom, rgba(7,9,28,0.55) 0%, rgba(7,9,28,0.85) 100%)",
+          background: isDark
+            ? "linear-gradient(to bottom, rgba(7,9,28,0.55) 0%, rgba(7,9,28,0.85) 100%)"
+            : "linear-gradient(to bottom, rgba(247,248,255,0.55) 0%, rgba(247,248,255,0.85) 100%)",
         }}
       />
 
@@ -101,7 +105,7 @@ export default function Hero() {
           <AeLogo
             size={92}
             title=""
-            variant="white"
+            variant="auto"
             style={{
               filter: "drop-shadow(0 12px 40px var(--brand-glow))",
               animation: reduced ? "none" : "ae-float 6s ease-in-out infinite",
@@ -109,13 +113,13 @@ export default function Hero() {
           />
         </div>
 
-        <div className="eyebrow mb-4" style={{ color: "#8B8FC8" }}>
+        <div className="eyebrow mb-4" style={{ color: isDark ? "#8B8FC8" : "#3B3F7A" }}>
           SUAS Competition 2025
         </div>
 
         <h1
           className="font-display font-extrabold leading-none tracking-[-0.02em] m-0 mb-5 pb-1"
-          style={{ fontSize: "var(--text-hero)", color: "#F0F2FF" }}
+          style={{ fontSize: "var(--text-hero)", color: isDark ? "#F0F2FF" : "#0D1030" }}
         >
           ALEX EAGLES
         </h1>
@@ -124,7 +128,7 @@ export default function Hero() {
           className="font-sans font-normal mx-auto mb-9 leading-[1.6]"
           style={{
             fontSize: "clamp(16px, 2.2vw, 20px)",
-            color: "#B7BAE0",
+            color: isDark ? "#B7BAE0" : "#3B3F7A",
             maxWidth: "560px",
           }}
         >

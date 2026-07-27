@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/data/site";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
+import { useTheme } from "@/context/ThemeContext";
 import AeLogo from "@/components/ui/AeLogo";
 
 /**
@@ -21,6 +22,7 @@ export default function Navbar() {
   const scrollY = useScrollPosition();
   const scrolled = scrollY > 80;
   const { pathname } = useLocation();
+  const { isDark } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -57,9 +59,14 @@ export default function Navbar() {
         <div
           className="pointer-events-auto flex items-center gap-1.5 px-3 py-[7px] rounded-full transition-[background,border-color,box-shadow] duration-300"
           style={{
-            background: scrolled ? "var(--bg-glass)" : "transparent",
-            border: `1px solid ${scrolled ? "var(--border-subtle)" : "transparent"}`,
-            boxShadow: scrolled ? "var(--elevation-2)" : "none",
+            // Fully transparent-at-top only works in dark mode, where hero
+            // photos/video are dark enough for light link text to read on
+            // their own. In light mode the pill still blurs whatever photo
+            // sits behind it (e.g. the Blog hero), so it keeps a light glass
+            // tint even before the scrolled state kicks in.
+            background: scrolled ? "var(--bg-glass)" : isDark ? "transparent" : "rgba(255,255,255,0.55)",
+            border: `1px solid ${scrolled || !isDark ? "var(--border-subtle)" : "transparent"}`,
+            boxShadow: scrolled ? "var(--elevation-2)" : isDark ? "none" : "0 4px 20px rgba(13,16,48,0.08)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
           }}
