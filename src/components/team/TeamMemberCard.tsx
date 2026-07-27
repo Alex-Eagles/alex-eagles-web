@@ -9,6 +9,7 @@ import {
   memberName,
   memberPhoto,
   memberRoleLabel,
+  memberTier,
   memberYearLabel,
   type TeamMember,
 } from "@/data/team";
@@ -106,6 +107,9 @@ export function TeamMemberCard({
     <article
       className={styles.card}
       data-mode={cutout ? "cutout" : "photo"}
+      /* Rank, so the page can size a card by it — a vice sharing a row with
+         members can't be sized by a class on the row. Matches the 2025 card. */
+      data-tier={memberTier(member)}
       data-open={open}
       style={{ "--card-accent": cardAccent } as CSSProperties}
       tabIndex={0}

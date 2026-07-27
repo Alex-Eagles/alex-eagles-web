@@ -154,6 +154,21 @@
   color: #f2f2f2;
 }
 
+/*
+ * backdrop-filter on a fixed element is repainted against whatever scrolls
+ * behind it, and on iOS that repaint during an anchor jump is the second half
+ * of the white flash when you tap a nav link. The panel is already 90% opaque,
+ * so going fully opaque on touch costs almost nothing visually and drops the
+ * most expensive property on the page.
+ */
+@media (hover: none) {
+  .panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgb(22 22 22 / 0.98);
+  }
+}
+
 /* The tab overlaps the cards on narrow screens, so shrink it out of the way. */
 @media (max-width: 640px) {
   .tab {

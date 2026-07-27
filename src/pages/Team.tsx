@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import crew2026_1280 from "@/assets/team/crew-2026-1280.webp";
 import crew2026_1920 from "@/assets/team/crew-2026-1920.webp";
 import crew2026_2560 from "@/assets/team/crew-2026-2560.webp";
@@ -49,6 +49,23 @@ export default function Team({
    */
   const [openCardId, setOpenCardId] = useState<string | null>(null);
   const toggleCard = (id: string) => setOpenCardId((cur) => (cur === id ? null : id));
+
+  /*
+   * This page is dark-only by design, but the document canvas still follows the
+   * site theme — so in light mode `body` is white while `.page` is #141a26.
+   * Any moment the browser paints outside .page's box shows that white through,
+   * which is the flash when a jump-nav link scrolls the page. Painting the
+   * canvas to match for as long as this page is mounted removes it. Restored on
+   * unmount so the rest of the site keeps its own theme.
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.style.backgroundColor;
+    root.style.backgroundColor = "#141a26";
+    return () => {
+      root.style.backgroundColor = previous;
+    };
+  }, []);
 
   const roster = ROSTERS[year];
 
@@ -150,9 +167,7 @@ export default function Team({
               cardRow(people, styles.grid)
             ) : (
               <>
-                {/* Same grid as the members, plus a hook so the phone layout can
-                    keep vices a size above them — see .gridRanked. */}
-                {cardRow(vices, `${styles.grid} ${styles.gridRanked}`)}
+                {cardRow(vices, styles.grid)}
                 {/* One row per `breakBefore` group — normally just the one. */}
                 {splitRows(grid).map((row, i) => cardRow(row, styles.grid, i))}
               </>

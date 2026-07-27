@@ -292,9 +292,25 @@
  * between blocks so they never bleed into one river of cards.
  */
 .section {
+  /* ====================================================================
+   * SUB-TEAM RULE SPACING — the two numbers to tune.
+   *
+   *  --rule-gap-above  From the previous sub-team's last card down to this
+   *                    rule. Smaller pulls the rule up, closer to what it's
+   *                    closing off. Don't go below ~20px: a hovered card
+   *                    throws a `0 34px 60px -30px` glow that reaches past
+   *                    its own bottom edge, and the rule will cut it.
+   *  --rule-gap-below  From the rule down to this sub-team's title. Keep it
+   *                    clearly larger than the gap above — that difference
+   *                    is the whole signal that the rule ends the section
+   *                    above rather than floating between two of them.
+   * ================================================================== */
+  --rule-gap-above: 22px;
+  --rule-gap-below: 34px;
+
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px 48px 0;
+  padding: var(--rule-gap-above) 48px 0;
   scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
 }
 
@@ -306,7 +322,7 @@
   gap: 16px;
   flex-wrap: wrap;
   margin: 0 0 16px;
-  padding-top: 16px;
+  padding-top: var(--rule-gap-below);
   border-top: 1px solid rgb(46 46 46 / 0.9);
 }
 
@@ -532,44 +548,58 @@
 
   /* --- hero ---------------------------------------------------------------
    *
-   * Stops being a full-bleed 100svh crop. Both crew photos are 4:3, and
-   * cropping 4:3 to a tall phone viewport throws away most of the team — the
-   * whole point of the shot. So the photo gets its own 4:3 band under the
-   * fixed navbar, and the copy sits below it in normal flow.
+   * Same shape as desktop: the photo runs full-bleed from the very top with
+   * the navbar floating over it, and the copy sits *on* the picture, dissolving
+   * into the page at the bottom.
+   *
+   * The previous version parked the photo in a band under the navbar with the
+   * copy stacked below. That gave the photo a hard edge top and bottom, put a
+   * strip of flat navy behind the theme toggle, and left the copy stranded on
+   * background instead of on the image.
+   *
+   * The one thing that can't be copied from desktop is `height: 100svh`. A
+   * desktop viewport is landscape, so a 4:3 photo covers it with barely any
+   * crop; a phone viewport is about 1:2, and covering that would show roughly
+   * a third of the group. So the height comes from the photo's own aspect
+   * instead, and the copy overlaps its faded bottom rather than sitting below.
    * ---------------------------------------------------------------------- */
   .hero {
     /* ===================================================================
-     * HERO FRAMING — the three numbers to tune. Both crew photos are 4:3
-     * (1280x960), so at zoom 1 the image exactly fills the screen width and
-     * nothing is cropped either way.
+     * HERO FRAMING — the numbers to tune. Both crew photos are 4:3
+     * (1280x960), so at zoom 1 with band 75vw the photo fills the width
+     * exactly and nothing is cropped either way.
      *
-     *  --hero-zoom   How much bigger than screen-width the photo is drawn.
-     *                1 = no zoom. 1.12 = people 12% bigger, and the only
-     *                horizontal crop there is: (zoom - 1) / 2 off each edge,
-     *                so 6% a side at 1.12. Raise this to push in; this is
-     *                the one to watch, since it's what costs you the edges
-     *                of the group.
-     *  --hero-band   Height of the photo strip. Lower crops more off the
-     *                top and bottom (free — costs nothing horizontally) and
-     *                makes the shot read tighter. In vw so it tracks any
-     *                screen width.
-     *  --hero-focus  Which slice survives that vertical crop. 0% keeps the
-     *                top, 100% the bottom, 50% is centred. Lower it to keep
-     *                heads and drop foreground.
+     *  --hero-zoom     Magnification. 1 = none. The only horizontal crop
+     *                  there is: (zoom - 1) / 2 off each edge, so 3% a side
+     *                  at 1.06. This is the one to watch — it's what costs
+     *                  you the people at the ends of the group.
+     *  --hero-band     Height of the photo. Above 75vw it crops the sides
+     *                  as well, below it crops top and bottom (free). Also
+     *                  sets how much of the screen the hero fills.
+     *  --hero-focus    Which slice survives a vertical crop. 0% keeps the
+     *                  top, 100% the bottom.
+     *  --hero-overlap  How far the copy rides up onto the photo's faded
+     *                  bottom. Larger = text further over the picture,
+     *                  which is what makes it read like the desktop hero.
      * =================================================================== */
-    --hero-zoom: 1.12;
-    --hero-band: 66vw;
-    --hero-focus: 40%;
+    /*
+     * 82vw, not the 100svh desktop uses: covering a ~1:2 phone viewport with a
+     * 4:3 photo would crop ~22% off each side and cut the people at the ends
+     * of the group. At 82vw the side crop is 4.7%, which keeps everyone in.
+     */
+    --hero-zoom: 1.04;
+    --hero-band: 82vw;
+    --hero-focus: 42%;
+    --hero-overlap: 72px;
 
     height: auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    /* Nav clearance + the band the absolutely-positioned photos fill. The
-       --nav-height token describes the desktop pill; on a phone Navbar.tsx
-       renders a 44px button at top:20px instead, so 76px clears it with air
-       to spare. */
-    padding-top: calc(76px + var(--hero-band));
+    /* The photos are absolutely positioned, so this is what gives the hero
+       their height. No nav offset: the navbar floats over the photo here, the
+       same way it does on desktop. */
+    padding-top: var(--hero-band);
   }
   /*
    * The photo band is exactly the screen width; the zoom is a scale on top of
@@ -583,7 +613,7 @@
    * year switch still drifts.
    */
   .heroPhoto {
-    top: 76px;
+    top: 0;
     bottom: auto;
     left: 0;
     right: 0;
@@ -597,24 +627,35 @@
   .heroPhotoActive {
     transform: scale(var(--hero-zoom));
   }
-  /* The scrim was fading a full-bleed photo into the page; now it only has the
-     photo's own bottom edge to soften. */
+  /*
+   * Same job as the desktop scrim: darken the top just enough that the floating
+   * navbar reads against the sky, stay out of the way through the middle where
+   * the people are, then run all the way to the page colour at the bottom so
+   * the photo dissolves into the page instead of ending on a line. That last
+   * stop is the fix for the "gradient is shifted up" hard edge — it used to
+   * stop at 0.92 and leave a visible seam.
+   */
   .heroScrim {
-    top: 76px;
+    top: 0;
     bottom: auto;
     height: var(--hero-band);
     background: linear-gradient(
       180deg,
-      rgb(20 26 38 / 0.28) 0%,
-      rgb(20 26 38 / 0) 26%,
-      rgb(20 26 38 / 0) 70%,
-      rgb(20 26 38 / 0.92) 100%
+      rgb(20 26 38 / 0.55) 0%,
+      rgb(20 26 38 / 0) 18%,
+      rgb(20 26 38 / 0) 52%,
+      rgb(20 26 38 / 0.72) 78%,
+      rgb(20 26 38 / 0.95) 91%,
+      #141a26 100%
     );
   }
+  /* Rides up onto that dissolve, so the copy sits on the picture the way it
+     does on desktop rather than starting below it on flat background. */
   .heroCopy {
     position: static;
     order: 1;
-    padding: 18px 16px 8px;
+    margin-top: calc(-1 * var(--hero-overlap));
+    padding: 0 16px 4px;
   }
   /* Below the year tabs rather than over them — `order` because the hint
      precedes the copy in the DOM, where it belongs for the absolute layout. */
@@ -622,7 +663,7 @@
     position: static;
     order: 2;
     bottom: auto;
-    padding-bottom: 26px;
+    padding-bottom: 8px;
   }
 
   /* --- leadership ---------------------------------------------------------
@@ -633,6 +674,12 @@
    * follows the DOM, which is the trade for not reshaping the [left, centre,
    * right] contract the desktop layout is built on.
    * ---------------------------------------------------------------------- */
+  /* 88px of air below the hero hint left a screen's worth of empty navy
+     before "LEADERSHIP". The hint already provides the breathing room. */
+  .leadership {
+    padding-top: 40px;
+  }
+
   /* Same "close above, wide below" ratio as desktop, scaled to the screen.
      40px still clears the card glow; the gap below just doesn't need 72px
      when the division name is already the biggest thing on the page. */
@@ -717,8 +764,14 @@
     max-width: 250px;
   }
 
-  /* The vice row — a step above members, a step below the lead. */
-  .gridRanked > * {
+  /*
+   * A vice is a step above members and a step below the lead — sized by the
+   * card's own rank rather than by a class on its row, because a small
+   * sub-team puts the vice and the members in the *same* row (2025's
+   * Propulsion is a lead, one vice and two members, which fits one row), and
+   * there the row can't say which card is which.
+   */
+  .grid > *[data-tier="vice"] {
     max-width: 275px;
   }
 
