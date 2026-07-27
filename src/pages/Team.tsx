@@ -133,7 +133,9 @@ export default function Team({
               cardRow(people, styles.grid)
             ) : (
               <>
-                {cardRow(vices, styles.grid)}
+                {/* Same grid as the members, plus a hook so the phone layout can
+                    keep vices a size above them — see .gridRanked. */}
+                {cardRow(vices, `${styles.grid} ${styles.gridRanked}`)}
                 {/* One row per `breakBefore` group — normally just the one. */}
                 {splitRows(grid).map((row, i) => cardRow(row, styles.grid, i))}
               </>
@@ -181,7 +183,14 @@ export default function Team({
           aria-hidden
           style={{ opacity: hintOpacity, transform: `translateY(${hintShift}px)` }}
         >
-          <span className={styles.heroHintText}>Hover a card to reveal the person</span>
+          {/* Two copies, one per input model — CSS shows whichever matches, so
+              a phone isn't told to hover something it can't. */}
+          <span className={`${styles.heroHintText} ${styles.heroHintHover}`}>
+            Hover a card to reveal the person
+          </span>
+          <span className={`${styles.heroHintText} ${styles.heroHintTap}`}>
+            Tap a card to reveal the person
+          </span>
           <svg
             className={styles.heroHintArrow}
             width="20"

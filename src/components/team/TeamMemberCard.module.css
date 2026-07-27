@@ -36,6 +36,18 @@
   --name-behind: color-mix(in srgb, var(--card-accent) 78%, #ffffff);
   --ease-move: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-img: cubic-bezier(0.16, 0.84, 0.34, 1);
+  /*
+   * Hover timings, in one place. Everything the pointer drives stays under
+   * 300ms: scanning a roster crosses dozens of these, and past ~300ms a
+   * reveal you trigger that often reads as lag rather than as elegance. The
+   * portrait swap gets the longest budget because it's the largest change on
+   * screen; the small tags get the shortest. Previously 350-700ms.
+   */
+  --t-lift: 200ms;
+  --t-panel: 220ms;
+  --t-fade: 240ms;
+  --t-img: 280ms;
+  --t-tags: 180ms;
 
   position: relative;
   display: block;
@@ -44,10 +56,11 @@
   container-type: inline-size;
   border-radius: 16px;
   overflow: hidden;
-  cursor: pointer;
+  /* Nothing happens on click on a pointer device — the reveal is hover. */
+  cursor: default;
   background: #242424;
   box-shadow: 0 8px 24px -14px rgb(0 0 0 / 0.6);
-  transition: transform 0.45s var(--ease-move), box-shadow 0.45s ease;
+  transition: transform var(--t-lift) var(--ease-move), box-shadow var(--t-lift) ease;
 }
 
 .card:is(:hover, :focus-visible, :has(:focus-visible)) {
@@ -100,7 +113,7 @@
   inset: 0;
   filter: grayscale(1) contrast(1.02) brightness(0.9);
   transform: scale(1);
-  transition: filter 0.55s ease, opacity 0.5s ease, transform 0.7s var(--ease-img);
+  transition: filter var(--t-img) ease, opacity var(--t-fade) ease, transform var(--t-img) var(--ease-img);
 }
 
 .photoLayer img {
@@ -167,7 +180,7 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity var(--t-fade) ease;
 }
 
 .backdrop {
@@ -189,7 +202,7 @@
   opacity: 0;
   transform: scale(0.72) translateY(3%);
   transform-origin: bottom center;
-  transition: opacity 0.5s ease, transform 0.7s var(--ease-img);
+  transition: opacity var(--t-fade) ease, transform var(--t-img) var(--ease-img);
 }
 
 .cutoutLayer img {
@@ -218,7 +231,7 @@
   justify-content: center;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity var(--t-fade) ease;
 }
 
 /* The actual text — sized naturally, then squeezed/stretched horizontally by
@@ -265,7 +278,7 @@
   );
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity var(--t-fade) ease;
 }
 
 .card:is(:hover, :focus-visible, :has(:focus-visible)) .topScrim {
@@ -281,7 +294,7 @@
   margin: 0;
   pointer-events: none;
   opacity: 1;
-  transition: opacity 0.35s ease;
+  transition: opacity var(--t-tags) ease;
 }
 
 .restRole {
@@ -331,7 +344,7 @@
   );
   opacity: 0;
   transform: translateY(30%);
-  transition: opacity 0.45s ease, transform 0.5s var(--ease-move);
+  transition: opacity var(--t-panel) ease, transform var(--t-panel) var(--ease-move);
 }
 
 .card:is(:hover, :focus-visible, :has(:focus-visible)) .panel {
@@ -456,30 +469,61 @@
 
 /* --- touch + accessibility ------------------------------------------------ */
 
-/* No hover on touch: show the info panel outright instead of hiding the
-   person's details behind an interaction that device can't perform. */
+/*
+ * Touch: tap is the hover.
+ *
+ * The card rests on its first face — portrait, role, name — and a tap plays
+ * the same reveal a pointer gets, driven by data-open from the component. Tap
+ * again to go back. Previously this breakpoint forced the panel permanently
+ * open, so a phone only ever saw the second face and the first was
+ * unreachable; now both are, and the transitions are the same ones the
+ * pointer path uses, so the two input models look identical in motion.
+ *
+ * Scoped to (hover: none) on purpose: it's what keeps a mouse click inert.
+ * The component toggles data-open unconditionally, and on a pointer device
+ * nothing below matches, so the flag has no effect on screen.
+ */
 @media (hover: none) {
-  .photoLayer {
-    filter: grayscale(0);
+  .card[data-open="true"] {
+    transform: translateY(-6px);
+    box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
   }
-  .panel {
-    opacity: 1;
-    transform: none;
+  .card[data-mode="photo"][data-open="true"] .photoLayer {
+    filter: grayscale(0) contrast(1) brightness(1);
+    transform: scale(1.05);
   }
-  .restRole,
-  .restName {
+  .card[data-mode="cutout"][data-open="true"] .photoLayer {
     opacity: 0;
   }
-  .card[data-mode="cutout"] .cutoutLayer,
-  .card[data-mode="cutout"] :is(.backdrop, .backdropScrim),
-  .card[data-mode="cutout"] .bigNameBack {
+  .card[data-open="true"] :is(.backdrop, .backdropScrim) {
     opacity: 1;
   }
-  .card[data-mode="cutout"] .cutoutLayer {
+  .card[data-open="true"] .cutoutLayer {
+    opacity: 1;
     transform: scale(0.9);
   }
-  .card[data-mode="cutout"] .photoLayer {
+  .card[data-open="true"] .bigNameBack {
+    opacity: 1;
+  }
+  .card[data-open="true"] .bigNameFront {
+    opacity: 0.9;
+  }
+  .card[data-open="true"] .topScrim {
+    opacity: 0.9;
+  }
+  .card[data-open="true"] :is(.restRole, .restName) {
     opacity: 0;
+  }
+  .card[data-open="true"] .panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* A tap target the size of a fingertip. The pill was ~23px tall, which is
+     half of the ~44px a thumb actually needs to hit reliably. */
+  .linkedIn {
+    min-height: 40px;
+    padding: 9px 14px;
   }
 }
 

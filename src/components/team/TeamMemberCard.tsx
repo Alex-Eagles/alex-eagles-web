@@ -88,12 +88,22 @@ export function TeamMemberCard({
    * brand blue we want for the team-wide roles. */
   const cardAccent = memberAccent(member);
 
+  /*
+   * Touch reveal. A pointer device has hover, so the reveal follows the
+   * pointer and this flag is ignored — the stylesheet only acts on it inside
+   * `@media (hover: none)`. So the handler can stay unconditional: on a mouse
+   * a click still toggles this, and still does nothing at all on screen.
+   */
+  const [open, setOpen] = useState(false);
+
   return (
     <article
       className={styles.card}
       data-mode={cutout ? "cutout" : "photo"}
+      data-open={open}
       style={{ "--card-accent": cardAccent } as CSSProperties}
       tabIndex={0}
+      onClick={() => setOpen((o) => !o)}
       aria-label={filled ? `${member.name}, ${roleLabel}` : `Unfilled ${roleLabel} slot`}
     >
       <div className={styles.inner}>
@@ -181,6 +191,8 @@ export function TeamMemberCard({
                 href={member.linkedIn}
                 target="_blank"
                 rel="noreferrer"
+                /* Tapping the link shouldn't also collapse the panel it sits in. */
+                onClick={(e) => e.stopPropagation()}
                 aria-label={`${name} on LinkedIn`}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>

@@ -76,6 +76,21 @@
   text-shadow: 0 2px 12px rgb(0 0 0 / 0.5);
 }
 
+/* One hint per input model — a touch device can't hover, so it shouldn't be
+   told to. Keyed on the input, not the width: an iPad is wide *and* touch. */
+.heroHintTap {
+  display: none;
+}
+
+@media (hover: none) {
+  .heroHintHover {
+    display: none;
+  }
+  .heroHintTap {
+    display: inline;
+  }
+}
+
 .heroHintArrow {
   animation: crewBob 1.6s ease-in-out infinite;
 }
@@ -491,11 +506,85 @@
   .pageFooter {
     padding-inline: 16px;
   }
-  /* Keep content clear of the fixed PULL tab — 40px wide at right:10px on this
+  /* Keep cards clear of the fixed PULL tab — 40px wide at right:10px on this
      breakpoint, so 56px leaves it a hair of daylight. */
+  .leadership,
   .section,
   .divisionHeads {
     padding-right: 56px;
+  }
+
+  /* --- hero ---------------------------------------------------------------
+   *
+   * Stops being a full-bleed 100svh crop. Both crew photos are 4:3, and
+   * cropping 4:3 to a tall phone viewport throws away most of the team — the
+   * whole point of the shot. So the photo gets its own 4:3 band under the
+   * fixed navbar, and the copy sits below it in normal flow.
+   * ---------------------------------------------------------------------- */
+  .hero {
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    /* Nav clearance + the band the absolutely-positioned photos fill. The
+       --nav-height token describes the desktop pill; on a phone Navbar.tsx
+       renders a 44px button at top:20px instead, so 76px clears it with air
+       to spare. 75vw is the 4:3 photo's height at full width. */
+    padding-top: calc(76px + 75vw);
+  }
+  .heroPhoto {
+    top: 76px;
+    bottom: auto;
+    height: 75vw;
+    /* contain, not cover: whatever ratio the screen turns out to be, the whole
+       team stays in frame. At the photos' native 4:3 the two are identical, so
+       a normal phone letterboxes by nothing at all. */
+    object-fit: contain;
+  }
+  /* The scrim was fading a full-bleed photo into the page; now it only has the
+     photo's own bottom edge to soften. */
+  .heroScrim {
+    top: 76px;
+    bottom: auto;
+    height: 75vw;
+    background: linear-gradient(
+      180deg,
+      rgb(20 26 38 / 0.28) 0%,
+      rgb(20 26 38 / 0) 26%,
+      rgb(20 26 38 / 0) 70%,
+      rgb(20 26 38 / 0.92) 100%
+    );
+  }
+  .heroCopy {
+    position: static;
+    order: 1;
+    padding: 18px 16px 8px;
+  }
+  /* Below the year tabs rather than over them — `order` because the hint
+     precedes the copy in the DOM, where it belongs for the absolute layout. */
+  .heroHint {
+    position: static;
+    order: 2;
+    bottom: auto;
+    padding-bottom: 26px;
+  }
+
+  /* --- leadership ---------------------------------------------------------
+   *
+   * The row renders [vice, leader, EM] because on desktop the centre slot is
+   * the raised one. Stacked, that order reads as the vice outranking the
+   * leader, so re-order to leader → vice → EM. Visual only: tab order still
+   * follows the DOM, which is the trade for not reshaping the [left, centre,
+   * right] contract the desktop layout is built on.
+   * ---------------------------------------------------------------------- */
+  .leadershipRow > *:nth-child(1) {
+    order: 2;
+  }
+  .leadershipRow > *:nth-child(2) {
+    order: 1;
+  }
+  .leadershipRow > *:nth-child(3) {
+    order: 3;
   }
 
   .sectionBody {
@@ -504,17 +593,26 @@
     gap: 16px;
   }
 
-  /* The lead sits alone and centred. Wider than a member card, since stacking
-     costs the size contrast the desktop lead column gets from sitting in its
-     own 280px track. Co-leads wrap to their own line rather than shrinking. */
+  /*
+   * Rank has to survive the stack. On desktop a lead reads as senior because
+   * it sits in its own 280px track beside ~242px members; once everything is
+   * one-per-row that cue is gone, so the sizes below carry it explicitly:
+   *
+   *   lead / head   300px
+   *   vice          275px
+   *   member        250px
+   *
+   * All three clear the 190px container query in the card, so every card on a
+   * phone gets full-size type and a fingertip-sized LinkedIn pill.
+   */
   .sectionBody .leadRow {
     flex-direction: row;
     justify-content: center;
     width: 100%;
-    gap: 12px;
+    gap: 14px;
   }
   .sectionBody .leadRow > * {
-    width: min(58%, 230px);
+    width: min(100%, 300px);
   }
 
   /* Was the vertical rule beside the lead column. Short and centred so it
@@ -531,30 +629,34 @@
   }
 
   /*
-   * Members size themselves rather than being pinned to a fixed count: as many
-   * columns as fit at a readable width, which lands on 2 across a phone and 3
-   * across a large phone or small tablet.
-   *
-   * Why not a hard 3: the content box on a 390px screen is 318px, so three
-   * tracks would be ~98px a card — 98x132 including the portrait, the name and
-   * the info panel that touch devices show outright. That is smaller than a
-   * thumbnail, and unreadable cards are the thing this breakpoint exists to
-   * fix. 148px is the narrowest the card still reads at, so it's the floor the
-   * column count is derived from.
+   * One card per row, centred. A phone only ever shows one of these at a
+   * legible size anyway, so splitting the width two ways bought a second card
+   * at the cost of both being too small to read. Tablets are above this
+   * breakpoint and keep their two-up grid.
    */
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 14px;
     width: 100%;
     max-width: 100%;
   }
+  .grid > * {
+    max-width: 250px;
+  }
 
-  /* Division heads stay two-up — they're a pair, not a lead-plus-grid. */
+  /* The vice row — a step above members, a step below the lead. */
+  .gridRanked > * {
+    max-width: 275px;
+  }
+
+  /* Division heads outrank every section, so they take the lead card's size
+     rather than splitting the row between them. */
   .divisionHeads .leadRow {
-    gap: 12px;
+    gap: 14px;
   }
   .divisionHeads .leadRow > * {
-    width: calc(50% - 6px);
+    width: min(100%, 300px);
   }
 }
 

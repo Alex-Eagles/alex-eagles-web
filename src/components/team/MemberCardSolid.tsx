@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { useState } from "react";
 import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
@@ -37,10 +38,20 @@ export function MemberCardSolid({
   const tier = memberTier(member);
   const roleLabel = memberRoleLabel(member);
 
+  /*
+   * Touch reveal — see TeamMemberCard. The stylesheet only acts on this inside
+   * `@media (hover: none)`, so on a pointer device the reveal stays hover-only
+   * and a click still does nothing. Without it the panel (and the LinkedIn
+   * link in it) was unreachable on a phone, since there's no hover to give.
+   */
+  const [open, setOpen] = useState(false);
+
   return (
     <article
       className={styles.card}
       data-tier={tier}
+      data-open={open}
+      onClick={() => setOpen((o) => !o)}
       /* Every card carries its sub-team's colour — the badge, the big first
        * name, the panel role and (on lead tiers) the accent ring all read from
        * it, so a 2025 card is colour-coded to its section exactly like a 2026
@@ -114,6 +125,8 @@ export function MemberCardSolid({
               href={member.linkedIn}
               target="_blank"
               rel="noreferrer"
+              /* Tapping the link shouldn't also collapse the panel it sits in. */
+              onClick={(e) => e.stopPropagation()}
               aria-label={`${member.name} on LinkedIn`}
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>

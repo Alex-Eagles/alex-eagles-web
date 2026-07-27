@@ -6,8 +6,10 @@
  * Hover: the big first name fades in behind the person and an info panel rises,
  *        while the rest-state badge + name fade out.
  *
- * All motion is CSS, keyed off :hover / :focus-within, so the component never
- * re-renders on pointer movement.
+ * All motion is CSS, keyed off :hover / :focus-visible, so the component never
+ * re-renders on pointer movement. On touch, where there is no hover to give,
+ * a tap toggles data-open and plays the same reveal — see the (hover: none)
+ * block at the foot of this file.
  */
 
 .card {
@@ -17,6 +19,17 @@
      token on :root, so an unset inherited value would resolve to shadcn's
      near-white rather than falling back to the brand. */
   --card-accent: #3d3ecc;
+  /*
+   * Hover timings, in one place — same budget as the 2026 card so the two
+   * years move alike. Everything the pointer drives stays under 300ms:
+   * scanning a roster crosses dozens of these, and past ~300ms a reveal you
+   * trigger that often reads as lag rather than as elegance. Was 350-600ms.
+   */
+  --t-lift: 200ms;
+  --t-panel: 220ms;
+  --t-fade: 240ms;
+  --t-img: 280ms;
+  --t-tags: 180ms;
 
   position: relative;
   display: block;
@@ -29,7 +42,8 @@
   aspect-ratio: 0.74;
   border-radius: 16px;
   overflow: hidden;
-  cursor: pointer;
+  /* Nothing happens on click on a pointer device — the reveal is hover. */
+  cursor: default;
   background: linear-gradient(165deg, #242424 0%, #1a1a1a 100%);
   font-family: "Archivo", system-ui, sans-serif;
   box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.6);
@@ -37,8 +51,8 @@
   /* Establish a container so the big name can size to the card width. */
   container-type: inline-size;
   transition:
-    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.4s ease;
+    transform var(--t-lift) cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow var(--t-lift) ease;
 }
 
 .card:hover,
@@ -83,7 +97,7 @@
   transform-origin: top;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity var(--t-fade) ease;
   /* The <text> fills with currentColor. Lifted towards white the way the old
      hand-picked #6b6fc7 sat above the brand blue, so it stays legible over the
      dark backdrop whatever the sub-team colour is. */
@@ -107,7 +121,7 @@
   object-position: center;
   transform: scale(1);
   transform-origin: bottom center;
-  transition: transform 0.6s cubic-bezier(0.16, 0.84, 0.34, 1);
+  transition: transform var(--t-img) cubic-bezier(0.16, 0.84, 0.34, 1);
 }
 
 .card:hover .photo,
@@ -140,7 +154,7 @@
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  transition: opacity 0.35s ease;
+  transition: opacity var(--t-tags) ease;
 }
 
 /* Rest-state name. */
@@ -157,7 +171,7 @@
   letter-spacing: -0.01em;
   line-height: 1.1;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
-  transition: opacity 0.35s ease;
+  transition: opacity var(--t-tags) ease;
 }
 
 .card:hover .badge,
@@ -183,8 +197,8 @@
   opacity: 0;
   transform: translateY(30%);
   transition:
-    opacity 0.45s ease,
-    transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    opacity var(--t-panel) ease,
+    transform var(--t-panel) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .card:hover .panel,
@@ -252,6 +266,53 @@
 .linkedin:hover {
   color: #f2f2f2;
   border-color: var(--card-accent);
+}
+
+/* --- touch ----------------------------------------------------------------
+ *
+ * Tap is the hover. There's no pointer to follow here, so a tap toggles
+ * data-open on the card and plays exactly the reveal a mouse would get — same
+ * properties, same transitions, so both input models look identical in motion.
+ * Before this the panel was simply unreachable on a phone, and with it the
+ * member's department, class year and LinkedIn link.
+ *
+ * Scoped to (hover: none) on purpose: it's what keeps a mouse click inert. The
+ * component toggles data-open unconditionally, and on a pointer device nothing
+ * in here matches, so the flag has no effect on screen.
+ * -------------------------------------------------------------------------*/
+@media (hover: none) {
+  .card[data-open="true"] {
+    transform: translateY(-6px);
+    box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
+  }
+  /* Lead/vice/head keep their ring while lifted, same as the hover rules. */
+  .card[data-tier="lead"][data-open="true"],
+  .card[data-tier="vice"][data-open="true"],
+  .card[data-tier="head"][data-open="true"] {
+    box-shadow:
+      0 34px 60px -30px color-mix(in srgb, var(--card-accent) 55%, transparent),
+      inset 0 0 0 2px var(--card-accent);
+  }
+  .card[data-open="true"] .bigName {
+    opacity: 0.9;
+  }
+  .card[data-open="true"] .photo {
+    transform: scale(1.05);
+  }
+  .card[data-open="true"] :is(.badge, .restName) {
+    opacity: 0;
+  }
+  .card[data-open="true"] .panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* A tap target the size of a fingertip. The pill was ~23px tall, which is
+     half of the ~44px a thumb actually needs to hit reliably. */
+  .linkedin {
+    min-height: 40px;
+    padding: 9px 14px;
+  }
 }
 
 /* --- narrow cards ---------------------------------------------------------
