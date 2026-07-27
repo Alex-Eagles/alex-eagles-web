@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
-  isLeadTier,
+  memberAccent,
   memberCutout,
   memberFirstName,
   memberName,
@@ -10,7 +10,6 @@ import {
   memberRoleLabel,
   memberYearLabel,
   roleTier,
-  subTeamAccent,
   type TeamMember,
 } from "@/data/team";
 import styles from "./MemberCardSolid.module.css";
@@ -34,18 +33,21 @@ export function MemberCardSolid({
   const filled = hasName(member);
   const name = memberName(member);
   const firstName = memberFirstName(member);
-  const accent = subTeamAccent(member.department);
+  const accent = memberAccent(member);
   const tier = roleTier(member.role);
-  const lead = isLeadTier(tier);
   const roleLabel = memberRoleLabel(member);
 
   return (
     <article
       className={styles.card}
       data-tier={tier}
-      /* Lead-tier cards tint their accent ring with the sub-team colour, set as
-       * a custom property so the stylesheet owns the actual treatment. */
-      style={lead ? ({ "--accent": accent } as CSSProperties) : undefined}
+      /* Every card carries its sub-team's colour — the badge, the big first
+       * name, the panel role and (on lead tiers) the accent ring all read from
+       * it, so a 2025 card is colour-coded to its section exactly like a 2026
+       * one. Team Leader / Vice Lead / EM Integration Lead keep the brand,
+       * which `memberAccent` handles. Named `--card-accent`, not `--accent`,
+       * because the latter is a shadcn theme token on :root. */
+      style={{ "--card-accent": accent } as CSSProperties}
       tabIndex={0}
       aria-label={filled ? `${member.name}, ${roleLabel}` : `Unfilled ${roleLabel} slot`}
     >
@@ -75,7 +77,8 @@ export function MemberCardSolid({
             fontWeight="900"
             fontSize="190"
             letterSpacing="-0.03em"
-            fill="#6b6fc7"
+            /* Colour comes from the stylesheet so it can track --card-accent. */
+            fill="currentColor"
           >
             {firstName}
           </text>

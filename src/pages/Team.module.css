@@ -361,21 +361,38 @@
  * one row up, for vices (same card size, so rank there reads through the
  * accent ring rather than a bigger card).
  */
+/*
+ * Three to a row, as an explicit grid rather than fixed-width flex items that
+ * happen to wrap. Flex wrapping made the count depend on arithmetic between the
+ * lead column, the gutters and the viewport, so a section could silently drop
+ * to two-up on a narrower window; equal fractional tracks pin it at three.
+ *
+ * The width that leaves: the section is 1200px capped with 48px gutters, so
+ * 1104px of content, less the 280px lead column, the 1px divider and its two
+ * 28px gaps = 767px, less two 20px gaps = ~242px a card. That still clears the
+ * hover panel's footer, which needs ~185px to keep "CLASS OF <year>" on one
+ * line beside the LinkedIn pill.
+ *
+ * max-width caps a section that has *no* lead column — without it those tracks
+ * would spread across the full 1104px and inflate the cards to ~355px, so
+ * member cards would jump size between sections.
+ */
 .grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+  max-width: 770px;
 }
 
 .grid > * {
-  /* 250, not the old 205. The hover panel stacks role, name, sub-team and a
-     footer of "CLASS OF <year>" beside a LinkedIn pill; at 205px the footer
-     had ~169px of usable width for ~185px of content, so the year wrapped to
-     two lines and squeezed the pill. 250px gives the footer ~214px and the
-     whole panel room to breathe. Lead and leadership cards are unchanged, so
-     rank still reads through size. */
-  width: 250px;
   max-width: 100%;
+}
+
+/* Two-up once three would squeeze below a comfortable reading width. */
+@media (max-width: 1180px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* --- rank rows ----------------------------------------------------------- */
@@ -394,15 +411,19 @@
 }
 
 .leadRow > * {
-  /* Bigger than a grid card (205px), so leads dominate their section. */
+  /* Bigger than a grid card (~242px), so leads dominate their section. Held at
+     280 rather than grown: the section is 1200px wide minus 48px gutters, so
+     every px here comes straight out of the three member tracks beside it. */
   width: 280px;
   max-width: 100%;
 }
 
 .sectionBody .leadRow {
-  /* Wraps rather than forcing a single column, so a lone lead sits alone
-     and co-leads (Hana + Rodyna, Mazen + Sara) sit side by side. */
+  /* One card per row: co-leads (Mazen + Sara on Software, Hana + Rodyna) stack
+     down the left column in roster order instead of sitting side by side and
+     eating the width the member grid needs for three-up. */
   flex: none;
+  flex-direction: column;
   justify-content: flex-start;
 }
 
@@ -487,10 +508,8 @@
   }
   /* Members go two-up, still centred, on a phone. */
   .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
-  }
-  .grid > * {
-    width: calc(50% - 7px);
   }
   /* Keep the last card clear of the fixed PULL tab. */
   .section,

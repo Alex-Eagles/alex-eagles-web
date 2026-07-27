@@ -3,26 +3,16 @@ import { useLayoutEffect, useRef, useState } from "react";
 import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
+  memberAccent,
   memberCutout,
   memberFirstName,
   memberName,
   memberPhoto,
   memberRoleLabel,
   memberYearLabel,
-  subTeamAccent,
   type TeamMember,
 } from "@/data/team";
 import styles from "./TeamMemberCard.module.css";
-
-/** Brand blue — the fallback, and what the three team-wide roles always use. */
-const BRAND_ACCENT = "#3d3ecc";
-
-/**
- * Roles that sit above any one sub-team, so they keep the brand colour instead
- * of borrowing a section's. Everyone else — section leads, vices, members —
- * takes the colour of the sub-team they belong to.
- */
-const TEAM_WIDE_ROLES = new Set(["Team Leader", "Vice Lead", "EM Integration Lead"]);
 
 /**
  * The stretched first name behind the portrait — squeezed or stretched
@@ -96,9 +86,7 @@ export function TeamMemberCard({
    * the section wrapper: `--accent` is also a shadcn theme token defined on
    * :root, so an un-set inherited value would resolve to that instead of the
    * brand blue we want for the team-wide roles. */
-  const cardAccent = TEAM_WIDE_ROLES.has(member.role)
-    ? BRAND_ACCENT
-    : subTeamAccent(member.department);
+  const cardAccent = memberAccent(member);
 
   return (
     <article

@@ -11,6 +11,13 @@
  */
 
 .card {
+  /* Set inline by the component to the member's sub-team colour (brand blue for
+     the three team-wide roles). The value here only covers a card rendered
+     outside the component. Not called `--accent`: that name is a shadcn theme
+     token on :root, so an unset inherited value would resolve to shadcn's
+     near-white rather than falling back to the brand. */
+  --card-accent: #3d3ecc;
+
   position: relative;
   display: block;
   width: 100%;
@@ -68,6 +75,10 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s ease;
+  /* The <text> fills with currentColor. Lifted towards white the way the old
+     hand-picked #6b6fc7 sat above the brand blue, so it stays legible over the
+     dark backdrop whatever the sub-team colour is. */
+  color: color-mix(in srgb, var(--card-accent) 78%, #ffffff);
 }
 
 .card:hover .bigName,
@@ -113,9 +124,9 @@
   padding: 6px 12px;
   border-radius: 8px;
   background: rgba(26, 26, 26, 0.55);
-  border: 1px solid rgba(61, 62, 204, 0.5);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 50%, transparent);
   backdrop-filter: blur(6px);
-  color: #3d3ecc;
+  color: var(--card-accent);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.18em;
@@ -175,7 +186,7 @@
 
 .panelRole {
   margin: 0 0 6px;
-  color: #3d3ecc;
+  color: var(--card-accent);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -231,7 +242,7 @@
 
 .linkedin:hover {
   color: #f2f2f2;
-  border-color: #3d3ecc;
+  border-color: var(--card-accent);
 }
 
 /* ---------------------------------------------------------------------------
@@ -250,7 +261,7 @@
 .card[data-tier="head"] {
   box-shadow:
     0 8px 24px -14px rgba(0, 0, 0, 0.6),
-    inset 0 0 0 2px color-mix(in srgb, var(--accent, #3d3ecc) 85%, transparent);
+    inset 0 0 0 2px color-mix(in srgb, var(--card-accent) 85%, transparent);
 }
 
 .card[data-tier="lead"]:hover,
@@ -260,20 +271,20 @@
 .card[data-tier="head"]:hover,
 .card[data-tier="head"]:focus-visible {
   box-shadow:
-    0 34px 60px -30px color-mix(in srgb, var(--accent, #3d3ecc) 55%, transparent),
-    inset 0 0 0 2px var(--accent, #3d3ecc);
+    0 34px 60px -30px color-mix(in srgb, var(--card-accent) 55%, transparent),
+    inset 0 0 0 2px var(--card-accent);
 }
 
 /* A vice reads as a lead's second — a dashed ring instead of a solid one. */
 .card[data-tier="vice"] {
   box-shadow:
     0 8px 24px -14px rgba(0, 0, 0, 0.6),
-    inset 0 0 0 2px color-mix(in srgb, var(--accent, #3d3ecc) 55%, transparent);
+    inset 0 0 0 2px color-mix(in srgb, var(--card-accent) 55%, transparent);
 }
 
 /* A head card (division lead) gets a slightly heavier ring than a section lead. */
 .card[data-tier="head"] {
   box-shadow:
     0 10px 30px -14px rgba(0, 0, 0, 0.7),
-    inset 0 0 0 2.5px var(--accent, #3d3ecc);
+    inset 0 0 0 2.5px var(--card-accent);
 }

@@ -264,6 +264,29 @@ export function subTeamAccent(name: string): string {
   return `var(--team-${slugify(name)}, #3d3ecc)`;
 }
 
+/** Brand blue. The fallback, and what the three team-wide roles always use. */
+export const BRAND_ACCENT = "#3d3ecc";
+
+/**
+ * Roles that sit above any single sub-team, so they keep the brand colour
+ * rather than borrowing a section's.
+ */
+const TEAM_WIDE_ROLES: ReadonlySet<Role> = new Set<Role>([
+  "Team Leader",
+  "Vice Lead",
+  "EM Integration Lead",
+]);
+
+/**
+ * The colour a card should wear: its sub-team's, or the brand for the three
+ * team-wide roles. Lives here so both card designs (2025's MemberCardSolid and
+ * 2026's TeamMemberCard) resolve rank-vs-sub-team identically instead of each
+ * keeping its own copy of the rule.
+ */
+export function memberAccent(member: TeamMember): string {
+  return TEAM_WIDE_ROLES.has(member.role) ? BRAND_ACCENT : subTeamAccent(member.department);
+}
+
 /** Ids must be unique across years, since both rosters are built at once. */
 let slotCounter = 0;
 
