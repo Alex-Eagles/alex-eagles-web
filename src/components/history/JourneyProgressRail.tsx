@@ -69,11 +69,11 @@
  * chrome silently changes this. Same look, independent dials.
  *
  * ─── AND WHY IT IS GLASS ONLY ON A DESKTOP POINTER ──────────────────────────
- * On touch the rail and its panel are opaque instead. Blurring a live WebGL
- * canvas is ruinous on a phone, and because the glass fill is only 8-10% the
- * panel had no surface of its own to fall back on while the blur resolved —
- * it opened transparent and filled in a beat later. See the note above
- * `useFinePointer` for the full account.
+ * On touch the rail and its panel stay translucent but drop the blur. Blurring
+ * a live WebGL canvas is ruinous on a phone, and because the glass fill is
+ * only 8-10% the panel had no surface of its own to fall back on while the
+ * blur resolved — it opened transparent and filled in a beat later. The
+ * transparency was never the cost; see the note above `useFinePointer`.
  *
  * ─── IT NEVER RE-RENDERS WHILE YOU SCROLL ───────────────────────────────────
  * Same rule as the rest of this page (see useScrollProgress): progress is a
@@ -107,18 +107,21 @@ const RAIL = {
    * 26 is the current setting. Below about 18 the fill stops being legible
    * as a proportion and starts looking like a dot.
    *
-   * NB the rail is now a button, so its total width doubles as a touch
-   * target: barWidth 26 + 2×padX 9 = 44, exactly the 44px minimum. Going
-   * thinner means widening padX to compensate, or the tap target shrinks
-   * below it.
+   * NB the rail is a button, so its total width doubles as a touch target:
+   * barWidth + 2×padX must clear 44px. It did not — the bar was narrowed from
+   * 26 to 25 at some point without widening padX to compensate, exactly the
+   * failure this note warned about, leaving a 43px target. padX carries the
+   * extra now: 25 + 2×10 = 45.
+   *
+   * Change either number and redo that sum.
    */
   barWidth: 25,
   /** Bar thickness. Keep it well under barWidth or they stop reading as bars. */
   barHeight: 8,
   /** Vertical gap between bars. */
   barGap: 8,
-  /** Glass padding around the stack. */
-  padX: 9,
+  /** Glass padding around the stack. Also the tap target's slack — see barWidth. */
+  padX: 10,
   padY: 11,
 } as const;
 
@@ -163,8 +166,8 @@ const GLASS = {
     shadow: "0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10)",
     /** Unfilled bars are recessed into the glass, not sitting on top of it. */
     trackInset: "inset 0 1px 2px rgba(0,0,0,0.38)",
-    /** See SOLID below. */
-    solidFill: "#161a50",
+    /** See the note below on the no-blur surface. */
+    solidFill: "rgba(22, 26, 80, 0.90)",
     solidBorder: "rgba(148,158,240,0.30)",
   },
   light: {
@@ -175,11 +178,11 @@ const GLASS = {
     shadow:
       "0 10px 30px rgba(60,64,181,0.16), inset 0 1px 0 rgba(255,255,255,0.90)",
     trackInset: "inset 0 1px 2px rgba(60,64,181,0.16)",
-    solidFill: "#ffffff",
+    solidFill: "rgba(255, 255, 255, 0.90)",
     // A REAL edge, not the glass border above. That one is white at 80% — over
-    // a blurred scene it reads as a lit rim, but on an opaque white panel it is
-    // white on white, i.e. nothing. Without this the light-theme panel would
-    // have no outline at all against the pale scene behind it.
+    // a blurred scene it reads as a lit rim, but on a near-opaque white panel
+    // it is white on white, i.e. nothing. Without this the light-theme panel
+    // would have no outline at all against the pale scene behind it.
     solidBorder: "var(--border-solid)",
   },
 } as const;
@@ -210,14 +213,32 @@ const BACKDROP = "blur(20px) saturate(180%)";
  * transparent list then returns to the normal colour".
  *
  * The fix is not to make the blur faster. It is that a surface must not depend
- * on a filter to exist. On coarse pointers the panel gets a genuinely opaque
- * background and no backdrop-filter at all, so it is correct in the first
- * frame it is painted. Desktop keeps the real glass, where it costs nothing
- * and the effect was designed.
+ * on a filter to exist. On coarse pointers the panel drops backdrop-filter
+ * entirely, so it is correct in the first frame it is painted. Desktop keeps
+ * the real glass, where it costs nothing and the effect was designed.
  *
- * It is also the more legible panel of the two: opaque, the year and title sit
- * at 14.5:1 and 18.5:1 on their own surface instead of on whatever happened to
- * be behind the glass that second.
+ * ─── STILL TRANSLUCENT, BECAUSE TRANSPARENCY WAS NEVER THE EXPENSIVE PART ───
+ * Only the FILTER was. Alpha compositing is the single thing a GPU is best at:
+ * one multiply-add per pixel, no readback of what is behind, no separable
+ * convolution, no backdrop root to promote. A translucent panel with no
+ * backdrop-filter costs, for practical purposes, nothing — so there is no
+ * reason to make it opaque, and 10% of the scene shows through it.
+ *
+ * What caps the transparency is CONTRAST, not cost. Without a blur to even out
+ * what is behind it, the panel's own alpha is the only thing keeping the text
+ * off the scene, and the scene can put its travelling light directly behind
+ * the rail. Measured against the brightest thing it can put there (the light's
+ * near-white core, #d8f6ff):
+ *
+ *     alpha 1.00 → 6.36:1     alpha 0.90 → 4.88:1
+ *     alpha 0.95 → 5.62:1     alpha 0.88 → 4.61:1   ← the floor
+ *     alpha 0.92 → 5.15:1     alpha 0.85 → 4.18:1   ✗ fails AA
+ *
+ * 0.90 is the setting: visibly see-through, and still 4.88:1 in the worst
+ * frame the scene can produce — 6.5:1 in the ordinary case where the ground
+ * plane is what is behind it. Go lower and the achievement titles start
+ * failing exactly when the light sweeps past, which is the one moment someone
+ * is most likely to be looking.
  */
 
 /**
@@ -281,8 +302,9 @@ export default function JourneyProgressRail({
   const reduced = useReducedMotion();
   const glass = isDark ? GLASS.dark : GLASS.light;
 
-  // Real glass on a desktop pointer, an opaque panel everywhere else. See the
-  // note above SOLID for why this is a correctness fix and not a perf tweak.
+  // Real glass on a desktop pointer; translucent-but-unblurred everywhere else.
+  // See the note above `useFinePointer` for why that is a correctness fix and
+  // not a performance tweak.
   const finePointer = useFinePointer();
 
   /** The rail's and the panel's shared surface, in whichever mode is in force. */

@@ -113,6 +113,30 @@
     transition: background var(--transition-slow), color var(--transition-slow);
   }
 
+  /* ── Line breaking ────────────────────────────────────────────────────────
+   * `balance` evens out the lines of a heading instead of letting the last one
+   * hold a single orphaned word — the browser tries every break point and
+   * picks the set with the least ragged result. Capped at a few lines by the
+   * spec, which is why it is for headings only.
+   *
+   * `pretty` is the long-copy version: it does not balance, it just refuses to
+   * leave one word alone on the final line. Cheaper, and correct for
+   * paragraphs, where balancing every line would fight the reader's rhythm.
+   *
+   * Both degrade to normal wrapping where unsupported, so there is nothing to
+   * guard. Applied to the ELEMENTS rather than to utility classes so it covers
+   * headings the design system has not met yet. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
   /* Native smooth scrolling for in-page anchor links (#team, #vehicles …). */
   html {
     scroll-behavior: smooth;

@@ -94,10 +94,15 @@
    *
    * ⚠ This is a floor, not a free dial. The label is real text, and WCAG AA
    * wants 4.5:1 for the whole time it's on screen — not just at the bright end
-   * of a loop. 0.82 is where --text-secondary lands at ~4.6:1 on the dark page
-   * and ~5.3:1 on the light one; both are the tightest case, so anything lower
-   * puts the text under the bar for part of every cycle. Push it DOWN only if
-   * you re-check the contrast, or raise it freely.
+   * of a loop. At 0.82 the label bottoms out at 5.7:1 on the dark page and
+   * 5.4:1 on the light one, measured against the page it sits on. Push it DOWN
+   * only if you re-check the contrast, or raise it freely.
+   *
+   * The dark figure used to be ~4.6:1, i.e. the floor was set right at the
+   * edge. It has headroom now only because --text-secondary itself was
+   * brightened (see the note on the text ramp below); this dial did not move,
+   * and it is still the thing standing between a decorative pulse and text
+   * that dips under the bar once per cycle.
    *
    * The ARROW is the loud half of the gesture on purpose: it's decorative and
    * aria-hidden, so it carries no contrast obligation and swings much further
@@ -204,7 +209,18 @@
 
   /* Brand + accents */
   --brand: #3c40b5; /* Alex Eagles royal indigo            */
-  --brand-light: #5458cc; /* hover / active                      */
+  /* ── hover / active, AND the colour every eyebrow is set in ───────────────
+   * Lightened from #5458cc, which measured 2.81:1 on the card surface — under
+   * two thirds of the AA floor. It is never a background anywhere on the site,
+   * only ink and the focus ring, so raising it has no downstream victim and
+   * fixes five things at once: the `.eyebrow` above every SectionHeader, the
+   * Footer's column labels, the About link, the ghost Button's label, and the
+   * focus outline (which was also under the 3:1 floor for non-text).
+   *
+   * Hue and saturation are the original's; only lightness moved. Now 4.70:1 on
+   * the card and 6.2:1 on the page. The light theme keeps #2b2f9e — it was
+   * always fine there at 9.4:1. */
+  --brand-light: #7f82d9;
   --brand-glow: rgba(60, 64, 181, 0.25); /* glow behind brand elements          */
   --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
   --gold-hover: #fbbf24;
@@ -235,10 +251,28 @@
   --jump-row-hover: rgba(255, 255, 255, 0.09);
   --jump-row-active: rgba(57, 198, 255, 0.16);
 
-  /* Text (indigo-tinted, per brand) */
+  /* ── Text (indigo-tinted, per brand) ──────────────────────────────────────
+   * ⚠ A DARK SURFACE HAS A NARROW ACCESSIBLE BAND, and these three levels have
+   * to live inside it. Anything under about L* 55 fails AA on --bg-elevated,
+   * which is the lightest surface any of this text lands on — so the "dim"
+   * end of a dark ramp is far shallower than instinct suggests.
+   *
+   * --text-muted was #565a94 and measured 2.53:1 on a card: barely half the
+   * floor, on text as small as 11px (the Footer's legal line, the Competitions
+   * stat labels, the Publications year). Raising it to clear 4.5:1 necessarily
+   * pulls it up toward --text-secondary, so --text-secondary was lifted too,
+   * keeping an 11 L* gap between them — comfortably above the ~2 L* just-
+   * noticeable difference, so the two still read as different levels.
+   *
+   * The three now sit at L* 96 / 68 / 57, and 14.5:1 / 6.7:1 / 4.7:1 against
+   * the worst surface each appears on. Hue and saturation are untouched; only
+   * lightness moved. Do not push any of them back down without re-measuring —
+   * the muted one has under half a stop of headroom.
+   *
+   * The LIGHT theme is unchanged: it was already passing at 4.6-9.6:1. */
   --text-primary: #f0f2ff;
-  --text-secondary: #8b8fc8;
-  --text-muted: #565a94;
+  --text-secondary: #a0a3d2;
+  --text-muted: #8286b7;
 
   /* Borders */
   --border-subtle: rgba(60, 64, 181, 0.18);
