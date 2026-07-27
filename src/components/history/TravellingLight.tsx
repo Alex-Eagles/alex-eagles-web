@@ -203,12 +203,25 @@ export default function TravellingLight({
     <group ref={groupRef}>
       {/* Solid core. Basic (unlit) material — this object IS the light source
           conceptually, so shading it would be backwards. */}
+      {/* ─── THE SEGMENT COUNT IS A SILHOUETTE BUDGET, NOT A SHADING ONE ────
+          This carries a `meshBasicMaterial` in a flat colour, so nothing about
+          it is shaded: on screen it is a solid disc of `lightCore`. The ONLY
+          thing the geometry decides is the outline.
+
+          It was 8 + detail*4 around, i.e. a 12-sided ball at the tier phones
+          run — and a dodecagon's corners are plainly visible on the brightest,
+          most-watched object in the scene. The old numbers were budgeting for
+          a lit sphere's shading cost, which this sphere does not have.
+
+          24 around at that tier is 864 triangles for the whole ball. The path
+          tube beside it is eight thousand. This was never where the frame time
+          was going. */}
       <mesh>
         <sphereGeometry
           args={[
             LIGHT.coreRadius,
-            8 + quality.sphereDetail * 4,
-            6 + quality.sphereDetail * 3,
+            16 + quality.sphereDetail * 8,
+            12 + quality.sphereDetail * 6,
           ]}
         />
         <meshBasicMaterial color={coreColor} toneMapped={false} />

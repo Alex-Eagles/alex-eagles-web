@@ -185,7 +185,7 @@ export interface GlowStyle {
 }
 
 export const GLOW: Record<"dark" | "light", GlowStyle> = {
-  dark: { additive: true, haloOpacity: 0.55, coreOpacity: 0.9 },
+  dark: { additive: true, haloOpacity: 0.85, coreOpacity: 0.9 },
   // Alpha-composited, so these read as literal coverage rather than as added
   // brightness. The halo is pulled back a little: at 0.55 a 9-unit disc of
   // saturated blue laid straight over the pale floor stops being a glow and
@@ -535,7 +535,7 @@ export const LIGHT = {
   /** Radius of the solid core sphere. */
   coreRadius: 0.55,
   /** Size of the additive glow billboard (our cheap stand-in for bloom). */
-  glowSize: 9,
+  glowSize: 3,
   /** How far back along the path the bright trail fades out, in world units. */
   trailLength: 34,
   /** Light hovers slightly above the ground plane. */
@@ -582,7 +582,32 @@ export interface QualitySettings {
   sphereDetail: number;
   /** Whether to draw the fake blob shadows under props. */
   blobShadows: boolean;
-  /** Enable MSAA. Off on weak devices — it's a real cost for a subtle gain. */
+  /**
+   * Enable MSAA on the default framebuffer.
+   *
+   * ─── IT IS NOT THE EXPENSIVE OPTION, WHICH IS WHY IT IS ON AT `medium` ─────
+   * This used to be off for everything but `high`, on the reasonable-sounding
+   * theory that antialiasing is a luxury. It reads that way on paper and it is
+   * wrong on the two things this scene is actually made of.
+   *
+   * MSAA multisamples COVERAGE, not shading. The fragment shader still runs
+   * once per pixel — only the depth/stencil test and the colour write happen
+   * per sample. So the cost is memory bandwidth and a resolve, not shader
+   * work. And on a tile-based GPU, which is every phone, the multisample
+   * buffer lives in on-chip tile memory and only the RESOLVED tile is written
+   * to main memory: 4x MSAA there typically costs a low tens of percent, not
+   * 4x.
+   *
+   * Raising `maxDpr` instead — the intuitive alternative — multiplies shading
+   * AND bandwidth AND the resolve, for every pixel of the frame rather than
+   * just the edges. Going from dpr 1.25 to 1.5 is 44% more fragment work
+   * everywhere; MSAA at 1.25 buys better edges for less.
+   *
+   * And edges are the whole problem here. The scene is thin bright geometry on
+   * a dark ground — a path tube a few pixels wide and a small hot ball. That is
+   * the single worst case for no-AA rasterisation and the single best case for
+   * MSAA, which is exactly the trade this page should be taking.
+   */
   antialias: boolean;
 }
 
@@ -601,20 +626,27 @@ export const QUALITY: Record<"high" | "medium" | "low", QualitySettings> = {
     maxDpr: 1.5,
     dotGridExtent: 28,
     dotSpacing: 2.1,
-    pathRadialSegments: 6,
+    pathRadialSegments: 8,
     pathSegmentsPerUnit: 1.6,
     sphereDetail: 1,
     blobShadows: true,
-    antialias: false,
+    // ON, despite this being the tier phones start at — see the note above
+    // `antialias` in QualitySettings. MSAA is the cheap way out of exactly the
+    // aliasing this tier suffers from, and it is cheaper here than the extra
+    // resolution it replaces.
+    antialias: true,
   },
   low: {
     maxDpr: 1,
     dotGridExtent: 20,
     dotSpacing: 2.6,
-    pathRadialSegments: 4,
+    pathRadialSegments: 6,
     pathSegmentsPerUnit: 1,
     sphereDetail: 0,
     blobShadows: false,
+    // OFF only here. This tier is reached by FAILING a live framerate probe,
+    // so the device has already told us it cannot keep up; adding bandwidth to
+    // a machine that is missing frames is the wrong direction.
     antialias: false,
   },
 };
