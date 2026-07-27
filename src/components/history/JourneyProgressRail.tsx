@@ -68,6 +68,13 @@
  * future tuning here silently restyles the site's chrome, and any tuning of the
  * chrome silently changes this. Same look, independent dials.
  *
+ * ─── AND WHY IT IS GLASS ONLY ON A DESKTOP POINTER ──────────────────────────
+ * On touch the rail and its panel are opaque instead. Blurring a live WebGL
+ * canvas is ruinous on a phone, and because the glass fill is only 8-10% the
+ * panel had no surface of its own to fall back on while the blur resolved —
+ * it opened transparent and filled in a beat later. See the note above
+ * `useFinePointer` for the full account.
+ *
  * ─── IT NEVER RE-RENDERS WHILE YOU SCROLL ───────────────────────────────────
  * Same rule as the rest of this page (see useScrollProgress): progress is a
  * ref plus a subscription, and both the bar fills AND the list's "you are
@@ -156,6 +163,9 @@ const GLASS = {
     shadow: "0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10)",
     /** Unfilled bars are recessed into the glass, not sitting on top of it. */
     trackInset: "inset 0 1px 2px rgba(0,0,0,0.38)",
+    /** See SOLID below. */
+    solidFill: "#161a50",
+    solidBorder: "rgba(148,158,240,0.30)",
   },
   light: {
     /** ◀── transparency */
@@ -165,6 +175,12 @@ const GLASS = {
     shadow:
       "0 10px 30px rgba(60,64,181,0.16), inset 0 1px 0 rgba(255,255,255,0.90)",
     trackInset: "inset 0 1px 2px rgba(60,64,181,0.16)",
+    solidFill: "#ffffff",
+    // A REAL edge, not the glass border above. That one is white at 80% — over
+    // a blurred scene it reads as a lit rim, but on an opaque white panel it is
+    // white on white, i.e. nothing. Without this the light-theme panel would
+    // have no outline at all against the pale scene behind it.
+    solidBorder: "var(--border-solid)",
   },
 } as const;
 
@@ -174,6 +190,59 @@ const GLASS = {
  * saturation back up restores the tint real glass carries through.
  */
 const BACKDROP = "blur(20px) saturate(180%)";
+
+/**
+ * ─── WHY THERE IS AN OPAQUE VARIANT AT ALL ──────────────────────────────────
+ * Because on a phone the glass was not slow, it was ABSENT for the first beat
+ * and then appeared — which is a different and much worse bug.
+ *
+ * Look at `fill` above: 0.08 and 0.1. The panel paints almost nothing of its
+ * own; what makes it a surface is `backdrop-filter` blurring whatever is
+ * behind it. Behind it here is a live WebGL canvas, and on iOS backdrop-filter
+ * over one is about the most expensive thing a compositor can be asked for —
+ * it has to read the canvas back, blur it, and promote a new backdrop root,
+ * and it does that at the exact moment the tap handler has just re-rendered
+ * the rail.
+ *
+ * So the panel became visible before its blur did: a 92%-transparent box with
+ * the 3D scene showing straight through the achievement list, resolving to the
+ * intended frosted panel a beat later. Reported, accurately, as "it opens a
+ * transparent list then returns to the normal colour".
+ *
+ * The fix is not to make the blur faster. It is that a surface must not depend
+ * on a filter to exist. On coarse pointers the panel gets a genuinely opaque
+ * background and no backdrop-filter at all, so it is correct in the first
+ * frame it is painted. Desktop keeps the real glass, where it costs nothing
+ * and the effect was designed.
+ *
+ * It is also the more legible panel of the two: opaque, the year and title sit
+ * at 14.5:1 and 18.5:1 on their own surface instead of on whatever happened to
+ * be behind the glass that second.
+ */
+
+/**
+ * True when this is a desktop-class pointer — the one query that decides both
+ * whether the rail uses real glass and whether hover opens the panel.
+ *
+ * The two travel together on purpose. A device with no hover is a device that
+ * taps, and a device that taps is a phone or tablet, which is exactly where
+ * blurring a live canvas hurts. One question, asked once.
+ */
+function useFinePointer(): boolean {
+  const query = "(hover: hover) and (pointer: fine)";
+  const [fine, setFine] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const onChange = () => setFine(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+
+  return fine;
+}
 
 /**
  * The glass fill: a vertical gradient that thins toward the bottom, which is
@@ -211,6 +280,25 @@ export default function JourneyProgressRail({
   const { isDark } = useTheme();
   const reduced = useReducedMotion();
   const glass = isDark ? GLASS.dark : GLASS.light;
+
+  // Real glass on a desktop pointer, an opaque panel everywhere else. See the
+  // note above SOLID for why this is a correctness fix and not a perf tweak.
+  const finePointer = useFinePointer();
+
+  /** The rail's and the panel's shared surface, in whichever mode is in force. */
+  const surface = finePointer
+    ? {
+        background: glassSurface(glass),
+        border: `1px solid ${glass.border}`,
+        boxShadow: glass.shadow,
+        backdropFilter: BACKDROP,
+        WebkitBackdropFilter: BACKDROP,
+      }
+    : {
+        background: glass.solidFill,
+        border: `1px solid ${glass.solidBorder}`,
+        boxShadow: glass.shadow,
+      };
 
   const [open, setOpen] = useState(false);
   const fillsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -414,8 +502,20 @@ export default function JourneyProgressRail({
      */
     <div
       className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      // `pointerType`, not onMouseEnter — the same guard the press tiles use.
+      //
+      // iOS synthesises a full mouse sequence for a tap, so a finger landing on
+      // the trigger fired mouseenter (open) and then click (toggle → shut) from
+      // one gesture. React batches neither, so the panel opened and closed
+      // inside a single tap, and whether it survived came down to which event
+      // won the race. The click handler is the whole story on touch; hover is
+      // for pointers that can actually hover.
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") setOpen(true);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse") setOpen(false);
+      }}
       // Escape is the expected way out of any disclosure, and without it a
       // keyboard user who has opened the panel can only leave by tabbing
       // through all ten rows.
@@ -465,11 +565,7 @@ export default function JourneyProgressRail({
         style={{
           gap: RAIL.barGap,
           padding: `${RAIL.padY}px ${RAIL.padX}px`,
-          background: glassSurface(glass),
-          border: `1px solid ${glass.border}`,
-          boxShadow: glass.shadow,
-          backdropFilter: BACKDROP,
-          WebkitBackdropFilter: BACKDROP,
+          ...surface,
         }}
       >
         {/* `flex-col-reverse`: bar 0 is the LAST child laid out, so it sits at
@@ -566,11 +662,7 @@ export default function JourneyProgressRail({
             maxWidth: "calc(100vw - 92px)",
             maxHeight: "70vh",
             padding: 6,
-            background: glassSurface(glass),
-            border: `1px solid ${glass.border}`,
-            boxShadow: glass.shadow,
-            backdropFilter: BACKDROP,
-            WebkitBackdropFilter: BACKDROP,
+            ...surface,
           }}
         >
           {rows.map(({ achievement, index }) => (
