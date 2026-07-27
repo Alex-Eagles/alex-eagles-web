@@ -87,6 +87,20 @@ export interface TeamMember {
   /** Overrides the big name behind the portrait. Defaults to the first word of `name`. */
   firstName?: string;
   role: Role;
+  /**
+   * Overrides the visual weight derived from `role`. Only needed when a card's
+   * rank and its placement disagree — 2025's Wing and Tail leads are folded into
+   * Aerodesign, so they keep the "Section Lead" role but sit in the vice row
+   * beside the members rather than in the lead column next to Hattan.
+   */
+  tier?: Tier;
+  /**
+   * Overrides the role text on the card. `memberRoleLabel` otherwise builds a
+   * Section Lead's title from `department`, which is wrong for someone whose
+   * section was merged into another — Abdelrahman Arafat led Wing, not
+   * Aerodesign, even though his card now wears Aerodesign's colour.
+   */
+  roleLabel?: string;
   /** Section the card sits in — stamped on by the builder, shown in the hover panel. */
   department: string;
   /** Defaults to the roster year. Set only to override one person. */
@@ -116,6 +130,14 @@ export interface TeamMember {
    */
   major?: string;
 }
+
+/**
+ * The visual tier a card actually renders at — its per-member override, else
+ * the one its role implies. The single place tier is resolved, so the cards and
+ * the row-splitting agree on where a person sits and how heavy they look.
+ */
+export const memberTier = (member: TeamMember): Tier =>
+  member.tier ?? roleTier(member.role);
 
 /**
  * The icon shown on a sub-team's info chip. Keys map to an SVG in the
@@ -259,6 +281,7 @@ export function memberYearLabel(member: TeamMember, rosterYear: string): string 
  * Every other role (Vice Section Lead, Member, the exec titles) shows as-is.
  */
 export function memberRoleLabel(member: TeamMember): string {
+  if (member.roleLabel) return member.roleLabel;
   if (member.role === "Section Lead") return `${member.department} Lead`;
   return member.role;
 }
@@ -368,7 +391,7 @@ export function splitByTier(members: TeamMember[]): {
   const vices: TeamMember[] = [];
   const grid: TeamMember[] = [];
   for (const m of members) {
-    const tier = roleTier(m.role);
+    const tier = memberTier(m);
     if (tier === "lead" || tier === "head") leads.push(m);
     else if (tier === "vice") vices.push(m);
     else grid.push(m);
@@ -671,46 +694,56 @@ const ROSTER_2025: YearRoster = {
               "We design and build the airframe that holds everything together — sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
           },
         ),
-        // Aerodesign owns Wing and Tail & Stability; Hattan leads the aero core.
+        /*
+         * One flat Aerodesign section. Wing and Tail & Stability used to hang
+         * off it as nested subsections; they're folded in here instead, so the
+         * whole aero group wears Aerodesign's colour and reads as a single
+         * sub-team. Layout, top to bottom:
+         *
+         *   lead column   Hattan
+         *   row 1 (right) the three sub-team leads — vice tier so they sit
+         *                 beside the members rather than under Hattan
+         *   row 2         the aero core members
+         *   row 3         Wing's remaining members     (breakBefore)
+         *   row 4         Tail's remaining members     (breakBefore)
+         *
+         * Their `roleLabel`s still say Wing / Tail — the sections are gone from
+         * the page, but these people did lead them.
+         */
         section(
           "Aerodesign",
           [
             slot("Section Lead", "Hattan Yosry", { photo: "hattan-yosry" }),
+
+            slot("Section Lead", "Abdelrahman Arafat", {
+              photo: "abdelrahman-arafat",
+              tier: "vice",
+              roleLabel: "Wing Lead",
+            }),
+            slot("Vice Section Lead", "Abdelghfour Alaa", {
+              photo: "abdelghfour-alaa",
+              roleLabel: "Wing Vice Lead",
+            }),
+            slot("Section Lead", "Osama Mohamed", {
+              photo: "osama-mohamed",
+              tier: "vice",
+              roleLabel: "Tail & Stability Lead",
+            }),
+
             slot("Member", "Esraa Ahmed", { photo: "esraa-ahmed" }),
             slot("Member", "Farah Harfoush", { photo: "farah-harfoush" }),
             slot("Member", "Rodyna Amr", { photo: "rodyna-amr" }),
+
+            slot("Member", "Lina Tarek", { photo: "lina-tarek", breakBefore: true }),
+            slot("Member", "Mira Barsoum", { photo: "mira-barsoum" }),
+            slot("Member", "Youssef Ibrahim", { photo: "youssef-ibrahim" }),
+
+            slot("Member", "Mo'men Ashraf", { photo: "momen-ashraf", breakBefore: true }),
+            slot("Member", "Moamen Nawara", { photo: "moamen-nawara" }),
           ],
           {
             blurb:
               "We shape how the aircraft flies — the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
-            subsections: [
-              section(
-                "Wing",
-                [
-                  slot("Section Lead", "Abdelrahman Arafat", { photo: "abdelrahman-arafat" }),
-                  slot("Vice Section Lead", "Abdelghfour Alaa", { photo: "abdelghfour-alaa" }),
-                  slot("Member", "Lina Tarek", { photo: "lina-tarek" }),
-                  slot("Member", "Mira Barsoum", { photo: "mira-barsoum" }),
-                  slot("Member", "Youssef Ibrahim", { photo: "youssef-ibrahim" }),
-                ],
-                {
-                  blurb:
-                    "We design the wing — airfoil selection, planform, and geometry — to generate the lift the aircraft needs while keeping drag low.",
-                },
-              ),
-              section(
-                "Tail & Stability",
-                [
-                  slot("Section Lead", "Osama Mohamed", { photo: "osama-mohamed" }),
-                  slot("Member", "Mo'men Ashraf", { photo: "momen-ashraf" }),
-                  slot("Member", "Moamen Nawara", { photo: "moamen-nawara" }),
-                ],
-                {
-                  blurb:
-                    "We design the tail and control surfaces, and make sure the aircraft stays stable and controllable through every phase of flight.",
-                },
-              ),
-            ],
           },
         ),
         section(

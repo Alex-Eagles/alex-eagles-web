@@ -8,8 +8,8 @@ import {
   memberName,
   memberPhoto,
   memberRoleLabel,
+  memberTier,
   memberYearLabel,
-  roleTier,
   type TeamMember,
 } from "@/data/team";
 import styles from "./MemberCardSolid.module.css";
@@ -34,7 +34,7 @@ export function MemberCardSolid({
   const name = memberName(member);
   const firstName = memberFirstName(member);
   const accent = memberAccent(member);
-  const tier = roleTier(member.role);
+  const tier = memberTier(member);
   const roleLabel = memberRoleLabel(member);
 
   return (
