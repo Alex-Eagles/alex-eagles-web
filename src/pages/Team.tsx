@@ -79,6 +79,17 @@ export default function Team({
     const count = sectionCount(section);
     const hasChildren = !!section.subsections?.length;
 
+    /* Vices and members share one flow rather than getting a row each — vices
+     * come first so rank still reads left-to-right, and a section with two
+     * vices and one member lands on a single row instead of two ragged ones. */
+    const people = [...vices, ...grid];
+
+    /* A short roster is centred on the lead card's midline instead of hanging
+     * off its top edge, which left an obvious hole under two or three cards
+     * sitting beside a much taller lead. Past three the row is tall enough
+     * that top alignment reads better again. */
+    const centrePeople = leads.length > 0 && people.length >= 2 && people.length <= 3;
+
     return (
       <div
         key={section.id}
@@ -109,13 +120,15 @@ export default function Team({
 
         <div className={styles.sectionBody}>
           {cardRow(leads, styles.leadRow)}
-          {leads.length > 0 && (vices.length > 0 || grid.length > 0) && (
+          {leads.length > 0 && people.length > 0 && (
             <div className={styles.sectionDivider} aria-hidden />
           )}
-          <div className={styles.sectionRight}>
-            {/* Vices sit in member-sized cards, one row above the rest of the members. */}
-            {cardRow(vices, styles.grid)}
-            {cardRow(grid, styles.grid)}
+          <div
+            className={`${styles.sectionRight}${
+              centrePeople ? ` ${styles.sectionRightCentred}` : ""
+            }`}
+          >
+            {cardRow(people, styles.grid)}
           </div>
         </div>
 

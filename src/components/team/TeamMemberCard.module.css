@@ -7,13 +7,24 @@
  * -------------------------------------------------------------------------*/
 
 .card {
-  /* tokens — override on a wrapper if a page needs a variant */
-  --accent: #3d3ecc;
+  /* tokens — override on a wrapper if a page needs a variant.
+   *
+   * `--card-accent` is set inline by the component to the sub-team's colour
+   * (brand blue for the three team-wide roles). Deliberately *not* named
+   * `--accent`: that name is a shadcn theme token defined on :root, so a card
+   * outside a section would inherit shadcn's near-white instead of falling
+   * back to the brand. The fallback below only covers a card rendered without
+   * the component, e.g. in isolation. */
+  --card-accent: #3d3ecc;
   --ink: #f2f2f2;
   --periwinkle: #aaaaaa;
   --periwinkle-dim: #999999;
   --muted: #666666;
-  --name-behind: #6b6fc7;
+  /* The oversized first name behind the portrait — the card's largest block of
+     colour, so it tracks the sub-team accent too. Lifted towards white the way
+     the old hand-picked #6b6fc7 sat above the brand blue, which keeps it
+     legible over the dark backdrop whatever the section colour is. */
+  --name-behind: color-mix(in srgb, var(--card-accent) 78%, #ffffff);
   --ease-move: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-img: cubic-bezier(0.16, 0.84, 0.34, 1);
 
@@ -30,11 +41,13 @@
 
 .card:is(:hover, :focus-within) {
   transform: translateY(-6px);
-  box-shadow: 0 34px 60px -30px rgb(90 91 221 / 0.22);
+  /* Lift glow carries the sub-team colour rather than a fixed blue, so hovering
+     a Structure card no longer throws blue light under a warm-grey section. */
+  box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
 }
 
 .card:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--card-accent);
   outline-offset: 3px;
 }
 
@@ -263,7 +276,7 @@
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--card-accent);
 }
 
 .restName {
@@ -314,7 +327,7 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--card-accent);
 }
 
 .panelName {
@@ -365,7 +378,7 @@
 
 .linkedIn:is(:hover, :focus-visible) {
   color: var(--ink);
-  border-color: var(--accent);
+  border-color: var(--card-accent);
 }
 
 /* --- touch + accessibility ------------------------------------------------ */

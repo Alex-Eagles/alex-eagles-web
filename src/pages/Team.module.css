@@ -347,6 +347,16 @@
 }
 
 /*
+ * Two or three cards next to a much taller lead used to hang off the top edge
+ * with a visible hole beneath them. Centring the block on the lead's midline
+ * closes that. `align-self` (not `justify-content`) because the height here is
+ * the content's own — the row's height comes from the lead column.
+ */
+.sectionRightCentred {
+  align-self: center;
+}
+
+/*
  * A row of member-sized cards — used both for the actual member grid and,
  * one row up, for vices (same card size, so rank there reads through the
  * accent ring rather than a bigger card).
@@ -358,7 +368,13 @@
 }
 
 .grid > * {
-  width: 205px;
+  /* 250, not the old 205. The hover panel stacks role, name, sub-team and a
+     footer of "CLASS OF <year>" beside a LinkedIn pill; at 205px the footer
+     had ~169px of usable width for ~185px of content, so the year wrapped to
+     two lines and squeezed the pill. 250px gives the footer ~214px and the
+     whole panel room to breathe. Lead and leadership cards are unchanged, so
+     rank still reads through size. */
+  width: 250px;
   max-width: 100%;
 }
 
