@@ -61,24 +61,15 @@ export default function Team({
       </div>
     );
 
-  /* Total headcount of a section including its nested subsections — shown in
-   * the header so each sub-team reads as a countable unit. */
-  const sectionCount = (section: Section): number =>
-    section.members.length +
-    (section.subsections?.reduce((n, s) => n + sectionCount(s), 0) ?? 0);
-
   /*
-   * One sub-team block. Two visual modes, driven by the same data:
-   *   - top-level  → a big banner header + divider, cards below
-   *   - nested     → a lighter, indented header under an accent rule (Aerodesign
-   *                  → Wing / Tail), no box around it
-   * A themed info chip sits beside the title whenever the section has a blurb.
+   * One sub-team block: a banner header with the headcount and a themed info
+   * chip (whenever the section has a blurb), then the lead column, a divider,
+   * and the member rows beside it.
    */
-  const renderSection = (section: Section, nested = false) => {
+  const renderSection = (section: Section) => {
     const { leads, vices, grid } = splitByTier(section.members);
     const accent = subTeamAccent(section.name);
-    const count = sectionCount(section);
-    const hasChildren = !!section.subsections?.length;
+    const count = section.members.length;
 
     const people = [...vices, ...grid];
 
@@ -101,13 +92,13 @@ export default function Team({
       <div
         key={section.id}
         id={section.id}
-        className={nested ? styles.subPanel : styles.section}
-        /* Accent drives the header, marker, and nested rule. */
+        className={styles.section}
+        /* Accent drives the header and the marker. */
         style={{ "--accent": accent } as CSSProperties}
       >
-        <div className={nested ? styles.subHeader : styles.sectionHeader}>
+        <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleGroup}>
-            <h3 className={nested ? styles.subName : styles.sectionName}>
+            <h3 className={styles.sectionName}>
               <span className={styles.sectionMarker} aria-hidden />
               {section.name}
             </h3>
@@ -149,12 +140,6 @@ export default function Team({
             )}
           </div>
         </div>
-
-        {hasChildren && (
-          <div className={styles.subGroup}>
-            {section.subsections!.map((sub) => renderSection(sub, true))}
-          </div>
-        )}
       </div>
     );
   };

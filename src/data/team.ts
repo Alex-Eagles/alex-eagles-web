@@ -173,13 +173,6 @@ export interface Section {
    * Propulsion side by side.
    */
   stackLeads?: boolean;
-  /**
-   * Nested sub-groups — e.g. Aerodesign → Wing, Tail & Stability. When present,
-   * the section renders as a parent block: its own `members` first (the aero
-   * "core"), then each subsection as an indented, labelled group. Leave empty
-   * for a flat section.
-   */
-  subsections?: Section[];
 }
 
 export interface Division {
@@ -348,7 +341,6 @@ const section = (
   opts: {
     blurb?: string;
     icon?: SubTeamIconKey;
-    subsections?: Section[];
     stackLeads?: boolean;
   } = {},
 ): Section => ({
@@ -359,7 +351,6 @@ const section = (
   members: members.map((m) => ({ ...m, department: name })),
   ...(opts.blurb ? { blurb: opts.blurb } : {}),
   ...(opts.icon ? { icon: opts.icon } : {}),
-  ...(opts.subsections?.length ? { subsections: opts.subsections } : {}),
   ...(opts.stackLeads ? { stackLeads: true } : {}),
 });
 
@@ -838,22 +829,11 @@ export interface NavGroup {
 
 /** Leadership, then one group per division — drives the PULL side nav. */
 export function navGroups(roster: YearRoster): NavGroup[] {
-  // A parent section and its subsections both get a nav row; subsections are
-  // prefixed so the Wing/Tail entries read as living under Aerodesign.
-  const sectionItems = (sections: Section[]): { name: string; href: string }[] =>
-    sections.flatMap((s) => [
-      { name: s.name, href: `#${s.id}` },
-      ...(s.subsections ?? []).map((sub) => ({
-        name: `— ${sub.name}`,
-        href: `#${sub.id}`,
-      })),
-    ]);
-
   return [
     { label: "Leadership", items: [{ name: "Leadership", href: "#leadership" }] },
     ...roster.divisions.map((division) => ({
       label: division.name,
-      items: sectionItems(division.sections),
+      items: division.sections.map((s) => ({ name: s.name, href: `#${s.id}` })),
     })),
   ];
 }

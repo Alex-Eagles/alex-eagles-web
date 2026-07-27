@@ -450,47 +450,6 @@
   margin-bottom: 0;
 }
 
-/* --- nested subsections (Aerodesign → Wing / Tail) ----------------------- */
-
-/*
- * No panel or box — just a light accent rule and a smaller header, so Wing and
- * Tail & Stability read as belonging under Aerodesign without being caged in.
- */
-.subGroup {
-  margin-top: 22px;
-}
-
-.subPanel {
-  margin-top: 26px;
-  scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
-}
-
-.subHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 0 0 18px;
-}
-
-.subName {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  color: var(--accent, #3d3ecc);
-}
-
-/* The marker in a nested header is a touch smaller than the banner's. */
-.subName .sectionMarker {
-  width: 9px;
-  height: 9px;
-}
-
 /* --- footer line --------------------------------------------------------- */
 
 .pageFooter {
