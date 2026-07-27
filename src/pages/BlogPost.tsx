@@ -26,7 +26,7 @@ export default function BlogPost() {
       className="min-h-dvh"
       style={{
         background: isDark
-          ? "#121B34"
+          ? "#1C1D22"
           : "linear-gradient(to bottom, var(--bg-elevated) 0%, var(--bg-primary) 60%)",
       }}
     >

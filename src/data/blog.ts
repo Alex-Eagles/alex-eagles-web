@@ -137,6 +137,17 @@ export const BLOG_POSTS: BlogPostFull[] = [
     readTime: "2 min read",
   },
   {
+    id: 42,
+    title: "Flight Testing & Competition Preparation",
+    excerpt:
+      "With the design locked in, the team moved into flight testing, working through final adjustments as real-world results came in against the simulation-based predictions. Competition documentation is being prepared alongside testing to finalize the aircraft for UAVC 2026.",
+    image: "/images/blog/aerodesign-flight-testing.jpg",
+    category: "aerodesign",
+    date: "May – Jul 2026",
+    author: "Aerodesign Team",
+    readTime: "2 min read",
+  },
+  {
     id: 28,
     title: "Final Structural Assembly",
     excerpt:
@@ -228,6 +239,94 @@ export const BLOG_POSTS: BlogPostFull[] = [
     readTime: "2 min read",
   },
   {
+    id: 40,
+    title: "Aerodynamic Validation (AVL & CFD)",
+    excerpt:
+      "The finalized geometry was run back through AVL to validate the lift, drag, and stability derivatives predicted during sizing, then cross-checked with ANSYS Fluent CFD simulations on the airfoil for a higher-fidelity look at surface pressure distribution. The two methods were compared against each other to refine drag estimates and confirm the aircraft's overall aerodynamic efficiency before the design was locked in.",
+    image: "/images/blog/aerodesign-cfd-validation.jpg",
+    category: "aerodesign",
+    date: "Mid – Late Apr 2026",
+    author: "Aerodesign Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 41,
+    title: "Design Documentation (PDR)",
+    excerpt:
+      "All of the sizing calculations, airfoil trade studies, structural CAD, and validation results were compiled into the team's formal design review package. Writing the review forced a second pass over every earlier decision, from wing loading to tail volume, to make sure the documented methodology matched what was actually built.",
+    image: "/images/blog/aerodesign-design-review.png",
+    category: "aerodesign",
+    date: "Mar – Apr 2026",
+    author: "Aerodesign Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 39,
+    title: "Fuselage Design & Aircraft Integration",
+    excerpt:
+      "The fuselage structure was developed to carry the wing, tail, propulsion, and payload loads through a single airframe, tying every subsystem together into one integrated design. Component placement was iterated to keep the center of gravity, aerodynamic requirements, and structural load paths all satisfied at once.",
+    image: "/images/blog/aerodesign-fuselage-integration.png",
+    category: "aerodesign",
+    date: "Late Mar – Mid Apr 2026",
+    author: "Aerodesign Team",
+    readTime: "2 min read",
+  },
+  {
+    id: 38,
+    title: "Empennage & Stability Design",
+    excerpt:
+      "The horizontal and vertical stabilizers were sized and positioned to give the aircraft the tail volume it needed for pitch and yaw stability. Static margin was checked by comparing the neutral point against the center of gravity, and the mass balance was tuned until the trimmed configuration met the stability and control targets.",
+    image: "/images/blog/aerodesign-empennage-wireframe.png",
+    category: "aerodesign",
+    date: "Mid Mar – Early Apr 2026",
+    author: "Aerodesign Team",
+    readTime: "2 min read",
+  },
+  {
+    id: 37,
+    title: "Primary Structural Design & CAD",
+    excerpt:
+      "The wing's internal structure was laid out spar by spar and rib by rib, with lightening holes cut into each rib to save weight without giving up bending or torsional stiffness. Preliminary CAD models tied the layout together, checking that the structure could actually be built and assembled the way it was designed.",
+    image: "/images/blog/aerodesign-stability-empennage.jpg",
+    category: "aerodesign",
+    date: "Mar – Early Apr 2026",
+    author: "Aerodesign Team",
+    readTime: "2 min read",
+  },
+  {
+    id: 36,
+    title: "Airfoil Selection & Wing Optimization",
+    excerpt:
+      "Candidate airfoils, including the FX 76-MP-120, LNV109A, and MH 113, were compared against a refined NACA 6313 profile across lift, drag, and moment polars to find the best balance of stall behavior and efficiency. The winning section was then carried into the aspect ratio and taper ratio study, locking in the wing geometry used for the rest of the aerodynamic analysis.",
+    image: "/images/blog/aerodesign-structural-cad.jpg",
+    category: "aerodesign",
+    date: "Feb – Early Mar 2026",
+    author: "Aerodesign Team",
+    readTime: "2 min read",
+  },
+  {
+    id: 35,
+    title: "Aircraft Sizing & Wing Concept Development",
+    excerpt:
+      "Constraint sizing was performed to define the aircraft's design point, working through stall speed, take-off distance, climb rate, cruise speed, and turn requirements to arrive at a wing loading of 131.92 kg/m² and a thrust-to-weight ratio of 0.3149. From there, an aspect ratio between 9 and 11 was selected to balance induced drag against maneuverability, fixing the wing's span, area, and taper for the conceptual design.",
+    image: "/images/blog/aerodesign-aircraft-sizing-polar.jpg",
+    category: "aerodesign",
+    date: "Late Jan – Mid Feb 2026",
+    author: "Aerodesign Team",
+    readTime: "2 min read",
+  },
+  {
+    id: 43,
+    title: "Project Planning & Aircraft Requirements",
+    excerpt:
+      "Before any technical design began, the team laid out its project objectives, worked through the competition's requirements and design constraints, and turned all of it into an overall development roadmap. That roadmap became the backbone for every design decision that followed.",
+    image: "/images/blog/aerodesign-wing-concept-render.png",
+    category: "aerodesign",
+    date: "Dec 2025 – Jan 2026",
+    author: "Aerodesign Team",
+    readTime: "2 min read",
+  },
+  {
     id: 19,
     title: "Designing Our Custom Power Distribution Board",
     excerpt:
@@ -249,18 +348,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     date: "Mar 16, 2026",
     author: "AI Team",
     readTime: "3 min read",
-  },
-  {
-    id: 8,
-    title: "Wing Profile Selection for Cruise Efficiency",
-    excerpt:
-      "Comparing airfoil candidates in simulation to maximize lift-to-drag at cruise speed, then validating the winner on the test range. Here's how we picked our final wing profile.",
-    image:
-      "https://images.unsplash.com/photo-1575686467550-7d2a658eb1cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZsaWdodCUyMHRlc3Rpbmd8ZW58MXx8fHwxNzczNjgzODg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "aerodesign",
-    date: "Mar 14, 2026",
-    author: "Lina Farouk",
-    readTime: "2 min read",
   },
   {
     id: 7,
@@ -306,6 +393,17 @@ export const BLOG_POSTS: BlogPostFull[] = [
     date: "Feb 15, 2026",
     author: "Software Team",
     readTime: "2 min read",
+  },
+  {
+    id: 44,
+    title: "Aircraft Stability & Propulsion Design",
+    excerpt:
+      "Completed the aircraft stability and control analysis alongside propulsion system optimization. Sized the empennage, selected the AT4130-450KV motor with an 18×8 APC-E propeller through trade-off analysis, and verified performance using eCalc, thrust, climb, take-off, and cruise analyses.",
+    image: "/images/blog/aerodesign-stability-propulsion.png",
+    category: "propulsion",
+    date: "Mar – Apr 2026",
+    author: "Propulsion Team",
+    readTime: "3 min read",
   },
   {
     id: 22,
