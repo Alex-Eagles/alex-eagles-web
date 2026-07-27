@@ -15,6 +15,7 @@ import {
   ROSTERS,
   type Section,
   splitByTier,
+  splitRows,
   subTeamAccent,
   type TeamMember,
   type RosterYear,
@@ -51,9 +52,9 @@ export default function Team({
 
   /* A row of cards for a set of members — used for both the raised lead row and
    * the member grid, differing only by the class the caller passes. */
-  const cardRow = (members: TeamMember[], className: string) =>
+  const cardRow = (members: TeamMember[], className: string, key?: number) =>
     members.length > 0 && (
-      <div className={className}>
+      <div key={key} className={className}>
         {members.map((member) => (
           <Card key={member.id} member={member} rosterYear={roster.year} />
         ))}
@@ -142,7 +143,8 @@ export default function Team({
             ) : (
               <>
                 {cardRow(vices, styles.grid)}
-                {cardRow(grid, styles.grid)}
+                {/* One row per `breakBefore` group — normally just the one. */}
+                {splitRows(grid).map((row, i) => cardRow(row, styles.grid, i))}
               </>
             )}
           </div>

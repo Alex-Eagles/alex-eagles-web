@@ -101,6 +101,13 @@ export interface TeamMember {
   cutout?: string;
   linkedIn?: string;
   /**
+   * Start a new row of the member grid at this card. The grid is three across,
+   * so a four-person section otherwise breaks 3 + 1; this lets a section ask
+   * for a different split without reordering anyone. Ignored when the whole
+   * roster already fits one row.
+   */
+  breakBefore?: boolean;
+  /**
    * Academic major, from the roster intake form — e.g. "Mechatronics",
    * "Computer and Communication Engineering". Not the same thing as
    * `department` (that's the sub-team, e.g. "Hardware"). Captured for
@@ -332,6 +339,20 @@ const section = (
   ...(opts.subsections?.length ? { subsections: opts.subsections } : {}),
   ...(opts.stackLeads ? { stackLeads: true } : {}),
 });
+
+/**
+ * Cut a member list into explicit rows at every card flagged `breakBefore`.
+ * Order is untouched — this only decides where the grid wraps, for sections
+ * whose natural three-across split reads badly.
+ */
+export function splitRows(members: TeamMember[]): TeamMember[][] {
+  const rows: TeamMember[][] = [];
+  for (const m of members) {
+    if (rows.length === 0 || m.breakBefore) rows.push([]);
+    rows[rows.length - 1].push(m);
+  }
+  return rows;
+}
 
 /**
  * Split a member list into the raised lead row and the member grid, in one
@@ -598,7 +619,9 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Mechatronics",
           }),
-          slot("Member", "Ahmed Ibrahim"),
+          // Drops to the second row so the two unfilled slots sit together
+          // rather than splitting 3 + 1 across the three-across grid.
+          slot("Member", "Ahmed Ibrahim", { breakBefore: true }),
           // Submitted the form, no photo yet.
           slot("Member", "Tarek Mohamed", {
             linkedIn: "https://www.linkedin.com/in/tarek-mohamed-elsaye",
