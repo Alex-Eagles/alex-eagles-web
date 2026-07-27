@@ -68,7 +68,7 @@ export type ScenePalette = { [K in keyof typeof PALETTE]: number };
  * Values come from the light-mode design tokens (the light column of the brand
  * colour-usage map / `theme.css`), so the 3D backdrop matches the rest of the
  * page in light mode:
- *   background  → --band-deep   (#f0f2fb)  keeps the seam with the page invisible
+ *   background  → --band-deep   (#eceef9)  keeps the seam with the page invisible
  *   ground      → --bg-tertiary (#e8e8f9)  a touch deeper, so it reads as surface
  *   dotIdle     → --border-default (#d0d0ed) faint grid on the pale floor
  *   pathIdle    → --border-strong  (#b0b0d8) dim path, a shade more defined
@@ -117,7 +117,7 @@ const PALETTE_LIGHT_OVERRIDES = {
    * is visible above the scene at all times. The two have to be the same
    * colour or there is a hairline seam across the top of the whole journey.
    * Change one, change the other. */
-  background: 0xf0f2fb,
+  background: 0xeceef9,
   ground: 0xe8e8f9,
   dotIdle: 0xd0d0ed,
   pathIdle: 0xb0b0d8,
@@ -757,6 +757,32 @@ export const LABEL = {
  * three stops instead of two rather than breaking the layout.
  */
 export const PROGRESS_SEGMENTS = 5;
+
+/**
+ * Device-pixel-ratio ceiling on a touch screen, on top of the tier's own.
+ *
+ * ─── THE ONE LEVER THAT MAKES A PHONE FASTER WITHOUT TAKING ANYTHING AWAY ───
+ * Every other option on the table costs the visitor something: fewer stops,
+ * fewer dots, no scene at all. This costs resolution on the WebGL layer only,
+ * and the WebGL layer is a dark floor, a dotted grid, a glowing ball and a
+ * tube — all soft-edged things with no fine detail to lose.
+ *
+ * What it does NOT touch is everything with an edge: the labels, the photos,
+ * the flags and the aircraft are DOM overlays, drawn by the browser at the
+ * screen's real pixel ratio no matter what the canvas is doing. The text stays
+ * exactly as sharp.
+ *
+ * The arithmetic on an iPhone 13 (390x659 CSS, DPR 3), at the `medium` tier's
+ * 1.5 ceiling: 585 x 989 = 579k pixels shaded per frame. At 1.25: 488 x 824 =
+ * 402k. A 31% cut in fragment work for every frame of the journey, on the
+ * device least able to afford it.
+ *
+ * Deliberately 1.25 and not 1.0. Dropping to 1.0 saves another 36% but the
+ * path tube and the flag poles are thin bright geometry on a dark ground,
+ * which is exactly the case where aliasing shows — and `antialias` is already
+ * off at this tier.
+ */
+export const COARSE_POINTER_MAX_DPR = 1.25;
 
 /** Scroll length per stop, in viewport heights. Sets the pace of the journey. */
 export const SCROLL_PER_STOP = 0.85;

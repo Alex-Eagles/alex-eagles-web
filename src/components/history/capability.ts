@@ -32,6 +32,12 @@ export interface Capability {
   /** Best initial guess at how much this device can handle. */
   tier: Tier;
   /**
+   * True on a touch screen. Not a proxy for "small" — a tablet is coarse and
+   * large — but for "the GPU is in something thermally limited and running off
+   * a battery", which is what decides how many pixels it is fair to shade.
+   */
+  coarsePointer: boolean;
+  /**
    * True when the visitor has asked not to be sent heavy things, or is on a
    * connection that cannot carry them. See `detectFrugalConnection`.
    */
@@ -158,14 +164,24 @@ function detectInitialTier(): Tier {
  * roughly sixteen. See detectWebGL for why a leaked probe context is a black
  * screen that only reproduces after a few navigations.
  */
-let staticProbe: { webgl: boolean; tier: Tier } | null = null;
+let staticProbe: {
+  webgl: boolean;
+  tier: Tier;
+  coarsePointer: boolean;
+} | null = null;
 
 /**
  * One-shot capability check. Safe to call during render, and safe to call from
  * more than one component.
  */
 export function detectCapability(): Capability {
-  staticProbe ??= { webgl: detectWebGL(), tier: detectInitialTier() };
+  staticProbe ??= {
+    webgl: detectWebGL(),
+    tier: detectInitialTier(),
+    coarsePointer:
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches,
+  };
 
   // NOT cached: both of these genuinely can change mid-visit — the visitor can
   // flip the OS motion setting, and a phone can walk off wifi onto 2G — and

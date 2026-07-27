@@ -257,30 +257,32 @@
    * `.ae-band .ae-band--lift` and alternate; the tones themselves are
    * --band-deep / --band-lift in theme.css, one pair per theme.
    *
-   * ─── THE SEAM IS A CROSSFADE, NOT A CUT ─────────────────────────────────
-   * Each band paints its own tone flat, then lays ONE two-stop gradient over
-   * its top edge that starts in the OTHER tone and resolves into its own over
-   * --band-seam. Because the band above is flat in exactly that other tone at
-   * the point they meet, the join is continuous — the eye reads a dissolve
-   * between chapters instead of a hard rule across the page.
+   * ─── THE SEAM IS A CUT, NOT A CROSSFADE ─────────────────────────────────
+   * Each band is one flat tone, and where two meet there is a hard edge plus
+   * a hairline in --band-edge.
    *
-   * Two colours, two stops, no third tone anywhere: a gradient that wanders
-   * through an intermediate hue is precisely what makes a banded page look
-   * muddy at the joins, and it is the failure this shape is chosen to avoid.
+   * It was a 150px dissolve at first, on the theory that chapters should flow
+   * into each other. That works on the dark theme, where the two tones differ
+   * in CHROMA as well as lightness — one near-neutral, one saturated indigo —
+   * so the eye has a second cue and finds the join regardless. The light pair
+   * has no such cue: two pale indigo neutrals separated only by lightness.
+   * Dissolved, there was no edge anywhere and the page read as one sheet.
    *
-   * ─── WHY A BACKGROUND LAYER AND NOT A ::before ──────────────────────────
-   * An absolutely-positioned pseudo-element would paint in the positioned
-   * layer, i.e. potentially OVER the section content, and would need a z-index
-   * contract with every child to stay behind it. Backgrounds paint behind
-   * content unconditionally. It also keeps the band element free of
-   * `transform`, `filter`, `contain` and `overflow`, ANY of which would create
-   * a containing block and break the `position: sticky` pin that the History
-   * page's 3D journey depends on. Do not add them here.
+   * The numbers are the punchline: the light step is ΔL* 4.4 and the dark step
+   * everyone reads as obvious is ΔL* 3.5. Light was already the STRONGER
+   * contrast. It was the gradient hiding it, not the colours.
+   *
+   * ─── NO BACKGROUND-IMAGE, WHICH ALSO KEEPS THE PIN SAFE ─────────────────
+   * A flat background-color is all this needs. Whatever replaces it must not
+   * introduce `transform`, `filter`, `contain` or `overflow` on the band
+   * element: any of those creates a containing block and breaks the
+   * `position: sticky` pin the History page's 3D journey scrolls on.
    * ----------------------------------------------------------------------*/
   .ae-band {
-    background-repeat: no-repeat;
-    background-position: top center;
-    background-size: 100% var(--band-seam);
+    /* The hairline sits on the TOP edge, so it belongs to the band that starts
+     * — which means each boundary is drawn exactly once, by the band below it,
+     * and no pair can double up. */
+    border-top: 1px solid var(--band-edge);
     /* Matches the body's own theme crossfade so a band and the page behind it
      * swap together rather than a beat apart. */
     transition: background-color var(--transition-slow);
@@ -288,27 +290,17 @@
 
   .ae-band--deep {
     background-color: var(--band-deep);
-    background-image: linear-gradient(
-      to bottom,
-      var(--band-lift),
-      var(--band-deep)
-    );
   }
 
   .ae-band--lift {
     background-color: var(--band-lift);
-    background-image: linear-gradient(
-      to bottom,
-      var(--band-deep),
-      var(--band-lift)
-    );
   }
 
-  /* The FIRST band on a page has no band above it to fade from — only the
-   * navbar and the top of the document. Fading in from the opposite tone there
-   * would hang an unexplained stripe under the site chrome. */
+  /* The FIRST band on a page has no band above it — only the navbar and the
+   * top of the document. A rule there would read as a stray line under the
+   * site chrome rather than as a boundary between two things. */
   .ae-band--flush {
-    background-image: none;
+    border-top: 0;
   }
 
   /* Sections on this site render nothing when their data file is empty, which

@@ -40,6 +40,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
+// `Html` is the only thing this project uses from drei, and the barrel import
+// is fine: measured against a deep `drei/web/Html` import, the built chunk is
+// byte-identical, so Rollup is already shaking the rest of the library out.
+// The chunk's weight is three.js itself, not drei — don't "optimise" this line.
 import { Html } from "@react-three/drei";
 import {
   FRAME,

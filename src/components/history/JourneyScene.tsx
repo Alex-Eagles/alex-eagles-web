@@ -44,6 +44,7 @@ import {
   poleOffsetFor,
 } from "./journeyCurve";
 import {
+  COARSE_POINTER_MAX_DPR,
   FRAME,
   LIGHT,
   QUALITY,
@@ -54,7 +55,7 @@ import {
   type ScenePalette,
 } from "./sceneConfig";
 import { useAdaptiveQuality } from "./usePerfTier";
-import type { Tier } from "./capability";
+import { detectCapability, type Tier } from "./capability";
 import {
   polesFor,
   visiblePortraits,
@@ -330,6 +331,16 @@ export default function JourneyScene({
   onStopUs,
 }: JourneySceneProps) {
   const quality: QualitySettings = QUALITY[tier];
+
+  // The tier already caps this; a touch screen caps it further. Both are
+  // ceilings, so the lower one wins and a low-tier phone is not raised by it.
+  const maxDpr = useMemo(
+    () =>
+      detectCapability().coarsePointer
+        ? Math.min(quality.maxDpr, COARSE_POINTER_MAX_DPR)
+        : quality.maxDpr,
+    [quality.maxDpr],
+  );
 
   /**
    * The framing, solved for this screen: field of view, how much to shrink a
@@ -622,9 +633,10 @@ export default function JourneyScene({
       // The core performance decision: draw ONLY when asked. An idle reader
       // costs zero GPU and zero battery.
       frameloop="demand"
-      // Cap device pixel ratio by tier. The single strongest perf lever there
-      // is — dpr 3 → 1.5 on a phone is a 75% cut in pixels shaded.
-      dpr={[1, quality.maxDpr]}
+      // Cap device pixel ratio by tier, and again on a touch screen. The
+      // single strongest perf lever there is, and the only one that costs the
+      // visitor nothing they can read — see COARSE_POINTER_MAX_DPR.
+      dpr={[1, maxDpr]}
       gl={{
         antialias: quality.antialias,
         powerPreference: "high-performance",

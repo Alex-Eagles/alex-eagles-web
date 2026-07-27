@@ -164,16 +164,30 @@
    * rediscover it. */
   --ink-on-accent: #0d1030;
 
-  /* ── Chapter-band seam height ─────────────────────────────────────────────
-   * How tall the crossfade is where one background band meets the next (see
-   * the --band-deep / --band-lift pair in the colour blocks, and .ae-band in
-   * global.css).
+  /* ── Chapter-band edge ────────────────────────────────────────────────────
+   * The hairline drawn where one background band meets the next.
    *
-   * It scales with the viewport because the thing it has to look right against
-   * is the section padding either side of it (py-32 → py-48, itself fluid). A
-   * fixed 120px seam that reads as a soft dissolve on a laptop reads as a hard
-   * line under a 48-unit gutter on a 4K display. */
-  --band-seam: clamp(96px, 11vw, 176px);
+   * ─── THERE USED TO BE A CROSSFADE HERE INSTEAD, AND IT WAS THE BUG ────────
+   * Each band faded into the next over 96-176px. On the dark theme that reads
+   * as a soft chapter change, because the two dark tones also differ in
+   * CHROMA — one is near-neutral, the other saturated indigo — so the eye has
+   * a second cue and finds the join anyway.
+   *
+   * The light pair has no such cue: two pale indigo-tinted neutrals differing
+   * only in lightness. Dissolved over 150px there was no edge to find at all,
+   * and the page read as one continuous sheet. The measurements are the joke
+   * of it — the light step is ΔL* 4.4 and the dark step people describe as
+   * obvious is ΔL* 3.5. The light bands were ALREADY the stronger contrast.
+   * What they lacked was an edge.
+   *
+   * So the bands butt up hard now, in both themes, and the light theme gets
+   * this hairline on top. Dark leaves it transparent: it was never the theme
+   * with the problem, and a rule across every section boundary there would be
+   * solving something that isn't broken.
+   *
+   * ◀── DIAL. Push toward --border-solid (#b0b3e0) for a more editorial rule,
+   * or toward --border-subtle (#d4d6f0) to make it a whisper. */
+  --band-edge: transparent;
 }
 
 /* ----------------------------------------------------------------------------
@@ -345,9 +359,22 @@
    *
    * NB: PALETTE_LIGHT_OVERRIDES.background in sceneConfig.ts mirrors this
    * value, so the 3D canvas and the band it sits in have no visible seam.
-   * Change one, change the other. */
-  --band-deep: #f0f2fb;
+   * Change one, change the other.
+   *
+   * ⚠ #eceef9 IS THE FLOOR — this cannot go darker without breaking text.
+   * --text-muted (#6366a8) is the binding constraint: it lands at 4.55:1 here,
+   * and the next step down the ramp (#e8ebf7) puts it at 4.42:1, under AA, on
+   * 11px labels. Deepening the band any further means darkening --text-muted
+   * first, and that compresses the light theme's text ramp the same way the
+   * dark one is already compressed. Measure before you touch it. */
+  --band-deep: #eceef9;
   --band-lift: #ffffff;
+  /* A real hairline, because two pale neutrals butting together need one.
+   * Same value as --border-solid, at ~2:1 against the tone on either side —
+   * a definite rule rather than a hint. A first pass at #c9cde8 measured
+   * 1.36:1 and read as a smudge, which is the failure mode this whole change
+   * exists to fix. */
+  --band-edge: #b0b3e0;
 
   --brand: #3c40b5; /* brand indigo stays constant          */
   --brand-light: #2b2f9e; /* darker on hover against light bg     */
