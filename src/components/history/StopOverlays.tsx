@@ -358,7 +358,15 @@ function StopOverlay({
             // exact inverse is needed once both invert. See `overlayStyle`.
             textShadow: overlay.labelTextShadow,
           }}
-          className="pointer-events-none select-none text-center w-[320px]"
+          // 350px, not 320: this width is in the label's OWN pixel space, which
+          // drei then scales by LABEL.distanceFactor. Widening the box while
+          // lowering that factor in the same ratio leaves the ON-SCREEN width
+          // where it was (320×15 ≈ 350×14), but gives the longest award title
+          // on the page — "Best Technical Design Report" — clear room before it
+          // wraps, and a wrapped title is a whole extra line on the tallest
+          // label there is. Change one of the two without the other and the
+          // label's screen width moves with it.
+          className="pointer-events-none select-none text-center w-[350px]"
         >
           <div
             className="font-mono tracking-[0.18em] text-[var(--sky)] uppercase mb-1"
@@ -406,9 +414,17 @@ function StopOverlay({
               >
                 {achievement.title}
               </div>
+              {/* `line-clamp-5`, not 4. The clamp is a guard against a long
+                  blurb blowing the label up, not a design choice about length —
+                  and at 4 it cut the founding blurb one word short, ending the
+                  stop's only sentence on "mechanical and computer…". Five lines
+                  fits the copy as written and still leaves this stop ~40-53px of
+                  clearance below the navbar, the same as the tallest stop on the
+                  page (2025). If the blurb is ever rewritten longer, raise this
+                  and re-check that clearance rather than letting it truncate. */}
               {achievement.blurb && (
                 <p
-                  className="font-sans leading-[1.5] text-[var(--text-secondary)] mt-2 mb-0 line-clamp-4"
+                  className="font-sans leading-[1.5] text-[var(--text-secondary)] mt-2 mb-0 line-clamp-5"
                   style={{ fontSize: LABEL.blurbSize }}
                 >
                   {achievement.blurb}

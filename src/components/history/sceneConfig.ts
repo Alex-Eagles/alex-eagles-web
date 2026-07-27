@@ -744,25 +744,56 @@ export const VEHICLE = {
  *
  * ─── TO RESIZE THE TEXT ─────────────────────────────────────────────────────
  * Two independent levers:
- *   • `distanceFactor` scales the WHOLE label uniformly. SMALLER = BIGGER on
- *     screen (it's how far away drei pretends the label is). This is the fast
- *     "make everything bigger/smaller" dial.
+ *   • `distanceFactor` scales the WHOLE label uniformly. LARGER = BIGGER on
+ *     screen. drei computes `scale = distanceFactor / (2·tan(fov/2)·distance)`
+ *     (objectScale in @react-three/drei/web/Html.js), so it is a straight
+ *     multiplier and NOT, despite the name, a pretend distance — the sign is
+ *     the opposite of what the name suggests. This is the fast "make everything
+ *     bigger/smaller" dial.
  *   • the individual `*Size` values (px) tune each line relative to the others.
  *
  * ─── TO MOVE IT CLOSER TO / FURTHER FROM THE FLAGS ──────────────────────────
  *   • `heightAbovePole` is how far (world units) the label floats above the
  *     pole top. Smaller = closer to the flags. It's bottom-anchored, so the
  *     block always grows upward from here and never dips onto the flags.
+ *
+ * ─── IF A LABEL IS CLIPPED AT THE TOP OF FRAME ──────────────────────────────
+ * The block is BOTTOM-anchored and grows UPWARD, so its top edge is set by how
+ * many lines it has. The tallest stop in the data decides the ceiling — that is
+ * 2025, the only year with three awards. Lower `distanceFactor` (shrinks the
+ * whole block) and/or `heightAbovePole` (drops its floor); `titleSize` trims
+ * the lines that actually repeat per award. See also the label's `w-[...]` in
+ * StopOverlays, which decides how many of those lines wrap in the first place.
  */
 export const LABEL = {
-  /** Whole-label scale. Smaller ⇒ larger on screen. */
-  distanceFactor: 15,
+  /**
+   * Whole-label scale. LARGER ⇒ larger on screen (see the header).
+   *
+   * 14, down from 15: the 2025 stop carries three awards — six lines on top of
+   * the eyebrow and the year — and at 15 the top of that stack came within
+   * ~14px of the top of the canvas on a 1366x768 laptop. The canvas top is
+   * itself only ~19px below the navbar (HistoryJourney), so "nearly clipped"
+   * and "tucked under the navbar" look like the same thing.
+   *
+   * Deliberately NOT dropped further. This factor scales the eyebrow and the
+   * competition lines too, and those are already the smallest text in the
+   * scene; most of the height came out of `titleSize` instead, which is the
+   * line that actually repeats per award. Paired with the label box in
+   * StopOverlays the on-screen WIDTH is held roughly constant:
+   * 320px×(15/k) ≈ 350px×(14/k).
+   */
+  distanceFactor: 14,
   /** World height of the label's baseline above the pole top. Small because the
    *  pole is now tall (see STOP.poleHeight); this sits the label just above the
-   *  flag that flies from the pole top. */
-  heightAbovePole: 0.8,
-  /** Award headline lines — the big, bold text. */
-  titleSize: 28,
+   *  flag that flies from the pole top. 0.4 rather than 0.8 to buy back headroom
+   *  at the top of frame — the flag hangs DOWN from the pole top, so lowering
+   *  the label's floor costs it nothing on the way down. */
+  heightAbovePole: 0.4,
+  /** Award headline lines — the big, bold text. 25, down from 28: this line and
+   *  its competition line repeat once PER AWARD, so it is the single size that
+   *  decides how tall a multi-award year gets — and 2025, with three, sets the
+   *  ceiling for the whole page. */
+  titleSize: 25,
   /** "ACHIEVEMENT NN" eyebrow. */
   eyebrowSize: 13,
   /** The year. */
