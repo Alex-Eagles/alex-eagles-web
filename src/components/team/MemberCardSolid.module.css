@@ -21,7 +21,12 @@
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 0.8;
+  /* Matches the 2026 card so both years read as the same object. See that file
+     for why 0.74. The 2025 cut-outs are 600x750 (0.8), so `cover` no longer
+     fits them exactly — it scales to the taller box and trims roughly 4% off
+     each side. Portraits here are centred with margin, so that clears the
+     figure; nothing is distorted, only cropped. */
+  aspect-ratio: 0.74;
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
@@ -39,7 +44,11 @@
 .card:hover,
 .card:focus-visible {
   transform: translateY(-6px);
-  box-shadow: 0 34px 60px -30px rgba(90, 91, 221, 0.22);
+  /* The lift glow under the card carries the sub-team colour. This is the base
+     rule every member card hits; the lead/vice/head rules below override it
+     with their ringed variants, which is why fixing those alone left plain
+     members glowing brand blue. */
+  box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
 }
 
 /* Dark texture, always visible — same treatment as the 2026 card's cutout

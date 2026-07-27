@@ -54,7 +54,14 @@
 .inner {
   position: relative;
   width: 100%;
-  aspect-ratio: 0.8;
+  /* Taller than the original 0.8 — the member grid is pinned at three across so
+     a card can only gain size in height, and the extra room lets the portrait,
+     the stretched first name and the hover panel share the box less tightly.
+     Nothing stretches: portraits are object-fit: cover and cut-outs
+     object-fit: contain, so a shape change re-crops or letterboxes, never
+     distorts. Kept close to 0.75 on purpose — that is the cut-outs' own
+     aspect, so they still land in the box with almost nothing trimmed. */
+  aspect-ratio: 0.74;
   overflow: hidden;
   background: linear-gradient(165deg, #2e2e2e, #242424);
   /* Rounds this box itself instead of relying on .card's overflow clip. That

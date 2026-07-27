@@ -138,6 +138,13 @@ export interface Section {
   /** Overrides the info-chip icon. Defaults to the section's slug. */
   icon?: SubTeamIconKey;
   /**
+   * Stack this section's leads down the left column instead of side by side.
+   * Only matters for a section with co-leads; opt-in per section because the
+   * two co-led sections want different shapes — Software reads better stacked,
+   * Propulsion side by side.
+   */
+  stackLeads?: boolean;
+  /**
    * Nested sub-groups — e.g. Aerodesign → Wing, Tail & Stability. When present,
    * the section renders as a parent block: its own `members` first (the aero
    * "core"), then each subsection as an indented, labelled group. Leave empty
@@ -308,7 +315,12 @@ const slot = (
 const section = (
   name: string,
   members: Omit<TeamMember, "department">[],
-  opts: { blurb?: string; icon?: SubTeamIconKey; subsections?: Section[] } = {},
+  opts: {
+    blurb?: string;
+    icon?: SubTeamIconKey;
+    subsections?: Section[];
+    stackLeads?: boolean;
+  } = {},
 ): Section => ({
   name,
   id: slugify(name),
@@ -318,6 +330,7 @@ const section = (
   ...(opts.blurb ? { blurb: opts.blurb } : {}),
   ...(opts.icon ? { icon: opts.icon } : {}),
   ...(opts.subsections?.length ? { subsections: opts.subsections } : {}),
+  ...(opts.stackLeads ? { stackLeads: true } : {}),
 });
 
 /**
@@ -543,7 +556,7 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Mechatronics",
           }),
-          slot("Member", "Youssef Mohamed Fawzy", {
+          slot("Member", "Youssef Fawzy", {
             photo: "youssef-fawzy",
             linkedIn: "https://www.linkedin.com/in/youssef-fawzy-1b93242a6/",
             gradYear: "2027",
@@ -573,7 +586,7 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Biomedical",
           }),
-          slot("Member", "Ahmed Hisham EL Tantawy", {
+          slot("Member", "Ahmed EL Tantawy", {
             photo: "ahmed-tantawy",
             linkedIn: "https://www.linkedin.com/in/ahmed-tantawy-154025318/",
             gradYear: "2027",
@@ -595,6 +608,9 @@ const ROSTER_2026: YearRoster = {
         ], {
           blurb:
             "We write the software that flies the aircraft on its own — the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
+          // Mazen above Sara down the left column. Propulsion's co-leads stay
+          // side by side, so this is opt-in rather than a rule for co-leads.
+          stackLeads: true,
         }),
       ],
     },

@@ -212,10 +212,13 @@
   flex-wrap: wrap;
 }
 
-/* All three leadership cards are the same size and align on one line. */
+/* All three leadership cards are the same size and align on one line. Grown
+ * alongside the taller member cards so the trio keeps its lead in the
+ * hierarchy — unlike a section lead, nothing sits beside it competing for
+ * width, so this one can gain in both directions. */
 .leaderSide,
 .leaderCentre {
-  width: 320px;
+  width: 340px;
   max-width: 100%;
 }
 
@@ -419,12 +422,19 @@
 }
 
 .sectionBody .leadRow {
-  /* One card per row: co-leads (Mazen + Sara on Software, Hana + Rodyna) stack
-     down the left column in roster order instead of sitting side by side and
-     eating the width the member grid needs for three-up. */
+  /* Wraps rather than forcing a single column, so a lone lead sits alone and
+     co-leads (Hana + Rodyna on Propulsion) sit side by side. */
   flex: none;
-  flex-direction: column;
   justify-content: flex-start;
+}
+
+/*
+ * Opt-in per section (Section.stackLeads): co-leads run down the left column in
+ * roster order instead of side by side. Only Software wants this — two 280px
+ * cards abreast there left the member grid too little room.
+ */
+.sectionBody .leadRowStacked {
+  flex-direction: column;
 }
 
 /* Division heads sit in the same centred, roomy row as section leads, with a

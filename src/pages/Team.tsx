@@ -79,10 +79,16 @@ export default function Team({
     const count = sectionCount(section);
     const hasChildren = !!section.subsections?.length;
 
-    /* Vices and members share one flow rather than getting a row each — vices
-     * come first so rank still reads left-to-right, and a section with two
-     * vices and one member lands on a single row instead of two ragged ones. */
     const people = [...vices, ...grid];
+
+    /*
+     * A roster that fits one row goes in one row — vices first, so rank still
+     * reads left-to-right, and a section with two vices and one member doesn't
+     * split into two ragged rows. Any longer and the vices take their own row
+     * above the members, which keeps rank legible instead of letting a vice
+     * and a member share a line only because the wrap happened to land there.
+     */
+    const singleRow = people.length <= 3;
 
     /* A short roster is centred on the lead card's midline instead of hanging
      * off its top edge, which left an obvious hole under two or three cards
@@ -119,7 +125,10 @@ export default function Team({
         </div>
 
         <div className={styles.sectionBody}>
-          {cardRow(leads, styles.leadRow)}
+          {cardRow(
+            leads,
+            `${styles.leadRow}${section.stackLeads ? ` ${styles.leadRowStacked}` : ""}`,
+          )}
           {leads.length > 0 && people.length > 0 && (
             <div className={styles.sectionDivider} aria-hidden />
           )}
@@ -128,7 +137,14 @@ export default function Team({
               centrePeople ? ` ${styles.sectionRightCentred}` : ""
             }`}
           >
-            {cardRow(people, styles.grid)}
+            {singleRow ? (
+              cardRow(people, styles.grid)
+            ) : (
+              <>
+                {cardRow(vices, styles.grid)}
+                {cardRow(grid, styles.grid)}
+              </>
+            )}
           </div>
         </div>
 
