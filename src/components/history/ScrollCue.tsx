@@ -70,7 +70,7 @@ export default function ScrollCue({ label, className = "" }: ScrollCueProps) {
           section's `overflow-hidden`. Capped to the viewport so it wraps to two
           centred lines instead. */}
       <span
-        className="font-mono text-caption uppercase tracking-[0.16em] text-fg-muted text-center max-w-[calc(100vw-3rem)]"
+        className="font-mono text-caption uppercase tracking-[0.16em] text-fg-secondary text-center max-w-[calc(100vw-3rem)]"
         style={{ animation: labelAnimation }}
       >
         {label}

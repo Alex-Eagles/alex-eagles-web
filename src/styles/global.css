@@ -20,6 +20,13 @@
  *
  *   --color-canvas   → bg-canvas / text-canvas / border-canvas
  *   --color-fg       → text-fg
+ *
+ * NB the text ramp reads primary → secondary → muted, and the utility names
+ * now say so: `text-fg` / `text-fg-secondary` / `text-fg-muted`. They used to
+ * be `fg-muted` and `fg-subtle`, which mapped to --text-secondary and
+ * --text-muted respectively — i.e. `text-fg-muted` did NOT give you
+ * --text-muted. Reaching for the wrong one of those is how the dark theme
+ * shipped 11px labels at 2.53:1.
  *   --color-brand    → text-brand / bg-brand / border-brand
  *   --font-display   → font-display
  *   --text-hero      → text-hero
@@ -45,8 +52,8 @@
 
   /* Text */
   --color-fg: var(--text-primary);
-  --color-fg-muted: var(--text-secondary);
-  --color-fg-subtle: var(--text-muted);
+  --color-fg-secondary: var(--text-secondary);
+  --color-fg-muted: var(--text-muted);
 
   /* Borders */
   --color-border: var(--border-subtle);

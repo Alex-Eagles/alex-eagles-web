@@ -29,7 +29,7 @@ export default function Footer() {
             <div className="font-sans text-xs tracking-[0.18em] uppercase text-brand-light mb-4">
               {BRAND.unit}
             </div>
-            <p className="font-sans text-sm leading-[1.7] text-fg-muted max-w-[34ch] mb-5">
+            <p className="font-sans text-sm leading-[1.7] text-fg-secondary max-w-[34ch] mb-5">
               {BRAND.mission}
             </p>
             <div className="flex gap-2.5">
@@ -38,7 +38,7 @@ export default function Footer() {
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="w-11 h-11 rounded-lg flex items-center justify-center bg-elevated border border-border text-fg-muted transition-colors duration-200 hover:text-fg hover:border-brand"
+                  className="w-11 h-11 rounded-lg flex items-center justify-center bg-elevated border border-border text-fg-secondary transition-colors duration-200 hover:text-fg hover:border-brand"
                 >
                   <Icon size={18} />
                 </a>
@@ -52,7 +52,7 @@ export default function Footer() {
               <li key={link.path}>
                 <Link
                   to={link.path}
-                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
+                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-secondary transition-colors hover:text-fg"
                 >
                   <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
                   {link.label}
@@ -67,7 +67,7 @@ export default function Footer() {
               <li key={name}>
                 <Link
                   to="/vehicles"
-                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
+                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-secondary transition-colors hover:text-fg"
                 >
                   <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
                   {name}
@@ -80,11 +80,11 @@ export default function Footer() {
           <div>
             <ColumnHeading>Communication</ColumnHeading>
             <div className="flex flex-col gap-3.5 mb-[22px]">
-              <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted">
+              <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-secondary">
                 <Mail size={17} className="text-gold" />
                 {CONTACT.email}
               </span>
-              <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted">
+              <span className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-secondary">
                 <MapPin size={17} className="text-gold" />
                 {CONTACT.location}
               </span>
@@ -97,7 +97,7 @@ export default function Footer() {
             >
               <label
                 htmlFor="footer-email"
-                className="block font-sans text-[13px] text-fg-muted mb-2.5"
+                className="block font-sans text-[13px] text-fg-secondary mb-2.5"
               >
                 Stay informed about developments.
               </label>
@@ -121,7 +121,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-[22px] border-t border-border text-center font-sans text-[13px] text-fg-subtle">
+        <div className="mt-12 pt-[22px] border-t border-border text-center font-sans text-[13px] text-fg-muted">
           © 2025 Alex Eagles · Alexandria University · SUAS Competition
         </div>
       </div>

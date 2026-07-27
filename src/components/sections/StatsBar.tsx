@@ -18,7 +18,7 @@ export default function StatsBar() {
             >
               {stat.num}
             </div>
-            <div className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-fg-muted mt-2.5">
+            <div className="font-sans text-[13px] font-medium tracking-[0.12em] uppercase text-fg-secondary mt-2.5">
               {stat.label}
             </div>
           </ScrollReveal>

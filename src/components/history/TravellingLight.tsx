@@ -56,36 +56,65 @@ import {
 } from "./sceneConfig";
 
 /**
+ * Falloff of the glow at normalised radius `r`, 0 at the centre and 1 at the
+ * sprite's edge.
+ *
+ * Two Gaussians summed: a tight one for the hot core and a wide one for the
+ * spill. That is the shape real bloom produces — a concentrated centre with a
+ * long, gentle tail — and it is why the light reads as EMITTING rather than as
+ * a painted disc with a soft edge.
+ *
+ * Both are renormalised so the result is exactly 0 at r = 1. A Gaussian never
+ * truly reaches zero, and the residue matters here: left in, every pixel of the
+ * sprite's square quad would carry a little brightness, and with additive
+ * blending on a dark floor that is a faintly glowing RECTANGLE around the ball.
+ * The subtraction is what guarantees the glow ends as a circle.
+ */
+function glowFalloff(r: number): number {
+  const gaussian = (x: number, k: number) => Math.exp(-k * x * x);
+  const normalised = (x: number, k: number) =>
+    (gaussian(x, k) - gaussian(1, k)) / (1 - gaussian(1, k));
+
+  return 0.55 * normalised(r, 2.6) + 0.45 * normalised(r, 11);
+}
+
+/**
  * Generates the soft radial gradient used by both glow sprites.
  *
- * Drawn once into a small offscreen canvas and uploaded as a single texture.
- * 128px is plenty: it's a smooth gradient stretched over a large sprite, so
- * there's no detail to lose, and a small texture means a trivial GPU upload
- * and excellent cache behaviour.
+ * Drawn once into an offscreen canvas and uploaded as a single texture shared
+ * by both sprites — one upload for the life of the page.
+ *
+ * ─── WHY SO MANY STOPS ──────────────────────────────────────────────────────
+ * This was five hand-placed colour stops, and a canvas gradient interpolates
+ * LINEARLY between them. Five stops over a curve this steep means five straight
+ * segments, and each junction is a discontinuity in the first derivative — a
+ * faint ring at every one, banding on a dark background where the eye is most
+ * sensitive to it. Sampling the real curve densely costs nothing: it happens
+ * once, at mount, into a 256px canvas.
  */
 function createGlowTexture(): CanvasTexture {
-  const size = 128;
+  const size = 256;
+  const stops = 64;
+
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
 
   const ctx = canvas.getContext("2d")!;
+  const centre = size / 2;
   const gradient = ctx.createRadialGradient(
-    size / 2,
-    size / 2,
+    centre,
+    centre,
     0,
-    size / 2,
-    size / 2,
-    size / 2,
+    centre,
+    centre,
+    centre,
   );
 
-  // An exponential-ish ramp rather than a linear one: real light falls off
-  // fast near the source, and a linear ramp reads as a flat painted disc.
-  gradient.addColorStop(0.0, "rgba(255,255,255,1)");
-  gradient.addColorStop(0.12, "rgba(255,255,255,0.85)");
-  gradient.addColorStop(0.3, "rgba(255,255,255,0.35)");
-  gradient.addColorStop(0.6, "rgba(255,255,255,0.08)");
-  gradient.addColorStop(1.0, "rgba(255,255,255,0)");
+  for (let i = 0; i <= stops; i++) {
+    const r = i / stops;
+    gradient.addColorStop(r, `rgba(255,255,255,${glowFalloff(r).toFixed(4)})`);
+  }
 
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, size, size);
@@ -94,6 +123,36 @@ function createGlowTexture(): CanvasTexture {
   texture.colorSpace = SRGBColorSpace;
   return texture;
 }
+
+/**
+ * Draw order for the glow sprites, and the reason they ignore the depth buffer.
+ *
+ * ─── THE HARD HORIZONTAL LINE BEHIND THE BALL ───────────────────────────────
+ * The halo is a 9-unit billboard centred on a light that hovers 0.9 units above
+ * the floor. So it hangs 3.6 units BELOW the ground plane — and the ground is
+ * an opaque, depth-writing mesh (see GroundDots). Every halo fragment under
+ * y = 0 failed the depth test and was discarded, which cut the glow off along
+ * the sprite's intersection with the floor. A camera-facing quad meeting a
+ * horizontal plane intersects in a horizontal line, and that line, projected,
+ * is exactly the sharp edge that sat just under the ball in every screenshot,
+ * in both themes, on every device. It was geometry, not colour.
+ *
+ * Turning off `depthTest` is the fix, and it is also the physically honest one:
+ * light spills ONTO a floor, it does not stop at it. The glow now washes over
+ * the ground, the dot grid and the path the same way it washes over everything
+ * else.
+ *
+ * What that trades away is occlusion — a pole passing between the camera and
+ * the light no longer blocks the halo. That is the correct trade twice over:
+ * the camera chases the light from behind, so almost nothing is ever in front
+ * of it, and a bright glow bleeding around a thin pole is what a real one does.
+ *
+ * `renderOrder` then guarantees the sprites are drawn AFTER the opaque scene
+ * and in the right order between themselves (wide halo first, hot core over
+ * it). Without it, two sprites at the identical distance are sorted by
+ * whichever order three happens to walk them in.
+ */
+const GLOW_RENDER_ORDER = 10;
 
 interface TravellingLightProps {
   quality: QualitySettings;
@@ -170,6 +229,7 @@ export default function TravellingLight({
       <sprite
         key={isDark ? "halo-dark" : "halo-light"}
         scale={[LIGHT.glowSize, LIGHT.glowSize, 1]}
+        renderOrder={GLOW_RENDER_ORDER}
       >
         <spriteMaterial
           map={glowTexture}
@@ -179,6 +239,10 @@ export default function TravellingLight({
           // Glows must never write depth, or they'd punch a hole in everything
           // drawn behind them.
           depthWrite={false}
+          // ...nor READ it. See the note above GLOW_RENDER_ORDER: this is what
+          // stops the ground plane slicing a hard horizontal line across the
+          // halo.
+          depthTest={false}
           toneMapped={false}
           opacity={glow.haloOpacity}
         />
@@ -191,6 +255,7 @@ export default function TravellingLight({
       <sprite
         key={isDark ? "core-dark" : "core-light"}
         scale={[LIGHT.glowSize * 0.35, LIGHT.glowSize * 0.35, 1]}
+        renderOrder={GLOW_RENDER_ORDER + 1}
       >
         <spriteMaterial
           map={glowTexture}
@@ -198,6 +263,7 @@ export default function TravellingLight({
           blending={blending}
           transparent
           depthWrite={false}
+          depthTest={false}
           toneMapped={false}
           opacity={glow.coreOpacity}
         />

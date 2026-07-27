@@ -64,7 +64,7 @@ export default function Competitions() {
           />
 
           <ScrubbedText
-            className="font-sans text-body text-fg-muted leading-[1.7] mt-6 mx-auto text-center"
+            className="font-sans text-body text-fg-secondary leading-[1.7] mt-6 mx-auto text-center"
             style={{ maxWidth: "var(--maxw-prose)" }}
           >
             The events the team designs and builds for, and how it has done at
@@ -216,12 +216,12 @@ function CompetitionRow({
             </h3>
 
             {entry.fullName && (
-              <p className="font-mono text-[12px] uppercase tracking-[0.12em] text-fg-muted m-0 mt-2">
+              <p className="font-mono text-[12px] uppercase tracking-[0.12em] text-fg-secondary m-0 mt-2">
                 {entry.fullName}
               </p>
             )}
 
-            <p className="font-sans text-small md:text-body text-fg-muted leading-[1.7] m-0 mt-4">
+            <p className="font-sans text-small md:text-body text-fg-secondary leading-[1.7] m-0 mt-4">
               {entry.blurb}
             </p>
 
@@ -256,7 +256,7 @@ function CompetitionRow({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col-reverse">
-      <dt className="font-mono text-[11px] uppercase tracking-[0.14em] text-fg-subtle mt-2">
+      <dt className="font-mono text-[11px] uppercase tracking-[0.14em] text-fg-muted mt-2">
         {label}
       </dt>
       <dd className="m-0 font-display font-bold text-h4 text-[var(--sky)] leading-none">

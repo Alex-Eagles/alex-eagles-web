@@ -594,7 +594,7 @@ function Milestone({
                 {achievement.title}
               </h3>
               {achievement.blurb && (
-                <p className="font-sans text-small text-fg-muted leading-[1.65] m-0">
+                <p className="font-sans text-small text-fg-secondary leading-[1.65] m-0">
                   {achievement.blurb}
                 </p>
               )}

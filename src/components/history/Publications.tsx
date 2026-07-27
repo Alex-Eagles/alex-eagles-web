@@ -95,7 +95,7 @@ export default function Publications() {
           />
 
           <ScrubbedText
-            className="font-sans text-body text-fg-muted leading-[1.7] mt-6 mx-auto text-center"
+            className="font-sans text-body text-fg-secondary leading-[1.7] mt-6 mx-auto text-center"
             style={{ maxWidth: "var(--maxw-prose)" }}
           >
             Papers the team has published — in aircraft design, and in the
@@ -245,7 +245,7 @@ function PublicationRow({
                 needs air above, above the title on desktop it needs air below. */}
             <div className="order-2 sm:order-1 flex items-center justify-between gap-3 mt-3 sm:mt-0 mb-0 sm:mb-3">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <span className="font-mono text-[12px] tracking-[0.12em] text-fg-subtle">
+                <span className="font-mono text-[12px] tracking-[0.12em] text-fg-muted">
                   {paper.year}
                 </span>
                 {/* No border: on a solid chip an outline in the same colour
@@ -263,7 +263,7 @@ function PublicationRow({
                 size={20}
                 aria-hidden="true"
                 className={
-                  "shrink-0 text-fg-subtle opacity-60 " +
+                  "shrink-0 text-fg-muted opacity-60 " +
                   "transition-[opacity,transform,color] duration-[220ms] [transition-timing-function:var(--ease-out-strong)] " +
                   "group-hover:opacity-100 group-hover:text-[var(--sky)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 " +
                   "motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0"
@@ -286,14 +286,14 @@ function PublicationRow({
             {/* The citation. Authors first, then where it ran — the order a
                 reader scans in when they're checking whether they know the
                 work or the people. */}
-            <p className="order-3 font-sans text-small text-fg-muted leading-[1.6] m-0 mt-3">
+            <p className="order-3 font-sans text-small text-fg-secondary leading-[1.6] m-0 mt-3">
               {paper.authors.join(", ")}
             </p>
 
             <p className="order-4 font-mono text-[12px] uppercase tracking-[0.12em] text-fg m-0 mt-2">
               {paper.venue}
               {paper.venueDetail && (
-                <span className="block normal-case tracking-[0.04em] text-fg-subtle mt-1">
+                <span className="block normal-case tracking-[0.04em] text-fg-muted mt-1">
                   {paper.venueDetail}
                 </span>
               )}
@@ -309,7 +309,7 @@ function PublicationRow({
                 // From `sm` it goes back to the shared scale, where it sits in
                 // a wide column beside the preview and matches every other
                 // secondary paragraph on the site.
-                "order-5 font-sans text-body sm:text-small text-fg-muted leading-[1.7] m-0 mt-4 " +
+                "order-5 font-sans text-body sm:text-small text-fg-secondary leading-[1.7] m-0 mt-4 " +
                 (expanded ? "" : "line-clamp-4")
               }
             >

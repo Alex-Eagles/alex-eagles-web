@@ -413,7 +413,7 @@ export default function HistoryJourney() {
 function SceneMessage({ children }: { children: React.ReactNode }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
-      <span className="font-mono text-caption uppercase tracking-[0.14em] text-fg-muted">
+      <span className="font-mono text-caption uppercase tracking-[0.14em] text-fg-secondary">
         {children}
       </span>
     </div>

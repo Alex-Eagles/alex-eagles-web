@@ -29,9 +29,9 @@
  *   BAND 3  deep   publications
  *   BAND 4  lift   competitions
  *
- * Deep first, in both themes. The tones and the crossfaded seam between them
- * are .ae-band in global.css; the pair of colours is --band-deep/--band-lift in
- * theme.css.
+ * Deep first, in both themes. Bands butt up hard and the light theme draws a
+ * hairline at each join — .ae-band in global.css; the pair of colours, and the
+ * edge, are --band-deep / --band-lift / --band-edge in theme.css.
  *
  * The BANDS LIVE HERE, not on the sections. They used to be a `bg-surface`
  * class hardcoded inside MediaCoverage and Competitions, which meant every one
@@ -103,7 +103,7 @@ export default function History() {
       {/* ══ BAND 1 — deep ═════════════════════════════════════════════════
           The hero, the journey and the written record are one chapter: the
           team's own account of itself. `--flush` because there is no band
-          above this one to fade in from, only the navbar. */}
+          above this one to divide it from, only the navbar. */}
       <div className="ae-band ae-band--deep ae-band--flush">
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         {/* `pb-24` reserves the bottom strip for the scroll cue. The section
@@ -150,7 +150,7 @@ export default function History() {
                 it. Space below the hero is the section's job (`pb-24` above),
                 where it can be reserved deliberately. */}
             <p
-              className="font-sans text-body-lg text-fg-muted leading-[1.7] mt-6"
+              className="font-sans text-body-lg text-fg-secondary leading-[1.7] mt-6"
               style={{ maxWidth: "var(--maxw-prose)" }}
             >
               {awardCount} awards across {yearsActive} years of competition.{" "}

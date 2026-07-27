@@ -64,7 +64,7 @@ export default function Sponsors() {
               <span className="font-display font-bold text-[30px] tracking-[0.02em] text-fg">
                 {sp.name}
               </span>
-              <span className="font-sans text-[13px] text-fg-muted">{sp.tag}</span>
+              <span className="font-sans text-[13px] text-fg-secondary">{sp.tag}</span>
             </div>
           ))}
         </div>

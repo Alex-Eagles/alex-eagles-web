@@ -110,7 +110,7 @@ export default function MediaCoverage() {
           />
 
           <ScrubbedText
-            className="font-sans text-body text-fg-muted leading-[1.7] mt-6 mx-auto text-center"
+            className="font-sans text-body text-fg-secondary leading-[1.7] mt-6 mx-auto text-center"
             style={{ maxWidth: "var(--maxw-prose)" }}
           >
             We&rsquo;ve been featured on several news outlets — on national
