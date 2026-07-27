@@ -55,16 +55,6 @@
     box-shadow var(--t-lift) ease;
 }
 
-.card:hover,
-.card:focus-visible {
-  transform: translateY(-6px);
-  /* The lift glow under the card carries the sub-team colour. This is the base
-     rule every member card hits; the lead/vice/head rules below override it
-     with their ringed variants, which is why fixing those alone left plain
-     members glowing brand blue. */
-  box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
-}
-
 /* Dark texture, always visible — same treatment as the 2026 card's cutout
  * backdrop (TeamMemberCard's .backdrop/.backdropScrim), so the texture reads
  * equally visible in both years instead of getting crushed dark here. */
@@ -104,11 +94,6 @@
   color: color-mix(in srgb, var(--card-accent) 78%, #ffffff);
 }
 
-.card:hover .bigName,
-.card:focus-visible .bigName {
-  opacity: 0.9;
-}
-
 /* The colour cut-out — sits above the big name so it occludes it. */
 .photo {
   position: absolute;
@@ -122,11 +107,6 @@
   transform: scale(1);
   transform-origin: bottom center;
   transition: transform var(--t-img) cubic-bezier(0.16, 0.84, 0.34, 1);
-}
-
-.card:hover .photo,
-.card:focus-visible .photo {
-  transform: scale(1.05);
 }
 
 .placeholder {
@@ -174,13 +154,6 @@
   transition: opacity var(--t-tags) ease;
 }
 
-.card:hover .badge,
-.card:focus-visible .badge,
-.card:hover .restName,
-.card:focus-visible .restName {
-  opacity: 0;
-}
-
 /* Hover info panel. */
 .panel {
   position: absolute;
@@ -199,12 +172,6 @@
   transition:
     opacity var(--t-panel) ease,
     transform var(--t-panel) cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.card:hover .panel,
-.card:focus-visible .panel {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .panelRole {
@@ -266,6 +233,61 @@
 .linkedin:hover {
   color: #f2f2f2;
   border-color: var(--card-accent);
+}
+
+/* --- pointer reveal -------------------------------------------------------
+ *
+ * Gated to devices that actually have a pointer. iOS keeps :hover stuck on a
+ * tapped element until you tap somewhere else, so ungated these fired on touch
+ * too — a tapped card stayed revealed after data-open had already closed it,
+ * and a second tapped card could be revealed at the same time. On touch the
+ * (hover: none) block below is the only thing that reveals a card, which is
+ * what makes data-open the single source of truth there.
+ * -------------------------------------------------------------------------*/
+@media (hover: hover) {
+  .card:hover,
+  .card:focus-visible {
+    transform: translateY(-6px);
+    /* The lift glow under the card carries the sub-team colour. This is the base
+       rule every member card hits; the lead/vice/head rules below override it
+       with their ringed variants, which is why fixing those alone left plain
+       members glowing brand blue. */
+    box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
+  }
+
+  .card:hover .bigName,
+  .card:focus-visible .bigName {
+    opacity: 0.9;
+  }
+
+  .card:hover .photo,
+  .card:focus-visible .photo {
+    transform: scale(1.05);
+  }
+
+  .card:hover .badge,
+  .card:focus-visible .badge,
+  .card:hover .restName,
+  .card:focus-visible .restName {
+    opacity: 0;
+  }
+
+  .card:hover .panel,
+  .card:focus-visible .panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .card[data-tier="lead"]:hover,
+  .card[data-tier="lead"]:focus-visible,
+  .card[data-tier="vice"]:hover,
+  .card[data-tier="vice"]:focus-visible,
+  .card[data-tier="head"]:hover,
+  .card[data-tier="head"]:focus-visible {
+    box-shadow:
+      0 34px 60px -30px color-mix(in srgb, var(--card-accent) 55%, transparent),
+      inset 0 0 0 2px var(--card-accent);
+  }
 }
 
 /* --- touch ----------------------------------------------------------------
@@ -384,17 +406,6 @@
   box-shadow:
     0 8px 24px -14px rgba(0, 0, 0, 0.6),
     inset 0 0 0 2px color-mix(in srgb, var(--card-accent) 85%, transparent);
-}
-
-.card[data-tier="lead"]:hover,
-.card[data-tier="lead"]:focus-visible,
-.card[data-tier="vice"]:hover,
-.card[data-tier="vice"]:focus-visible,
-.card[data-tier="head"]:hover,
-.card[data-tier="head"]:focus-visible {
-  box-shadow:
-    0 34px 60px -30px color-mix(in srgb, var(--card-accent) 55%, transparent),
-    inset 0 0 0 2px var(--card-accent);
 }
 
 /* A vice reads as a lead's second — a dashed ring instead of a solid one. */

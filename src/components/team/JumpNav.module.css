@@ -17,7 +17,7 @@
    * Don't reach for backdrop-filter here: that one *is* expensive, and on a
    * fixed element over a scrolling page it repaints every frame.
    * ==================================================================== */
-  --tab-opacity: 0.55;
+  --tab-opacity: 0.25;
 
   position: fixed;
   top: 50%;

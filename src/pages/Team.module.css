@@ -193,7 +193,10 @@
 .leadership {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 88px 48px 40px;
+  /* No bottom padding: the gap down to the first division's rule is owned by
+     .divisionHeader's padding-top, so the "close above, wide below" spacing
+     holds here too instead of being 40px deeper than everywhere else. */
+  padding: 88px 48px 0;
   scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
 }
 
@@ -239,10 +242,22 @@
 
 /* --- divisions ----------------------------------------------------------- */
 
+/*
+ * The rule above a division belongs to the division that just *ended* — it's
+ * the full stop, not the opening. So it sits close to the last card above it
+ * and leaves a much larger gap below, before the new division's number and
+ * name. Equal gaps read as "something is between these two", which is exactly
+ * the ambiguity being fixed.
+ *
+ * The 40px above isn't arbitrary: a hovered/tapped card throws a
+ * `0 34px 60px -30px` glow, which reaches ~34px past its own bottom edge.
+ * Any tighter and the rule would clip the glow off the last card in the
+ * division.
+ */
 .divisionHeader {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 48px 48px 8px;
+  padding: 40px 48px 8px;
 }
 
 .divisionHeaderInner {
@@ -252,7 +267,7 @@
   text-align: center;
   gap: 6px;
   border-top: 1px solid rgb(68 68 68 / 0.4);
-  padding-top: 40px;
+  padding-top: 72px;
 }
 
 .divisionNumber {
@@ -556,23 +571,31 @@
        to spare. */
     padding-top: calc(76px + var(--hero-band));
   }
+  /*
+   * The photo band is exactly the screen width; the zoom is a scale on top of
+   * it, clipped by .hero's overflow. An earlier version drew the element wider
+   * than the screen and pulled it back with a negative percentage margin —
+   * that resolves against the containing block in ways that left the photo
+   * offset instead of centred. A transform can't drift: it scales about the
+   * element's own centre, so the framing stays put whatever --hero-zoom is.
+   *
+   * The crossfade's own scale is folded in below rather than replaced, so the
+   * year switch still drifts.
+   */
   .heroPhoto {
     top: 76px;
     bottom: auto;
     left: 0;
-    right: auto;
+    right: 0;
+    width: 100%;
     height: var(--hero-band);
-    /*
-     * Drawn wider than the screen and pulled back to centre, so `cover` scales
-     * to that wider box — which is what actually magnifies the people. The
-     * overflow is clipped by .hero. Done with width + margin rather than a
-     * transform because the transform on this element is already spoken for by
-     * the year crossfade.
-     */
-    width: calc(100% * var(--hero-zoom));
-    margin-left: calc((100% - 100% * var(--hero-zoom)) / 2);
     object-fit: cover;
     object-position: center var(--hero-focus);
+    transform: scale(calc(1.06 * var(--hero-zoom)));
+  }
+  /* Must follow .heroPhoto — same specificity, so order decides. */
+  .heroPhotoActive {
+    transform: scale(var(--hero-zoom));
   }
   /* The scrim was fading a full-bleed photo into the page; now it only has the
      photo's own bottom edge to soften. */
@@ -610,6 +633,16 @@
    * follows the DOM, which is the trade for not reshaping the [left, centre,
    * right] contract the desktop layout is built on.
    * ---------------------------------------------------------------------- */
+  /* Same "close above, wide below" ratio as desktop, scaled to the screen.
+     40px still clears the card glow; the gap below just doesn't need 72px
+     when the division name is already the biggest thing on the page. */
+  .divisionHeader {
+    padding-top: 40px;
+  }
+  .divisionHeaderInner {
+    padding-top: 56px;
+  }
+
   .leadershipRow > *:nth-child(1) {
     order: 2;
   }

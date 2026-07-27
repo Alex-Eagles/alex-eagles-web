@@ -63,13 +63,6 @@
   transition: transform var(--t-lift) var(--ease-move), box-shadow var(--t-lift) ease;
 }
 
-.card:is(:hover, :focus-visible, :has(:focus-visible)) {
-  transform: translateY(-6px);
-  /* Lift glow carries the sub-team colour rather than a fixed blue, so hovering
-     a Structure card no longer throws blue light under a warm-grey section. */
-  box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
-}
-
 .card:focus-visible {
   outline: 2px solid var(--card-accent);
   outline-offset: 3px;
@@ -124,16 +117,7 @@
 }
 
 /* mode A — no cutout: grayscale → colour, slight zoom */
-.card[data-mode="photo"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
-  filter: grayscale(0) contrast(1) brightness(1);
-  transform: scale(1.05);
-}
-
 /* mode B — cutout present: the flat portrait gets out of the way */
-.card[data-mode="cutout"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
-  opacity: 0;
-}
-
 /* --- empty portrait slot -------------------------------------------------- */
 /*
  * Shown when a roster slot has no photo file yet. Deliberately reads as an
@@ -192,10 +176,6 @@
   background: linear-gradient(180deg, rgb(15 15 15 / 0.55), rgb(15 15 15 / 0.35));
 }
 
-.card:is(:hover, :focus-visible, :has(:focus-visible)) :is(.backdrop, .backdropScrim) {
-  opacity: 1;
-}
-
 .cutoutLayer {
   position: absolute;
   inset: 0;
@@ -211,11 +191,6 @@
   object-fit: contain;
   object-position: bottom;
   display: block;
-}
-
-.card:is(:hover, :focus-visible, :has(:focus-visible)) .cutoutLayer {
-  opacity: 1;
-  transform: scale(0.9);
 }
 
 /* --- stretched first name ------------------------------------------------ */
@@ -256,14 +231,6 @@
   text-shadow: 0 3px 24px rgb(0 0 0 / 0.6);
 }
 
-.card:is(:hover, :focus-visible, :has(:focus-visible)) .bigNameBack {
-  opacity: 1;
-}
-
-.card:is(:hover, :focus-visible, :has(:focus-visible)) .bigNameFront {
-  opacity: 0.9;
-}
-
 .topScrim {
   position: absolute;
   top: 0;
@@ -279,10 +246,6 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--t-fade) ease;
-}
-
-.card:is(:hover, :focus-visible, :has(:focus-visible)) .topScrim {
-  opacity: 0.9;
 }
 
 /* --- rest state tags ------------------------------------------------------ */
@@ -324,10 +287,6 @@
   color: rgb(255 255 255 / 0.55);
 }
 
-.card:is(:hover, :focus-visible, :has(:focus-visible)) :is(.restRole, .restName) {
-  opacity: 0;
-}
-
 /* --- hover panel ---------------------------------------------------------- */
 
 .panel {
@@ -345,11 +304,6 @@
   opacity: 0;
   transform: translateY(30%);
   transition: opacity var(--t-panel) ease, transform var(--t-panel) var(--ease-move);
-}
-
-.card:is(:hover, :focus-visible, :has(:focus-visible)) .panel {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .panelRole {
@@ -410,6 +364,63 @@
 .linkedIn:is(:hover, :focus-visible) {
   color: var(--ink);
   border-color: var(--card-accent);
+}
+
+/* --- pointer reveal -------------------------------------------------------
+ *
+ * Gated to devices that actually have a pointer. iOS keeps :hover stuck on a
+ * tapped element until you tap somewhere else, so ungated these fired on touch
+ * too — a tapped card stayed revealed after data-open had already closed it,
+ * and a second tapped card could be revealed at the same time. On touch the
+ * (hover: none) block below is the only thing that reveals a card, which is
+ * what makes data-open the single source of truth there.
+ * -------------------------------------------------------------------------*/
+@media (hover: hover) {
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) {
+    transform: translateY(-6px);
+    /* Lift glow carries the sub-team colour rather than a fixed blue, so hovering
+       a Structure card no longer throws blue light under a warm-grey section. */
+    box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
+  }
+
+  .card[data-mode="photo"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
+    filter: grayscale(0) contrast(1) brightness(1);
+    transform: scale(1.05);
+  }
+
+  .card[data-mode="cutout"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
+    opacity: 0;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) :is(.backdrop, .backdropScrim) {
+    opacity: 1;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .cutoutLayer {
+    opacity: 1;
+    transform: scale(0.9);
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .bigNameBack {
+    opacity: 1;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .bigNameFront {
+    opacity: 0.9;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .topScrim {
+    opacity: 0.9;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) :is(.restRole, .restName) {
+    opacity: 0;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- narrow cards ---------------------------------------------------------
@@ -532,10 +543,13 @@
   .card * {
     transition-duration: 0.01ms !important;
   }
-  .card:is(:hover, :focus-visible, :has(:focus-visible)) {
+  /* [data-open] too, so the touch path drops its motion as well — the reveal
+     still happens, it just doesn't lift or push in. */
+  .card:is(:hover, :focus-visible, :has(:focus-visible), [data-open="true"]) {
     transform: none;
   }
-  .card[data-mode="photo"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
+  .card[data-mode="photo"]:is(:hover, :focus-visible, :has(:focus-visible), [data-open="true"])
+    .photoLayer {
     transform: none;
   }
 }

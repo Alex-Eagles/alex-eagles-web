@@ -11,6 +11,7 @@ import styles from "./JumpNav.module.css";
 export function JumpNav({ groups }: { groups: NavGroup[] }) {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
+  const tabRef = useRef<HTMLButtonElement>(null);
 
   // Escape closes it, and focus moves into the panel when it opens so the
   // links are reachable straight from the tab by keyboard.
@@ -20,15 +21,36 @@ export function JumpNav({ groups }: { groups: NavGroup[] }) {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
+
+    /*
+     * Anything outside the panel closes it — mouse or touch, since pointerdown
+     * covers both. The tab is excluded because it toggles on its own click: if
+     * this closed the panel first, the tab's own handler would immediately
+     * reopen it and the tab would never appear to close anything. Fires on
+     * pointerdown rather than click so the panel is already on its way out by
+     * the time the tap completes.
+     */
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (panelRef.current?.contains(target) || tabRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+
     document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
     panelRef.current?.querySelector("a")?.focus();
 
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
   }, [open]);
 
   return (
     <>
       <button
+        ref={tabRef}
         type="button"
         className={styles.tab}
         data-open={open}
