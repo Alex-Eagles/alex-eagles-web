@@ -768,7 +768,9 @@ const ROSTER_2025: YearRoster = {
             slot("Vice Section Lead", "Ann Tarek", { photo: "ann-tarek" }),
             slot("Member", "Mazen Nazeih", { photo: "mazen-amr" }),
             slot("Member", "Sara Gharib", { photo: "sara-gharib" }),
-            slot("Member", "Zeyad Essam", { photo: "zeyad-essam" }),
+            // Four members wrap 3 + 1 on their own, leaving John alone on the
+            // last line. Splitting 2 + 2 puts Zeyad beside him instead.
+            slot("Member", "Zeyad Essam", { photo: "zeyad-essam", breakBefore: true }),
             slot("Member", "John Ayman", { photo: "john-ayman" }),
           ],
           {
