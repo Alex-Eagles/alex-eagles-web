@@ -39,6 +39,17 @@ export default function Team({
   const [year, setYear] = useState<RosterYear>(initialYear ?? ROSTER_YEARS[0]);
   const scrollY = useScrollPosition();
 
+  /*
+   * Which card is showing its second face. One id for the whole page, so at
+   * most one card is ever open: tapping another card hands the id over, and
+   * any click that reaches the page wrapper — empty space, a heading, the jump
+   * nav — clears it. Cards stop propagation on their own click, which is what
+   * keeps that wrapper handler from immediately undoing the tap that opened
+   * them. Only touch acts on this; see the (hover: none) blocks in the cards.
+   */
+  const [openCardId, setOpenCardId] = useState<string | null>(null);
+  const toggleCard = (id: string) => setOpenCardId((cur) => (cur === id ? null : id));
+
   const roster = ROSTERS[year];
 
   /* 2025 uses the solid-backdrop colour-cutout card; 2026 uses the
@@ -56,7 +67,13 @@ export default function Team({
     members.length > 0 && (
       <div key={key} className={className}>
         {members.map((member) => (
-          <Card key={member.id} member={member} rosterYear={roster.year} />
+          <Card
+            key={member.id}
+            member={member}
+            rosterYear={roster.year}
+            open={openCardId === member.id}
+            onToggle={() => toggleCard(member.id)}
+          />
         ))}
       </div>
     );
@@ -147,7 +164,8 @@ export default function Team({
   };
 
   return (
-    <div className={styles.page}>
+    /* Any click that isn't stopped by a card closes whichever card is open. */
+    <div className={styles.page} onClick={() => setOpenCardId(null)}>
       {/* ---- Hero -------------------------------------------------------- */}
       <header className={styles.hero}>
         {/* Both crew photos stay mounted so switching years crossfades
@@ -244,15 +262,19 @@ export default function Team({
 
           {/* [left, centre, right] — the centre card is the raised one. */}
           <div className={styles.leadershipRow}>
-            <div className={styles.leaderSide}>
-              <Card member={roster.leadership[0]} rosterYear={roster.year} />
-            </div>
-            <div className={styles.leaderCentre}>
-              <Card member={roster.leadership[1]} rosterYear={roster.year} />
-            </div>
-            <div className={styles.leaderSide}>
-              <Card member={roster.leadership[2]} rosterYear={roster.year} />
-            </div>
+            {roster.leadership.map((leader, i) => (
+              <div
+                key={leader.id}
+                className={i === 1 ? styles.leaderCentre : styles.leaderSide}
+              >
+                <Card
+                  member={leader}
+                  rosterYear={roster.year}
+                  open={openCardId === leader.id}
+                  onToggle={() => toggleCard(leader.id)}
+                />
+              </div>
+            ))}
           </div>
         </section>
 

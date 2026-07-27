@@ -7,6 +7,18 @@
  * -------------------------------------------------------------------------*/
 
 .tab {
+  /* ======================================================================
+   * TAB OPACITY — tune here. 1 = solid, 0 = invisible. The tab floats over
+   * the cards rather than having a gutter reserved for it, so this is what
+   * lets whatever it passes over still read through.
+   *
+   * It's a plain rgb(... / a) fill, so it costs nothing extra to render —
+   * no blur, no filter, no compositing work beyond what a solid fill does.
+   * Don't reach for backdrop-filter here: that one *is* expensive, and on a
+   * fixed element over a scrolling page it repaints every frame.
+   * ==================================================================== */
+  --tab-opacity: 0.55;
+
   position: fixed;
   top: 50%;
   right: 16px;
@@ -23,9 +35,15 @@
   gap: 3px;
   cursor: pointer;
   color: #ffffff;
-  background: #3d3ecc;
-  box-shadow: 0 8px 22px -8px rgb(61 62 204 / 0.6);
-  transition: right 0.38s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: rgb(61 62 204 / var(--tab-opacity));
+  /* Glow scaled to the fill, so a faded tab doesn't sit in a solid halo. */
+  box-shadow: 0 8px 22px -8px rgb(61 62 204 / calc(var(--tab-opacity) * 0.6));
+  transition: right 0.38s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease;
+}
+
+/* Solid while the panel is open — it's being used, not passively floating. */
+.tab[data-open="true"] {
+  --tab-opacity: 1;
 }
 
 .tab[data-open="true"] {

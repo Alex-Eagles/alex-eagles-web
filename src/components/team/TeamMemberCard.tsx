@@ -69,9 +69,14 @@ function FitName({ children }: { children: string }) {
 export function TeamMemberCard({
   member,
   rosterYear,
+  open = false,
+  onToggle,
 }: {
   member: TeamMember;
   rosterYear: string;
+  /** Touch-only: whether this card is showing its second face. */
+  open?: boolean;
+  onToggle?: () => void;
 }) {
   const photo = memberPhoto(member);
   const cutout = memberCutout(member);
@@ -89,13 +94,14 @@ export function TeamMemberCard({
   const cardAccent = memberAccent(member);
 
   /*
-   * Touch reveal. A pointer device has hover, so the reveal follows the
-   * pointer and this flag is ignored — the stylesheet only acts on it inside
-   * `@media (hover: none)`. So the handler can stay unconditional: on a mouse
-   * a click still toggles this, and still does nothing at all on screen.
+   * Touch reveal. `open` is owned by the page so only one card is ever open;
+   * stopping propagation is what keeps the page's close-on-click handler from
+   * undoing the tap that opened this one. A pointer device has hover, so the
+   * reveal follows the pointer and this flag is ignored — the stylesheet only
+   * acts on it inside `@media (hover: none)`. So the handler can stay
+   * unconditional: on a mouse a click still toggles it, and still does nothing
+   * at all on screen.
    */
-  const [open, setOpen] = useState(false);
-
   return (
     <article
       className={styles.card}
@@ -103,7 +109,10 @@ export function TeamMemberCard({
       data-open={open}
       style={{ "--card-accent": cardAccent } as CSSProperties}
       tabIndex={0}
-      onClick={() => setOpen((o) => !o)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle?.();
+      }}
       aria-label={filled ? `${member.name}, ${roleLabel}` : `Unfilled ${roleLabel} slot`}
     >
       <div className={styles.inner}>

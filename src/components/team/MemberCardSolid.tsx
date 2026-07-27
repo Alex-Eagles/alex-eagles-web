@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useState } from "react";
+
 import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
@@ -26,9 +26,14 @@ import styles from "./MemberCardSolid.module.css";
 export function MemberCardSolid({
   member,
   rosterYear = "",
+  open = false,
+  onToggle,
 }: {
   member: TeamMember;
   rosterYear?: string;
+  /** Touch-only: whether this card is showing its second face. */
+  open?: boolean;
+  onToggle?: () => void;
 }) {
   const src = memberCutout(member) ?? memberPhoto(member);
   const filled = hasName(member);
@@ -39,19 +44,23 @@ export function MemberCardSolid({
   const roleLabel = memberRoleLabel(member);
 
   /*
-   * Touch reveal — see TeamMemberCard. The stylesheet only acts on this inside
-   * `@media (hover: none)`, so on a pointer device the reveal stays hover-only
-   * and a click still does nothing. Without it the panel (and the LinkedIn
-   * link in it) was unreachable on a phone, since there's no hover to give.
+   * Touch reveal — see TeamMemberCard. `open` is owned by the page so only one
+   * card is ever open; stopping propagation keeps the page's close-on-click
+   * handler from undoing the tap that opened this one. The stylesheet only
+   * acts on it inside `@media (hover: none)`, so on a pointer device the
+   * reveal stays hover-only and a click still does nothing. Without it the
+   * panel (and the LinkedIn link in it) was unreachable on a phone, since
+   * there's no hover to give.
    */
-  const [open, setOpen] = useState(false);
-
   return (
     <article
       className={styles.card}
       data-tier={tier}
       data-open={open}
-      onClick={() => setOpen((o) => !o)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle?.();
+      }}
       /* Every card carries its sub-team's colour — the badge, the big first
        * name, the panel role and (on lead tiers) the accent ring all read from
        * it, so a 2025 card is colour-coded to its section exactly like a 2026

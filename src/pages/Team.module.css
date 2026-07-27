@@ -506,13 +506,14 @@
   .pageFooter {
     padding-inline: 16px;
   }
-  /* Keep cards clear of the fixed PULL tab — 40px wide at right:10px on this
-     breakpoint, so 56px leaves it a hair of daylight. */
-  .leadership,
-  .section,
-  .divisionHeads {
-    padding-right: 56px;
-  }
+  /*
+   * No reserved gutter for the PULL tab. Holding 56px clear of it pushed every
+   * card left of centre — visibly so, since the cards are one-per-row here —
+   * to dodge a 40px tab that only ever covers a 50px band at mid-viewport. The
+   * tab floats over the cards instead, which is what a fixed overlay should
+   * do, and it's been made semi-transparent (--tab-opacity in
+   * JumpNav.module.css) so whatever it passes over still reads through it.
+   */
 
   /* --- hero ---------------------------------------------------------------
    *
@@ -522,6 +523,29 @@
    * fixed navbar, and the copy sits below it in normal flow.
    * ---------------------------------------------------------------------- */
   .hero {
+    /* ===================================================================
+     * HERO FRAMING — the three numbers to tune. Both crew photos are 4:3
+     * (1280x960), so at zoom 1 the image exactly fills the screen width and
+     * nothing is cropped either way.
+     *
+     *  --hero-zoom   How much bigger than screen-width the photo is drawn.
+     *                1 = no zoom. 1.12 = people 12% bigger, and the only
+     *                horizontal crop there is: (zoom - 1) / 2 off each edge,
+     *                so 6% a side at 1.12. Raise this to push in; this is
+     *                the one to watch, since it's what costs you the edges
+     *                of the group.
+     *  --hero-band   Height of the photo strip. Lower crops more off the
+     *                top and bottom (free — costs nothing horizontally) and
+     *                makes the shot read tighter. In vw so it tracks any
+     *                screen width.
+     *  --hero-focus  Which slice survives that vertical crop. 0% keeps the
+     *                top, 100% the bottom, 50% is centred. Lower it to keep
+     *                heads and drop foreground.
+     * =================================================================== */
+    --hero-zoom: 1.12;
+    --hero-band: 66vw;
+    --hero-focus: 40%;
+
     height: auto;
     min-height: 0;
     display: flex;
@@ -529,24 +553,33 @@
     /* Nav clearance + the band the absolutely-positioned photos fill. The
        --nav-height token describes the desktop pill; on a phone Navbar.tsx
        renders a 44px button at top:20px instead, so 76px clears it with air
-       to spare. 75vw is the 4:3 photo's height at full width. */
-    padding-top: calc(76px + 75vw);
+       to spare. */
+    padding-top: calc(76px + var(--hero-band));
   }
   .heroPhoto {
     top: 76px;
     bottom: auto;
-    height: 75vw;
-    /* contain, not cover: whatever ratio the screen turns out to be, the whole
-       team stays in frame. At the photos' native 4:3 the two are identical, so
-       a normal phone letterboxes by nothing at all. */
-    object-fit: contain;
+    left: 0;
+    right: auto;
+    height: var(--hero-band);
+    /*
+     * Drawn wider than the screen and pulled back to centre, so `cover` scales
+     * to that wider box — which is what actually magnifies the people. The
+     * overflow is clipped by .hero. Done with width + margin rather than a
+     * transform because the transform on this element is already spoken for by
+     * the year crossfade.
+     */
+    width: calc(100% * var(--hero-zoom));
+    margin-left: calc((100% - 100% * var(--hero-zoom)) / 2);
+    object-fit: cover;
+    object-position: center var(--hero-focus);
   }
   /* The scrim was fading a full-bleed photo into the page; now it only has the
      photo's own bottom edge to soften. */
   .heroScrim {
     top: 76px;
     bottom: auto;
-    height: 75vw;
+    height: var(--hero-band);
     background: linear-gradient(
       180deg,
       rgb(20 26 38 / 0.28) 0%,
@@ -615,12 +648,18 @@
     width: min(100%, 300px);
   }
 
-  /* Was the vertical rule beside the lead column. Short and centred so it
-     reads as a divider *inside* the sub-team, not another section break. */
+  /*
+   * Was the vertical rule beside the lead column. Wide enough to read as a
+   * deliberate divider, but still clearly shorter than the full-width rule
+   * above each sub-team heading, so the two don't compete — that one separates
+   * sub-teams, this one separates a lead from their members. Slightly brighter
+   * than the desktop rule too, since it's carrying more weight here.
+   */
   .sectionDivider {
     align-self: center;
-    width: min(132px, 38%);
+    width: min(220px, 62%);
     height: 1px;
+    background: rgb(96 96 96 / 0.75);
   }
 
   .sectionRight {
