@@ -50,7 +50,7 @@ export default function Blog() {
       className="min-h-dvh"
       style={{
         background: isDark
-          ? "#1C1D22"
+          ? "#121B34"
           : "linear-gradient(to bottom, var(--bg-elevated) 0%, var(--bg-primary) 60%)",
       }}
     >
@@ -59,12 +59,12 @@ export default function Blog() {
       <div className="max-w-[var(--maxw-content)] mx-auto px-6 pt-2 pb-16">
         {/* Canvas behind the cards — same elevated panel as the home page's
             "Latest updates" section, for the nested-card depth effect. Dark
-            mode uses a neutral charcoal grey; light mode is a touch darker
-            than the default elevated surface. */}
+            mode uses a Space Cadet navy; light mode is a touch darker than
+            the default elevated surface. */}
         <div
           ref={panelRef}
           className="border border-border rounded-2xl p-[30px] shadow-[var(--elevation-2)] scroll-mt-24"
-          style={{ backgroundColor: isDark ? "#1C1D22" : "#E3E3E8" }}
+          style={{ backgroundColor: isDark ? "#121B34" : "#E3E3E8" }}
         >
           {filteredPosts.length > 0 ? (
             <>
