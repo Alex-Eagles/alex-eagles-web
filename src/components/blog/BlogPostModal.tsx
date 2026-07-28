@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
@@ -22,18 +22,26 @@ export default function BlogPostModal({ post, onClose }: BlogPostModalProps) {
   const text = isDark ? style.text.dark : style.text.light;
   const label = isDark ? style.label.dark : style.label.light;
 
+  // Read through a ref so the scroll-lock effect below can run exactly once
+  // per open. Blog builds a fresh `onClose` on every render, and listing it
+  // as a dependency made the effect tear down and re-arm the body lock on
+  // unrelated re-renders (theme toggle, filter change, the close itself).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   // Locks background scroll for the lifetime of the modal. `overflow:hidden`
   // alone doesn't stop touch-scroll on iOS Safari when a fixed overlay sits
   // on top, so the body is pinned in place with `position:fixed` instead —
   // the standard workaround — and the scroll position is restored on close.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKeyDown);
 
     const scrollY = window.scrollY;
     const body = document.body;
+    const root = document.documentElement;
     const prev = {
       position: body.style.position,
       top: body.style.top,
@@ -47,13 +55,25 @@ export default function BlogPostModal({ post, onClose }: BlogPostModalProps) {
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+
+      // Unpinning the body drops the document back to scroll offset 0, so the
+      // scrollTo below is what puts the reader back where they were. Under the
+      // global `html { scroll-behavior: smooth }` that restore *animates* —
+      // the page visibly rewinds to the top and scrolls back down every time
+      // the modal closes. Suspend smooth scrolling across the restore (inline
+      // style outranks the stylesheet rule) so it snaps instead, leaving the
+      // exact screen the reader left. Restored right after, so anchor links
+      // elsewhere keep their smooth scrolling.
+      const prevScrollBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
       body.style.position = prev.position;
       body.style.top = prev.top;
       body.style.width = prev.width;
       body.style.overflow = prev.overflow;
       window.scrollTo(0, scrollY);
+      root.style.scrollBehavior = prevScrollBehavior;
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div
