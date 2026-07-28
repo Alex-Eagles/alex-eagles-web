@@ -11,6 +11,7 @@ import { SubTeamInfo } from "@/components/team/SubTeamInfo";
 import { TeamMemberCard } from "@/components/team/TeamMemberCard";
 import {
   navGroups,
+  rosterStats,
   ROSTER_YEARS,
   ROSTERS,
   type Section,
@@ -92,6 +93,7 @@ export default function Team({
   }, []);
 
   const roster = ROSTERS[year];
+  const stats = rosterStats(roster);
 
   /* 2025 uses the solid-backdrop colour-cutout card; 2026 uses the
    * grayscale→reveal hover card. Same props, so the grid code below is shared. */
@@ -221,19 +223,29 @@ export default function Team({
             that exists anywhere in the repo, so there is nothing to offer a
             bigger screen. It will soften past ~1280px wide until someone
             digs out the original. */}
-        <img
-          className={`${styles.heroPhoto} ${year === "2026" ? styles.heroPhotoActive : ""}`}
-          src={crew2026_1920}
-          srcSet={`${crew2026_1280} 1280w, ${crew2026_1920} 1920w, ${crew2026_2560} 2560w, ${crew2026_3840} 3840w`}
-          sizes="100vw"
-          alt="The Alex Eagles team"
-        />
-        <img
-          className={`${styles.heroPhoto} ${year === "2025" ? styles.heroPhotoActive : ""}`}
-          src={crew2025Photo}
-          alt="The Alex Eagles team"
-        />
-        <div className={styles.heroScrim} aria-hidden />
+        {/*
+          One clipping frame for both photos and the scrim. The photos are
+          scaled (the year crossfade drifts, and the phone layout zooms), and a
+          scaled image overflows its own box — so without a frame to clip to,
+          the photo extended past the scrim and left a bare strip of picture
+          below it. Everything inside is `inset: 0`, so the scrim's bottom edge
+          is the photo's bottom edge by construction, at any scale.
+        */}
+        <div className={styles.heroMedia}>
+          <img
+            className={`${styles.heroPhoto} ${year === "2026" ? styles.heroPhotoActive : ""}`}
+            src={crew2026_1920}
+            srcSet={`${crew2026_1280} 1280w, ${crew2026_1920} 1920w, ${crew2026_2560} 2560w, ${crew2026_3840} 3840w`}
+            sizes="100vw"
+            alt="The Alex Eagles team"
+          />
+          <img
+            className={`${styles.heroPhoto} ${year === "2025" ? styles.heroPhotoActive : ""}`}
+            src={crew2025Photo}
+            alt="The Alex Eagles team"
+          />
+          <div className={styles.heroScrim} aria-hidden />
+        </div>
 
         <div
           className={styles.heroHint}
@@ -281,6 +293,23 @@ export default function Team({
                 </button>
               ))}
             </div>
+
+            {/*
+              What the year you just picked actually contains. `key={year}`
+              remounts it so the line re-animates on every switch — the numbers
+              change, and that's the confirmation the toggle did something.
+            */}
+            <p key={year} className={styles.heroStats}>
+              <span className={styles.heroStatValue}>{stats.people}</span> people
+              <span className={styles.heroStatSep} aria-hidden>
+                ·
+              </span>
+              <span className={styles.heroStatValue}>{stats.divisions}</span> divisions
+              <span className={styles.heroStatSep} aria-hidden>
+                ·
+              </span>
+              <span className={styles.heroStatValue}>{stats.subTeams}</span> sub-teams
+            </p>
           </div>
         </div>
       </header>

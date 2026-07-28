@@ -826,6 +826,37 @@ export const ROSTERS: Record<RosterYear, YearRoster> = {
  * 5. JUMP NAV
  * -------------------------------------------------------------------------*/
 
+/**
+ * Headline counts for a roster year — what the hero states under the year tabs.
+ *
+ * People are de-duplicated by name on purpose: a few carry two cards (Ziad
+ * Essam is EM Integration Lead *and* Head of Autonomous; Youssef Hozayen is
+ * Vice Lead *and* runs Hardware), and counting the cards would quietly inflate
+ * the team. Unfilled slots don't count as people either.
+ */
+export function rosterStats(roster: YearRoster): {
+  people: number;
+  divisions: number;
+  subTeams: number;
+} {
+  const names = new Set<string>();
+  const add = (members: TeamMember[]) => {
+    for (const m of members) if (hasName(m)) names.add(m.name.trim().toLowerCase());
+  };
+
+  add(roster.leadership);
+  let subTeams = 0;
+  for (const division of roster.divisions) {
+    add(division.heads ?? []);
+    for (const section of division.sections) {
+      subTeams++;
+      add(section.members);
+    }
+  }
+
+  return { people: names.size, divisions: roster.divisions.length, subTeams };
+}
+
 export interface NavGroup {
   label: string;
   items: { name: string; href: string }[];

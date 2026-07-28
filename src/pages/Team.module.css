@@ -20,6 +20,19 @@
   overflow: hidden;
 }
 
+/*
+ * The clipping frame for both photos and the scrim. Both photos are scaled —
+ * the crossfade drifts one in, and the phone layout zooms — and a scaled image
+ * overflows its own box, so without this the picture ran past the scrim's
+ * bottom edge. Everything inside is inset: 0, which makes "scrim ends where
+ * the photo ends" true by construction rather than by matching two heights.
+ */
+.heroMedia {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
 .heroPhoto {
   position: absolute;
   inset: 0;
@@ -141,6 +154,44 @@
 .yearTabs {
   display: flex;
   gap: 10px;
+}
+
+/*
+ * What the selected year actually contains, as one quiet line — deliberately
+ * a sentence and not a row of stat tiles. Three big numbers with labels under
+ * them is the stock hero-metric block; this says the same thing without
+ * pretending it's a dashboard.
+ */
+.heroStats {
+  margin: 20px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #9aa3b2;
+  animation: heroStatsIn 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Only the numbers change between years, so only they carry the emphasis. */
+.heroStatValue {
+  font-weight: 800;
+  color: #f2f2f2;
+  font-variant-numeric: tabular-nums;
+}
+
+.heroStatSep {
+  margin: 0 9px;
+  color: #4d5769;
+}
+
+@keyframes heroStatsIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .yearTab {
@@ -604,24 +655,16 @@
     padding-top: var(--hero-band);
   }
   /*
-   * The photo band is exactly the screen width; the zoom is a scale on top of
-   * it, clipped by .hero's overflow. An earlier version drew the element wider
-   * than the screen and pulled it back with a negative percentage margin —
-   * that resolves against the containing block in ways that left the photo
-   * offset instead of centred. A transform can't drift: it scales about the
-   * element's own centre, so the framing stays put whatever --hero-zoom is.
-   *
-   * The crossfade's own scale is folded in below rather than replaced, so the
-   * year switch still drifts.
+   * The band is the frame's height, and the photos and scrim just fill it —
+   * so the zoom is free to scale past the edges without dragging the picture
+   * out from under the scrim. This is what makes the two bottom edges line up
+   * at any --hero-zoom, in both years.
    */
-  .heroPhoto {
-    top: 0;
+  .heroMedia {
     bottom: auto;
-    left: 0;
-    right: 0;
-    width: 100%;
     height: var(--hero-band);
-    object-fit: cover;
+  }
+  .heroPhoto {
     object-position: center var(--hero-focus);
     transform: scale(calc(1.06 * var(--hero-zoom)));
   }
@@ -633,14 +676,9 @@
    * Same job as the desktop scrim: darken the top just enough that the floating
    * navbar reads against the sky, stay out of the way through the middle where
    * the people are, then run all the way to the page colour at the bottom so
-   * the photo dissolves into the page instead of ending on a line. That last
-   * stop is the fix for the "gradient is shifted up" hard edge — it used to
-   * stop at 0.92 and leave a visible seam.
+   * the photo dissolves into the page instead of ending on a line.
    */
   .heroScrim {
-    top: 0;
-    bottom: auto;
-    height: var(--hero-band);
     background: linear-gradient(
       180deg,
       rgb(20 26 38 / 0.55) 0%,
@@ -660,20 +698,43 @@
    * 390px screen was always going to be the weaker option; below it, every
    * line has full contrast against flat page colour.
    *
-   * Spacing runs on an 8px scale: 32 down from the photo, then the element
-   * margins already carry 8 (eyebrow) and 18 (title) between the lines.
+   * Spacing runs on an 8px scale: 28 down from the photo, then the element
+   * margins carry the rhythm between the lines (8 / 16 / 24).
    */
   .heroCopy {
     position: relative;
     z-index: 1;
     order: 1;
-    padding: 32px 20px 0;
+    padding: 28px 20px 0;
   }
+
+  /*
+   * Bigger than the shared clamp's 40px floor. This is the one display line on
+   * the screen and it was sitting at barely more than the card names' size;
+   * at ~14vw it reads as the page title and uses the width it has. Held under
+   * the desktop 68px ceiling, and the tracking stays at the -0.03em the shared
+   * rule sets, above the -0.04em floor where caps start to touch.
+   */
+  .heroTitle {
+    font-size: clamp(46px, 14vw, 62px);
+    margin-bottom: 16px;
+    text-wrap: balance;
+  }
+
+  .heroEyebrow {
+    margin-bottom: 10px;
+  }
+
   /* 40px is the smallest comfortable tap target with 15px text; the default
      11px padding landed at ~42px total but sat tighter than the 44px guideline
      once the row is the only control on the screen. */
   .yearTab {
     padding: 13px 28px;
+  }
+
+  .heroStats {
+    margin-top: 24px;
+    font-size: 15px;
   }
   /*
    * Last in the stack and pinned to the bottom of the viewport-tall hero, so
@@ -820,5 +881,19 @@
   }
   .rosterContent {
     animation: none;
+  }
+  /* Keep the crossfade — it's what confirms the year changed — and drop only
+     the movement. */
+  .heroStats {
+    animation: heroStatsFade 0.2s ease both;
+  }
+}
+
+@keyframes heroStatsFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
