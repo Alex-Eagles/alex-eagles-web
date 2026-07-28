@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import ConstructionBanner from "@/components/layout/ConstructionBanner";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 
 import Home from "@/pages/Home";
@@ -29,11 +30,13 @@ function ScrollToTop() {
 
 /**
  * App — the layout shell shared by every page: skip link, fixed theme toggle,
- * navbar, the routed page in <main>, and the footer.
+ * navbar, the routed page in <main>, the footer, and the site-wide
+ * under-construction notice.
  *
- * Only Home is fully built for now; the other five routes render a polished
- * "coming soon" placeholder so navigation works end-to-end today. Swap each
- * import for the real page as it's designed — nothing else here changes.
+ * No page is finished yet. Home and Blog have their own holding-page designs;
+ * the other four routes render a polished "coming soon" placeholder so
+ * navigation works end-to-end today. Swap each import for the real page as it's
+ * designed — nothing else here changes.
  */
 export default function App() {
   return (
@@ -59,6 +62,7 @@ export default function App() {
       </main>
 
       <Footer />
+      <ConstructionBanner />
     </>
   );
 }

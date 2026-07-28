@@ -1,11 +1,11 @@
 import { Construction, Radio } from "lucide-react";
 import AeLogo from "@/components/ui/AeLogo";
-import AmbientImage from "@/components/ui/AmbientImage";
 import Button from "@/components/ui/Button";
 
 /**
- * Image-led holding page. It preserves the site's under-construction status
- * while giving desktop and mobile visitors artwork tailored to their screens.
+ * Holding page. The site carries no photography or footage yet, so the hero is
+ * built entirely from brand gradients and the grid texture, and it states its
+ * under-construction status plainly.
  */
 export default function Home() {
   return (
@@ -19,20 +19,6 @@ export default function Home() {
         }}
       />
 
-      <AmbientImage
-        src="/media/homepage-background-poster.jpg"
-        mobileSrc="/media/homepage-mobile-poster.jpg"
-        className="absolute inset-0"
-      />
-
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(7, 9, 28, 0.42) 0%, rgba(7, 9, 28, 0.72) 55%, rgba(7, 9, 28, 0.96) 100%)",
-        }}
-      />
       <div
         aria-hidden="true"
         className="absolute inset-0 opacity-40"

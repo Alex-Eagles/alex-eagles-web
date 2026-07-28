@@ -1,10 +1,9 @@
-import { BookOpen, MapPin, Timer } from "lucide-react";
+import { BookOpen, Construction, MapPin, Timer } from "lucide-react";
 import type { ReactNode } from "react";
-import AmbientImage from "@/components/ui/AmbientImage";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
-/** Blog landing page — a field still followed by the build-log introduction. */
+/** Blog landing page — the build-log introduction, with no entries published yet. */
 export default function Blog() {
   return (
     <>
@@ -18,17 +17,17 @@ export default function Blog() {
           }}
         />
 
-        <AmbientImage
-          src="/media/blog-hero-poster.jpg"
-          className="absolute inset-0"
-        />
-
         <div
           aria-hidden="true"
-          className="absolute inset-0"
+          className="absolute inset-0 opacity-40"
           style={{
-            background:
-              "linear-gradient(90deg, rgba(9, 9, 14, 0.94) 0%, rgba(9, 9, 14, 0.66) 48%, rgba(9, 9, 14, 0.22) 100%)",
+            backgroundImage:
+              "linear-gradient(var(--border-subtle) 1px, transparent 1px), linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+            maskImage:
+              "radial-gradient(75% 60% at 50% 40%, #000 0%, transparent 78%)",
+            WebkitMaskImage:
+              "radial-gradient(75% 60% at 50% 40%, #000 0%, transparent 78%)",
           }}
         />
         <div
@@ -41,10 +40,18 @@ export default function Blog() {
         />
 
         <div className="relative z-10 mx-auto w-full max-w-[var(--maxw-content)]">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-3.5 py-2 text-white backdrop-blur-md">
-            <BookOpen size={15} className="text-brand-light" />
-            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em]">
-              Alex Eagles build log
+          <div className="mb-5 flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-3.5 py-2 text-white backdrop-blur-md">
+              <BookOpen size={15} className="text-brand-light" />
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em]">
+                Alex Eagles build log
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold/35 bg-black/30 px-3.5 py-2 text-white backdrop-blur-md">
+              <Construction size={15} className="text-gold" />
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em]">
+                Under construction
+              </span>
             </span>
           </div>
 

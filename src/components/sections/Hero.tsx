@@ -1,6 +1,5 @@
 import { ChevronDown } from "lucide-react";
 import AeLogo from "@/components/ui/AeLogo";
-import AmbientImage from "@/components/ui/AmbientImage";
 import Button from "@/components/ui/Button";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -8,14 +7,14 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 /**
  * Hero — the full-viewport opening section.
  *
+ * The site ships no photography or footage, so every layer here is drawn in
+ * CSS.
+ *
  * Layering (back → front):
- *   1. Radial brand gradient      — always present; also the fallback if no
- *                                    image file is provided.
- *   2. Drone background still      — full-bleed, decorative.
- *   3. Darkening overlay           — keeps headline text readable over it.
- *   4. Animated indigo grid        — subtle aerospace texture.
- *   5. Bottom fade into the page.
- *   6. Floating brand crest + copy — parallaxes gently on scroll.
+ *   1. Radial brand gradient       — the backdrop.
+ *   2. Animated indigo grid        — subtle aerospace texture.
+ *   3. Bottom fade into the page.
+ *   4. Floating brand crest + copy — parallaxes gently on scroll.
  */
 export default function Hero() {
   const scrollY = useScrollPosition();
@@ -26,7 +25,7 @@ export default function Hero() {
 
   return (
     <header className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* 1. Base radial gradient (also the no-image fallback). */}
+      {/* 1. Base radial gradient. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -36,24 +35,7 @@ export default function Hero() {
         }}
       />
 
-      {/* 2. Drone background still. */}
-      <AmbientImage
-        src="/media/homepage-background-poster.jpg"
-        mobileSrc="/media/homepage-mobile-poster.jpg"
-        className="absolute inset-0"
-      />
-
-      {/* 3. Darkening overlay for text contrast over the image. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(7,9,28,0.55) 0%, rgba(7,9,28,0.85) 100%)",
-        }}
-      />
-
-      {/* 4. Animated indigo grid texture, masked to a soft vignette. */}
+      {/* 2. Animated indigo grid texture, masked to a soft vignette. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -70,7 +52,7 @@ export default function Hero() {
         }}
       />
 
-      {/* 5. Bottom fade blends the hero into the page background. */}
+      {/* 3. Bottom fade blends the hero into the page background. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -80,7 +62,7 @@ export default function Hero() {
         }}
       />
 
-      {/* 6. Foreground content (parallaxed). */}
+      {/* 4. Foreground content (parallaxed). */}
       <div
         className="relative z-10 text-center px-6 max-w-[900px]"
         style={{ transform: contentParallax }}
