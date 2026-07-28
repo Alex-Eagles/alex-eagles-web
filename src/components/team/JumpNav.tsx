@@ -8,8 +8,21 @@ import styles from "./JumpNav.module.css";
  * Anchors are plain `#id` links, so they inherit the page's `scroll-behavior:
  * smooth` and land clear of the fixed navbar via `scroll-margin-top`.
  */
-export function JumpNav({ groups }: { groups: NavGroup[] }) {
+export function JumpNav({
+  groups,
+  visible = true,
+}: {
+  groups: NavGroup[];
+  /** False hides the whole thing — used to keep it off the hero. */
+  visible?: boolean;
+}) {
   const [open, setOpen] = useState(false);
+
+  // Scrolling back up to the hero shouldn't leave an open panel behind an
+  // element that's on its way out.
+  useEffect(() => {
+    if (!visible) setOpen(false);
+  }, [visible]);
   const panelRef = useRef<HTMLElement>(null);
   const tabRef = useRef<HTMLButtonElement>(null);
 
@@ -54,6 +67,11 @@ export function JumpNav({ groups }: { groups: NavGroup[] }) {
         type="button"
         className={styles.tab}
         data-open={open}
+        data-visible={visible}
+        /* Out of the tab order and off the a11y tree while it's hidden, so it
+           isn't a control you can reach but not see. */
+        tabIndex={visible ? undefined : -1}
+        aria-hidden={visible ? undefined : true}
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="jump-nav-panel"
@@ -81,6 +99,7 @@ export function JumpNav({ groups }: { groups: NavGroup[] }) {
         ref={panelRef}
         className={styles.panel}
         data-open={open}
+        data-visible={visible}
         aria-label="Jump to section"
         // Keeps the links out of the tab order while the panel is closed.
         {...(open ? {} : { inert: "" })}

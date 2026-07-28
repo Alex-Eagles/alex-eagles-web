@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import crew2026_1280 from "@/assets/team/crew-2026-1280.webp";
 import crew2026_1920 from "@/assets/team/crew-2026-1920.webp";
 import crew2026_2560 from "@/assets/team/crew-2026-2560.webp";
@@ -53,6 +53,30 @@ export default function Team({
    */
   const [openCardId, setOpenCardId] = useState<string | null>(null);
   const toggleCard = (id: string) => setOpenCardId((cur) => (cur === id ? null : id));
+
+  /*
+   * The jump nav is for moving *between sections*, which is meaningless while
+   * the hero is still what you're looking at — so it stays out of the way until
+   * the hero has been scrolled past, and comes back if you return to the top.
+   *
+   * Observing the hero rather than the leadership section is deliberate: with
+   * leadership as the trigger the nav would vanish again once you scrolled
+   * past it, which is exactly when it's most wanted. The hero is only on
+   * screen at the top, so "hero not visible" means "somewhere in the roster".
+   */
+  const heroRef = useRef<HTMLElement>(null);
+  const [pastHero, setPastHero] = useState(false);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setPastHero(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
 
   /*
    * The white flash on a jump-nav jump is the browser's *base* canvas, not the
@@ -208,7 +232,7 @@ export default function Team({
     /* Any click that isn't stopped by a card closes whichever card is open. */
     <div className={styles.page} onClick={() => setOpenCardId(null)}>
       {/* ---- Hero -------------------------------------------------------- */}
-      <header className={styles.hero}>
+      <header ref={heroRef} className={styles.hero}>
         {/* Both crew photos stay mounted so switching years crossfades
             instead of popping — only the active year's photo is visible.
 
@@ -300,7 +324,7 @@ export default function Team({
               change, and that's the confirmation the toggle did something.
             */}
             <p key={year} className={styles.heroStats}>
-              <span className={styles.heroStatValue}>{stats.people}</span> people
+              <span className={styles.heroStatValue}>{stats.members}</span> members
               <span className={styles.heroStatSep} aria-hidden>
                 ·
               </span>
@@ -377,7 +401,7 @@ export default function Team({
         </div>
       </div>
 
-      <JumpNav groups={navGroups(roster)} />
+      <JumpNav groups={navGroups(roster)} visible={pastHero} />
     </div>
   );
 }

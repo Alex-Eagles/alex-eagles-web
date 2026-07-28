@@ -126,6 +126,25 @@
  * --------------------------------------------------------------------------*/
 :root,
 :root[data-theme="dark"] {
+  /*
+   * Tells the browser this really is a dark page. Without it the UA assumes
+   * light and renders its *own* surfaces that way — form controls, scrollbars,
+   * and on iOS the material behind the toolbars, which is where the pale band
+   * at the bottom of the screen came from. `data-theme` only ever swapped our
+   * variables; nothing had told the browser itself.
+   */
+  color-scheme: dark;
+
+  /* ------------------------------------------------------------------------
+   * THEME TOGGLE OPACITY — tune here. 1 = solid, 0 = invisible.
+   * The pill floats over page content, so this is how much of that content
+   * reads through it. It's a plain rgb(... / a) fill on a single element, so
+   * the cost is the same as a solid colour. (The pill also carries a 14px
+   * backdrop blur, which is the expensive part; see ThemeToggle.tsx if you
+   * want that off on phones.)
+   * --------------------------------------------------------------------- */
+  --toggle-opacity: 0.42;
+
   /* Surfaces (back → front) */
   --bg-primary: #07091c; /* deep-space navy — page background   */
   --bg-surface: #0d1035; /* section backgrounds                 */
@@ -170,6 +189,14 @@
  *    only ever reference the names, light mode "just works".
  * --------------------------------------------------------------------------*/
 :root[data-theme="light"] {
+  /* See the dark block — the browser's own surfaces follow this, not
+     `data-theme`. */
+  color-scheme: light;
+
+  /* Slightly more opaque than dark: a pale pill over pale content needs more
+     body to stay legible. Same knob, see the dark block for what it does. */
+  --toggle-opacity: 0.62;
+
   --bg-primary: #f7f8ff; /* faintly indigo-tinted white          */
   --bg-surface: #ffffff;
   --bg-elevated: #eceeff;

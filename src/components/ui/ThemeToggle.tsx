@@ -34,7 +34,11 @@ export default function ThemeToggle({
           : "1px solid rgba(60,64,181,0.22)",
         borderRadius: 9999,
         cursor: "pointer",
-        background: isDark ? "rgba(13,16,53,0.82)" : "rgba(255,255,255,0.9)",
+        /* Opacity comes from --toggle-opacity in theme.css, per theme — the
+           one place to tune how much of the page reads through the pill. */
+        background: isDark
+          ? "rgb(13 16 53 / var(--toggle-opacity, 0.42))"
+          : "rgb(255 255 255 / var(--toggle-opacity, 0.62))",
         boxShadow: isDark
           ? "0 10px 28px rgba(0,0,0,0.55)"
           : "0 10px 28px rgba(60,64,181,0.18)",
