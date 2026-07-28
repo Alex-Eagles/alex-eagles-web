@@ -23,6 +23,9 @@ import {
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import styles from "./Team.module.css";
 
+/** Must match .page's background in Team.module.css. */
+const PAGE_BG = "#141a26";
+
 /**
  * Team page — full-height crew hero with a year toggle, the leadership trio,
  * then each division's sections as card grids, plus the PULL jump nav.
@@ -51,19 +54,40 @@ export default function Team({
   const toggleCard = (id: string) => setOpenCardId((cur) => (cur === id ? null : id));
 
   /*
-   * This page is dark-only by design, but the document canvas still follows the
-   * site theme — so in light mode `body` is white while `.page` is #141a26.
-   * Any moment the browser paints outside .page's box shows that white through,
-   * which is the flash when a jump-nav link scrolls the page. Painting the
-   * canvas to match for as long as this page is mounted removes it. Restored on
-   * unmount so the rest of the site keeps its own theme.
+   * The white flash on a jump-nav jump is the browser's *base* canvas, not the
+   * page's background. During a long scroll the compositor shows un-rasterised
+   * area in the base colour, and with no `color-scheme` and no `theme-color`
+   * that colour is white — which is why setting only the html background
+   * didn't fix it, and why it happened in dark mode too.
+   *
+   * `color-scheme: dark` is the property that actually darkens that base
+   * colour; `theme-color` covers the same ground for the iOS UI. Both are set
+   * for as long as this dark-only page is mounted, and restored on unmount so
+   * the rest of the site keeps following the user's theme.
    */
   useEffect(() => {
     const root = document.documentElement;
-    const previous = root.style.backgroundColor;
-    root.style.backgroundColor = "#141a26";
+    const previousScheme = root.style.colorScheme;
+    const previousBg = root.style.backgroundColor;
+
+    root.style.colorScheme = "dark";
+    root.style.backgroundColor = PAGE_BG;
+
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const hadMeta = !!meta;
+    const previousContent = meta?.content;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "theme-color";
+      document.head.appendChild(meta);
+    }
+    meta.content = PAGE_BG;
+
     return () => {
-      root.style.backgroundColor = previous;
+      root.style.colorScheme = previousScheme;
+      root.style.backgroundColor = previousBg;
+      if (!hadMeta) meta.remove();
+      else if (previousContent !== undefined) meta.content = previousContent;
     };
   }, []);
 

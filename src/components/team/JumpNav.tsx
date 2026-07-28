@@ -117,7 +117,29 @@ export function JumpNav({ groups }: { groups: NavGroup[] }) {
                 key={item.href}
                 href={item.href}
                 className={styles.link}
-                onClick={() => setOpen(false)}
+                onClick={(e) => {
+                  setOpen(false);
+                  /*
+                   * On touch, jump instead of smooth-scrolling. These targets
+                   * are thousands of pixels apart on a phone, and animating
+                   * across that much card-heavy page is what iOS can't
+                   * rasterise in time — it shows un-painted area (the white
+                   * flash) for the length of the animation. A jump has no
+                   * in-between frames to miss. Pointer devices keep the
+                   * smooth scroll, where the distance is far shorter and the
+                   * hardware keeps up.
+                   */
+                  const target = document.querySelector(item.href);
+                  if (!target) return;
+                  e.preventDefault();
+                  const coarse = window.matchMedia("(hover: none)").matches;
+                  target.scrollIntoView({
+                    behavior: coarse ? "auto" : "smooth",
+                    block: "start",
+                  });
+                  // Keep the hash so the section stays linkable/shareable.
+                  window.history.replaceState(null, "", item.href);
+                }}
               >
                 {item.name}
               </a>

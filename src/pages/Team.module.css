@@ -583,17 +583,19 @@
      *                  which is what makes it read like the desktop hero.
      * =================================================================== */
     /*
-     * 82vw, not the 100svh desktop uses: covering a ~1:2 phone viewport with a
-     * 4:3 photo would crop ~22% off each side and cut the people at the ends
-     * of the group. At 82vw the side crop is 4.7%, which keeps everyone in.
+     * Not 100svh like desktop: covering a ~1:2 phone viewport with a 4:3 photo
+     * crops ~22% off each side and cuts the people at the ends of the group.
+     * At 78vw the side crop is ~2%, so everyone stays in. The svh cap stops a
+     * short viewport from getting a photo taller than the screen.
      */
     --hero-zoom: 1.04;
-    --hero-band: 82vw;
-    --hero-focus: 42%;
-    --hero-overlap: 72px;
+    --hero-band: min(78vw, 50svh);
+    --hero-focus: 45%;
 
     height: auto;
-    min-height: 0;
+    /* Fills the screen, so Leadership is never visible before a scroll and the
+       hint has the bottom edge to sit on — the desktop hero's scroll cue. */
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
     /* The photos are absolutely positioned, so this is what gives the hero
@@ -649,21 +651,48 @@
       #141a26 100%
     );
   }
-  /* Rides up onto that dissolve, so the copy sits on the picture the way it
-     does on desktop rather than starting below it on flat background. */
+  /*
+   * Stacked under the photo, not over it. Overlaying needs the copy to paint
+   * above the photo, and the photo and scrim are absolutely positioned — so
+   * they paint above static content no matter where it sits, which is what
+   * buried the title and clipped the year tabs. `position: relative` + z-index
+   * would fix the paint order, but reading white text over a group photo on a
+   * 390px screen was always going to be the weaker option; below it, every
+   * line has full contrast against flat page colour.
+   *
+   * Spacing runs on an 8px scale: 32 down from the photo, then the element
+   * margins already carry 8 (eyebrow) and 18 (title) between the lines.
+   */
   .heroCopy {
-    position: static;
+    position: relative;
+    z-index: 1;
     order: 1;
-    margin-top: calc(-1 * var(--hero-overlap));
-    padding: 0 16px 4px;
+    padding: 32px 20px 0;
   }
-  /* Below the year tabs rather than over them — `order` because the hint
-     precedes the copy in the DOM, where it belongs for the absolute layout. */
+  /* 40px is the smallest comfortable tap target with 15px text; the default
+     11px padding landed at ~42px total but sat tighter than the 44px guideline
+     once the row is the only control on the screen. */
+  .yearTab {
+    padding: 13px 28px;
+  }
+  /*
+   * Last in the stack and pinned to the bottom of the viewport-tall hero, so
+   * it reads as "there is more below" exactly like the desktop one. `order`
+   * because the hint precedes the copy in the DOM, which is where it belongs
+   * for the absolute layout; `margin-top: auto` is what absorbs whatever the
+   * screen has left over after the photo and the copy.
+   *
+   * The scroll fade is unchanged and already does what was asked — the inline
+   * opacity is driven by scroll position, so it fades out on the way down and
+   * comes back on the way up.
+   */
   .heroHint {
-    position: static;
+    position: relative;
+    z-index: 1;
     order: 2;
     bottom: auto;
-    padding-bottom: 8px;
+    margin-top: auto;
+    padding: 24px 20px 28px;
   }
 
   /* --- leadership ---------------------------------------------------------

@@ -335,6 +335,15 @@
     min-height: 40px;
     padding: 9px 14px;
   }
+
+  /* One live blur per card, ~50 on the page, all of them re-rasterised while
+     the page scrolls. That is a real part of why a long jump goes blank on
+     iOS. A solid fill reads the same at this size and costs nothing. */
+  .badge {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(20, 20, 20, 0.78);
+  }
 }
 
 /* --- narrow cards ---------------------------------------------------------
