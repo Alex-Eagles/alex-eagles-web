@@ -34,7 +34,8 @@
       "Bash(cd /c/Users/Admin/AppData/Local/Temp/claude/e--alex-eagles-web/41a63904-5591-4543-8a7f-3701563cb319/scratchpad/taste-skill/skills && find . -maxdepth 2 -type f | sort)",
       "Read(//c/Users/Admin/AppData/Local/Temp/claude/e--alex-eagles-web/41a63904-5591-4543-8a7f-3701563cb319/scratchpad/taste-skill/skills/**)",
       "Bash(grep -v \"^\\\\s*//\\\\|^\\\\s*\\\\*\\\\|{/\\\\*\")",
-      "Bash(grep -n \"top: 100%\\\\|top: 0%\\\\|left: 50%;\\\\s*$\" e:/alex-eagles-web/src/styles/team-structure-options/pyramid-option.css)"
+      "Bash(grep -n \"top: 100%\\\\|top: 0%\\\\|left: 50%;\\\\s*$\" e:/alex-eagles-web/src/styles/team-structure-options/pyramid-option.css)",
+      "Bash(git commit *)"
     ]
   }
 }
