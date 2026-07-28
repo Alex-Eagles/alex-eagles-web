@@ -29,7 +29,9 @@ export default function Hero() {
   const { isDark } = useTheme();
 
   // Gentle parallax; disabled when the visitor prefers reduced motion.
-  const contentParallax = reduced ? undefined : `translateY(${scrollY * 0.12}px)`;
+  const contentParallax = reduced
+    ? undefined
+    : `translateY(${scrollY * 0.12}px)`;
 
   return (
     <header className="relative min-h-screen flex items-center justify-center overflow-hidden">

@@ -10,6 +10,11 @@
 
 @import "tailwindcss";
 @import "./theme.css";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+/* ---break---*/
+@custom-variant dark (&:is(.dark *));
 
 /* ----------------------------------------------------------------------------
  * BRIDGE: expose design tokens as Tailwind utilities.
@@ -75,6 +80,39 @@
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 /* ----------------------------------------------------------------------------
@@ -83,6 +121,7 @@
 @layer base {
   * {
     box-sizing: border-box;
+    @apply border-border outline-ring/50;
   }
 
   html,
@@ -117,7 +156,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Smooth cross-fade when the theme flips. */
-    transition: background var(--transition-slow), color var(--transition-slow);
+    transition:
+      background var(--transition-slow),
+      color var(--transition-slow);
+
+    & section {
+      @apply px-6 pt-[72px] pb-7;
+    }
+    @apply bg-background text-foreground;
   }
 
   /* ── Line breaking ────────────────────────────────────────────────────────
@@ -147,6 +193,7 @@
   /* Native smooth scrolling for in-page anchor links (#team, #vehicles …). */
   html {
     scroll-behavior: smooth;
+    @apply font-sans;
   }
 
   /* Brand selection color. */
@@ -379,6 +426,86 @@
   .skip-link:focus-visible {
     transform: translateY(0);
   }
+
+  .marquee {
+    --marquee-duration: 15s;
+
+    ul {
+      animation: marqueeAnimation calc(var(--marquee-duration) / 2) linear
+        infinite;
+    }
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, max-content);
+  }
+
+  .problem-grid--textless {
+    grid-template-rows: auto auto minmax(0, max-content);
+  }
+
+  .counter {
+    counter-reset: count;
+
+    .counter__superscript {
+      position: relative;
+      width: max-content;
+
+      &::after {
+        counter-increment: count;
+        content: counter(count);
+        position: absolute;
+        top: 0em;
+        right: -1em;
+        font-size: 0.6em;
+      }
+    }
+  }
+
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * BACKDROP BLUR — POINTER DEVICES ONLY
+ *
+ * backdrop-filter is the most expensive property on the page: the browser has
+ * to re-blur whatever sits behind the element, and on a *fixed* element that
+ * means every scroll frame, for the whole life of the page. On a phone that's
+ * real battery and real dropped frames, and at these sizes the effect is close
+ * to invisible anyway.
+ *
+ * So the blur is granted here rather than taken away: elements that want it
+ * carry `.ui-blur` and set no blur of their own, and only hover-capable devices
+ * get the rule. (It was briefly an `!important` override of an inline style —
+ * but the minifier drops an unprefixed `!important` backdrop-filter next to its
+ * -webkit- twin, which left the standard property un-overridden. Not needing
+ * `!important` at all avoids the whole question.)
+ *
+ * Touch devices compensate with more opaque surfaces — see the (hover: none)
+ * block at the foot of theme.css.
+ * --------------------------------------------------------------------------*/
+@media (hover: hover) {
+  .ui-blur {
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /*
+   * The unprefixed property lives in its own @supports block because the
+   * minifier collapses a prefixed/unprefixed pair down to the -webkit- form
+   * alone, which would leave Firefox (unprefixed only) without the blur.
+   * Wrapping it stops the merge.
+   */
+  @supports (backdrop-filter: blur(1px)) {
+    .ui-blur {
+      backdrop-filter: blur(14px);
+    }
+  }
 }
 
 /* ----------------------------------------------------------------------------
@@ -394,4 +521,73 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+/* ---break---*/
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+/* ---break---*/
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }

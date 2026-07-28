@@ -103,13 +103,12 @@ export default function Navbar() {
         onClick={() => setMenuOpen(true)}
         aria-label="Open menu"
         aria-expanded={menuOpen}
-        className="fixed top-5 left-5 z-40 md:hidden flex items-center justify-center w-11 h-11 rounded-full cursor-pointer"
+        className="ui-blur fixed top-5 left-5 z-40 md:hidden flex items-center justify-center w-11 h-11 rounded-full cursor-pointer"
         style={{
           background: "var(--bg-glass)",
           border: "1px solid var(--border-subtle)",
           color: "var(--text-primary)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
+          /* Blur comes from `.ui-blur` — pointer devices only. */
         }}
       >
         <Menu size={22} />

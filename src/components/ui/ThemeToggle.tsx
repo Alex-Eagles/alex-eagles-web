@@ -16,7 +16,9 @@ interface ThemeToggleProps {
 export default function ThemeToggle({
   // Fixed to the top-right with comfortable edge padding (a little tighter on
   // small screens, roomier on desktop) so it's always easy to reach.
-  className = "fixed top-5 right-5 md:top-6 md:right-8 z-40",
+  // `ui-blur` lets global.css drop the backdrop blur on touch devices, where a
+  // fixed blurred element is re-rasterised on every scroll frame.
+  className = "ui-blur fixed top-5 right-5 md:top-6 md:right-8 z-40",
 }: ThemeToggleProps) {
   const { isDark, toggle } = useTheme();
 
@@ -32,10 +34,17 @@ export default function ThemeToggle({
         border: `1px solid ${isDark ? "var(--border-solid)" : "var(--border-subtle)"}`,
         borderRadius: 9999,
         cursor: "pointer",
-        background: "var(--bg-glass)",
-        boxShadow: "var(--elevation-3)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
+        /* Opacity comes from --toggle-opacity in theme.css, per theme — the
+           one place to tune how much of the page reads through the pill. */
+        background: isDark
+          ? "rgb(13 16 53 / var(--toggle-opacity, 0.42))"
+          : "rgb(255 255 255 / var(--toggle-opacity, 0.62))",
+        boxShadow: isDark
+          ? "0 10px 28px rgba(0,0,0,0.55)"
+          : "0 10px 28px rgba(60,64,181,0.18)",
+        /* No blur here — `.ui-blur` in the className grants it on pointer
+           devices only, so phones don't pay for a fixed element being re-blurred
+           on every scroll frame. */
         padding: 0,
         // NOTE: no `position` here — placement comes from the `fixed …` class in
         // className. An inline position would override it and break the layout.

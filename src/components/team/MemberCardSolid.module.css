@@ -1,0 +1,444 @@
+/*
+ * MemberCardSolid — the 2025 roster card.
+ *
+ * Rest:  colour cut-out on a dark textured backdrop, a MEMBER badge top-left,
+ *        and the name bottom-left.
+ * Hover: the big first name fades in behind the person and an info panel rises,
+ *        while the rest-state badge + name fade out.
+ *
+ * All motion is CSS, keyed off :hover / :focus-visible, so the component never
+ * re-renders on pointer movement. On touch, where there is no hover to give,
+ * a tap toggles data-open and plays the same reveal — see the (hover: none)
+ * block at the foot of this file.
+ */
+
+.card {
+  /* Set inline by the component to the member's sub-team colour (brand blue for
+     the three team-wide roles). The value here only covers a card rendered
+     outside the component. Not called `--accent`: that name is a shadcn theme
+     token on :root, so an unset inherited value would resolve to shadcn's
+     near-white rather than falling back to the brand. */
+  --card-accent: var(--team-accent);
+  /*
+   * Hover timings, in one place — same budget as the 2026 card so the two
+   * years move alike. Everything the pointer drives stays under 300ms:
+   * scanning a roster crosses dozens of these, and past ~300ms a reveal you
+   * trigger that often reads as lag rather than as elegance. Was 350-600ms.
+   */
+  --t-lift: 200ms;
+  --t-panel: 220ms;
+  --t-fade: 240ms;
+  --t-img: 280ms;
+  --t-tags: 180ms;
+
+  position: relative;
+  display: block;
+  width: 100%;
+  /* Matches the 2026 card so both years read as the same object. See that file
+     for why 0.74. The 2025 cut-outs are 600x750 (0.8), so `cover` no longer
+     fits them exactly — it scales to the taller box and trims roughly 4% off
+     each side. Portraits here are centred with margin, so that clears the
+     figure; nothing is distorted, only cropped. */
+  aspect-ratio: 0.74;
+  border-radius: 16px;
+  overflow: hidden;
+  /* Nothing happens on click on a pointer device — the reveal is hover. */
+  cursor: default;
+  background: linear-gradient(
+    165deg,
+    var(--team-card-solid-from) 0%,
+    var(--team-card-solid-to) 100%
+  );
+  font-family: "Archivo", system-ui, sans-serif;
+  box-shadow: 0 8px 24px -14px var(--team-card-shadow);
+  outline: none;
+  /* Establish a container so the big name can size to the card width. */
+  container-type: inline-size;
+  transition:
+    transform var(--t-lift) cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow var(--t-lift) ease;
+}
+
+/* Dark texture, always visible — same treatment as the 2026 card's cutout
+ * backdrop (TeamMemberCard's .backdrop/.backdropScrim), so the texture reads
+ * equally visible in both years instead of getting crushed dark here. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  /* Themed — see the note in the component. */
+  background-image: var(--team-card-backdrop);
+  background-size: cover;
+  background-position: center;
+  /* `none` in dark — see --team-backdrop-filter in theme.css. */
+  filter: var(--team-backdrop-filter);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--team-card-scrim-from),
+    var(--team-card-scrim-to)
+  );
+}
+
+/* Big first name — an SVG stretched to the full card width, behind the person,
+ * revealed on hover. scaleY makes it tall like the reference. */
+.bigName {
+  position: absolute;
+  top: 5%;
+  left: 3%;
+  width: 94%;
+  height: auto;
+  transform: scaleY(2.1);
+  transform-origin: top;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-fade) ease;
+  /* The <text> fills with currentColor. Lifted towards white the way the old
+     hand-picked #6b6fc7 sat above the brand blue, so it stays legible over the
+     dark backdrop whatever the sub-team colour is. */
+  color: color-mix(in srgb, var(--card-accent) 78%, #ffffff);
+}
+
+/* The colour cut-out — sits above the big name so it occludes it. */
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Cut-outs are pre-normalized to the card aspect with framing baked in, so
+   * cover fits 1:1 — no cropping shift needed. */
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1);
+  transform-origin: bottom center;
+  transition: transform var(--t-img) cubic-bezier(0.16, 0.84, 0.34, 1);
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 900 64px "Archivo", system-ui, sans-serif;
+  /* Not themed: this initial sits on the backdrop texture + scrim, which stay
+     dark in both themes, so it belongs to the imagery zone. */
+  color: #444444;
+}
+
+/* Rest-state MEMBER badge. */
+.badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--team-tag-bg);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 50%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--card-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: opacity var(--t-tags) ease;
+}
+
+/* Rest-state name. */
+.restName {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  /* Over the cut-out photo, not the card surface — stays light in both themes.
+     See the two-zone note in theme.css. */
+  color: var(--team-card-ink-photo);
+  /* One line, scaled to the card width so long full names still fit. */
+  white-space: nowrap;
+  font-size: 7cqw;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-shadow: 0 2px 14px var(--team-name-shadow);
+  transition: opacity var(--t-tags) ease;
+}
+
+/* Hover info panel. */
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 50px 16px 16px;
+  background: linear-gradient(
+    180deg,
+    var(--team-card-panel-from),
+    var(--team-card-panel-mid) 44%,
+    var(--team-card-panel-to)
+  );
+  opacity: 0;
+  transform: translateY(30%);
+  transition:
+    opacity var(--t-panel) ease,
+    transform var(--t-panel) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.panelRole {
+  margin: 0 0 6px;
+  color: var(--card-accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.panelName {
+  margin: 0 0 3px;
+  color: var(--team-card-ink);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.panelDept {
+  margin: 0 0 12px;
+  color: var(--team-card-ink-soft);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--team-card-rule);
+  padding-top: 10px;
+}
+
+.year {
+  color: var(--team-card-ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--team-card-ink-dim);
+  padding: 5px 10px;
+  border: 1px solid var(--team-card-pill-border);
+  border-radius: 999px;
+  text-decoration: none;
+  transition:
+    color 0.25s,
+    border-color 0.25s;
+}
+
+.linkedin:hover {
+  color: var(--team-card-ink);
+  border-color: var(--card-accent);
+}
+
+/* --- pointer reveal -------------------------------------------------------
+ *
+ * Gated to devices that actually have a pointer. iOS keeps :hover stuck on a
+ * tapped element until you tap somewhere else, so ungated these fired on touch
+ * too — a tapped card stayed revealed after data-open had already closed it,
+ * and a second tapped card could be revealed at the same time. On touch the
+ * (hover: none) block below is the only thing that reveals a card, which is
+ * what makes data-open the single source of truth there.
+ * -------------------------------------------------------------------------*/
+@media (hover: hover) {
+  .card:hover,
+  .card:focus-visible {
+    transform: translateY(-6px);
+    /* The lift glow under the card carries the sub-team colour. This is the base
+       rule every member card hits; the lead/vice/head rules below override it
+       with their ringed variants, which is why fixing those alone left plain
+       members glowing brand blue. */
+    box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
+  }
+
+  .card:hover .bigName,
+  .card:focus-visible .bigName {
+    opacity: 0.9;
+  }
+
+  .card:hover .photo,
+  .card:focus-visible .photo {
+    transform: scale(1.05);
+  }
+
+  .card:hover .badge,
+  .card:focus-visible .badge,
+  .card:hover .restName,
+  .card:focus-visible .restName {
+    opacity: 0;
+  }
+
+  .card:hover .panel,
+  .card:focus-visible .panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .card[data-tier="lead"]:hover,
+  .card[data-tier="lead"]:focus-visible,
+  .card[data-tier="vice"]:hover,
+  .card[data-tier="vice"]:focus-visible,
+  .card[data-tier="head"]:hover,
+  .card[data-tier="head"]:focus-visible {
+    box-shadow:
+      0 34px 60px -30px color-mix(in srgb, var(--card-accent) 55%, transparent),
+      inset 0 0 0 2px var(--card-accent);
+  }
+}
+
+/* --- touch ----------------------------------------------------------------
+ *
+ * Tap is the hover. There's no pointer to follow here, so a tap toggles
+ * data-open on the card and plays exactly the reveal a mouse would get — same
+ * properties, same transitions, so both input models look identical in motion.
+ * Before this the panel was simply unreachable on a phone, and with it the
+ * member's department, class year and LinkedIn link.
+ *
+ * Scoped to (hover: none) on purpose: it's what keeps a mouse click inert. The
+ * component toggles data-open unconditionally, and on a pointer device nothing
+ * in here matches, so the flag has no effect on screen.
+ * -------------------------------------------------------------------------*/
+@media (hover: none) {
+  .card[data-open="true"] {
+    transform: translateY(-6px);
+    box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
+  }
+  /* Lead/vice/head keep their ring while lifted, same as the hover rules. */
+  .card[data-tier="lead"][data-open="true"],
+  .card[data-tier="vice"][data-open="true"],
+  .card[data-tier="head"][data-open="true"] {
+    box-shadow:
+      0 34px 60px -30px color-mix(in srgb, var(--card-accent) 55%, transparent),
+      inset 0 0 0 2px var(--card-accent);
+  }
+  .card[data-open="true"] .bigName {
+    opacity: 0.9;
+  }
+  .card[data-open="true"] .photo {
+    transform: scale(1.05);
+  }
+  .card[data-open="true"] :is(.badge, .restName) {
+    opacity: 0;
+  }
+  .card[data-open="true"] .panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* A tap target the size of a fingertip. The pill was ~23px tall, which is
+     half of the ~44px a thumb actually needs to hit reliably. */
+  .linkedin {
+    min-height: 40px;
+    padding: 9px 14px;
+  }
+
+  /* One live blur per card, ~50 on the page, all of them re-rasterised while
+     the page scrolls. That is a real part of why a long jump goes blank on
+     iOS. A solid fill reads the same at this size and costs nothing. */
+  .badge {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--team-tag-bg-solid);
+  }
+}
+
+/* --- narrow cards ---------------------------------------------------------
+ *
+ * Keyed off the card's own width, not the viewport: on a phone a lead card is
+ * ~230px and a member card ~153px, so a media query would compact both or
+ * neither. Below 190px "CLASS OF 2025" beside the LinkedIn pill needs more
+ * room than the card has, so the footer stacks and the scale steps down.
+ * (.restName already tracks the width on its own, via 7cqw.)
+ * -------------------------------------------------------------------------*/
+@container (max-width: 190px) {
+  .panel {
+    padding: 32px 11px 11px;
+  }
+  .panelRole {
+    margin-bottom: 5px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+  .panelName {
+    font-size: 15px;
+  }
+  .panelDept {
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    padding-top: 8px;
+  }
+  .year {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+  .linkedin {
+    padding: 4px 9px;
+    font-size: 10px;
+  }
+  .badge {
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .restName {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * RANK TIERS
+ * The card sizing (bigger lead cards, own row) is done by the grid in the page;
+ * here we add the per-card *treatment* that tells rank apart at a glance:
+ *   lead / vice / head  → accent ring (the role tag stays the top-left badge)
+ *   exec                → the raised trio, styled by the page
+ * `--accent` is set inline from the sub-team colour on lead-tier cards.
+ * -------------------------------------------------------------------------*/
+
+/* Accent ring around any lead-tier card. Uses an inset shadow so it hugs the
+ * rounded corners without a layout-shifting border. */
+.card[data-tier="lead"],
+.card[data-tier="vice"],
+.card[data-tier="head"] {
+  box-shadow:
+    0 8px 24px -14px var(--team-card-shadow),
+    inset 0 0 0 2px color-mix(in srgb, var(--card-accent) 85%, transparent);
+}
+
+/* A vice reads as a lead's second — a dashed ring instead of a solid one. */
+.card[data-tier="vice"] {
+  box-shadow:
+    0 8px 24px -14px var(--team-card-shadow),
+    inset 0 0 0 2px color-mix(in srgb, var(--card-accent) 55%, transparent);
+}
+
+/* A head card (division lead) gets a slightly heavier ring than a section lead. */
+.card[data-tier="head"] {
+  box-shadow:
+    0 10px 30px -14px var(--team-card-shadow-strong),
+    inset 0 0 0 2.5px var(--card-accent);
+}
