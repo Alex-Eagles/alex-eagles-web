@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Alex Eagles blog hero">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b0f28"/>
+      <stop offset="1" stop-color="#050716"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="34%" r="60%">
+      <stop offset="0" stop-color="#1b2166" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#1b2166" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M60 0H0V60" fill="none" stroke="#3c40b5" stroke-opacity="0.12" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="fade" cx="50%" cy="45%" r="62%">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="0.75" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="gridmask"><rect width="1600" height="900" fill="url(#fade)"/></mask>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect width="1600" height="900" fill="url(#grid)" mask="url(#gridmask)"/>
+</svg>
