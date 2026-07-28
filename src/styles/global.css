@@ -301,6 +301,43 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * BACKDROP BLUR — POINTER DEVICES ONLY
+ *
+ * backdrop-filter is the most expensive property on the page: the browser has
+ * to re-blur whatever sits behind the element, and on a *fixed* element that
+ * means every scroll frame, for the whole life of the page. On a phone that's
+ * real battery and real dropped frames, and at these sizes the effect is close
+ * to invisible anyway.
+ *
+ * So the blur is granted here rather than taken away: elements that want it
+ * carry `.ui-blur` and set no blur of their own, and only hover-capable devices
+ * get the rule. (It was briefly an `!important` override of an inline style —
+ * but the minifier drops an unprefixed `!important` backdrop-filter next to its
+ * -webkit- twin, which left the standard property un-overridden. Not needing
+ * `!important` at all avoids the whole question.)
+ *
+ * Touch devices compensate with more opaque surfaces — see the (hover: none)
+ * block at the foot of theme.css.
+ * --------------------------------------------------------------------------*/
+@media (hover: hover) {
+  .ui-blur {
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /*
+   * The unprefixed property lives in its own @supports block because the
+   * minifier collapses a prefixed/unprefixed pair down to the -webkit- form
+   * alone, which would leave Firefox (unprefixed only) without the blur.
+   * Wrapping it stops the merge.
+   */
+  @supports (backdrop-filter: blur(1px)) {
+    .ui-blur {
+      backdrop-filter: blur(14px);
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------
  * REDUCED MOTION — honor the OS setting. Kills decorative + scroll animation.
  * (Framer Motion is handled separately via the useReducedMotion hook.)
  * --------------------------------------------------------------------------*/

@@ -24,6 +24,16 @@ type Theme = "dark" | "light";
 
 const STORAGE_KEY = "ae-theme";
 
+/**
+ * What the browser chrome is tinted to per theme — must track --bg-primary in
+ * theme.css. The dark value is duplicated in index.html's static meta tag so
+ * the first paint is right before any JS runs.
+ */
+const THEME_COLORS: Record<Theme, string> = {
+  dark: "#07091c",
+  light: "#f7f8ff",
+};
+
 interface ThemeContextValue {
   theme: Theme;
   isDark: boolean;
@@ -50,6 +60,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Reflect the theme onto <html> and persist it whenever it changes.
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+
+    /*
+     * Keep the browser chrome in step with the theme. index.html ships a
+     * theme-color for the dark default so the first paint is already right;
+     * this is what updates it when the user toggles. Without it the toolbar
+     * keeps the dark tint on a light page.
+     *
+     * `color-scheme` itself is declared in theme.css per data-theme, so the
+     * browser's own surfaces follow along without any JS.
+     */
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (meta) meta.content = THEME_COLORS[theme];
+
     try {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {

@@ -10,6 +10,19 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      Tints the browser's own chrome — on iOS this is what stops Safari drawing
+      its default toolbar material over the page, which showed up as a pale band
+      fading in at the bottom of the screen.
+
+      It has to be here, in the served HTML, not added by JS on mount: Safari
+      decides how to draw that chrome on the first paint, and a meta tag that
+      arrives after React has mounted is already too late. Matches the dark
+      --bg-primary, the same default `data-theme` above commits to;
+      ThemeContext keeps it in sync when the user toggles.
+    -->
+    <meta name="theme-color" content="#07091c" />
     <meta
       name="description"
       content="Alex Eagles — Alexandria University's Unmanned Aerial Systems team engineering precision flight for the SUAS competition."
