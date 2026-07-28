@@ -103,6 +103,11 @@
    * updates. Slug must match slugify(subTeamName): "Tail & Stability" →
    * `--team-tail-stability`, "Computer Vision" → `--team-computer-vision`.
    * --------------------------------------------------------------------- */
+  /* The page's own accent — eyebrows, the active year tab, the jump-nav tab,
+   * and the fallback for a card rendered outside a sub-team. Brand blue in
+   * both themes, so it lives here rather than in the per-theme blocks. */
+  --team-accent: #3d3ecc;
+
   --team-management: #3d3ecc; /* brand blue (accent)    */
   --team-aerodesign: #85b7eb; /* sky blue               */
   --team-wing: #6ad1d8; /* cyan                   */
@@ -114,6 +119,146 @@
   --team-computer-vision: #ed93b1; /* pink                   */
   --team-ai: #ed93b1; /* pink — same discipline as Computer Vision */
   --team-firmware: #afa9ec; /* lavender               */
+}
+
+/* ----------------------------------------------------------------------------
+ * TEAM PAGE PALETTE
+ *
+ * The roster was built dark-only: every colour in Team.module.css and the four
+ * team components was a literal hex. This block is those literals, lifted out
+ * verbatim under semantic names, so the page can be re-coloured per theme from
+ * one place. The dark values below are byte-for-byte what those files used
+ * before, so dark mode renders identically.
+ *
+ * The light block is at the foot of the light theme (section 4).
+ *
+ * ─── The two zones, and why they don't both flip ────────────────────────────
+ * A card is two different surfaces and they need opposite treatment:
+ *
+ *   1. The IMAGERY zone — the portrait, the cut-out backdrop wallpaper, and
+ *      the scrims and names that sit on top of them. Text here is over a
+ *      photograph in *both* themes, so it stays light-on-dark-scrim in both.
+ *      Flipping it to dark ink would put near-black type over a mid-tone
+ *      photo, which is unreadable at any brightness.
+ *   2. The SURFACE zone — the flat card fill, the hover panel, the role tag.
+ *      This is chrome, not photography, so it follows the theme: near-black
+ *      with light ink in dark mode, light grey with dark ink in light mode.
+ *
+ * `--team-card-ink-photo` is zone 1's ink and is deliberately identical in
+ * both themes. `--team-card-ink` is zone 2's and flips. Don't merge them.
+ * ------------------------------------------------------------------------- */
+:root,
+:root[data-theme="dark"] {
+  /* Page chrome */
+  --team-bg: #141a26;
+  /* Bare channels — the hero scrim needs them inside rgb(… / a) stops. */
+  --team-bg-rgb: 20 26 38;
+  --team-ink: #f2f2f2;
+  --team-ink-soft: #9aa3b2; /* hero stat line            */
+  --team-ink-dim: #aaaaaa; /* hero hint, year tab rest  */
+  --team-ink-muted: #666666; /* headcount, footer         */
+  --team-ink-faint: #4d5769; /* stat separators           */
+  --team-accent-ink: #ffffff; /* ink on a filled accent    */
+  --team-numeral: rgb(61 62 204 / 0.18); /* ghosted division number */
+
+  /* Rules. Three weights: the division rule, the heavier sub-team rule, and
+     the lead/member divider (plus its brighter phone variant). */
+  --team-rule: rgb(68 68 68 / 0.4);
+  --team-rule-strong: rgb(46 46 46 / 0.9);
+  --team-rule-divider: rgb(68 68 68 / 0.5);
+  --team-rule-divider-mobile: rgb(96 96 96 / 0.75);
+
+  /* Year tabs */
+  --team-chip-bg: rgb(255 255 255 / 0.06);
+  --team-chip-border: rgb(68 68 68 / 0.6);
+
+  /* Hero copy sits *on* the crew photo (desktop) in the band where the scrim
+     has already washed it most of the way to the page colour. `--team-hero-
+     wash` is that band's opacity — it has to go higher in light mode, because
+     dark ink needs more of the photo covered than light ink does. The two
+     shadows are the halo behind the copy, and they invert with the ink. */
+  --team-hero-wash: 0.55;
+  --team-hero-wash-sm: 0.72;
+  --team-hero-title-shadow: rgb(0 0 0 / 0.55);
+  --team-hero-hint-shadow: rgb(0 0 0 / 0.5);
+
+  /* --- card: imagery zone (does NOT flip — see the note above) ------------ */
+  /* Resolved by Vite from this file's own location. Swapping the theme swaps
+     the texture behind every cut-out card, with no work in the components. */
+  --team-card-backdrop: url("../assets/team/card-backdrop.jpg");
+  /* Per-card texture slots, used by `cardBackdrop` in data/team.ts to run a
+     side-by-side comparison of light-mode wallpapers. All three resolve to the
+     single dark texture here, so a card carrying data-backdrop looks exactly
+     like every other card in dark mode. */
+  --team-card-backdrop-1: url("../assets/team/card-backdrop.jpg");
+  --team-card-backdrop-2: url("../assets/team/card-backdrop.jpg");
+  --team-card-backdrop-3: url("../assets/team/card-backdrop.jpg");
+  --team-card-backdrop-4: url("../assets/team/card-backdrop.jpg");
+  --team-card-ink-photo: #f2f2f2;
+  --team-card-scrim-from: rgb(15 15 15 / 0.55);
+  --team-card-scrim-to: rgb(15 15 15 / 0.35);
+  --team-card-topscrim-from: rgb(15 15 15 / 0.86);
+  --team-card-topscrim-mid: rgb(15 15 15 / 0.35);
+  --team-card-topscrim-to: rgb(15 15 15 / 0);
+  --team-name-shadow: rgb(0 0 0 / 0.6);
+
+  /* --- card: surface zone (flips) ----------------------------------------- */
+  --team-card-surface: #242424;
+  --team-card-surface-from: #2e2e2e;
+  --team-card-surface-to: #242424;
+  /* The 2025 card's fill is its own pair — a touch deeper than the 2026 one.
+     It's almost entirely covered by the backdrop texture, so this only shows
+     at the very edges; keep the two distinct anyway. */
+  --team-card-solid-from: #242424;
+  --team-card-solid-to: #1a1a1a;
+  --team-card-ink: #f2f2f2;
+  --team-card-ink-dim: #aaaaaa;
+  --team-card-ink-soft: #999999;
+  --team-card-ink-muted: #666666;
+  --team-card-ink-ghost: rgb(255 255 255 / 0.55); /* unfilled roster slot */
+  --team-card-rule: rgb(255 255 255 / 0.12);
+  --team-card-pill-border: rgb(68 68 68 / 0.6);
+  /* The card's own drop shadow. Near-black at 0.6 in dark; a light page can't
+     take that much black, so light mode uses the ink hue at a third the alpha. */
+  --team-card-shadow: rgb(0 0 0 / 0.6);
+  --team-card-shadow-strong: rgb(0 0 0 / 0.7);
+  --team-card-panel-from: rgb(26 26 26 / 0);
+  --team-card-panel-mid: rgb(26 26 26 / 0.85);
+  --team-card-panel-to: rgb(26 26 26 / 0.98);
+
+  /* The role tag on a resting card. Its text is the sub-team accent, set per
+     card, so only the plate is themed here. The -solid variant is the touch
+     fallback used where the backdrop blur is dropped. */
+  --team-tag-bg: rgb(26 26 26 / 0.55);
+  --team-tag-bg-solid: rgb(20 20 20 / 0.78);
+
+  /* --- sub-team info popover ---------------------------------------------- */
+  /* Mixed with the sub-team accent by the component, so it must stay a plain
+     opaque colour — color-mix needs a real base, not a translucent one. */
+  --team-pop-surface: #1a1a1a;
+  --team-pop-ink: #ffffff;
+  --team-pop-ink-dim: #aaaaaa;
+  --team-pop-close: #999999;
+  --team-pop-close-hover-ink: #ffffff;
+  --team-pop-close-hover-bg: rgb(255 255 255 / 0.08);
+  --team-pop-shadow: rgb(0 0 0 / 0.75);
+
+  /* --- jump nav ------------------------------------------------------------ */
+  --team-nav-surface: rgb(26 26 26 / 0.9);
+  --team-nav-surface-solid: rgb(22 22 22 / 0.98); /* touch: no backdrop blur */
+  --team-nav-border: rgb(68 68 68 / 0.35);
+  --team-nav-shadow: rgb(0 0 0 / 0.75);
+  /* The nav panel's own inks. Close to the popover's but not the same — its
+     title and links sit a step quieter than the popover's body copy. */
+  --team-nav-ink: #f2f2f2;
+  --team-nav-ink-dim: #aaaaaa;
+  --team-nav-close: #666666;
+  /* The PULL tab floats over the cards at partial opacity so they read through
+     it. Brand indigo at 25% has plenty of body against a dark page; against a
+     near-white one it washes out to pale lavender and the white label on it
+     stops being legible, hence the much higher resting value in light mode. */
+  --team-tab-opacity: 0.25;
+  --team-tab-focus-ring: #ffffff;
 }
 
 /* Anchor targets clear the fixed navbar instead of landing beneath it. */
@@ -143,7 +288,7 @@
    * backdrop blur, which is the expensive part; see ThemeToggle.tsx if you
    * want that off on phones.)
    * --------------------------------------------------------------------- */
-  --toggle-opacity: 0.32;
+  --toggle-opacity: 0.52;
 
   /* Surfaces (back → front) */
   --bg-primary: #07091c; /* deep-space navy — page background   */
@@ -195,7 +340,7 @@
 
   /* Slightly more opaque than dark: a pale pill over pale content needs more
      body to stay legible. Same knob, see the dark block for what it does. */
-  --toggle-opacity: 0.62;
+  --toggle-opacity: 0.22;
 
   --bg-primary: #f7f8ff; /* faintly indigo-tinted white          */
   --bg-surface: #ffffff;
@@ -226,6 +371,158 @@
   --elevation-2: 0 4px 12px rgba(60, 64, 181, 0.12);
   --elevation-3: 0 10px 30px rgba(60, 64, 181, 0.15);
   --elevation-4: 0 20px 50px rgba(60, 64, 181, 0.18);
+
+  /* --------------------------------------------------------------------------
+   * TEAM PAGE — light.
+   *
+   * Direction comes from the Claude Design project ("Team Grey Cards" /
+   * "Team Light Mode", turn 8a): a calm desaturated ground with the existing
+   * dark cards left alone as the figure. The design's own note on that option
+   * reads "cards unchanged (dark = figure)", and it is the reason almost every
+   * --team-card-* token below is identical to its dark counterpart.
+   *
+   * That is deliberate, not an oversight. An earlier pass flipped the card to a
+   * pale surface with dark ink, which put a near-white gradient over the bottom
+   * of every portrait — the hover panel washed out the person's shoulders and
+   * the name with them. The panel has to stay dark because it sits ON the
+   * photograph; only the page behind the cards becomes light.
+   *
+   * Ground is #DEE3E9, the design's default pageBg. Deliberately a grey and not
+   * a white: the cards' hover glow is a coloured drop shadow, and on a
+   * near-white page there is no room below the background for a shadow to
+   * register, so the lift disappears entirely.
+   * ------------------------------------------------------------------------ */
+  --team-bg: #dee3e9;
+  --team-bg-rgb: 222 227 233;
+  /* Page inks, straight from the design's headings and body copy. */
+  --team-ink: #1a1f2e;
+  --team-ink-soft: #5a6377;
+  --team-ink-dim: #4a5164;
+  --team-ink-muted: #5a6377;
+  --team-ink-faint: #8b93a5;
+  --team-accent-ink: #ffffff;
+  --team-numeral: rgb(61 62 204 / 0.22);
+
+  /* The design rules its sections off in a tint of the brand rather than a
+     neutral grey. */
+  --team-rule: rgb(61 62 204 / 0.18);
+  --team-rule-strong: rgb(61 62 204 / 0.24);
+  --team-rule-divider: rgb(61 62 204 / 0.2);
+  --team-rule-divider-mobile: rgb(61 62 204 / 0.32);
+
+  --team-chip-bg: rgb(26 31 46 / 0.06);
+  --team-chip-border: rgb(26 31 46 / 0.18);
+
+  /* See the dark block. Washed harder and haloed in white, because the hero
+     copy is dark here and the photo underneath is not. */
+  --team-hero-wash: 0.82;
+  --team-hero-wash-sm: 0.9;
+  --team-hero-title-shadow: rgb(255 255 255 / 0.7);
+  --team-hero-hint-shadow: rgb(255 255 255 / 0.65);
+
+  /* --- card ----------------------------------------------------------------
+   * Unchanged from dark, on purpose — see the note at the top of this block.
+   * The single exception is the backdrop texture, which swaps to the
+   * light-mode hieroglyph wallpaper. It is a mid-tone blue-grey, so it still
+   * sits under light ink exactly the way the dark texture does.
+   * ---------------------------------------------------------------------- */
+  --team-card-backdrop: url("../assets/team/card-backdrop-light-1.webp");
+  /* The three candidates, for the side-by-side comparison. 1 is the muted
+     slate, 2 the lighter grey-blue, 3 the vivid blue. */
+  --team-card-backdrop-1: url("../assets/team/card-backdrop-light-1.webp");
+  --team-card-backdrop-2: url("../assets/team/card-backdrop-light-2.webp");
+  --team-card-backdrop-3: url("../assets/team/card-backdrop-light-3.webp");
+  --team-card-backdrop-4: url("../assets/team/card-backdrop-light-4.webp");
+  --team-card-ink-photo: #f2f2f2;
+  --team-card-scrim-from: rgb(15 15 15 / 0.55);
+  --team-card-scrim-to: rgb(15 15 15 / 0.35);
+  --team-card-topscrim-from: rgb(15 15 15 / 0.86);
+  --team-card-topscrim-mid: rgb(15 15 15 / 0.35);
+  --team-card-topscrim-to: rgb(15 15 15 / 0);
+  --team-name-shadow: rgb(0 0 0 / 0.6);
+
+  --team-card-surface: #242424;
+  --team-card-surface-from: #2e2e2e;
+  --team-card-surface-to: #242424;
+  --team-card-solid-from: #242424;
+  --team-card-solid-to: #1a1a1a;
+  --team-card-ink: #f2f2f2;
+  --team-card-ink-dim: #aaaaaa;
+  --team-card-ink-soft: #999999;
+  --team-card-ink-muted: #666666;
+  --team-card-ink-ghost: rgb(255 255 255 / 0.55);
+  --team-card-rule: rgb(255 255 255 / 0.12);
+  --team-card-pill-border: rgb(68 68 68 / 0.6);
+  --team-card-panel-from: rgb(26 26 26 / 0);
+  --team-card-panel-mid: rgb(26 26 26 / 0.85);
+  --team-card-panel-to: rgb(26 26 26 / 0.98);
+  /* Role tag: identical to dark. A dark plate with the sub-team's own colour
+     on it is the only pairing that stays legible — the accents are pale by
+     design (they were picked to sit on the near-black card), and pale text on
+     any translucent-white plate measures ~2:1 at best, whatever its opacity.
+     So the tag simply doesn't change between themes. */
+  --team-tag-bg: rgb(26 26 26 / 0.55);
+  --team-tag-bg-solid: rgb(20 20 20 / 0.78);
+
+  /* The one card value that does change. A near-black drop shadow vanishes
+     into a dark page but has somewhere to go on a grey one, so the hover lift
+     reads here at the design's own weight (0 16px 38px -18px rgba(30,38,54,.5)
+     at rest, heavier on hover). */
+  --team-card-shadow: rgb(30 38 54 / 0.5);
+  --team-card-shadow-strong: rgb(30 38 54 / 0.6);
+
+  /* --- sub-team info popover ----------------------------------------------- */
+  --team-pop-surface: #ffffff;
+  --team-pop-ink: #1a1f2e;
+  --team-pop-ink-dim: #5a6377;
+  --team-pop-close: #667089;
+  --team-pop-close-hover-ink: #1a1f2e;
+  --team-pop-close-hover-bg: rgb(26 31 46 / 0.06);
+  --team-pop-shadow: rgb(20 28 56 / 0.28);
+
+  /* --- jump nav ------------------------------------------------------------- */
+  /* The design's floating pills are rgba(255,255,255,.94) over the photo. */
+  --team-nav-surface: rgb(255 255 255 / 0.94);
+  --team-nav-surface-solid: rgb(255 255 255 / 0.98);
+  --team-nav-border: rgb(255 255 255 / 0.7);
+  --team-nav-shadow: rgb(20 28 56 / 0.5);
+  --team-nav-ink: #1a1f2e;
+  --team-nav-ink-dim: #4a5164;
+  --team-nav-close: #667089;
+  --team-tab-opacity: 0.6;
+  --team-tab-focus-ring: #1a1f2e;
+
+  /* --------------------------------------------------------------------------
+   * SUB-TEAM ACCENTS — page-level, light only
+   *
+   * The base --team-<slug> values in section 1 are pastels chosen to read on
+   * the near-black cards, and the cards keep them here — the cards are still
+   * dark, so nothing about them changed. But the same colours also title each
+   * sub-team's *section*, and on the #DEE3E9 ground those pastels collapse to
+   * between 1.4:1 and 1.7:1.
+   *
+   * So the page gets its own set. `subTeamAccent()` in data/team.ts emits
+   * `var(--team-<slug>-page, var(--team-<slug>, #3d3ecc))`, which resolves to
+   * these in light mode and falls straight back to the pastel in dark, where
+   * this block does not apply. `memberAccent()` is untouched and still hands
+   * the card the pastel in both themes.
+   *
+   * Same hue, same saturation, darkened by lightness alone until each clears
+   * 4.5:1 on the ground — Wing is still the cyan one, Hardware still the gold.
+   * Retune a colour in section 1 and you must retune its partner here.
+   * ------------------------------------------------------------------------ */
+  --team-aerodesign-page: #1d65b0;
+  --team-wing-page: #1e6e73;
+  --team-tail-stability-page: #aa4413;
+  --team-structure-page: #676454;
+  --team-propulsion-page: #4f6d27;
+  --team-software-page: #257057;
+  --team-hardware-page: #895a0b;
+  --team-computer-vision-page: #bf2055;
+  --team-ai-page: #bf2055;
+  --team-firmware-page: #5b4ed8;
+  /* --team-management / --team-accent are brand blue and already clear 5.9:1. */
+
 }
 
 /* ----------------------------------------------------------------------------
@@ -242,12 +539,12 @@
 @media (hover: none) {
   :root,
   :root[data-theme="dark"] {
-    --toggle-opacity: 0.72;
+    --toggle-opacity: 0.52;
     --bg-glass: rgba(22, 26, 80, 0.86);
   }
 
   :root[data-theme="light"] {
-    --toggle-opacity: 0.88;
+    --toggle-opacity: 0.52;
     --bg-glass: rgba(255, 255, 255, 0.92);
   }
 }

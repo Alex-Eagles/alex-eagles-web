@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
-import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
   memberAccent,
@@ -112,6 +111,8 @@ export function TeamMemberCard({
       data-tier={memberTier(member)}
       data-open={open}
       style={{ "--card-accent": cardAccent } as CSSProperties}
+      /* Light-mode wallpaper comparison; undefined on every other card. */
+      data-backdrop={member.cardBackdrop}
       tabIndex={0}
       onClick={(e) => {
         e.stopPropagation();
@@ -122,11 +123,9 @@ export function TeamMemberCard({
       <div className={styles.inner}>
         {cutout && (
           <>
-            <div
-              className={styles.backdrop}
-              style={{ backgroundImage: `url(${backdrop})` }}
-              aria-hidden
-            />
+            {/* The texture itself is `--team-card-backdrop` in theme.css, so it
+                follows the theme — light mode gets its own wallpaper. */}
+            <div className={styles.backdrop} aria-hidden />
             <div className={styles.backdropScrim} aria-hidden />
             {firstName && (
               <span className={`${styles.bigName} ${styles.bigNameBack}`} aria-hidden>

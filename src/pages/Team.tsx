@@ -163,8 +163,12 @@ export default function Team({
      * split into two ragged rows. Any longer and the vices take their own row
      * above the members, which keeps rank legible instead of letting a vice
      * and a member share a line only because the wrap happened to land there.
+     *
+     * Unless the section asks otherwise: an explicit `breakBefore` is a
+     * deliberate instruction about where the grid wraps, so it opts out of the
+     * collapse rather than being silently ignored for being short.
      */
-    const singleRow = people.length <= 3;
+    const singleRow = people.length <= 3 && !people.some((m) => m.breakBefore);
 
     /* A short roster is centred on the lead card's midline instead of hanging
      * off its top edge, which left an obvious hole under two or three cards

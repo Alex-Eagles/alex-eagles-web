@@ -24,11 +24,16 @@
    * outside a section would inherit shadcn's near-white instead of falling
    * back to the brand. The fallback below only covers a card rendered without
    * the component, e.g. in isolation. */
-  --card-accent: #3d3ecc;
-  --ink: #f2f2f2;
-  --periwinkle: #aaaaaa;
-  --periwinkle-dim: #999999;
-  --muted: #666666;
+  --card-accent: var(--team-accent);
+  /* Two inks, deliberately. `--ink` is the card's *surface* ink (hover panel,
+     empty-slot copy) and flips with the theme; `--ink-photo` is the ink that
+     sits on the portrait and the textured backdrop, which are dark in both
+     themes, so it does not flip. See the two-zone note in theme.css. */
+  --ink: var(--team-card-ink);
+  --ink-photo: var(--team-card-ink-photo);
+  --periwinkle: var(--team-card-ink-dim);
+  --periwinkle-dim: var(--team-card-ink-soft);
+  --muted: var(--team-card-ink-muted);
   /* The oversized first name behind the portrait — the card's largest block of
      colour, so it tracks the sub-team accent too. Lifted towards white the way
      the old hand-picked #6b6fc7 sat above the brand blue, which keeps it
@@ -58,8 +63,8 @@
   overflow: hidden;
   /* Nothing happens on click on a pointer device — the reveal is hover. */
   cursor: default;
-  background: #242424;
-  box-shadow: 0 8px 24px -14px rgb(0 0 0 / 0.6);
+  background: var(--team-card-surface);
+  box-shadow: 0 8px 24px -14px var(--team-card-shadow);
   transition: transform var(--t-lift) var(--ease-move), box-shadow var(--t-lift) ease;
 }
 
@@ -80,7 +85,11 @@
      aspect, so they still land in the box with almost nothing trimmed. */
   aspect-ratio: 0.74;
   overflow: hidden;
-  background: linear-gradient(165deg, #2e2e2e, #242424);
+  background: linear-gradient(
+    165deg,
+    var(--team-card-surface-from),
+    var(--team-card-surface-to)
+  );
   /* Rounds this box itself instead of relying on .card's overflow clip. That
      is what kills the white anti-alias fringe on the corners when the photo
      scales on hover — the clip now happens on the same box that paints the
@@ -168,12 +177,19 @@
 }
 
 .backdrop {
+  /* Set here rather than inline on the element: the light theme swaps this for
+     a different texture, and an inline style would always win over it. */
+  background-image: var(--team-card-backdrop);
   background-size: cover;
   background-position: center;
 }
 
 .backdropScrim {
-  background: linear-gradient(180deg, rgb(15 15 15 / 0.55), rgb(15 15 15 / 0.35));
+  background: linear-gradient(
+    180deg,
+    var(--team-card-scrim-from),
+    var(--team-card-scrim-to)
+  );
 }
 
 .cutoutLayer {
@@ -227,8 +243,8 @@
 }
 
 .bigNameFront {
-  color: #f2f2f2;
-  text-shadow: 0 3px 24px rgb(0 0 0 / 0.6);
+  color: var(--ink-photo);
+  text-shadow: 0 3px 24px var(--team-name-shadow);
 }
 
 .topScrim {
@@ -239,9 +255,9 @@
   height: 58%;
   background: linear-gradient(
     180deg,
-    rgb(15 15 15 / 0.86),
-    rgb(15 15 15 / 0.35) 52%,
-    rgb(15 15 15 / 0)
+    var(--team-card-topscrim-from),
+    var(--team-card-topscrim-mid) 52%,
+    var(--team-card-topscrim-to)
   );
   pointer-events: none;
   opacity: 0;
@@ -264,7 +280,7 @@
   top: 14px;
   padding: 5px 10px;
   border-radius: 8px;
-  background: rgb(26 26 26 / 0.55);
+  background: var(--team-tag-bg);
   backdrop-filter: blur(6px);
   font-size: 11px;
   font-weight: 700;
@@ -277,14 +293,19 @@
   bottom: 12px;
   font-size: 16px;
   font-weight: 800;
-  color: var(--ink);
-  text-shadow: 0 1px 12px rgb(0 0 0 / 0.6);
+  /* Over the portrait, not the card surface — see --ink-photo above. */
+  color: var(--ink-photo);
+  text-shadow: 0 1px 12px var(--team-name-shadow);
 }
 
-/* An unfilled slot's name reads dimmer than a real one. */
-.restName[data-placeholder="true"],
-.panelName[data-placeholder="true"] {
+/* An unfilled slot's name reads dimmer than a real one. Split by zone: the
+   rest-state name is over the portrait, the panel name is over the panel. */
+.restName[data-placeholder="true"] {
   color: rgb(255 255 255 / 0.55);
+}
+
+.panelName[data-placeholder="true"] {
+  color: var(--team-card-ink-ghost);
 }
 
 /* --- hover panel ---------------------------------------------------------- */
@@ -297,9 +318,9 @@
   padding: 52px 18px 18px;
   background: linear-gradient(
     180deg,
-    rgb(26 26 26 / 0),
-    rgb(26 26 26 / 0.85) 44%,
-    rgb(26 26 26 / 0.98)
+    var(--team-card-panel-from),
+    var(--team-card-panel-mid) 44%,
+    var(--team-card-panel-to)
   );
   opacity: 0;
   transform: translateY(30%);
@@ -334,7 +355,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  border-top: 1px solid rgb(255 255 255 / 0.12);
+  border-top: 1px solid var(--team-card-rule);
   padding-top: 11px;
 }
 
@@ -352,7 +373,7 @@
   gap: 6px;
   margin-left: auto;
   padding: 5px 10px;
-  border: 1px solid rgb(68 68 68 / 0.6);
+  border: 1px solid var(--team-card-pill-border);
   border-radius: 999px;
   font-size: 11px;
   font-weight: 600;
@@ -543,7 +564,7 @@
   .restRole {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgb(20 20 20 / 0.78);
+    background: var(--team-tag-bg-solid);
   }
 }
 
@@ -561,4 +582,23 @@
     .photoLayer {
     transform: none;
   }
+}
+
+/* --- light-mode wallpaper comparison ---------------------------------------
+ *
+ * Set from `cardBackdrop` in data/team.ts. The three slots all resolve to the
+ * single dark texture in dark mode, so these rules are inert there — a card
+ * carrying data-backdrop looks like every other card until the theme flips.
+ * -------------------------------------------------------------------------*/
+.card[data-backdrop="1"] {
+  --team-card-backdrop: var(--team-card-backdrop-1);
+}
+.card[data-backdrop="2"] {
+  --team-card-backdrop: var(--team-card-backdrop-2);
+}
+.card[data-backdrop="3"] {
+  --team-card-backdrop: var(--team-card-backdrop-3);
+}
+.card[data-backdrop="4"] {
+  --team-card-backdrop: var(--team-card-backdrop-4);
 }

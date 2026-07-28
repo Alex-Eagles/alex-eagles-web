@@ -17,7 +17,7 @@
    * Don't reach for backdrop-filter here: that one *is* expensive, and on a
    * fixed element over a scrolling page it repaints every frame.
    * ==================================================================== */
-  --tab-opacity: 0.25;
+  --tab-opacity: var(--team-tab-opacity);
 
   position: fixed;
   top: 50%;
@@ -34,7 +34,7 @@
   justify-content: center;
   gap: 3px;
   cursor: pointer;
-  color: #ffffff;
+  color: var(--team-accent-ink);
   background: rgb(61 62 204 / var(--tab-opacity));
   /* Glow scaled to the fill, so a faded tab doesn't sit in a solid halo. */
   box-shadow: 0 8px 22px -8px rgb(61 62 204 / calc(var(--tab-opacity) * 0.6));
@@ -84,7 +84,7 @@
 }
 
 .tab:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid var(--team-tab-focus-ring);
   outline-offset: 3px;
 }
 
@@ -115,12 +115,12 @@
   flex-direction: column;
   gap: 2px;
   padding: 16px 12px;
-  background: rgb(26 26 26 / 0.9);
+  background: var(--team-nav-surface);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgb(68 68 68 / 0.35);
+  border: 1px solid var(--team-nav-border);
   border-radius: 16px;
-  box-shadow: 0 20px 50px -18px rgb(0 0 0 / 0.75);
+  box-shadow: 0 20px 50px -18px var(--team-nav-shadow);
   transform: translateY(-50%) translateX(120%);
   opacity: 0;
   pointer-events: none;
@@ -145,7 +145,7 @@
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #aaaaaa;
+  color: var(--team-nav-ink-dim);
 }
 
 .close {
@@ -153,12 +153,12 @@
   padding: 2px;
   background: none;
   border: none;
-  color: #666666;
+  color: var(--team-nav-close);
   cursor: pointer;
 }
 
 .close:is(:hover, :focus-visible) {
-  color: #f2f2f2;
+  color: var(--team-nav-ink);
 }
 
 .groupLabel {
@@ -167,7 +167,7 @@
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #3d3ecc;
+  color: var(--team-accent);
 }
 
 .link {
@@ -176,7 +176,7 @@
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #aaaaaa;
+  color: var(--team-nav-ink-dim);
   text-decoration: none;
   white-space: nowrap;
   transition: background 0.2s, color 0.2s;
@@ -184,7 +184,7 @@
 
 .link:is(:hover, :focus-visible) {
   background: rgb(61 62 204 / 0.16);
-  color: #f2f2f2;
+  color: var(--team-nav-ink);
 }
 
 /*
@@ -198,7 +198,7 @@
   .panel {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgb(22 22 22 / 0.98);
+    background: var(--team-nav-surface-solid);
   }
 }
 

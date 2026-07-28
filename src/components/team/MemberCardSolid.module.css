@@ -18,7 +18,7 @@
      outside the component. Not called `--accent`: that name is a shadcn theme
      token on :root, so an unset inherited value would resolve to shadcn's
      near-white rather than falling back to the brand. */
-  --card-accent: #3d3ecc;
+  --card-accent: var(--team-accent);
   /*
    * Hover timings, in one place — same budget as the 2026 card so the two
    * years move alike. Everything the pointer drives stays under 300ms:
@@ -44,9 +44,13 @@
   overflow: hidden;
   /* Nothing happens on click on a pointer device — the reveal is hover. */
   cursor: default;
-  background: linear-gradient(165deg, #242424 0%, #1a1a1a 100%);
+  background: linear-gradient(
+    165deg,
+    var(--team-card-solid-from) 0%,
+    var(--team-card-solid-to) 100%
+  );
   font-family: "Archivo", system-ui, sans-serif;
-  box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px -14px var(--team-card-shadow);
   outline: none;
   /* Establish a container so the big name can size to the card width. */
   container-type: inline-size;
@@ -61,6 +65,8 @@
 .backdrop {
   position: absolute;
   inset: 0;
+  /* Themed — see the note in the component. */
+  background-image: var(--team-card-backdrop);
   background-size: cover;
   background-position: center;
 }
@@ -70,8 +76,8 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(15, 15, 15, 0.55),
-    rgba(15, 15, 15, 0.35)
+    var(--team-card-scrim-from),
+    var(--team-card-scrim-to)
   );
 }
 
@@ -116,6 +122,8 @@
   align-items: center;
   justify-content: center;
   font: 900 64px "Archivo", system-ui, sans-serif;
+  /* Not themed: this initial sits on the backdrop texture + scrim, which stay
+     dark in both themes, so it belongs to the imagery zone. */
   color: #444444;
 }
 
@@ -126,7 +134,7 @@
   left: 14px;
   padding: 6px 12px;
   border-radius: 8px;
-  background: rgba(26, 26, 26, 0.55);
+  background: var(--team-tag-bg);
   border: 1px solid color-mix(in srgb, var(--card-accent) 50%, transparent);
   backdrop-filter: blur(6px);
   color: var(--card-accent);
@@ -143,14 +151,16 @@
   left: 16px;
   right: 16px;
   bottom: 16px;
-  color: #f2f2f2;
+  /* Over the cut-out photo, not the card surface — stays light in both themes.
+     See the two-zone note in theme.css. */
+  color: var(--team-card-ink-photo);
   /* One line, scaled to the card width so long full names still fit. */
   white-space: nowrap;
   font-size: 7cqw;
   font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 14px var(--team-name-shadow);
   transition: opacity var(--t-tags) ease;
 }
 
@@ -163,9 +173,9 @@
   padding: 50px 16px 16px;
   background: linear-gradient(
     180deg,
-    rgba(26, 26, 26, 0),
-    rgba(26, 26, 26, 0.85) 44%,
-    rgba(26, 26, 26, 0.98)
+    var(--team-card-panel-from),
+    var(--team-card-panel-mid) 44%,
+    var(--team-card-panel-to)
   );
   opacity: 0;
   transform: translateY(30%);
@@ -185,7 +195,7 @@
 
 .panelName {
   margin: 0 0 3px;
-  color: #f2f2f2;
+  color: var(--team-card-ink);
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.01em;
@@ -193,7 +203,7 @@
 
 .panelDept {
   margin: 0 0 12px;
-  color: #999999;
+  color: var(--team-card-ink-soft);
   font-size: 13px;
   font-weight: 500;
 }
@@ -202,12 +212,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid var(--team-card-rule);
   padding-top: 10px;
 }
 
 .year {
-  color: #666666;
+  color: var(--team-card-ink-muted);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -220,9 +230,9 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 600;
-  color: #aaaaaa;
+  color: var(--team-card-ink-dim);
   padding: 5px 10px;
-  border: 1px solid rgba(68, 68, 68, 0.6);
+  border: 1px solid var(--team-card-pill-border);
   border-radius: 999px;
   text-decoration: none;
   transition:
@@ -231,7 +241,7 @@
 }
 
 .linkedin:hover {
-  color: #f2f2f2;
+  color: var(--team-card-ink);
   border-color: var(--card-accent);
 }
 
@@ -342,7 +352,7 @@
   .badge {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgba(20, 20, 20, 0.78);
+    background: var(--team-tag-bg-solid);
   }
 }
 
@@ -413,20 +423,39 @@
 .card[data-tier="vice"],
 .card[data-tier="head"] {
   box-shadow:
-    0 8px 24px -14px rgba(0, 0, 0, 0.6),
+    0 8px 24px -14px var(--team-card-shadow),
     inset 0 0 0 2px color-mix(in srgb, var(--card-accent) 85%, transparent);
 }
 
 /* A vice reads as a lead's second — a dashed ring instead of a solid one. */
 .card[data-tier="vice"] {
   box-shadow:
-    0 8px 24px -14px rgba(0, 0, 0, 0.6),
+    0 8px 24px -14px var(--team-card-shadow),
     inset 0 0 0 2px color-mix(in srgb, var(--card-accent) 55%, transparent);
 }
 
 /* A head card (division lead) gets a slightly heavier ring than a section lead. */
 .card[data-tier="head"] {
   box-shadow:
-    0 10px 30px -14px rgba(0, 0, 0, 0.7),
+    0 10px 30px -14px var(--team-card-shadow-strong),
     inset 0 0 0 2.5px var(--card-accent);
+}
+
+/* --- light-mode wallpaper comparison ---------------------------------------
+ *
+ * Set from `cardBackdrop` in data/team.ts. The three slots all resolve to the
+ * single dark texture in dark mode, so these rules are inert there — a card
+ * carrying data-backdrop looks like every other card until the theme flips.
+ * -------------------------------------------------------------------------*/
+.card[data-backdrop="1"] {
+  --team-card-backdrop: var(--team-card-backdrop-1);
+}
+.card[data-backdrop="2"] {
+  --team-card-backdrop: var(--team-card-backdrop-2);
+}
+.card[data-backdrop="3"] {
+  --team-card-backdrop: var(--team-card-backdrop-3);
+}
+.card[data-backdrop="4"] {
+  --team-card-backdrop: var(--team-card-backdrop-4);
 }

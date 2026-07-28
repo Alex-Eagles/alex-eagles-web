@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 
-import backdrop from "@/assets/team/card-backdrop.jpg";
 import {
   hasName,
   memberAccent,
@@ -68,14 +67,14 @@ export function MemberCardSolid({
        * which `memberAccent` handles. Named `--card-accent`, not `--accent`,
        * because the latter is a shadcn theme token on :root. */
       style={{ "--card-accent": accent } as CSSProperties}
+      /* Light-mode wallpaper comparison; undefined on every other card. */
+      data-backdrop={member.cardBackdrop}
       tabIndex={0}
       aria-label={filled ? `${member.name}, ${roleLabel}` : `Unfilled ${roleLabel} slot`}
     >
-      <div
-        className={styles.backdrop}
-        style={{ backgroundImage: `url(${backdrop})` }}
-        aria-hidden
-      />
+      {/* Texture comes from `--team-card-backdrop` in theme.css so it follows
+          the theme; an inline style here would always beat the light override. */}
+      <div className={styles.backdrop} aria-hidden />
       <div className={styles.scrim} aria-hidden />
 
       {firstName && (
