@@ -3,34 +3,37 @@ import "../styles/Features.css";
 function Features() {
   return (
     <section className="features">
-      <h2 className="title">ALEX EAGLES</h2>
+      <div className="features-bg" aria-hidden="true">
+        <img src="/who%20we%20are.JPG" alt="" />
+      </div>
+      <div className="features-scrim" aria-hidden="true" />
 
-      <p className="subtitle">
-        A multidisciplinary team of student engineers designing, building, and
-        flying autonomous aircraft — driven by an unrelenting pursuit of
-        precision in the skies.
-      </p>
+      <span className="features-watermark" aria-hidden="true">
+        2013
+      </span>
 
       <div className="features-content">
-        <div className="features-image">
-          <img src="/members.jpg" alt="Alex Eagles team" />
+        <div className="features-eyebrow">
+          <span className="features-eyebrow-index">01</span>
+          <span className="features-eyebrow-line" />
+          <span className="features-eyebrow-label">Who We Are</span>
         </div>
 
-        <div className="features-text">
-          <h3>Our Mission</h3>
-          <p>
-            Founded in 2020 at Alexandria University, Alex Eagles has grown from
-            a handful of ambitious students into a competitive force in unmanned
-            aerial systems. Every airframe, circuit, and line of flight-control
-            code is designed, built, and tested in-house — engineered to perform
-            when it matters most.
-          </p>
+        <h2 className="features-headline">
+          <span className="features-headline-line">
+            Engineers <span className="features-headline-accent">First.</span>
+          </span>
+          <span className="features-headline-line">Aviators Second.</span>
+        </h2>
 
-          <p>
-            Our mission is singular: to advance the frontier of autonomous
-            flight, and to prove, mission after mission, that Egyptian student
-            engineering belongs among the world's best.
-          </p>
+        <p className="features-copy-text">
+          Established in 2013 at Alexandria University — a multidisciplinary
+          team of aerospace, mechatronics, electrical, and software engineers
+          who design, build, and fly autonomous aircraft end to end.
+        </p>
+
+        <div className="features-credential">
+          Alexandria University · SUAS Team
         </div>
       </div>
     </section>

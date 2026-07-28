@@ -101,18 +101,20 @@
   margin-bottom: 15px;
 }
 
-.sponsors-footer button {
+.sponsors-footer-cta {
+  display: inline-block;
   padding: 12px 25px;
   background: var(--brand);
   color: #fff;
   border: none;
   border-radius: 10px;
   font-size: 16px;
+  text-decoration: none;
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
-.sponsors-footer button:hover {
+.sponsors-footer-cta:hover {
   background: var(--brand-light);
 }
 

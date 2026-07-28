@@ -26,7 +26,7 @@ const sponsors = [
     logo: "/composites.jpg",
     url: "https://www.easycomposites.co.uk/",
   },
-  { name: "ALC", logo: "/alc.jpg", url: "https://www.alcglobal.com/pages/about-us" },
+  { name: "ecalc", logo: "/ecalc.jpg", url: "https://www.ecalc.ch/" },
 ];
 
 export default function Sponsors() {
@@ -79,15 +79,12 @@ export default function Sponsors() {
 
       <div className="sponsors-footer">
         <p>Interested in becoming a sponsor?</p>
-        <button
-          onClick={() =>
-            document.querySelector(".contact").scrollIntoView({
-              behavior: "smooth",
-            })
-          }
+        <a
+          href="mailto:alex_eagles@alexu.edu.eg?subject=Sponsorship%20Inquiry"
+          className="sponsors-footer-cta"
         >
           Partner With Us
-        </button>
+        </a>
       </div>
     </section>
   );

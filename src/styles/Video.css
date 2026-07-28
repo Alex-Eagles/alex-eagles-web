@@ -1,54 +1,150 @@
+/* "Watch Us Fly" — a giant outlined "SUAS" watermark with an overlapping
+ * year, a bold 3-line headline, and a CTA to the Vehicles page. Theme-aware
+ * (dark-mode default, white + light-blue for light mode, matching the team
+ * logo) — unlike Hero, this section no longer carries a photo/video
+ * background (moved to Hero), so there's no reason to lock it dark. */
+:root,
+:root[data-theme="dark"] {
+  --wf-bg: #0a0e1f;
+  --wf-text: #ffffff;
+  --wf-text-muted-1: rgba(255, 255, 255, 0.72);
+  --wf-text-muted-2: rgba(255, 255, 255, 0.55);
+  --wf-border-soft: rgba(255, 255, 255, 0.2);
+  --wf-accent: #3b82f6;
+  --wf-accent-bright: #60a5fa;
+  --wf-cta-hover: #60a5fa;
+  --wf-watermark-year: rgba(255, 255, 255, 0.12);
+  --wf-watermark-stroke: rgba(59, 130, 246, 0.4);
+}
+
+:root[data-theme="light"] {
+  --wf-bg: #ffffff;
+  --wf-text: #0b1220;
+  --wf-text-muted-1: #3b5a8a;
+  --wf-text-muted-2: #5b7bab;
+  --wf-border-soft: #dbeafe;
+  --wf-accent: #3b82f6;
+  --wf-accent-bright: #1d4ed8;
+  --wf-cta-hover: #1d4ed8;
+  --wf-watermark-year: rgba(16, 21, 43, 0.1);
+  --wf-watermark-stroke: rgba(59, 130, 246, 0.45);
+}
+
 .video {
-  background: #000;
-  color: #fff;
-  text-align: center;
-  padding: 100px 10%;
-}
-
-.video h2 {
-  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
-  font-size: 40px;
-  margin-bottom: 10px;
-}
-
-.underline {
-  width: 60px;
-  height: 4px;
-  background: #2f6df6;
-  margin: 10px auto 20px;
-  border-radius: 2px;
-}
-
-.video p {
-  max-width: 700px;
-  margin: auto;
-  line-height: 1.6;
-  opacity: 0.8;
-}
-
-.video-container {
   position: relative;
-  margin-top: 50px;
-}
-
-.video-container img,
-.video-container video {
-  width: 100%;
-  border-radius: 12px;
-}
-
-.play-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #2f6df6;
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
+  overflow: hidden;
+  min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  cursor: pointer;
+  background: var(--wf-bg);
+  padding: 100px 6%;
+}
+
+/* decorative watermark — sits in normal document flow, stacked above the
+ * eyebrow/headline on the left, so it can never overlap the real text
+ * regardless of viewport size (no absolute-position math to get wrong). */
+.video-watermark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 20px;
+  line-height: 1;
+  text-align: left;
+  pointer-events: none;
+  user-select: none;
+}
+
+.video-watermark-year {
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(26px, 3.2vw, 50px);
+  color: var(--wf-watermark-year);
+}
+
+.video-watermark-main {
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(46px, 6vw, 108px);
+  color: transparent;
+  -webkit-text-stroke: 2px var(--wf-watermark-stroke);
+}
+
+.video-content {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+}
+
+.video-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--wf-text-muted-2);
+}
+
+.video-eyebrow-index {
+  color: var(--wf-accent);
+  font-weight: 700;
+}
+
+.video-eyebrow-line {
+  flex: 1 1 auto;
+  max-width: 340px;
+  height: 1px;
+  background: var(--wf-border-soft);
+}
+
+.video-headline {
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(36px, 4.6vw, 58px);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--wf-text);
+  margin: 0 0 26px;
+}
+
+.video-headline-line {
+  display: block;
+}
+
+.video-headline-accent {
+  color: var(--wf-accent-bright);
+}
+
+.video-copy {
+  max-width: 46ch;
+  margin: 0 0 32px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--wf-text-muted-1);
+}
+
+.video-cta {
+  display: inline-block;
+  padding: 14px 24px;
+  background: var(--wf-accent);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.video-cta:hover {
+  background: var(--wf-cta-hover);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 720px) {
+  .video {
+    min-height: 0;
+    padding: 90px 8% 70px;
+  }
 }

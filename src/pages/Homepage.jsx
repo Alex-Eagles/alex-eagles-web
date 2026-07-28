@@ -17,6 +17,7 @@ import Video from "./Video";
 import Updates from "./Updates";
 import Sponsors from "./Sponsors";
 import Contact from "./Contact";
+import TeamStructure from "./TeamStructure";
 
 export default function Homepage() {
   const { isDark } = useTheme();
@@ -45,8 +46,9 @@ export default function Homepage() {
       <div className="homepage-content">
         <Hero />
         <Features />
-        <Video />
+        <TeamStructure />
         <Updates />
+        <Video />
         <Sponsors />
         <Contact />
       </div>
