@@ -24,7 +24,7 @@ import { useEffect, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
 import { CatmullRomCurve3, Color } from "three";
 import type { Vector3 } from "three";
-import { PALETTE, LIGHT, type QualitySettings, type ScenePalette } from "./sceneConfig";
+import { LIGHT, type QualitySettings, type ScenePalette } from "./sceneConfig";
 
 /** Tube radius in world units. Thin — it's a light trail, not a pipe. */
 const PATH_RADIUS = 0.16;
@@ -80,7 +80,7 @@ interface JourneyPathProps {
   quality: QualitySettings;
   lightPosRef: React.MutableRefObject<Vector3>;
   lightDirRef: React.MutableRefObject<Vector3>;
-  /** Active-theme palette. Only the idle path re-tints; the lit blue stays. */
+  /** Active-theme palette. Both the idle path and the lit trail re-tint. */
   palette: ScenePalette;
 }
 
@@ -106,9 +106,13 @@ export default function JourneyPath({
       // uniform writes from JS at all.
       uLightPos: { value: lightPosRef.current },
       uLightDir: { value: lightDirRef.current },
-      // The idle (unlit) path follows the theme; the lit blue is constant.
+      // Both follow the theme. `uLit` was previously pinned to the dark-mode
+      // hot cyan (#6fe3ff), which is lighter than the light-mode floor it was
+      // drawn on — so the comet tail, the one element on the path that conveys
+      // direction and speed, was the FAINTEST thing in the scene rather than
+      // the brightest. Seeded from the initial palette and synced below.
       uIdle: { value: new Color(palette.pathIdle) },
-      uLit: { value: new Color(PALETTE.pathLit) },
+      uLit: { value: new Color(palette.pathLit) },
       uTrailLength: { value: LIGHT.trailLength },
       uAheadLength: { value: AHEAD_LENGTH },
     }),
@@ -116,10 +120,11 @@ export default function JourneyPath({
     [],
   );
 
-  // Re-tint the idle path when the theme flips, then draw one frame so the
-  // change shows immediately (frameloop="demand").
+  // Re-tint on theme flip, then draw one frame so the change shows immediately
+  // (frameloop="demand").
   useEffect(() => {
     uniforms.uIdle.value.set(palette.pathIdle);
+    uniforms.uLit.value.set(palette.pathLit);
     invalidate();
   }, [palette, uniforms, invalidate]);
 

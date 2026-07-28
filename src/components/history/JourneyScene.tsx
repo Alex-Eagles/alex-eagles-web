@@ -30,21 +30,37 @@ import JourneyPath from "./JourneyPath";
 import TravellingLight from "./TravellingLight";
 import ChaseCamera from "./ChaseCamera";
 import StopProps, {
+  type FramePlacement,
   type StopPlacement,
   type PolePlacement,
+  type VehiclePlacement,
 } from "./StopProps";
 import StopOverlays from "./StopOverlays";
-import { buildJourneyCurve, poleOffsetFor } from "./journeyCurve";
+import VehicleShadows from "./VehicleShadows";
 import {
+  buildJourneyCurve,
+  fitScene,
+  frameSlots,
+  poleOffsetFor,
+} from "./journeyCurve";
+import {
+  COARSE_POINTER_MAX_DPR,
+  FRAME,
   LIGHT,
   QUALITY,
   scenePalette,
+  SHADOW,
+  showPoleShadows,
   type QualitySettings,
   type ScenePalette,
 } from "./sceneConfig";
 import { useAdaptiveQuality } from "./usePerfTier";
-import type { Tier } from "./capability";
-import { polesFor, type Achievement } from "@/data/achievements";
+import { detectCapability, type Tier } from "./capability";
+import {
+  polesFor,
+  visiblePortraits,
+  type Achievement,
+} from "@/data/achievements";
 import { useTheme } from "@/context/ThemeContext";
 
 /**
@@ -180,6 +196,99 @@ function SceneBackground({ palette }: { palette: ScenePalette }) {
   return null;
 }
 
+/**
+ * Repaints the whole canvas when the theme flips.
+ *
+ * ─── WHY A SINGLE invalidate() ISN'T ENOUGH ─────────────────────────────────
+ * With `frameloop="demand"` the render loop is asleep whenever the reader is
+ * holding still — which is exactly when someone reaches for the theme toggle.
+ * Nothing redraws until something asks, so the scene sits there in its old
+ * colours until the next scroll. That is the "it only changes if I refresh"
+ * symptom.
+ *
+ * Every palette consumer does call invalidate() from its own effect, but that
+ * correctness rests on each one remembering to — and it breaks down for
+ * anything that reads the theme inside useFrame instead of holding it in a
+ * material, because there is no palette effect to hang the call on. The
+ * aircraft shadows are exactly that case: their opacity is written per frame,
+ * so with no frame, no update.
+ *
+ * Asking centrally removes the requirement from every consumer. Asking across
+ * a HANDFUL of consecutive frames, rather than one, also removes an ordering
+ * question: sibling effects commit in tree order, so a lone invalidate fired
+ * here can be spent on a frame drawn before another consumer has swapped its
+ * colour. Four frames on a theme toggle costs nothing and is unconditionally
+ * correct.
+ */
+function ThemeRepaint({ palette }: { palette: ScenePalette }) {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    let drawn = 0;
+    let raf = 0;
+    const pump = () => {
+      invalidate();
+      if (++drawn < 4) raf = requestAnimationFrame(pump);
+    };
+    pump();
+    return () => cancelAnimationFrame(raf);
+  }, [palette, invalidate]);
+
+  return null;
+}
+
+/**
+ * Keeps a lost GPU context recoverable instead of terminal.
+ *
+ * ─── ONE LINE DECIDES WHETHER THE SCENE EVER COMES BACK ─────────────────────
+ * Browsers take WebGL contexts away routinely and for reasons that have
+ * nothing to do with this page: the GPU process restarts, a driver resets,
+ * another tab allocates heavily, a laptop switches between integrated and
+ * discrete graphics, or the machine wakes from sleep. This is normal, expected
+ * behaviour, and it is meant to be survivable.
+ *
+ * But only if you ask. The default action of the `webglcontextlost` event is
+ * to make the loss PERMANENT — `webglcontextrestored` is never fired unless
+ * the event was cancelled. Without the preventDefault() below, every one of
+ * those routine, transient interruptions became a dead canvas, which surfaced
+ * as an error, tripped the boundary, and dropped the visitor onto the 2D
+ * timeline for the rest of their visit. Cancelling the event is what tells the
+ * browser we intend to come back.
+ *
+ * three.js reinitialises its own GL state on restore; all this has to add is
+ * the redraw, because a demand-driven canvas won't repaint on its own and
+ * would otherwise sit blank until the next scroll.
+ */
+function ContextLossGuard() {
+  const gl = useThree((state) => state.gl);
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    const canvas = gl.domElement;
+
+    const onLost = (event: Event) => {
+      event.preventDefault();
+      console.warn("History scene: WebGL context lost — awaiting restore.");
+    };
+    const onRestored = () => {
+      console.info("History scene: WebGL context restored.");
+      // Several frames, not one: the first repaint after a restore lands while
+      // three is still rebuilding programs and buffers.
+      invalidate();
+      requestAnimationFrame(() => invalidate());
+    };
+
+    canvas.addEventListener("webglcontextlost", onLost);
+    canvas.addEventListener("webglcontextrestored", onRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", onLost);
+      canvas.removeEventListener("webglcontextrestored", onRestored);
+    };
+  }, [gl, invalidate]);
+
+  return null;
+}
+
 interface JourneySceneProps {
   achievements: Achievement[];
   progressRef: React.MutableRefObject<number>;
@@ -187,8 +296,27 @@ interface JourneySceneProps {
   tier: Tier;
   onDowngrade: (next: Tier) => void;
   onGiveUp: () => void;
-  isMobile: boolean;
+  /**
+   * Aspect ratio of the element the canvas fills, quantised by the caller.
+   *
+   * Everything about how a stop is framed is solved from this one number — see
+   * `fitScene`. It is a prop rather than something read from `useThree` inside
+   * the Canvas because the stop LAYOUT is built out here, before the Canvas
+   * exists, and layout and camera have to agree on the same fit.
+   */
+  aspect: number;
   reducedMotion: boolean;
+  /**
+   * Reports where each achievement sits along the curve, once it's built.
+   *
+   * The progress rail lives outside the Canvas and needs these to know when an
+   * achievement has actually been passed. It can't compute them itself:
+   * `buildJourneyCurve` needs three.js, and the rail is rendered by
+   * HistoryJourney, which is on the main bundle and must stay clear of it (see
+   * that file's header on the lazy boundary). So the scene — which is already
+   * paying for three.js — hands the numbers out. Fires once per mount.
+   */
+  onStopUs: (stopUs: number[]) => void;
 }
 
 export default function JourneyScene({
@@ -198,16 +326,40 @@ export default function JourneyScene({
   tier,
   onDowngrade,
   onGiveUp,
-  isMobile,
+  aspect,
   reducedMotion,
+  onStopUs,
 }: JourneySceneProps) {
   const quality: QualitySettings = QUALITY[tier];
+
+  // The tier already caps this; a touch screen caps it further. Both are
+  // ceilings, so the lower one wins and a low-tier phone is not raised by it.
+  const maxDpr = useMemo(
+    () =>
+      detectCapability().coarsePointer
+        ? Math.min(quality.maxDpr, COARSE_POINTER_MAX_DPR)
+        : quality.maxDpr,
+    [quality.maxDpr],
+  );
+
+  /**
+   * The framing, solved for this screen: field of view, how much to shrink a
+   * stop by, and how many photos it may show. See fitScene / the FIT block in
+   * sceneConfig.
+   *
+   * On any wide screen this resolves to exactly the values the scene was tuned
+   * at by eye (fov 42, scale 1, three photos), so nothing about desktop moves.
+   */
+  const fit = useMemo(() => fitScene(aspect), [aspect]);
 
   // The scene mirrors the site theme: in light mode the backdrop, ground, idle
   // dots, idle path and props turn pale, while the travelling light and the
   // blues it lights up stay exactly the same. See `scenePalette`.
   const { isDark } = useTheme();
   const palette = useMemo(() => scenePalette(isDark), [isDark]);
+  // Shadows are far weaker in light mode — a 0.5 black pool that reads as
+  // grounding on a near-black floor is an ink stain on a near-white one.
+  const poleShadows = useMemo(() => showPoleShadows(isDark), [isDark]);
 
   // Geometry is derived from the CONTENT, so editing achievements.ts reshapes
   // the path automatically — no hand-placed coordinates anywhere.
@@ -215,6 +367,12 @@ export default function JourneyScene({
     () => buildJourneyCurve(achievements.length),
     [achievements.length],
   );
+
+  // Hand the stop positions to the progress rail outside the Canvas. One call
+  // per journey rebuild, which is once per mount in practice.
+  useEffect(() => {
+    onStopUs(journey.stopUs);
+  }, [journey, onStopUs]);
 
   const stops: StopPlacement[] = useMemo(() => {
     const up = new Vector3(0, 1, 0);
@@ -251,56 +409,207 @@ export default function JourneyScene({
       const achievement = achievements[index];
       const anchor = journey.stopPoints[index];
 
-      // Frames come from the photos provided (min 1). The pole offset adapts to
-      // that count so a big year's outermost frame never crosses the path.
-      const frameCount = Math.max(1, achievement.portraits.length);
-      const poleBase = anchor
-        .clone()
-        .addScaledVector(right, poleOffsetFor(frameCount));
-
-      // One pole per distinct competition, positioned around poleBase. A lone
-      // pole sits dead centre; a pair straddles the centre.
-      //
-      // Multi-competition stops are laid out in SCREEN space (`screenRight`),
-      // NOT along the parity-flipped `right`. That guarantees the competitions
-      // read left-to-right in the SAME order they're listed in the label (the
-      // first-listed competition on the left), on every stop regardless of
-      // which way the path happens to be curving. Laying them along `right`
-      // instead flipped the pair left↔right on odd-numbered stops.
-      //
-      // Drape direction then follows each pole's actual screen position: a pole
-      // left-of-centre drapes its flag left, right-of-centre drapes right, so
-      // the pair opens outward. A single pole always drapes right.
+      /**
+       * A stop that straddles the path puts one competition's pole and photo on
+       * each side of the line, instead of crowding both onto one side.
+       *
+       * Only taken when the data asks for it AND the year really did have two
+       * distinct competitions — a split needs two sides to fill, and a stop
+       * that lost one of its competitions to a data edit has to degrade to the
+       * ordinary clustered layout rather than render half a composition.
+       */
       const poleSpecs = polesFor(achievement);
+      const splitOrder = achievement.splitCompetitions;
+      const isSplit =
+        splitOrder !== undefined &&
+        poleSpecs.length === 2 &&
+        splitOrder.every((competition) =>
+          poleSpecs.some((spec) => spec.competition === competition),
+        );
+
+      // Frames come from the photos provided (min 1), capped by what the screen
+      // can actually hold — a narrow phone shows one. Nothing is lost by that
+      // cap: every award is named in the label above the pole and again in the
+      // written timeline below the journey; only the extra pictures go.
+      //
+      // A split stop is exempt: each of its sides carries exactly one frame and
+      // reaches no further off the path than a single-photo stop does, so both
+      // photos fit on a phone that could not have held them side by side.
+      const frameCount = isSplit
+        ? 1
+        : Math.min(fit.maxFrames, Math.max(1, achievement.portraits.length));
+
+      // The pole offset adapts to whatever count survives, so a big year's
+      // outermost frame never crosses the path, and `stopScale` then pulls the
+      // whole arrangement in toward the path for narrow screens.
+      const poleOffset = poleOffsetFor(frameCount, fit.stopScale);
+      const frameSpacing = FRAME.spacing * fit.stopScale;
+
+      // Which photos survive the cap, and in what order. A year can nominate
+      // the one it wants kept when only one fits — see visiblePortraits.
+      const shownPortraits = visiblePortraits(achievement, frameCount);
+
       const multiPole = poleSpecs.length > 1;
-      const poles: PolePlacement[] = poleSpecs.map((spec, i) => {
-        // Offsets: 1 pole → [0]; 2 → [−gap/2, +gap/2]; N → centred spread.
-        const centred = i - (poleSpecs.length - 1) / 2;
-        const base = poleBase
-          .clone()
-          .addScaledVector(multiPole ? screenRight : right, centred * POLE_PAIR_GAP);
-        const screenOffset = base.clone().sub(poleBase).dot(screenRight);
-        const side: PolePlacement["side"] = !multiPole
-          ? "right"
-          : screenOffset < 0
-            ? "left"
-            : "right";
-        return { base, logo: spec.logo, side };
-      });
+      let poleBase: Vector3;
+      let poles: PolePlacement[];
+      let frames: FramePlacement[];
+
+      if (isSplit) {
+        /* ── Straddling the path ──────────────────────────────────────────
+           Each competition owns a side. `splitCompetitions` names them in
+           SCREEN order, so index 0 goes left of the line and index 1 right —
+           along `screenRight`, never the parity-flipped `right`, or the pair
+           would swap sides on every other stop and the year's own left/right
+           instruction would mean nothing.
+
+           Within a side the arrangement is the ordinary one read outward from
+           the path: photo first, pole beyond it, flag draping further out
+           still. Mirrored across the line that gives
+
+               pole  photo │ path │ photo  pole
+
+           which is the same shape twice, not two different layouts. */
+        const ordered = splitOrder!.map(
+          (competition) =>
+            poleSpecs.find((spec) => spec.competition === competition)!,
+        );
+
+        poles = ordered.map((spec, i) => {
+          const outward = i === 0 ? -1 : 1;
+          return {
+            base: anchor
+              .clone()
+              .addScaledVector(screenRight, outward * poleOffset),
+            logo: spec.logo,
+            // Each flag streams away from the path, so neither drapes back
+            // across its own photo.
+            side: outward < 0 ? "left" : "right",
+          } satisfies PolePlacement;
+        });
+
+        // The photo sits between the path and its own pole — one spacing step
+        // back INWARD from the pole, which is exactly where `frameSlots(1)`
+        // puts the lone frame on an ordinary stop.
+        frames = ordered.map((spec, i) => {
+          const outward = i === 0 ? -1 : 1;
+          const position = anchor
+            .clone()
+            .addScaledVector(screenRight, outward * (poleOffset - frameSpacing));
+          const portraitIndex = poleSpecs.indexOf(spec);
+          return {
+            position,
+            portrait: achievement.portraits[portraitIndex] ?? "",
+          };
+        });
+
+        // The label goes over the PATH, not over either pole. The stop straddles
+        // the line, so the line is its centre — hanging the text above one side
+        // would claim the year for that competition and leave the other looking
+        // like an afterthought. It also means `labelPull` has nothing to pull
+        // on here, which is correct: this label is already centred.
+        poleBase = anchor.clone();
+      } else {
+        poleBase = anchor.clone().addScaledVector(right, poleOffset);
+
+        // One pole per distinct competition, positioned around poleBase. A lone
+        // pole sits dead centre; a pair straddles the centre.
+        //
+        // Multi-competition stops are laid out in SCREEN space (`screenRight`),
+        // NOT along the parity-flipped `right`. That guarantees the competitions
+        // read left-to-right in the SAME order they're listed in the label (the
+        // first-listed competition on the left), on every stop regardless of
+        // which way the path happens to be curving. Laying them along `right`
+        // instead flipped the pair left↔right on odd-numbered stops.
+        //
+        // Drape direction then follows each pole's actual screen position: a
+        // pole left-of-centre drapes its flag left, right-of-centre drapes
+        // right, so the pair opens outward. A single pole always drapes right.
+        poles = poleSpecs.map((spec, i) => {
+          // Offsets: 1 pole → [0]; 2 → [−gap/2, +gap/2]; N → centred spread.
+          const centred = i - (poleSpecs.length - 1) / 2;
+          const base = poleBase
+            .clone()
+            .addScaledVector(
+              multiPole ? screenRight : right,
+              centred * POLE_PAIR_GAP * fit.stopScale,
+            );
+          const screenOffset = base.clone().sub(poleBase).dot(screenRight);
+          const side: PolePlacement["side"] = !multiPole
+            ? "right"
+            : screenOffset < 0
+              ? "left"
+              : "right";
+          return { base, logo: spec.logo, side };
+        });
+
+        // A multi-competition stop with one frame per competition lays its
+        // frames out in SCREEN space, matching how its poles are placed, so
+        // portrait[0] sits under competition[0]'s flag on the LEFT and they
+        // read left-to-right in label order. Single-competition stops keep
+        // using `right` so their lone photo still alternates sides down the
+        // path.
+        const frameAxis =
+          poleSpecs.length > 1 && frameCount > 1 ? screenRight : right;
+
+        frames = frameSlots(frameCount).map((slot, i) => ({
+          position: poleBase
+            .clone()
+            .addScaledVector(frameAxis, slot * frameSpacing),
+          portrait: shownPortraits[i] ?? "",
+        }));
+      }
+
+      // Where this year's aircraft park, resolved once here so the <img> in
+      // StopOverlays and the contact shadow in StopProps read the SAME point
+      // and an aircraft can never drift off its own shadow.
+      //
+      // `alongPoles` is a fraction from the first pole to the last, so an
+      // aircraft stays pinned to its competition's pole if the poles are ever
+      // moved apart. lerp covers the single-pole case for free: both ends are
+      // the same point. `forwardOffset` then pulls it back along −tangent,
+      // toward the oncoming camera.
+      const vehicles: VehiclePlacement[] = (achievement.vehicles ?? []).map(
+        (vehicle) => ({
+          position: poles[0].base
+            .clone()
+            .lerp(poles[poles.length - 1].base, vehicle.alongPoles)
+            // screenRight, not `right`: it never flips with path parity, so a
+            // positive lateralOffset is the viewer's right on every stop. It is
+            // also the ONLY sideways control that does anything on a one-pole
+            // stop, where the lerp above collapses to a single point.
+            .addScaledVector(screenRight, vehicle.lateralOffset * fit.stopScale)
+            .addScaledVector(
+              tangent,
+              -vehicle.forwardOffset * fit.stopScale,
+            ),
+          shadowRadius: vehicle.shadowRadius,
+          shadowOpacityDark: vehicle.shadowOpacityDark,
+          shadowOpacityLight: vehicle.shadowOpacityLight,
+          shadowMask: vehicle.shadowMask,
+          facing,
+          groundOffset: vehicle.groundOffset,
+        }),
+      );
 
       return {
         anchor,
         right,
         screenRight,
+        tangent,
         facing,
-        awardCount: achievement.awards.length,
-        frameCount,
+        vehicles,
+        frames,
         poleBase,
         poles,
         u,
       };
     });
-  }, [journey, achievements]);
+    // `fit` is a dependency because a change of screen shape genuinely moves
+    // every stop: the pole offset, the pole pair's gap and the aircraft's own
+    // offsets are all scaled by it. It only ever changes on a real change of
+    // shape — the aspect feeding it is quantised for exactly that reason (see
+    // useCanvasAspect) — so this rebuilds on rotation, not on scroll.
+  }, [journey, achievements, fit]);
 
   // Shared mutable state. Created once; mutated in place every frame.
   const lightGroupRef = useRef<Group>(null);
@@ -324,9 +633,10 @@ export default function JourneyScene({
       // The core performance decision: draw ONLY when asked. An idle reader
       // costs zero GPU and zero battery.
       frameloop="demand"
-      // Cap device pixel ratio by tier. The single strongest perf lever there
-      // is — dpr 3 → 1.5 on a phone is a 75% cut in pixels shaded.
-      dpr={[1, quality.maxDpr]}
+      // Cap device pixel ratio by tier, and again on a touch screen. The
+      // single strongest perf lever there is, and the only one that costs the
+      // visitor nothing they can read — see COARSE_POINTER_MAX_DPR.
+      dpr={[1, maxDpr]}
       gl={{
         antialias: quality.antialias,
         powerPreference: "high-performance",
@@ -336,7 +646,10 @@ export default function JourneyScene({
         stencil: false,
         depth: true,
       }}
-      camera={{ fov: isMobile ? 55 : 42, near: 0.5, far: 400 }}
+      // Solved for this screen's shape, not picked from a width breakpoint.
+      // ChaseCamera keeps it in step as the screen changes; this is only the
+      // value the camera is born with.
+      camera={{ fov: fit.fov, near: 0.5, far: 400 }}
       scene={{ background, fog }}
       style={{ touchAction: "pan-y" }}
     >
@@ -345,7 +658,9 @@ export default function JourneyScene({
       <ambientLight intensity={1.15} color="#8ea0d8" />
       <directionalLight position={[12, 24, 8]} intensity={1.5} color="#cfe0ff" />
 
+      <ContextLossGuard />
       <SceneBackground palette={palette} />
+      <ThemeRepaint palette={palette} />
 
       <SceneController
         curve={journey.curve}
@@ -367,7 +682,7 @@ export default function JourneyScene({
         pathLength={journey.length}
         uRef={uRef}
         speedRef={speedRef}
-        isMobile={isMobile}
+        fov={fit.fov}
         reducedMotion={reducedMotion}
       />
 
@@ -389,7 +704,12 @@ export default function JourneyScene({
         palette={palette}
       />
 
-      <TravellingLight quality={quality} groupRef={lightGroupRef} />
+      <TravellingLight
+        quality={quality}
+        groupRef={lightGroupRef}
+        palette={palette}
+        isDark={isDark}
+      />
 
       <StopProps
         stops={stops}
@@ -397,6 +717,17 @@ export default function JourneyScene({
         uRef={uRef}
         pathLength={journey.length}
         palette={palette}
+        shadowOpacity={SHADOW.poleOpacity}
+        showPoleShadows={poleShadows}
+        stopScale={fit.stopScale}
+      />
+
+      <VehicleShadows
+        stops={stops}
+        quality={quality}
+        uRef={uRef}
+        pathLength={journey.length}
+        isDark={isDark}
       />
 
       <StopOverlays
@@ -404,6 +735,8 @@ export default function JourneyScene({
         achievements={achievements}
         uRef={uRef}
         pathLength={journey.length}
+        isDark={isDark}
+        fit={fit}
       />
     </Canvas>
   );

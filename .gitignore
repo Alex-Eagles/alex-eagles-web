@@ -27,4 +27,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
-.claude
+
+# Local git worktrees created by Claude Code. These are full nested checkouts
+# with their own node_modules - never part of the repo.
+.claude/worktrees/

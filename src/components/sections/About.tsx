@@ -27,7 +27,7 @@ export default function About() {
           }
         />
 
-        <p className="font-sans text-[17px] leading-[1.75] text-fg-muted max-w-[62ch] mt-6 mb-5">
+        <p className="font-sans text-[17px] leading-[1.75] text-fg-secondary max-w-[62ch] mt-6 mb-5">
           Alex Eagles is a multidisciplinary undergraduate team designing,
           building, and flying autonomous aircraft for the Student Unmanned
           Aerial Systems competition. From carbon-fiber airframes to onboard
@@ -76,7 +76,7 @@ export default function About() {
                    loading="lazy" decoding="async"
                    className="absolute inset-0 w-full h-full object-cover" />
               Recommended export: 1200×900 (4:3), WebP. */}
-          <div className="relative text-center text-fg-subtle">
+          <div className="relative text-center text-fg-muted">
             <ImageIcon size={48} strokeWidth={1.5} className="mx-auto mb-2.5" />
             <div className="font-sans text-[13px] tracking-[0.08em] uppercase">
               Team photo

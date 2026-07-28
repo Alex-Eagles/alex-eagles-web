@@ -34,8 +34,8 @@ export default function ComingSoon({ title, blurb }: ComingSoonProps) {
 
       <div className="relative z-10 text-center max-w-[560px]">
         <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[var(--brand-glow)] border border-border mb-6">
-          <Construction size={16} className="text-brand-light" />
-          <span className="font-mono text-[13px] text-fg-muted uppercase tracking-[0.08em]">
+          <Construction size={16} className="text-gold" />
+          <span className="font-mono text-[13px] text-fg-secondary uppercase tracking-[0.08em]">
             Under construction
           </span>
         </div>
@@ -44,7 +44,7 @@ export default function ComingSoon({ title, blurb }: ComingSoonProps) {
           {title}
         </h1>
 
-        <p className="font-sans text-body-lg text-fg-muted leading-[1.7] mx-auto mb-9 prose-measure">
+        <p className="font-sans text-body-lg text-fg-secondary leading-[1.7] mx-auto mb-9 prose-measure">
           {blurb}
         </p>
 

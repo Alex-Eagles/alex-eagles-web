@@ -35,7 +35,7 @@
  * performance budget goes here.
  */
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { CatmullRomCurve3, MathUtils, Vector3 } from "three";
 import { CAMERA, LIGHT } from "./sceneConfig";
@@ -61,8 +61,15 @@ interface ChaseCameraProps {
   uRef: React.MutableRefObject<number>;
   /** Light's current speed in world units per second. */
   speedRef: React.MutableRefObject<number>;
-  /** Narrower FOV on desktop, wider on phones so stops still fit the screen. */
-  isMobile: boolean;
+  /**
+   * Vertical field of view, in degrees, solved for this screen by `fitScene`.
+   *
+   * This used to be an `isMobile` boolean the camera turned into one of two
+   * hardcoded angles. It is a number now because the fit that produced it also
+   * decided how far off the path to place every stop — the two have to be the
+   * same solution or the camera frames a layout it was not solved against.
+   */
+  fov: number;
   /** When true: no banking, near-instant follow. Honours reduced-motion. */
   reducedMotion: boolean;
 }
@@ -72,7 +79,7 @@ export default function ChaseCamera({
   pathLength,
   uRef,
   speedRef,
-  isMobile,
+  fov,
   reducedMotion,
 }: ChaseCameraProps) {
   const camera = useThree((state) => state.camera);
@@ -103,16 +110,16 @@ export default function ChaseCamera({
     [],
   );
 
-  const fovRef = useRef(isMobile ? CAMERA.fovMobile : CAMERA.fov);
-
+  // Pushed onto the camera whenever the solved fit changes — a rotation, a
+  // window drag, entering split screen. `updateProjectionMatrix` is required:
+  // three.js caches the projection and will not notice `fov` moving on its own.
   useEffect(() => {
-    fovRef.current = isMobile ? CAMERA.fovMobile : CAMERA.fov;
     if ("fov" in camera) {
-      camera.fov = fovRef.current;
+      camera.fov = fov;
       camera.updateProjectionMatrix();
     }
     invalidate();
-  }, [isMobile, camera, invalidate]);
+  }, [fov, camera, invalidate]);
 
   // Runs at priority -1: after the scene controller has moved the light
   // (priority -2), before everything else. Keeping every priority ≤ 0 is

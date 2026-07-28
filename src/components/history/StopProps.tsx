@@ -1,32 +1,28 @@
 /**
- * StopProps — the flag poles, crowds and ground shadows at every stop.
+ * StopProps — the flag poles and their ground shadows at every stop.
  *
  * ─── ONE DRAW CALL PER PROP TYPE, NOT PER STOP ──────────────────────────────
- * Ten stops with a growing crowd at each is roughly 70 figures, 10 poles and
- * 80 shadows. Rendered naively that's ~160 separate draw calls — and draw call
- * count, not triangle count, is what actually strangles mobile GPUs.
+ * Ten stops carry a dozen poles and a shadow under each. Rendered naively
+ * that's two dozen separate draw calls — and draw call count, not triangle
+ * count, is what actually strangles mobile GPUs.
  *
  * Instead each prop type is a single InstancedMesh: one geometry, one
  * material, uploaded once, drawn once, positioned by a per-instance matrix on
- * the GPU. Total: 3 draw calls, whether there are 10 stops or 100. Adding
+ * the GPU. Total: 2 draw calls, whether there are 10 stops or 100. Adding
  * years to the history file costs essentially nothing.
  *
  * ─── THE FADE ───────────────────────────────────────────────────────────────
  * Per-instance COLOUR is the one thing that changes per frame. There are only
- * ~160 of them, so writing them on the CPU is genuinely cheap (unlike the
- * ground's 6,000 dots, which is why that one had to be a shader). Each stop's
- * brightness is a pure function of how far the light is from it, so scrolling
- * back up fades everything back in with no state to unwind.
- *
- * ─── DETERMINISTIC "RANDOMNESS" ─────────────────────────────────────────────
- * The crowd is scattered with a seeded hash rather than Math.random(). A crowd
- * that rearranged itself on every reload — or worse, differed between a
- * quality downgrade and the frame before it — would read as a glitch.
+ * a couple of dozen of them, so writing them on the CPU is genuinely cheap
+ * (unlike the ground's 6,000 dots, which is why that one had to be a shader).
+ * Each stop's brightness is a pure function of how far the light is from it,
+ * so scrolling back up fades everything back in with no state to unwind.
  */
 
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
+  CanvasTexture,
   Color,
   DoubleSide,
   type InstancedMesh,
@@ -34,15 +30,46 @@ import {
   type Vector3,
 } from "three";
 import { STOP, type QualitySettings, type ScenePalette } from "./sceneConfig";
-import { crowdSizeFor, stopIntensity } from "./journeyCurve";
+import { stopIntensity } from "./journeyCurve";
 
 /**
- * Cheap deterministic hash → 0..1. Same inputs always give the same layout,
- * so the crowd is stable across reloads, resizes and quality changes.
+ * One aircraft parked at a stop, resolved to world space.
+ *
+ * Computed once in JourneyScene alongside the poles, because TWO files need
+ * it and they must not disagree: StopOverlays anchors the <img> here, and this
+ * file pools the contact shadow at the same spot. Deriving it independently in
+ * both would let an aircraft drift off its own shadow.
  */
-function hash(seed: number): number {
-  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
+export interface VehiclePlacement {
+  /** Ground position the aircraft stands on. */
+  position: Vector3;
+  /** Half-width of its contact shadow, world units. */
+  shadowRadius: number;
+  /**
+   * Optional per-aircraft shadow strength. Left UNRESOLVED here — VehicleShadows
+   * picks by theme — so that flipping the theme doesn't invalidate the whole
+   * stop layout and rebuild every Vector3 in the journey.
+   */
+  shadowOpacityDark?: number;
+  shadowOpacityLight?: number;
+  /** Greyscale silhouette used as this aircraft's ground shadow. */
+  shadowMask: string;
+  /** Which way the aircraft — and so its shadow — points. */
+  facing: number;
+  /**
+   * Height of the aircraft's bottom edge above the floor. Read by StopOverlays
+   * for the <img> anchor; the shadow here deliberately ignores it and stays
+   * flat on the ground, so lifting one separates it from its shadow.
+   */
+  groundOffset: number;
+}
+
+/** One photo frame standing at a stop. */
+export interface FramePlacement {
+  /** World position of the frame's centre. */
+  position: Vector3;
+  /** The photo to draw in it. */
+  portrait: string;
 }
 
 /** One flag pole standing at a stop. */
@@ -68,6 +95,12 @@ export interface StopPlacement {
    */
   screenRight: Vector3;
   /**
+   * Unit vector pointing the way the path is HEADING at this stop. Negating it
+   * points back at the oncoming camera, which is how the parked aircraft are
+   * placed in FRONT of the poles rather than level with them.
+   */
+  tangent: Vector3;
+  /**
    * Y rotation (radians) that turns a flat frame to face back down the path,
    * squarely at the approaching camera.
    *
@@ -77,14 +110,29 @@ export interface StopPlacement {
    * rather than dropped in at a random angle.
    */
   facing: number;
-  /** How many awards this year won. Drives crowd size. */
-  awardCount: number;
-  /** How many image frames to show (one per provided photo, min 1). */
-  frameCount: number;
-  /** Centre the frames, crowd and label cluster around. */
+  /**
+   * Every photo frame at this stop, already placed.
+   *
+   * Resolved in JourneyScene rather than in StopOverlays, which is where it
+   * used to happen. Two layouts exist now — the frames clustered around a
+   * single pole, and one frame per side for a stop that straddles the path
+   * (`splitCompetitions`) — and a stop's photos, poles and aircraft all have to
+   * agree about which one is in force. Deciding it in the file that already
+   * places the poles and the aircraft is what makes that agreement structural
+   * instead of two files independently reaching the same conclusion.
+   */
+  frames: FramePlacement[];
+  /**
+   * Where the label, and the cluster generally, is centred. On a split stop
+   * this is the FIRST pole's side — the label is pulled back toward the path by
+   * `labelPull` anyway (see fitScene), so on a narrow screen it lands near the
+   * middle either way.
+   */
   poleBase: Vector3;
   /** One pole per distinct competition. 1 or 2 in the current data. */
   poles: PolePlacement[];
+  /** The aircraft parked at this stop, if any. */
+  vehicles: VehiclePlacement[];
   /** Arc-length position of this stop, for the fade calculation. */
   u: number;
 }
@@ -98,6 +146,24 @@ interface StopPropsProps {
   pathLength: number;
   /** Active-theme palette. Both prop tints follow the theme. */
   palette: ScenePalette;
+  /** Ground-shadow strength for the active theme (see SHADOW in sceneConfig). */
+  shadowOpacity: number;
+  /**
+   * Whether the POLES cast shadows. False in light mode: a pole's shadow is a
+   * small dark ellipse with nothing above it wide enough to explain it, which
+   * on the pale floor reads as a smudge. See SHADOW.poleShadowsInLight.
+   */
+  showPoleShadows: boolean;
+  /**
+   * How much the screen shrank this stop by (see fitScene). The poles are the
+   * only part of a stop drawn as real geometry rather than as a DOM overlay, so
+   * they have to be scaled here by hand — everything else gets it for free from
+   * its `<Html>` scale.
+   *
+   * Height AND radius, both: scaling only the height leaves a stubby phone
+   * screen with poles as thick as a full-size one, which reads as scaffolding.
+   */
+  stopScale: number;
 }
 
 export default function StopProps({
@@ -106,9 +172,13 @@ export default function StopProps({
   uRef,
   pathLength,
   palette,
+  shadowOpacity,
+  showPoleShadows,
+  stopScale,
 }: StopPropsProps) {
+  const poleHeight = STOP.poleHeight * stopScale;
+  const poleRadius = STOP.poleRadius * stopScale;
   const invalidate = useThree((state) => state.invalidate);
-  const peopleRef = useRef<InstancedMesh>(null);
   const polesRef = useRef<InstancedMesh>(null);
   const shadowsRef = useRef<InstancedMesh>(null);
 
@@ -119,7 +189,6 @@ export default function StopProps({
    */
   const layout = useMemo(() => {
     const dummy = new Object3D();
-    const people: { matrix: number[]; stopIndex: number }[] = [];
     const poles: { matrix: number[]; stopIndex: number }[] = [];
     const shadows: { matrix: number[]; stopIndex: number }[] = [];
 
@@ -127,10 +196,8 @@ export default function StopProps({
       // Pole positions are precomputed per competition in JourneyScene and
       // handed in via stop.poles — one pole per distinct competition. Render a
       // cylinder and a shadow at each.
-      const poleBase = stop.poleBase;
-
       stop.poles.forEach((pole) => {
-        dummy.position.set(pole.base.x, STOP.poleHeight / 2, pole.base.z);
+        dummy.position.set(pole.base.x, poleHeight / 2, pole.base.z);
         dummy.rotation.set(0, 0, 0);
         dummy.scale.set(1, 1, 1);
         dummy.updateMatrix();
@@ -139,43 +206,19 @@ export default function StopProps({
         // Blob shadow beneath the pole.
         dummy.position.set(pole.base.x, 0.02, pole.base.z);
         dummy.rotation.set(-Math.PI / 2, 0, 0);
-        dummy.scale.setScalar(0.6);
+        dummy.scale.setScalar(0.6 * stopScale);
         dummy.updateMatrix();
         shadows.push({ matrix: dummy.matrix.toArray(), stopIndex });
       });
 
-      // The crowd — more people for a bigger year (see crowdSizeFor).
-      const crowd = crowdSizeFor(stop.awardCount);
-      for (let i = 0; i < crowd; i++) {
-        const seed = stopIndex * 100 + i;
-
-        // Scatter around the pole in a ring with jittered angle and radius, so
-        // it reads as a gathered group rather than a geometric formation.
-        const angle = (i / crowd) * Math.PI * 2 + (hash(seed) - 0.5) * 0.9;
-        const radius = STOP.crowdRadius * (0.45 + hash(seed + 0.5) * 0.75);
-
-        const px = poleBase.x + Math.cos(angle) * radius;
-        const pz = poleBase.z + Math.sin(angle) * radius;
-
-        // Slight height variation so the crowd doesn't look cloned.
-        const heightScale = 0.88 + hash(seed + 1.5) * 0.24;
-
-        dummy.position.set(px, (STOP.personHeight * heightScale) / 2, pz);
-        dummy.rotation.set(0, hash(seed + 2.5) * Math.PI * 2, 0);
-        dummy.scale.set(1, heightScale, 1);
-        dummy.updateMatrix();
-        people.push({ matrix: dummy.matrix.toArray(), stopIndex });
-
-        dummy.position.set(px, 0.02, pz);
-        dummy.rotation.set(-Math.PI / 2, 0, 0);
-        dummy.scale.setScalar(0.32);
-        dummy.updateMatrix();
-        shadows.push({ matrix: dummy.matrix.toArray(), stopIndex });
-      }
+      // NB: aircraft shadows are NOT here. A stretched ellipse is fine under a
+      // pole, which really is a circular post, but under a fixed-wing it reads
+      // as a blob that has nothing to do with the aircraft above it. They get
+      // their own silhouette-shaped shadows — see VehicleShadows.
     });
 
-    return { people, poles, shadows };
-  }, [stops]);
+    return { poles, shadows };
+  }, [stops, poleHeight, stopScale]);
 
   /**
    * Push the baked matrices into the instanced meshes.
@@ -198,10 +241,46 @@ export default function StopProps({
       mesh.instanceMatrix.needsUpdate = true;
     };
 
-    place(peopleRef.current, layout.people);
     place(polesRef.current, layout.poles);
     place(shadowsRef.current, layout.shadows);
   }, [layout, quality.blobShadows]);
+
+  /**
+   * Soft-edged alpha mask for the contact shadows.
+   *
+   * Drawn into a 64px canvas rather than shipped as a file: it's a radial
+   * gradient, so generating it costs a fraction of a millisecond once and saves
+   * a network request, a decode and an asset to keep in sync. 64px is plenty —
+   * it's nothing but a smooth falloff, and the GPU is stretching it across a
+   * blurry ellipse anyway.
+   *
+   * Without it these are flat discs with a hard polygonal rim, which read as
+   * dark stickers on the floor. The falloff is what makes them read as shadow.
+   */
+  const shadowAlpha = useMemo(() => {
+    const size = 64;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      const half = size / 2;
+      const gradient = ctx.createRadialGradient(half, half, 0, half, half, half);
+      // Held near-opaque through the middle so the shadow has a solid core and
+      // only softens at the rim — a gradient straight from 1 to 0 looks like
+      // fog rather than contact.
+      gradient.addColorStop(0, "rgba(255,255,255,1)");
+      gradient.addColorStop(0.5, "rgba(255,255,255,0.92)");
+      gradient.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+    }
+    return new CanvasTexture(canvas);
+  }, []);
+
+  // Textures hold a GPU allocation that outlives the React tree, so it has to
+  // be released explicitly — garbage collection won't reclaim it.
+  useEffect(() => () => shadowAlpha.dispose(), [shadowAlpha]);
 
   // Scratch colours, reused every frame — allocating a Color per instance per
   // frame would produce a steady stream of garbage for the GC to collect,
@@ -217,18 +296,17 @@ export default function StopProps({
   }, [palette, invalidate]);
 
   useFrame(() => {
-    const people = peopleRef.current;
     const poles = polesRef.current;
     // NB: shadows are absent on the low quality tier, so this must stay
     // optional — an early return on a null shadows mesh would silently kill
-    // the fade for people and poles as well.
+    // the fade for the poles as well.
     const shadows = shadowsRef.current;
-    if (!people || !poles) return;
+    if (!poles) return;
 
     const u = uRef.current;
 
-    // One intensity per stop, computed once and reused across all three
-    // instanced meshes rather than recomputed per instance.
+    // One intensity per stop, computed once and reused across both instanced
+    // meshes rather than recomputed per instance.
     const intensities = stops.map((stop) =>
       stopIntensity((u - stop.u) * pathLength),
     );
@@ -246,31 +324,12 @@ export default function StopProps({
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     };
 
-    paint(people, layout.people, 0);
     paint(poles, layout.poles, 0);
     if (shadows) paint(shadows, layout.shadows, 0);
   });
 
   return (
     <group>
-      {/* People — capsules. Abstract on purpose, matching the reference's
-          tiny featureless figures, and far cheaper than real character meshes. */}
-      <instancedMesh
-        ref={peopleRef}
-        args={[undefined, undefined, layout.people.length]}
-        frustumCulled={false}
-      >
-        <capsuleGeometry
-          args={[
-            STOP.personRadius,
-            STOP.personHeight - STOP.personRadius * 2,
-            quality.sphereDetail + 1,
-            5 + quality.sphereDetail * 2,
-          ]}
-        />
-        <meshLambertMaterial toneMapped={false} />
-      </instancedMesh>
-
       {/* Flag poles — thin cylinders. The flag itself is a DOM image, so its
           colours stay crisp and cost no texture upload. */}
       <instancedMesh
@@ -279,7 +338,7 @@ export default function StopProps({
         frustumCulled={false}
       >
         <cylinderGeometry
-          args={[STOP.poleRadius, STOP.poleRadius, STOP.poleHeight, 6]}
+          args={[poleRadius, poleRadius, poleHeight, 6]}
         />
         <meshLambertMaterial toneMapped={false} />
       </instancedMesh>
@@ -287,17 +346,20 @@ export default function StopProps({
       {/* Fake contact shadows. A real shadow map would re-render the scene from
           the light's viewpoint every frame; at this camera angle a soft dark
           ellipse is indistinguishable and effectively free. */}
-      {quality.blobShadows && (
+      {quality.blobShadows && showPoleShadows && (
         <instancedMesh
           ref={shadowsRef}
           args={[undefined, undefined, layout.shadows.length]}
           frustumCulled={false}
         >
-          <circleGeometry args={[1, 12]} />
+          {/* 24 segments, not 12: an aircraft's shadow is several world units
+              across, and at that size a 12-gon's straight edges are visible. */}
+          <circleGeometry args={[1, 24]} />
           <meshBasicMaterial
             color="#000000"
             transparent
-            opacity={0.35}
+            alphaMap={shadowAlpha}
+            opacity={shadowOpacity}
             depthWrite={false}
             side={DoubleSide}
             toneMapped={false}

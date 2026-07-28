@@ -40,9 +40,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
+// `Html` is the only thing this project uses from drei, and the barrel import
+// is fine: measured against a deep `drei/web/Html` import, the built chunk is
+// byte-identical, so Rollup is already shaking the rest of the library out.
+// The chunk's weight is three.js itself, not drei — don't "optimise" this line.
 import { Html } from "@react-three/drei";
-import { FRAME, LABEL, STOP } from "./sceneConfig";
-import { frameSlots, stopIntensity } from "./journeyCurve";
+import {
+  FRAME,
+  LABEL,
+  OVERLAY_SCALE,
+  STOP,
+  overlayStyle,
+  type SceneFit,
+} from "./sceneConfig";
+import { stopIntensity } from "./journeyCurve";
 import type { StopPlacement } from "./StopProps";
 import type { Achievement } from "@/data/achievements";
 
@@ -69,7 +80,11 @@ function Portrait({ src, year }: { src: string; year: string }) {
             "linear-gradient(150deg, var(--bg-elevated), var(--bg-surface))",
         }}
       >
-        <span className="font-mono text-[11px] tracking-[0.14em] text-[var(--text-muted)]">
+        {/* --text-secondary, not --text-muted: muted lands at ~1.9:1 on the
+            elevated surface behind it, and the year is the ONLY thing in this
+            placeholder — it can't be the one piece of text on the stop nobody
+            can read. */}
+        <span className="font-mono text-[11px] tracking-[0.14em] text-[var(--text-secondary)]">
           {year}
         </span>
       </div>
@@ -93,6 +108,10 @@ interface StopOverlaysProps {
   achievements: Achievement[];
   uRef: React.MutableRefObject<number>;
   pathLength: number;
+  /** Active theme — selects which grade of each aircraft render to show. */
+  isDark: boolean;
+  /** The screen's solved framing — see fitScene. */
+  fit: SceneFit;
 }
 
 export default function StopOverlays({
@@ -100,6 +119,8 @@ export default function StopOverlays({
   achievements,
   uRef,
   pathLength,
+  isDark,
+  fit,
 }: StopOverlaysProps) {
   // Which stops are currently mounted. Changes a handful of times per journey.
   const [visible, setVisible] = useState<number[]>([0, 1]);
@@ -158,6 +179,8 @@ export default function StopOverlays({
             index={index}
             stop={stop}
             achievement={achievement}
+            isDark={isDark}
+            fit={fit}
             registerNodes={(nodes) => {
               if (nodes) nodesRef.current.set(index, nodes);
               else nodesRef.current.delete(index);
@@ -174,6 +197,8 @@ interface StopOverlayProps {
   stop: StopPlacement;
   achievement: Achievement;
   registerNodes: (nodes: HTMLElement[] | null) => void;
+  isDark: boolean;
+  fit: SceneFit;
 }
 
 function StopOverlay({
@@ -181,7 +206,20 @@ function StopOverlay({
   stop,
   achievement,
   registerNodes,
+  isDark,
+  fit,
 }: StopOverlayProps) {
+  /**
+   * The scale every element on this stop is drawn at.
+   *
+   * One number for all of them, and the SAME number the stop's positions were
+   * scaled by in JourneyScene. That is the whole trick: shrink the spacing
+   * without shrinking the photos and they overlap; shrink the photos without
+   * the spacing and the stop develops gaps. Scaling both by one factor makes a
+   * narrow-screen stop the identical object, seen smaller.
+   */
+  const overlayScale = OVERLAY_SCALE * fit.stopScale;
+  const poleHeight = STOP.poleHeight * fit.stopScale;
   // Collected fresh each render — the number of frames varies per stop, so a
   // fixed set of refs won't do.
   const collected = useRef<HTMLElement[]>([]);
@@ -203,24 +241,24 @@ function StopOverlay({
     // about where the stop is.
     const poleBase = stop.poleBase;
 
-    // A multi-competition stop with one frame per competition lays its frames
-    // out in SCREEN space (screenRight), matching how its poles are placed, so
-    // portrait[0] sits under competition[0]'s flag on the LEFT and they read
-    // left-to-right in label order. Single-competition stops keep using `right`
-    // so their lone photo still alternates sides down the path.
-    const frameAxis =
-      stop.poles.length > 1 && stop.frameCount > 1 ? stop.screenRight : stop.right;
-    const frames = frameSlots(stop.frameCount).map((slot) => {
-      const position = poleBase
-        .clone()
-        .addScaledVector(frameAxis, slot * FRAME.spacing);
-      return [position.x, FRAME.height, position.z] as [number, number, number];
-    });
+    // Frames arrive already placed. Their lateral positions were resolved in
+    // JourneyScene, where the choice between the clustered and the
+    // straddle-the-path layouts is made — see StopPlacement.frames for why that
+    // decision cannot live in two files. All that is left here is the height,
+    // which is the same for every frame on every stop.
+    const frames = stop.frames.map(
+      (frame) =>
+        [
+          frame.position.x,
+          FRAME.height * fit.stopScale,
+          frame.position.z,
+        ] as [number, number, number],
+    );
 
     // Per-pole flag anchor: right at the pole's TOP. The flag div is
     // top-anchored, so the cloth hangs down from the pole top like a real flag.
     const flags = stop.poles.map((pole) => ({
-      position: [pole.base.x, STOP.poleHeight, pole.base.z] as [
+      position: [pole.base.x, poleHeight, pole.base.z] as [
         number,
         number,
         number,
@@ -229,20 +267,64 @@ function StopOverlay({
       side: pole.side,
     }));
 
+    /**
+     * The label's anchor, pulled back toward the path on narrow screens.
+     *
+     * Everything else on a stop shrinks with `stopScale`; the label does not,
+     * because it is drawn in screen space (`distanceFactor`, not `transform`)
+     * and it is the TEXT — shrinking it to fit would be fitting nothing worth
+     * reading. So it keeps its size and gives up its position instead.
+     *
+     * Left over the pole on a phone, a full-size label centred on something
+     * three-quarters of the way to the edge of frame simply hangs off it.
+     * `labelPull` slides the anchor along the same lateral axis the pole sits
+     * on, from the pole (1, every wide screen) toward the path itself, which
+     * re-centres the words without touching a single font size.
+     */
+    const labelAnchor = stop.anchor
+      .clone()
+      .lerp(poleBase, fit.labelPull);
+
     return {
       // Floats LABEL.heightAbovePole above the pole tops, bottom-anchored so it
       // grows upward and never dips onto the flags. Tune the gap in sceneConfig.
       label: [
-        poleBase.x,
-        STOP.poleHeight + LABEL.heightAbovePole,
-        poleBase.z,
+        labelAnchor.x,
+        poleHeight + LABEL.heightAbovePole * fit.stopScale,
+        labelAnchor.z,
       ] as [number, number, number],
+      // The aircraft parked on the ground at this stop. The world positions
+      // were resolved in JourneyScene, which is also what StopProps pools each
+      // contact shadow at — recomputing them here would risk an aircraft
+      // drifting off its own shadow.
+      //
+      // Y comes from the aircraft's own `groundOffset` (0 = parked on the
+      // floor). Because the element is bottom-anchored in CSS below, that is
+      // the height of its BOTTOM EDGE, so resizing an aircraft never changes
+      // where it meets the ground.
+      vehicles: stop.vehicles.map(
+        (vehicle) =>
+          [vehicle.position.x, vehicle.groundOffset, vehicle.position.z] as [
+            number,
+            number,
+            number,
+          ],
+      ),
       frames,
       flags,
     };
-  }, [stop]);
+    // `achievement` is in here for the aircraft: their positions are read from
+    // its `vehicles`, so a stop whose data changed but whose geometry didn't
+    // would otherwise keep stale anchors. `fit` because a change of screen
+    // shape moves the frames, the flag height and the label anchor.
+  }, [stop, achievement, fit, poleHeight]);
 
   const counter = String(index + 1).padStart(2, "0");
+
+  // Shadows and mats are the one thing on the stop that CANNOT be shared across
+  // themes: they're all dark values, and dark reads completely differently on a
+  // near-black floor than on a near-white one. See `overlayStyle`.
+  const overlay = overlayStyle(isDark);
 
   // Every frame and flag shares the stop's facing rotation, so they all square
   // up to the path and to each other.
@@ -272,9 +354,19 @@ function StopOverlay({
             transform: "translate(-50%, -100%)",
             // Soft shadow, NOT a box scrim — keeps the headlines legible over
             // the dotted floor without the ugly dark rectangle behind them.
-            textShadow: "0 2px 10px rgba(0,0,0,0.75)",
+            // Per-theme: a dark halo lifts light text off a dark floor, and the
+            // exact inverse is needed once both invert. See `overlayStyle`.
+            textShadow: overlay.labelTextShadow,
           }}
-          className="pointer-events-none select-none text-center w-[320px]"
+          // 350px, not 320: this width is in the label's OWN pixel space, which
+          // drei then scales by LABEL.distanceFactor. Widening the box while
+          // lowering that factor in the same ratio leaves the ON-SCREEN width
+          // where it was (320×15 ≈ 350×14), but gives the longest award title
+          // on the page — "Best Technical Design Report" — clear room before it
+          // wraps, and a wrapped title is a whole extra line on the tallest
+          // label there is. Change one of the two without the other and the
+          // label's screen width moves with it.
+          className="pointer-events-none select-none text-center w-[350px]"
         >
           <div
             className="font-mono tracking-[0.18em] text-[var(--sky)] uppercase mb-1"
@@ -322,9 +414,17 @@ function StopOverlay({
               >
                 {achievement.title}
               </div>
+              {/* `line-clamp-5`, not 4. The clamp is a guard against a long
+                  blurb blowing the label up, not a design choice about length —
+                  and at 4 it cut the founding blurb one word short, ending the
+                  stop's only sentence on "mechanical and computer…". Five lines
+                  fits the copy as written and still leaves this stop ~40-53px of
+                  clearance below the navbar, the same as the tallest stop on the
+                  page (2025). If the blurb is ever rewritten longer, raise this
+                  and re-check that clearance rather than letting it truncate. */}
               {achievement.blurb && (
                 <p
-                  className="font-sans leading-[1.5] text-[var(--text-secondary)] mt-2 mb-0 line-clamp-4"
+                  className="font-sans leading-[1.5] text-[var(--text-secondary)] mt-2 mb-0 line-clamp-5"
                   style={{ fontSize: LABEL.blurbSize }}
                 >
                   {achievement.blurb}
@@ -345,7 +445,7 @@ function StopOverlay({
           position={position}
           rotation={facing}
           transform
-          scale={1.6}
+          scale={overlayScale}
           zIndexRange={[9, 0]}
         >
           <div
@@ -356,16 +456,19 @@ function StopOverlay({
             <div
               className="w-[150px] h-[100px] p-[3px] rounded-[8px]"
               style={{
-                background:
-                  "linear-gradient(160deg, rgba(111,227,255,0.5), rgba(60,64,181,0.25))",
+                background: overlay.frameMat,
                 // A purely DARK drop shadow, no coloured glow. Cast down and
-                // out so the frame reads as floating ABOVE the ground.
-                boxShadow:
-                  "0 26px 46px rgba(0,0,0,0.72), 0 10px 20px rgba(0,0,0,0.5)",
+                // out so the frame reads as floating ABOVE the ground — at a
+                // weight the current floor can carry (see `overlayStyle`).
+                boxShadow: overlay.frameShadow,
               }}
             >
+              {/* The photo is chosen with the position, in JourneyScene: on a
+                  stop cut down to one frame it is the year's nominated shot,
+                  and on a stop straddling the path it is the one belonging to
+                  the competition standing on that side. */}
               <Portrait
-                src={achievement.portraits[i] ?? ""}
+                src={stop.frames[i]?.portrait ?? ""}
                 year={achievement.year}
               />
             </div>
@@ -378,12 +481,78 @@ function StopOverlay({
               aria-hidden="true"
               className="w-[128px] h-[16px] mx-auto mt-[12px] rounded-[50%]"
               style={{
-                background:
-                  "radial-gradient(ellipse at center, rgba(0,0,0,0.55), rgba(0,0,0,0) 72%)",
+                background: overlay.frameCastShadow,
                 filter: "blur(3px)",
               }}
             />
           </div>
+        </Html>
+      ))}
+
+      {/* ── The year's aircraft ─────────────────────────────────────────────
+          Only rendered for years that have renders on file; everything else
+          about the stop is identical whether or not any exist.
+
+          A transparent WebP, not a 3D model — see the Vehicle type in
+          achievements.ts for the reasoning. `transform` puts it genuinely in
+          the scene and `facing` squares it to the path, exactly like the photo
+          frames, so it shares their perspective and banks with the camera
+          through curves instead of floating in screen space.
+
+          ─── DELIBERATELY THE CHEAPEST THING ON THE STOP ───────────────────
+          The <img> IS the faded element — no wrapper divs, no name plate, no
+          animation. That means:
+            • one DOM node, so the per-frame fade does one style write here,
+              not three;
+            • no `filter`, which would make the browser re-run a per-pixel blur
+              on a large transparent bitmap on every one of those opacity
+              writes — by far the most expensive thing this element could do;
+            • no CSS animation and no `will-change`, so the compositor never
+              allocates a layer for it or wakes up to repaint it. The aircraft
+              is parked: once drawn, it costs nothing until the fade moves.
+
+          `translateY(-50%)` cancels drei's centring so the element's BOTTOM
+          edge lands on the anchor — the same trick the flags use below. The
+          anchor is at ground level, so each aircraft sits exactly on the floor
+          whatever its displayWidth is, with no magic offset to re-tune.
+
+          The intrinsic width/height attributes are the file's real pixel size:
+          they give the browser the aspect ratio before the bytes arrive, so
+          the element never reflows when the image decodes. */}
+      {(achievement.vehicles ?? []).map((vehicle, i) => (
+        <Html
+          key={vehicle.render}
+          position={anchors.vehicles[i]}
+          rotation={facing}
+          transform
+          scale={overlayScale}
+          zIndexRange={[9, 0]}
+        >
+          <img
+            ref={collect}
+            // Two grades of the same aircraft; only the one the current theme
+            // uses is ever requested, so this costs no extra bytes on a visit.
+            // The dark grade is dim enough to sit on a near-black floor and
+            // reads as a black blob on the pale one.
+            src={isDark ? vehicle.render : vehicle.renderLight}
+            // Named, not decorative: these are the team's own aircraft, so the
+            // alt text carries real information for screen readers even though
+            // no name is drawn on screen.
+            alt={`${vehicle.name}, an aircraft flown in ${achievement.year}`}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            width={vehicle.width}
+            height={vehicle.height}
+            className="block pointer-events-none select-none"
+            style={{
+              opacity: 0,
+              transform: "translateY(-50%)",
+              width: vehicle.displayWidth,
+              height: "auto",
+              maxWidth: "none",
+            }}
+          />
         </Html>
       ))}
 
@@ -423,7 +592,7 @@ function StopOverlay({
             position={flag.position}
             rotation={facing}
             transform
-            scale={1.6}
+            scale={overlayScale}
             zIndexRange={[9, 0]}
           >
             <div
@@ -441,9 +610,7 @@ function StopOverlay({
               {/* Plain rectangular flag. Adjust w-[..]/h-[..] to resize it. */}
               <div
                 className="w-[64px] h-[40px] rounded-[2px] overflow-hidden"
-                style={{
-                  filter: "drop-shadow(0 5px 10px rgba(0,0,0,0.55))",
-                }}
+                style={{ filter: overlay.flagShadow }}
               >
                 <img
                   src={flag.logo}

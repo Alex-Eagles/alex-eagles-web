@@ -148,12 +148,12 @@ export default function Hero() {
 
       {/* Scroll indicator. */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5">
-        <span className="font-sans text-[11px] tracking-[0.16em] uppercase text-fg-subtle">
+        <span className="font-sans text-[11px] tracking-[0.16em] uppercase text-fg-muted">
           Scroll
         </span>
         <ChevronDown
           size={22}
-          className="text-fg-subtle"
+          className="text-fg-muted"
           style={{
             animation: reduced ? "none" : "ae-bounce 1.8s ease-in-out infinite",
           }}

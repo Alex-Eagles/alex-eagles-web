@@ -81,8 +81,113 @@
   --transition-base: 250ms ease-out; /* hovers, cards             */
   --transition-slow: 400ms ease-out; /* theme swap, big reveals   */
 
+  /* A stronger ease-out than the CSS keyword. `ease-out` is a gentle curve;
+   * this one leaves hard and settles late, which is what makes a hover read as
+   * an immediate response rather than a slow drift. Use it for anything the
+   * pointer triggers — the moment right after the cursor lands is exactly when
+   * the user is watching most closely. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* ── Scroll-cue "breathe" ─────────────────────────────────────────────────
+   * How far the scroll-cue LABEL fades at the bottom of its pulse (see
+   * @keyframes ae-cue-pulse in global.css).
+   *
+   * ⚠ This is a floor, not a free dial. The label is real text, and WCAG AA
+   * wants 4.5:1 for the whole time it's on screen — not just at the bright end
+   * of a loop. At 0.82 the label bottoms out at 5.7:1 on the dark page and
+   * 5.4:1 on the light one, measured against the page it sits on. Push it DOWN
+   * only if you re-check the contrast, or raise it freely.
+   *
+   * The dark figure used to be ~4.6:1, i.e. the floor was set right at the
+   * edge. It has headroom now only because --text-secondary itself was
+   * brightened (see the note on the text ramp below); this dial did not move,
+   * and it is still the thing standing between a decorative pulse and text
+   * that dips under the bar once per cycle.
+   *
+   * The ARROW is the loud half of the gesture on purpose: it's decorative and
+   * aria-hidden, so it carries no contrast obligation and swings much further
+   * (see ae-cue-arrow). That split is what lets the cue read as a strong pulse
+   * without the words ever going faint. */
+  --cue-fade-floor: 0.82;
+  /* One cycle of the pulse. Both the label and the arrow share it, so they
+   * read as a single gesture rather than two things blinking near each other. */
+  --cue-cycle: 2.8s;
+
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
+
+  /* ------------------------------------------------------------------------
+   * SUB-TEAM ACCENT COLORS
+   * One accent per sub-team, tuned to read on the dark team cards. Change a
+   * hue here, once, and every section heading + card badge for that sub-team
+   * updates. Slug must match slugify(subTeamName): "Tail & Stability" →
+   * `--team-tail-stability`, "Computer Vision" → `--team-computer-vision`.
+   *
+   * ⚠ MERGE NOTE: this block is a verbatim copy of the one on the team-page
+   * branch, names and values identical, so the two reconcile without anyone
+   * having to decide which palette wins. If you edit a hue, edit it there too
+   * — or the History page and the Team page will disagree about what colour a
+   * discipline is, which is the one thing an accent palette exists to prevent.
+   *
+   * ⚠ THEME-INDEPENDENT, AND THEREFORE NOT SAFE AS TEXT. These are pastels
+   * picked against a dark card: on the light theme they land around 2.1:1 on
+   * white, well under half the AA floor. Use them as FILLS — a dot, a bar, a
+   * solid chip with --ink-on-accent on top — never as a text colour. See the
+   * publication tags for the chip pattern.
+   * --------------------------------------------------------------------- */
+  --team-management: #3d3ecc; /* brand blue (accent)    */
+  --team-aerodesign: #85b7eb; /* sky blue               */
+  --team-wing: #6ad1d8; /* cyan                   */
+  --team-tail-stability: #f0a07a; /* coral                  */
+  --team-structure: #c2c0b4; /* warm gray              */
+  --team-propulsion: #97c459; /* green                  */
+  --team-software: #5dcaa5; /* teal                   */
+  --team-hardware: #f0b24a; /* gold                   */
+  --team-computer-vision: #ed93b1; /* pink                   */
+  --team-ai: #ed93b1; /* pink — same discipline as Computer Vision */
+  --team-firmware: #afa9ec; /* lavender               */
+
+  /* The ink that goes ON one of those accents.
+   *
+   * Fixed in both themes, which is the whole point: the chip underneath it is
+   * the same pastel in dark and light, so its label cannot follow
+   * --text-primary — that would turn near-white in dark mode and put pale text
+   * on a pale chip. This is the light theme's ink, used unconditionally.
+   *
+   * Measured against every accent above: 8.3:1 on Computer Vision's pink,
+   * 8.8:1 on Aerodesign's blue, and 8.5–10.3:1 on the rest.
+   *
+   * ⚠ ONE EXCEPTION. --team-management (#3d3ecc) is a saturated brand blue,
+   * not a pastel like the other ten, and dark ink on it measures 2.43:1 — a
+   * clear fail. A Management chip needs WHITE ink instead. Nothing uses one
+   * today; this is here so that whoever adds the first one does not have to
+   * rediscover it. */
+  --ink-on-accent: #0d1030;
+
+  /* ── Chapter-band edge ────────────────────────────────────────────────────
+   * The hairline drawn where one background band meets the next.
+   *
+   * ─── THERE USED TO BE A CROSSFADE HERE INSTEAD, AND IT WAS THE BUG ────────
+   * Each band faded into the next over 96-176px. On the dark theme that reads
+   * as a soft chapter change, because the two dark tones also differ in
+   * CHROMA — one is near-neutral, the other saturated indigo — so the eye has
+   * a second cue and finds the join anyway.
+   *
+   * The light pair has no such cue: two pale indigo-tinted neutrals differing
+   * only in lightness. Dissolved over 150px there was no edge to find at all,
+   * and the page read as one continuous sheet. The measurements are the joke
+   * of it — the light step is ΔL* 4.4 and the dark step people describe as
+   * obvious is ΔL* 3.5. The light bands were ALREADY the stronger contrast.
+   * What they lacked was an edge.
+   *
+   * So the bands butt up hard now, in both themes, and the light theme gets
+   * this hairline on top. Dark leaves it transparent: it was never the theme
+   * with the problem, and a rule across every section boundary there would be
+   * solving something that isn't broken.
+   *
+   * ◀── DIAL. Push toward --border-solid (#b0b3e0) for a more editorial rule,
+   * or toward --border-subtle (#d4d6f0) to make it a whisper. */
+  --band-edge: transparent;
 }
 
 /* ----------------------------------------------------------------------------
@@ -98,6 +203,24 @@
   --canvas: #0d1035; /* alias: section canvas behind cards   */
   --card: #161a50; /* the card surface itself             */
 
+  /* ── Chapter bands ────────────────────────────────────────────────────────
+   * The two — and only two — background tones a long page alternates between
+   * so consecutive sections read as separate chapters. Used by .ae-band in
+   * global.css; the History page is what composes them.
+   *
+   * These are deliberately the SAME values as --bg-primary / --bg-surface
+   * above, not new colours: dark mode already had a legible alternation and
+   * this refactor must not move a single pixel of it. They exist as their own
+   * names because LIGHT mode needs a different step size (see the light block)
+   * and because a band is a page-composition decision, not a surface level —
+   * a section on --band-lift still puts --card and --bg-elevated on top of it.
+   *
+   * The step between them is ~1.07:1 in luminance, or ΔL* ≈ 3.5. That is the
+   * number the light pair is tuned against, so the two themes alternate with
+   * the same perceived strength rather than one shouting and one whispering. */
+  --band-deep: #07091c;
+  --band-lift: #0d1035;
+
   /* Brand + accents */
   --brand: #3c40b5; /* Alex Eagles royal indigo            */
   --brand-light: #5458cc; /* hover / active                      */
@@ -107,11 +230,54 @@
   --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
   --gold-hover: #fbbf24;
   --sky: #60a5fa; /* technical links / data accent       */
+  /* Halo behind --sky elements (timeline markers). On the near-black page a
+   * real glow is what sells the marker as lit; see the light block for why the
+   * same value cannot survive the swap. */
+  --sky-glow: rgba(96, 165, 250, 0.45);
 
-  /* Text (indigo-tinted, per brand) */
+  /* ── The History journey's travelling light, as DOM colours ───────────────
+   * MIRRORS `PALETTE.lightGlow` in src/components/history/sceneConfig.ts —
+   * the same duplication that file already documents (three.js cannot read CSS
+   * variables, so the scene keeps raw numbers and the DOM keeps these). Change
+   * one, change the other.
+   *
+   * The scene's light is a near-white core inside a cyan halo, and the halo is
+   * what you actually perceive its colour to BE — it covers far more area. So
+   * the halo value is the honest "colour of the ball" here, not the core. */
+  --journey-light: #39c6ff;
+  /* The ball glows in the scene, so its progress readout does too. */
+  --journey-glow: 0 0 10px rgba(57, 198, 255, 0.45);
+  /* Unfilled progress segments: light grey, translucent so the glass reads
+   * through them rather than sitting behind an opaque chip. */
+  --journey-track: rgba(240, 242, 255, 0.14);
+  /* Jump-list rows. These live here (rather than with the rail's own local
+   * glass) because :hover and [data-active] are pseudo/attribute states, and
+   * inline styles can't express those — they have to be real CSS rules. */
+  --jump-row-hover: rgba(255, 255, 255, 0.09);
+  --jump-row-active: rgba(57, 198, 255, 0.16);
+
+  /* ── Text (indigo-tinted, per brand) ──────────────────────────────────────
+   * ⚠ A DARK SURFACE HAS A NARROW ACCESSIBLE BAND, and these three levels have
+   * to live inside it. Anything under about L* 55 fails AA on --bg-elevated,
+   * which is the lightest surface any of this text lands on — so the "dim"
+   * end of a dark ramp is far shallower than instinct suggests.
+   *
+   * --text-muted was #565a94 and measured 2.53:1 on a card: barely half the
+   * floor, on text as small as 11px (the Footer's legal line, the Competitions
+   * stat labels, the Publications year). Raising it to clear 4.5:1 necessarily
+   * pulls it up toward --text-secondary, so --text-secondary was lifted too,
+   * keeping an 11 L* gap between them — comfortably above the ~2 L* just-
+   * noticeable difference, so the two still read as different levels.
+   *
+   * The three now sit at L* 96 / 68 / 57, and 14.5:1 / 6.7:1 / 4.7:1 against
+   * the worst surface each appears on. Hue and saturation are untouched; only
+   * lightness moved. Do not push any of them back down without re-measuring —
+   * the muted one has under half a stop of headroom.
+   *
+   * The LIGHT theme is unchanged: it was already passing at 4.6-9.6:1. */
   --text-primary: #f0f2ff;
-  --text-secondary: #8b8fc8;
-  --text-muted: #565a94;
+  --text-secondary: #a0a3d2;
+  --text-muted: #8286b7;
 
   /* Borders */
   --border-subtle: rgba(60, 64, 181, 0.18);
@@ -122,6 +288,28 @@
   --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.5);
   --elevation-3: 0 10px 30px rgba(0, 0, 0, 0.6);
   --elevation-4: 0 20px 50px rgba(0, 0, 0, 0.7);
+
+  /* ── Card shadows, at rest and lifted ─────────────────────────────────────
+   * Layered rather than single, because one big soft blur reads as fog while
+   * a tight contact shadow under a wide ambient one reads as an object with a
+   * definite bottom edge sitting above a surface.
+   *
+   * These are the DARK values, and they are deliberately close to the levels
+   * above: on a near-black page a shadow has almost nothing to darken, so
+   * depth here comes mostly from the card's own lighter surface. The light
+   * theme is where these earn their keep — see the pair further down. */
+  --elevation-card: 0 10px 30px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+  --elevation-card-hover: 0 22px 48px rgba(0, 0, 0, 0.68),
+    0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* A tray holding cards, rather than a card itself — bigger, so it sits
+   * further off the page and casts further. The `inset` line is the important
+   * part: a 1px lighter edge along the top reads as the light source catching
+   * the panel's near edge, which is what makes it a surface with a thickness
+   * instead of a rectangle of different colour. */
+  --elevation-panel: inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 14px rgba(0, 0, 0, 0.45), 0 28px 64px rgba(0, 0, 0, 0.6);
 }
 
 /* ----------------------------------------------------------------------------
@@ -137,6 +325,48 @@
   --canvas: #eceeff; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
 
+  /* ── Chapter bands (LIGHT) ────────────────────────────────────────────────
+   * The light theme was already alternating in the right DIRECTION — the
+   * deeper tone first, the lifted one second, exactly as dark does — but at
+   * --bg-primary #f7f8ff against --bg-surface #ffffff the step was ΔL* ≈ 2.4
+   * with essentially no chroma difference. On a screen that is not a rhythm,
+   * it is one flat white sheet, which is why the page read as unbanded in
+   * light mode while the identical structure read clearly in dark.
+   *
+   * #f0f2fb restores the step: ΔL* ≈ 4.4 against white, so it lands just past
+   * the dark theme's own 3.5 — near-white bands need slightly more separation
+   * than near-black ones because there is no glow or halo helping the eye — and
+   * it carries a real indigo tint, which is the second cue dark mode gets for
+   * free from --bg-surface being the more saturated of its pair.
+   *
+   * ⚠ This is the DARKEST surface the light theme puts body copy on, so it is
+   * the binding constraint for every muted text token. Verified at this value:
+   *   --text-muted     #6366a8 → 4.70:1  (AA, with margin)
+   *   --text-secondary #3b3f7a → 9.6:1
+   *   --sky            #1d4ed8 → 6.0:1
+   *   --gold           #b45309 → 5.2:1
+   * Push --band-deep any darker and --text-muted is the first thing to fail —
+   * it is already the tightest of the four. Re-measure before you do.
+   *
+   * NB: PALETTE_LIGHT_OVERRIDES.background in sceneConfig.ts mirrors this
+   * value, so the 3D canvas and the band it sits in have no visible seam.
+   * Change one, change the other.
+   *
+   * ⚠ #eceef9 IS THE FLOOR — this cannot go darker without breaking text.
+   * --text-muted (#6366a8) is the binding constraint: it lands at 4.55:1 here,
+   * and the next step down the ramp (#e8ebf7) puts it at 4.42:1, under AA, on
+   * 11px labels. Deepening the band any further means darkening --text-muted
+   * first, and that compresses the light theme's text ramp the same way the
+   * dark one is already compressed. Measure before you touch it. */
+  --band-deep: #eceef9;
+  --band-lift: #ffffff;
+  /* A real hairline, because two pale neutrals butting together need one.
+   * Same value as --border-solid, at ~2:1 against the tone on either side —
+   * a definite rule rather than a hint. A first pass at #c9cde8 measured
+   * 1.36:1 and read as a smudge, which is the failure mode this whole change
+   * exists to fix. */
+  --band-edge: #b0b3e0;
+
   --brand: #3c40b5; /* brand indigo stays constant          */
   --brand-light: #2b2f9e; /* darker on hover against light bg     */
   --brand-dark: #1e2258; /* deep indigo — pressed / gradients    */
@@ -145,6 +375,28 @@
   --gold: #b45309; /* darker amber for AA contrast on light */
   --gold-hover: #92400e;
   --sky: #1d4ed8;
+  /* Deliberately NOT a glow on light. A luminous halo only reads as "lit" when
+   * it is brighter than what surrounds it — on a near-white page it just smears
+   * the marker's edge into a fuzzy blue bruise, which is the single most
+   * eye-tiring artefact a light theme can inherit from a dark one. This is a
+   * faint tint of the marker's own hue instead: it softens the edge without
+   * emitting anything. */
+  --sky-glow: rgba(29, 78, 216, 0.16);
+
+  /* Mirrors `PALETTE_LIGHT_OVERRIDES.lightCore` in sceneConfig.ts. In light
+   * mode the ball's intensity is carried by DEPTH rather than brightness, so
+   * the deepest, most saturated part — the core — is what reads as its colour,
+   * and the halo is the incidental part. Exactly inverted from dark mode, for
+   * the reasons written up in that file. */
+  --journey-light: #1436a8;
+  /* No glow. A luminous halo needs somewhere brighter to go, and on a pale
+   * surface there isn't one — it would only smear the segment's edge. */
+  --journey-glow: none;
+  /* Light grey on the pale glass, from the page's own ink rather than pure
+   * black, so it stays in the indigo family the rest of the theme uses. */
+  --journey-track: rgba(13, 16, 48, 0.12);
+  --jump-row-hover: rgba(60, 64, 181, 0.10);
+  --jump-row-active: rgba(20, 54, 168, 0.13);
 
   --text-primary: #0d1030; /* deep navy text                       */
   --text-secondary: #3b3f7a;
@@ -157,4 +409,32 @@
   --elevation-2: 0 4px 12px rgba(60, 64, 181, 0.12);
   --elevation-3: 0 10px 30px rgba(60, 64, 181, 0.15);
   --elevation-4: 0 20px 50px rgba(60, 64, 181, 0.18);
+
+  /* ── Card shadows, at rest and lifted (LIGHT) ─────────────────────────────
+   * Much heavier than the levels above, and deliberately so. A white card on a
+   * near-white page has no surface contrast to separate it, so the shadow is
+   * the ONLY thing telling the eye the card sits above the page — at
+   * `--elevation-3`'s 0.15 alpha it was reading as a flat panel painted on.
+   *
+   * Three layers, each doing a different job:
+   *   · a tight 1px contact edge, which gives the card a definite bottom
+   *   · a short mid shadow for the near-surface falloff
+   *   · a wide, offset ambient shadow for the sense of height
+   * Tinted with the brand indigo instead of neutral grey: a grey shadow on a
+   * faintly indigo page reads as dirt, a same-hue shadow reads as light. */
+  --elevation-card: 0 1px 2px rgba(30, 34, 88, 0.09),
+    0 4px 10px -3px rgba(30, 34, 88, 0.13),
+    0 14px 32px -12px rgba(30, 34, 88, 0.26);
+  --elevation-card-hover: 0 1px 2px rgba(30, 34, 88, 0.1),
+    0 8px 18px -6px rgba(30, 34, 88, 0.18),
+    0 28px 56px -18px rgba(30, 34, 88, 0.34);
+
+  /* The tray, in light mode — where it does the most work. A pale panel on a
+   * white page has no colour contrast to separate the two, so without a real
+   * shadow the section reads as one flat sheet. The inset highlight is nearly
+   * pure white here rather than the faint 6% used on the dark theme, because
+   * on a light surface the catch-light IS the brightest thing available. */
+  --elevation-panel: inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(30, 34, 88, 0.1), 0 12px 26px -8px rgba(30, 34, 88, 0.2),
+    0 40px 80px -28px rgba(30, 34, 88, 0.4);
 }

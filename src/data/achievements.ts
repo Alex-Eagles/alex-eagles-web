@@ -29,6 +29,64 @@
  * ║  on it, so a missing or misspelled file never breaks the layout.         ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  *
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║  WHERE TO PUT THE AIRCRAFT RENDERS                                       ║
+ * ╠══════════════════════════════════════════════════════════════════════════╣
+ * ║                                                                          ║
+ * ║  1. Drop the render into:   public/history/vehicles/                     ║
+ * ║                                                                          ║
+ * ║  2. Add it to `vehicles` on the matching year, with the render's REAL    ║
+ * ║     pixel size and where it should stand:                                ║
+ * ║                                                                          ║
+ * ║         vehicles: [{                                                     ║
+ * ║           name: "Do3soka",                                               ║
+ * ║           render: "/history/vehicles/do3soka.webp",                      ║
+ * ║           width: 563, height: 240,   // the file's real size             ║
+ * ║           alongPoles: 0.1,           // 0 = 1st pole, 1 = last pole,     ║
+ * ║                                      //   negative = further LEFT        ║
+ * ║           forwardOffset: 2.2,        // toward the viewer                ║
+ * ║           displayWidth: 200,         // how big to draw it               ║
+ * ║           shadowRadius: 2.5,         // contact shadow half-width        ║
+ * ║           groundOffset: 0,           // 0 = wheels on the floor          ║
+ * ║         }],                                                              ║
+ * ║                                                                          ║
+ * ║  THE POSITION KNOBS, and which way each moves it:                        ║
+ * ║     lateralOffset ←→  sideways in world units. + is the viewer's RIGHT.  ║
+ * ║                       ** START HERE. ** It works on every stop, and it   ║
+ * ║                       is the ONLY sideways control that does anything on ║
+ * ║                       a year with one pole — which is most years.        ║
+ * ║     alongPoles    ←→  sideways, as a fraction from the first pole to the ║
+ * ║                       last. Only useful on a MULTI-competition year      ║
+ * ║                       (2021, 2025): with one pole both ends of the       ║
+ * ║                       interpolation are the same point, so every value   ║
+ * ║                       lands identically. 0.5 is midway; values outside   ║
+ * ║                       0..1 keep going past the poles.                    ║
+ * ║     forwardOffset  ↓   toward the viewer. Raise it to bring an aircraft  ║
+ * ║                       out in FRONT of the poles and photos.              ║
+ * ║     groundOffset   ↕   height off the floor. 0 = parked. This is the one ║
+ * ║                       to reach for if it looks like it's floating or     ║
+ * ║                       sunk. The shadow stays on the floor either way.    ║
+ * ║     displayWidth   ⤢   apparent size.                                    ║
+ * ║                                                                          ║
+ * ║  No label is drawn — `name` is the alt text. Years with no `vehicles`    ║
+ * ║  simply don't show any, and nothing else about the stop moves.           ║
+ * ║                                                                          ║
+ * ║  A year can list SEVERAL. Separate them with `alongPoles` AND            ║
+ * ║  `forwardOffset` — the poles are narrower than an aircraft, so depth,    ║
+ * ║  not sideways distance alone, is what stops two overlapping.             ║
+ * ║                                                                          ║
+ * ║  FORMAT: WebP with a TRANSPARENT background, and TRIMMED so the aircraft ║
+ * ║  touches the edges of the file. Transparent padding left in the file     ║
+ * ║  becomes dead space in the scene and shrinks the aircraft on screen.     ║
+ * ║  ~600px on the long edge is plenty; these land around 10KB.              ║
+ * ║                                                                          ║
+ * ║  Don't downscale below that hoping for a smaller file — it backfires.    ║
+ * ║  Resampling softens the clean edges WebP compresses well, so a 420px     ║
+ * ║  copy of this render encodes LARGER than the 563px original.             ║
+ * ║                                                                          ║
+ * ║  Renders, NOT .glb models — see the `Vehicle` type below for why.        ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ *
  * ─── EDIT THIS FILE, NOT THE 3D CODE ────────────────────────────────────────
  * Everything a visitor reads on the History page comes from the array below.
  * The 3D scene (curve shape, stop spacing, camera timing, scroll length) is
@@ -67,6 +125,170 @@ export interface Award {
   competition: Competition;
 }
 
+/**
+ * The aircraft the team flew that year, hovering above its stop.
+ *
+ * ─── WHY THIS IS A RENDER AND NOT A 3D MODEL ────────────────────────────────
+ * A .glb per year would mean shipping a GLTF loader plus a Draco decoder that
+ * nothing else on the site needs, several hundred KB per aircraft, and a
+ * texture/mesh upload landing exactly as the camera arrives at the stop — the
+ * same hitch the photo frames are DOM images to avoid (see StopOverlays).
+ *
+ * It would also read wrong: every solid object in this scene is an untextured
+ * primitive (capsule people, cylinder poles), so one photoreal mesh among them
+ * looks like a bug rather than a centrepiece.
+ *
+ * A trimmed transparent WebP costs ~13KB, decodes off the main thread, stays
+ * crisp at any zoom and needs no new dependency.
+ */
+export interface Vehicle {
+  /**
+   * The aircraft's name. NOT drawn on screen — the scene shows the aircraft
+   * with no label. This is the alt text, so it still has to be accurate: it's
+   * what a screen-reader user gets instead of the image.
+   */
+  name: string;
+  /**
+   * Transparent-background render, in `public/history/vehicles/`.
+   *
+   * FORMAT: WebP with a real alpha channel, trimmed so the aircraft touches
+   * the edges of the canvas — any transparent padding baked into the file
+   * becomes dead space in the scene and shrinks the aircraft on screen.
+   * Roughly 600px on the long edge is plenty.
+   *
+   * This is the DARK-MODE grade. See `renderLight` for its twin.
+   */
+  render: string;
+  /**
+   * The same aircraft graded for LIGHT mode.
+   *
+   * Two files rather than a CSS filter, because only one is ever requested —
+   * the browser fetches the variant the current theme uses and never sees the
+   * other, so a visitor downloads exactly what they would have anyway. A
+   * filter would instead cost per-frame work on an element whose opacity is
+   * already being written every frame.
+   *
+   * The dark grade is deliberately dim to sit on a near-black floor; dropped
+   * onto the pale light-mode floor it reads as a black blob. The light grade
+   * lifts exposure and fills the darks with a pale bounce instead of navy.
+   *
+   * BOTH are de-fringed identically. That matters: the "sticker" look came
+   * from white contamination on the antialiased edges, NOT from brightness, so
+   * making this one brighter does not bring it back.
+   */
+  renderLight: string;
+  /**
+   * Greyscale silhouette used as the aircraft's ground shadow — its own
+   * outline squashed and blurred, rather than a generic ellipse.
+   */
+  shadowMask: string;
+  /**
+   * The render's REAL pixel dimensions.
+   *
+   * Set on the <img> so the browser knows the aspect ratio before the file
+   * arrives and reserves the right box immediately — without them the element
+   * reflows the moment the image decodes, which inside a 3D-transformed
+   * overlay shows up as the aircraft visibly popping into place.
+   *
+   * These must match the file. If you re-export at a different size, update
+   * them.
+   */
+  width: number;
+  height: number;
+  /**
+   * WHERE IT PARKS, along the line between the stop's flag poles.
+   *
+   * 0 = standing at the FIRST pole, 1 = at the LAST pole, 0.5 = midway. So on
+   * 2025, whose poles are UAVC then SUAS, 0.1 is "between the poles, hard over
+   * by the UAVC pole" and 0.9 is the same by the SUAS pole.
+   *
+   * Expressed as a fraction rather than a distance so it keeps its meaning if
+   * the poles are ever moved further apart — the aircraft stay in proportion
+   * instead of drifting off their poles. Values outside 0..1 extrapolate
+   * beyond the poles, which is allowed but rarely what you want.
+   *
+   * A stop with only ONE pole ignores this: both ends of the line are the same
+   * point, so the aircraft simply stands at that pole.
+   */
+  alongPoles: number;
+  /**
+   * Sideways nudge in WORLD UNITS, applied after `alongPoles`. Positive moves
+   * it to the viewer's right, negative to the left, on every stop regardless of
+   * which way the path is curving.
+   *
+   * This is the only sideways control that works on a stop with ONE pole.
+   * `alongPoles` interpolates between the first pole and the last, so when a
+   * year won at a single competition both ends are the same point and every
+   * value lands in the same place. Most years are single-competition, so this
+   * is the dial you'll usually want.
+   */
+  lateralOffset: number;
+  /**
+   * How far IN FRONT of the poles it stands, in world units — measured back
+   * along the path toward the oncoming camera. Bigger = nearer the viewer.
+   *
+   * This is also what keeps two aircraft at one stop from overlapping. The
+   * poles are only ~2 units apart, which is narrower than an aircraft, so
+   * separating them sideways alone is not enough: giving them different
+   * forward offsets puts them at different DEPTHS, and one reads as standing
+   * in front of the other rather than through it.
+   */
+  forwardOffset: number;
+  /**
+   * Rendered width in px before VEHICLE.scale — the aircraft's apparent SIZE
+   * in the scene.
+   *
+   * Per-vehicle because the real aircraft are not the same size: the
+   * fixed-wing has a far wider span than the quadcopter, and giving them a
+   * shared width would draw them as though they were equally big.
+   */
+  displayWidth: number;
+  /**
+   * Half-width of the contact shadow pooled under it, in WORLD units (the
+   * render's size is in px, so this can't be derived from it).
+   *
+   * Roughly half the aircraft's real span. The shadow is drawn as a squashed
+   * ellipse aligned with the aircraft, flat on the floor — that contact patch
+   * is what makes it read as standing ON the ground instead of pasted in
+   * front of it.
+   */
+  shadowRadius: number;
+  /**
+   * OPTIONAL per-aircraft shadow strength, overriding the global SHADOW values
+   * in sceneConfig.
+   *
+   * Omit both and the aircraft follows SHADOW.vehicleDarkOpacity /
+   * SHADOW.vehicleLightOpacity like everything else. Set them when one
+   * aircraft needs its own answer — a render whose silhouette is mostly thin
+   * wing needs a heavier pool to read at all, while a dense one can look like
+   * an oil spill at the same value.
+   *
+   * Range is 0..1. Above 1 simply clamps to fully opaque.
+   */
+  shadowOpacityDark?: number;
+  shadowOpacityLight?: number;
+  /**
+   * ⬆ HOW HIGH OFF THE FLOOR IT SITS, in world units. THIS IS THE KNOB FOR
+   * "the aircraft is sinking into / floating above the ground".
+   *
+   *   0    = wheels exactly on the floor (the default, and what a parked
+   *          aircraft should normally be)
+   *   +0.5 = lifted half a unit, as though hovering
+   *   -0.3 = pushed down into the floor, to hide a render whose own shadow or
+   *          empty margin is baked into the image
+   *
+   * It works because the <img> is BOTTOM-anchored in CSS (StopOverlays), so
+   * this is the height of the image's bottom edge — not its centre. Resizing
+   * an aircraft therefore never changes where it meets the ground, and this
+   * number keeps its meaning.
+   *
+   * The contact shadow always stays flat on the floor and does NOT rise with
+   * it, which is exactly what you want: lift an aircraft and it separates from
+   * its shadow, reading as airborne.
+   */
+  groundOffset: number;
+}
+
 /** One stop on the path — one year of the team's history. */
 export interface Achievement {
   /** Stable key. Also drives the "ACHIEVEMENT 03" counter (index + 1). */
@@ -91,6 +313,69 @@ export interface Achievement {
    * frame. The scene lays them out automatically however many there are.
    */
   portraits: string[];
+  /**
+   * Which photo to keep when the screen only has room for one.
+   *
+   * A narrow phone shows a single frame per stop (see fitScene), and without
+   * this it is always `portraits[0]` — which is an accident of the order they
+   * were listed in, not a choice about which picture best represents the year.
+   * Index into `portraits`; defaults to 0. Ignored whenever every photo fits.
+   */
+  primaryPortrait?: number;
+  /**
+   * Put this stop's two competitions on OPPOSITE SIDES of the path instead of
+   * clustering them together on one side.
+   *
+   * Named in SCREEN ORDER, left to right. Each side then carries its own flag
+   * pole and its own photo, with the photo INSIDE — between the path and the
+   * pole — so the stop reads outward from the line in both directions:
+   *
+   *     pole   photo  │ path │  photo   pole
+   *      ▲       ▲    │      │    ▲       ▲
+   *     [0]     [0]   │      │   [1]     [1]
+   *
+   * ─── IT IS A FIT DECISION AS MUCH AS A COMPOSITION ONE ────────────────────
+   * A two-photo stop clustered on one side reaches ~15 world units off the
+   * path; split, each side reaches ~10.5 — the same as a one-photo stop. So a
+   * split stop shows BOTH photos on a phone where a clustered one would have
+   * been cut to a single frame, and it does it without shrinking anything.
+   *
+   * ⚠ It changes what `alongPoles` means for this stop's aircraft. The lerp
+   * runs from the first pole to the last, and those are now on either side of
+   * the path — so 0.5 is ON the line, and an aircraft belonging to the right
+   * hand competition wants roughly 0.75, not a small number. Re-tune both
+   * together or an aircraft ends up parked in the wrong country.
+   */
+  splitCompetitions?: [Competition, Competition];
+  /**
+   * The aircraft flown this year, parked on the ground at the stop. Optional:
+   * a year without any simply doesn't render one, and nothing else about the
+   * stop moves. A year may list several — see `alongPoles` for how they're
+   * spaced out between the flag poles.
+   */
+  vehicles?: Vehicle[];
+}
+
+/**
+ * The photos a stop should actually draw, given how many the screen can hold.
+ *
+ * When everything fits this is just `portraits`. When it does not, the list is
+ * taken starting from `primaryPortrait` and wrapping — so the year's chosen
+ * picture is the one that survives, and a stop cut from three to two keeps the
+ * primary plus its neighbour rather than an arbitrary pair.
+ */
+export function visiblePortraits(
+  achievement: Achievement,
+  count: number,
+): string[] {
+  const { portraits } = achievement;
+  if (portraits.length === 0 || count >= portraits.length) return portraits;
+
+  const start = achievement.primaryPortrait ?? 0;
+  return Array.from(
+    { length: count },
+    (_, offset) => portraits[(start + offset) % portraits.length],
+  );
 }
 
 export const achievements: Achievement[] = [
@@ -164,6 +449,9 @@ export const achievements: Achievement[] = [
     ],
     // Two awards → two frames: [ Image 1 ]  pole  [ Image 2 ]
     portraits: ["/history/sae-2022-1.webp", "/history/sae-2022-2.webp"],
+    // The second shot is the better single image for this year, so it is the
+    // one a phone keeps when there is only room for one frame.
+    primaryPortrait: 1,
   },
   {
     id: "2023-sae-overall",
@@ -173,6 +461,40 @@ export const achievements: Achievement[] = [
       { place: "11th Place", title: "Overall", competition: "SAE Aero Design" },
     ],
     portraits: ["/history/suas-2023.webp"],
+    // 2023 won at a single competition, so it has ONE pole — which means
+    // `alongPoles` can't move anything here (both ends of the lerp are the same
+    // point). `lateralOffset` is the control that works.
+    //
+    // Parked to the LEFT of the pole and pulled forward. The offset is sized to
+    // clear the pole outright rather than relying on depth: the aircraft is a
+    // DOM overlay, so it draws OVER the WebGL pole wherever the two coincide on
+    // screen no matter which is nearer the camera. Standing "in front" of the
+    // pole therefore hides it instead of passing it — only real sideways
+    // separation keeps them from intersecting.
+    //
+    // NB: this stop's frame axis is parity-flipped (odd index), so 2023's photo
+    // hangs on the viewer's RIGHT. Left is the clear side here.
+    vehicles: [
+      {
+        name: "Hotwing",
+        render: "/history/vehicles/hotwing.webp",
+        renderLight: "/history/vehicles/hotwing-light.webp",
+        shadowMask: "/history/vehicles/hotwing-shadow.webp",
+        width: 600,
+        height: 177,
+        alongPoles: 0,
+        lateralOffset: -4.0,
+        forwardOffset: 2.8,
+        displayWidth: 205,
+        shadowRadius: 3.9,
+        groundOffset: 0,
+        // ⬅ HOTWING'S OWN SHADOW DIALS. Independent of Do3soka and Itay, which
+        // follow the scene-wide SHADOW values in sceneConfig. Adjust these two
+        // freely without touching the others.
+        shadowOpacityDark: 13.0,
+        shadowOpacityLight: 2.5,
+      },
+    ],
   },
   {
     id: "2024-uavc",
@@ -180,6 +502,41 @@ export const achievements: Achievement[] = [
     title: "5th Place",
     awards: [{ place: "5th Place", title: "Overall", competition: "UAVC" }],
     portraits: ["/history/uavc-2024.webp"],
+    // 2024 won at a single competition, so this stop has ONE pole — which
+    // means `alongPoles` cannot move anything here (both ends of the lerp are
+    // the same point). `lateralOffset` is the control that works.
+    //
+    // Parked BETWEEN the photo and the pole, pulled forward so it stands in
+    // front of both. The photo hangs one FRAME.spacing (4.4 units) out along
+    // this stop's frame axis, so half of that — 2.2 — is the midpoint, and the
+    // sign puts it on the photo's side.
+    //
+    // NB on the sign: this stop's index is EVEN, the opposite parity to 2023,
+    // so its photo hangs on the viewer's LEFT where 2023's hangs right. If it
+    // turns out on the wrong side, flip this one number's sign — nothing else
+    // needs to change.
+    vehicles: [
+      {
+        name: "Taco",
+        render: "/history/vehicles/taco.webp",
+        renderLight: "/history/vehicles/taco-light.webp",
+        shadowMask: "/history/vehicles/taco-shadow.webp",
+        width: 600,
+        height: 305,
+        alongPoles: 0,
+        lateralOffset: -2.3,
+        forwardOffset: 4.6,
+        displayWidth: 190,
+        shadowRadius: 3.5,
+        groundOffset: -0.5,
+        // ⬅ TACO'S OWN SHADOW DIALS. Seeded at the scene-wide defaults
+        // (SHADOW.vehicleDarkOpacity 7.0 / vehicleLightOpacity 1.0), so
+        // changing them here moves only this aircraft and leaves Do3soka,
+        // Itay and Hotwing alone.
+        shadowOpacityDark: 10.0,
+        shadowOpacityLight: 1.5,
+      },
+    ],
   },
   {
     id: "2025-uavc-suas",
@@ -190,10 +547,59 @@ export const achievements: Achievement[] = [
       { title: "Best Technical Design Report", competition: "UAVC" },
       { title: "Best Technical Design Report", competition: "SUAS" },
     ],
-    // Three awards → three frames, arranged around the pole.
+    // One photo per competition, matched to the pole order `polesFor` returns
+    // (UAVC first, since it is the first competition named in `awards`).
     portraits: [
       "/history/uavc-2025.webp",
       "/history/suas-2025.webp",
+    ],
+    // The two competitions straddle the path rather than crowding one side of
+    // it: SUAS to the left of the line, UAVC to the right. Both photos survive
+    // on a phone this way — see `splitCompetitions`.
+    splitCompetitions: ["SUAS", "UAVC"],
+    // Each aircraft parks in front of ITS OWN competition's photo. `alongPoles`
+    // runs from the left pole (0) to the right pole (1) and the path is the
+    // midpoint, so a photo sitting between the line and its pole is at roughly
+    // a quarter or three quarters — not the small numbers this stop used while
+    // both poles were on the same side.
+    //
+    // ⚠ These are geometric estimates, not values tuned by eye. Nudge them
+    // toward 0.5 to bring an aircraft closer to the path.
+    vehicles: [
+      {
+        name: "Do3soka",
+        render: "/history/vehicles/do3soka.webp",
+        renderLight: "/history/vehicles/do3soka-light.webp",
+        shadowMask: "/history/vehicles/do3soka-shadow.webp",
+        width: 563,
+        height: 240,
+        // In front of the UAVC photo, which sits on the RIGHT of the path
+        // between the line and the UAVC pole. Pulled well forward so it clears
+        // the pole behind it.
+        alongPoles: 0.72,
+        lateralOffset: 0,
+        forwardOffset: 3.2,
+        displayWidth: 175,
+        shadowRadius: 3.5,
+        groundOffset: 0,
+      },
+      {
+        name: "Itay",
+        render: "/history/vehicles/itay.webp",
+        renderLight: "/history/vehicles/itay-light.webp",
+        shadowMask: "/history/vehicles/itay-shadow.webp",
+        width: 400,
+        height: 281,
+        // In front of the SUAS photo, on the LEFT of the path. The whole width
+        // of the line now separates it from the fixed-wing, so the two cannot
+        // touch however far forward either is pulled.
+        alongPoles: 0.28,
+        lateralOffset: 0,
+        forwardOffset: 3.4,
+        displayWidth: 105,
+        shadowRadius: 2.5,
+        groundOffset: 0,
+      },
     ],
   },
 ];
@@ -225,11 +631,11 @@ export function competitionLogo(
     case "SUAS":
       return "/history/Flags/suas.webp";
     case "SAE Aero Design":
-      return "/history/Flags/sae-logo.svg";
+      return "/history/Flags/sae-logo.webp";
     case "UAVC":
       // Only the years the team actually attended UAVC (2021, 2024, 2025)
       // have a logo on disk. Any other year would 404 → Egyptian fallback.
-      return `/history/Flags/UAVC-logo-${year}.svg`;
+      return `/history/Flags/UAVC-logo-${year}.webp`;
   }
 }
 

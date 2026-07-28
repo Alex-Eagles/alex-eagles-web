@@ -37,7 +37,7 @@ const VARIANTS: Record<Variant, string> = {
     "bg-transparent border border-brand text-brand-light hover:bg-brand hover:text-white",
   // Text-only — tertiary / inline action.
   ghost:
-    "bg-transparent text-fg-muted hover:text-fg px-4 py-2",
+    "bg-transparent text-fg-secondary hover:text-fg px-4 py-2",
 };
 
 const BASE =
