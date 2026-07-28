@@ -69,6 +69,8 @@
   background-image: var(--team-card-backdrop);
   background-size: cover;
   background-position: center;
+  /* `none` in dark — see --team-backdrop-filter in theme.css. */
+  filter: var(--team-backdrop-filter);
 }
 
 .scrim {
@@ -439,23 +441,4 @@
   box-shadow:
     0 10px 30px -14px var(--team-card-shadow-strong),
     inset 0 0 0 2.5px var(--card-accent);
-}
-
-/* --- light-mode wallpaper comparison ---------------------------------------
- *
- * Set from `cardBackdrop` in data/team.ts. The three slots all resolve to the
- * single dark texture in dark mode, so these rules are inert there — a card
- * carrying data-backdrop looks like every other card until the theme flips.
- * -------------------------------------------------------------------------*/
-.card[data-backdrop="1"] {
-  --team-card-backdrop: var(--team-card-backdrop-1);
-}
-.card[data-backdrop="2"] {
-  --team-card-backdrop: var(--team-card-backdrop-2);
-}
-.card[data-backdrop="3"] {
-  --team-card-backdrop: var(--team-card-backdrop-3);
-}
-.card[data-backdrop="4"] {
-  --team-card-backdrop: var(--team-card-backdrop-4);
 }

@@ -67,8 +67,6 @@ export function MemberCardSolid({
        * which `memberAccent` handles. Named `--card-accent`, not `--accent`,
        * because the latter is a shadcn theme token on :root. */
       style={{ "--card-accent": accent } as CSSProperties}
-      /* Light-mode wallpaper comparison; undefined on every other card. */
-      data-backdrop={member.cardBackdrop}
       tabIndex={0}
       aria-label={filled ? `${member.name}, ${roleLabel}` : `Unfilled ${roleLabel} slot`}
     >

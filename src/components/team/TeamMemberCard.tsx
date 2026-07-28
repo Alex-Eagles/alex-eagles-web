@@ -111,8 +111,6 @@ export function TeamMemberCard({
       data-tier={memberTier(member)}
       data-open={open}
       style={{ "--card-accent": cardAccent } as CSSProperties}
-      /* Light-mode wallpaper comparison; undefined on every other card. */
-      data-backdrop={member.cardBackdrop}
       tabIndex={0}
       onClick={(e) => {
         e.stopPropagation();

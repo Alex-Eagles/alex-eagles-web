@@ -113,7 +113,14 @@
 .photoLayer {
   position: absolute;
   inset: 0;
-  filter: grayscale(1) contrast(1.02) brightness(0.9);
+  /* The resting grade. Every value is a token so it can be tuned per theme
+     from theme.css — dark passes identity values for everything but
+     grayscale, so it renders exactly as it always has. In light mode this is
+     the consistency pass that levels 71 differently-lit portraits; see the
+     long note by --team-photo-saturate in theme.css. */
+  filter: grayscale(var(--team-photo-grayscale)) saturate(var(--team-photo-saturate))
+    contrast(var(--team-photo-contrast)) brightness(var(--team-photo-brightness))
+    sepia(var(--team-photo-sepia));
   transform: scale(1);
   transition: filter var(--t-img) ease, opacity var(--t-fade) ease, transform var(--t-img) var(--ease-img);
 }
@@ -182,6 +189,9 @@
   background-image: var(--team-card-backdrop);
   background-size: cover;
   background-position: center;
+  /* `none` in dark. Light mode can dial the wallpaper further back without
+     rebuilding the asset — see --team-backdrop-filter in theme.css. */
+  filter: var(--team-backdrop-filter);
 }
 
 .backdropScrim {
@@ -584,21 +594,3 @@
   }
 }
 
-/* --- light-mode wallpaper comparison ---------------------------------------
- *
- * Set from `cardBackdrop` in data/team.ts. The three slots all resolve to the
- * single dark texture in dark mode, so these rules are inert there — a card
- * carrying data-backdrop looks like every other card until the theme flips.
- * -------------------------------------------------------------------------*/
-.card[data-backdrop="1"] {
-  --team-card-backdrop: var(--team-card-backdrop-1);
-}
-.card[data-backdrop="2"] {
-  --team-card-backdrop: var(--team-card-backdrop-2);
-}
-.card[data-backdrop="3"] {
-  --team-card-backdrop: var(--team-card-backdrop-3);
-}
-.card[data-backdrop="4"] {
-  --team-card-backdrop: var(--team-card-backdrop-4);
-}

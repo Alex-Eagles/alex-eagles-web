@@ -53,18 +53,52 @@
   transform: scale(1);
 }
 
+/*
+ * Two stacked layers, both themed from theme.css:
+ *
+ *   1. the dark veil, on top — only light mode paints one, to carry the hero
+ *      copy over the photograph. `none` in dark mode, which is a legal (and
+ *      free) background layer, so dark renders exactly the single gradient it
+ *      always did.
+ *   2. the page fade, underneath — washes the top so the navbar reads, and
+ *      resolves the bottom into the page colour so the photo dissolves into
+ *      the page rather than ending on a line.
+ */
+/*
+ * The resolve — the stretch where the photograph stops being a photograph and
+ * becomes the page colour.
+ *
+ * It used to be a single stop: hold the wash, then jump to --team-bg inside the
+ * last 2.5%. In dark that was invisible, because the wash had already reached
+ * 0.94 by then and the jump covered almost no distance. In light the wash sits
+ * at 0.05 so that the photo survives, which left the whole remaining 95% of the
+ * transition to happen in ~20px — and a 20px ramp between two flat colours is
+ * exactly what the eye picks out as a seam.
+ *
+ * So it's a ramp now, eased rather than linear, expressed as a fraction of
+ * whatever is left to travel between the theme's wash and the page. That keeps
+ * one shape working for both themes: dark starts most of the way there and
+ * barely moves, light starts near zero and covers real ground, and neither one
+ * has an edge in it.
+ */
 .heroScrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgb(var(--team-bg-rgb) / 0.34) 0%,
-    rgb(var(--team-bg-rgb) / 0) 22%,
-    rgb(var(--team-bg-rgb) / 0) 62%,
-    rgb(var(--team-bg-rgb) / var(--team-hero-wash)) 82%,
-    rgb(var(--team-bg-rgb) / 0.94) 95%,
-    var(--team-bg) 100%
-  );
+  /* How far there is still to go once the wash has had its say. */
+  --resolve: calc(1 - var(--team-hero-wash));
+  background:
+    var(--team-hero-shade),
+    linear-gradient(
+      180deg,
+      rgb(var(--team-bg-rgb) / 0.34) 0%,
+      rgb(var(--team-bg-rgb) / 0) 22%,
+      rgb(var(--team-bg-rgb) / 0) 62%,
+      rgb(var(--team-bg-rgb) / var(--team-hero-wash)) var(--team-hero-resolve-at),
+      rgb(var(--team-bg-rgb) / calc(var(--team-hero-wash) + var(--resolve) * 0.18)) 95%,
+      rgb(var(--team-bg-rgb) / calc(var(--team-hero-wash) + var(--resolve) * 0.42)) 97%,
+      rgb(var(--team-bg-rgb) / calc(var(--team-hero-wash) + var(--resolve) * 0.7)) 98.5%,
+      var(--team-bg) 100%
+    );
 }
 
 /* The centred "hover a card" hint, which fades out as you scroll away. */
@@ -78,7 +112,10 @@
   align-items: center;
   gap: 7px;
   pointer-events: none;
-  color: var(--team-ink-dim);
+  /* Its own token: the hint sits below where the veil ends, in the hem that
+     has already resolved to the page colour, so it does NOT follow the rest of
+     the hero copy into light ink. See theme.css. */
+  color: var(--team-hero-hint-ink);
   transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -138,7 +175,13 @@
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--team-accent);
+  /* The hero copy reads from --team-hero-* rather than the page inks: on
+     desktop it sits on the photo, which is darkened in both themes, so it
+     can't follow the page. See the hero block in theme.css. */
+  color: var(--team-hero-eyebrow);
+  /* Insurance: this label sits highest, where the veil is thinnest, so it can
+     land on a bright patch of the photograph. Transparent in dark mode. */
+  text-shadow: 0 2px 10px var(--team-hero-eyebrow-shadow);
 }
 
 .heroTitle {
@@ -147,7 +190,7 @@
   line-height: 0.92;
   font-weight: 900;
   letter-spacing: -0.03em;
-  color: var(--team-ink);
+  color: var(--team-hero-ink);
   text-shadow: 0 4px 30px var(--team-hero-title-shadow);
 }
 
@@ -167,20 +210,20 @@
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: var(--team-ink-soft);
+  color: var(--team-hero-ink-soft);
   animation: heroStatsIn 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 /* Only the numbers change between years, so only they carry the emphasis. */
 .heroStatValue {
   font-weight: 800;
-  color: var(--team-ink);
+  color: var(--team-hero-ink);
   font-variant-numeric: tabular-nums;
 }
 
 .heroStatSep {
   margin: 0 9px;
-  color: var(--team-ink-faint);
+  color: var(--team-hero-ink-faint);
 }
 
 @keyframes heroStatsIn {
@@ -202,9 +245,10 @@
   padding: 11px 26px;
   border-radius: 999px;
   cursor: pointer;
-  background: var(--team-chip-bg);
-  color: var(--team-ink-dim);
-  border: 1px solid var(--team-chip-border);
+  /* Hero-scoped, like the rest of the copy — the tabs sit on the photo too. */
+  background: var(--team-hero-chip-bg);
+  color: var(--team-hero-ink-dim);
+  border: 1px solid var(--team-hero-chip-border);
   transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
@@ -678,16 +722,29 @@
    * the people are, then run all the way to the page colour at the bottom so
    * the photo dissolves into the page instead of ending on a line.
    */
+  /*
+   * The phone gets the longest resolve of the two layouts, and can afford it:
+   * nothing sits on the picture here, so there is no copy to keep legible and
+   * the fade is free to start early. It needs the room, too — the band is only
+   * ~300px tall, so the old 78%→91% ramp resolved the whole photograph inside
+   * about 40px and read as a haze band across the crew's legs rather than as a
+   * dissolve. Same eased shape as the desktop scrim above.
+   */
   .heroScrim {
-    background: linear-gradient(
-      180deg,
-      rgb(var(--team-bg-rgb) / 0.55) 0%,
-      rgb(var(--team-bg-rgb) / 0) 18%,
-      rgb(var(--team-bg-rgb) / 0) 52%,
-      rgb(var(--team-bg-rgb) / var(--team-hero-wash-sm)) 78%,
-      rgb(var(--team-bg-rgb) / 0.95) 91%,
-      var(--team-bg) 100%
-    );
+    --resolve: calc(1 - var(--team-hero-wash-sm));
+    background:
+      var(--team-hero-shade-sm),
+      linear-gradient(
+        180deg,
+        rgb(var(--team-bg-rgb) / 0.55) 0%,
+        rgb(var(--team-bg-rgb) / 0) 18%,
+        rgb(var(--team-bg-rgb) / 0) 46%,
+        rgb(var(--team-bg-rgb) / var(--team-hero-wash-sm)) 66%,
+        rgb(var(--team-bg-rgb) / calc(var(--team-hero-wash-sm) + var(--resolve) * 0.16)) 78%,
+        rgb(var(--team-bg-rgb) / calc(var(--team-hero-wash-sm) + var(--resolve) * 0.42)) 87%,
+        rgb(var(--team-bg-rgb) / calc(var(--team-hero-wash-sm) + var(--resolve) * 0.72)) 94%,
+        var(--team-bg) 100%
+      );
   }
   /*
    * Stacked under the photo, not over it. Overlaying needs the copy to paint
@@ -706,6 +763,17 @@
     z-index: 1;
     order: 1;
     padding: 28px 20px 0;
+    /*
+     * Shares the hero's leftover height with the hint below instead of leaving
+     * all of it in one gap. The hero is min-height: 100svh but its content —
+     * photo band, copy, hint — usually comes up short of that, and with only the
+     * hint claiming `margin-top: auto` every one of those spare pixels collected
+     * in a single void between the stats line and the hint. On a 390x844 phone
+     * that was ~100px of nothing sitting directly under the copy while the copy
+     * itself was crowded up against the photo. Two auto margins split the slack
+     * evenly, so the block sits in the space rather than at the top of it.
+     */
+    margin-top: auto;
   }
 
   /*

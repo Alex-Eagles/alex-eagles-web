@@ -47,7 +47,8 @@ export type Role =
   | "EM Integration Lead"
   | "Section Lead"
   | "Vice Section Lead"
-  | "Member";
+  | "Member"
+  | "Autonomous Lead";
 
 /**
  * Rank tier — the *visual* weight of a card, derived from its role. This is what
@@ -113,16 +114,6 @@ export interface TeamMember {
    * filenames pair up automatically. Set it only to point at a different file.
    */
   cutout?: string;
-  /**
-   * Which light-mode backdrop texture this card wears, 1-4. Only meaningful in
-   * light mode — every slot resolves to the same texture in dark, so a card
-   * carrying this is indistinguishable from its neighbours there.
-   *
-   * This exists to run the wallpapers side by side on real cards rather than
-   * judging them in isolation. Once one is chosen, set it as the default in
-   * theme.css (`--team-card-backdrop`, light block) and delete these.
-   */
-  cardBackdrop?: 1 | 2 | 3 | 4;
   linkedIn?: string;
   /**
    * Start a new row of the member grid at this card. The grid is three across,
@@ -314,12 +305,13 @@ export const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]
 export function subTeamAccent(name: string): string {
   /*
    * Two-step lookup, and the order matters. `--team-<slug>-page` only exists in
-   * the light theme: the base accents are pastels tuned for the near-black
-   * cards, and those cards stay dark in light mode, so the *cards* keep them
-   * (see `memberAccent`, which resolves the base token directly). A section
-   * heading, though, sits on the pale ground, where a pastel drops to ~1.5:1 —
-   * hence the darkened page-only variant. In dark mode `-page` is undefined and
-   * this falls through to the pastel, so nothing changes there.
+   * the light theme. The base accents are pastels tuned for the near-black
+   * cards; on the pale ground a pastel drops to ~1.5:1, so light mode gets its
+   * own darkened variant. In dark mode `-page` is undefined and this falls
+   * straight through to the pastel, so nothing changes there.
+   *
+   * `memberAccent` delegates here, so cards get the darkened accent in light
+   * mode too — which is what lets the role tag sit on a white plate there.
    */
   const slug = slugify(name);
   return `var(--team-${slug}-page, var(--team-${slug}, #3d3ecc))`;
@@ -436,7 +428,6 @@ const ROSTER_2026: YearRoster = {
   leadership: [
     {
       ...slot("Vice Lead", "Youssef Hozayen", {
-        cardBackdrop: 3,
         photo: "youssef-hozayen-2026",
         linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
         gradYear: "2027",
@@ -446,7 +437,6 @@ const ROSTER_2026: YearRoster = {
     },
     {
       ...slot("Team Leader", "Farah Harfoush", {
-        cardBackdrop: 4,
         photo: "farah-harfoush-2026",
         linkedIn: "https://www.linkedin.com/in/farah-harfoush-9297ab280",
         gradYear: "2026",
@@ -454,8 +444,7 @@ const ROSTER_2026: YearRoster = {
       }),
       department: "Team Leadership",
     },
-    { ...slot("EM Integration Lead", "Ziad Essam", {
-        cardBackdrop: 3,
+    { ...slot("Autonomous Lead", "Ziad Essam", {
         photo: "ziad-essam",
         linkedIn: "https://www.linkedin.com/in/ziad-essam-a202b3244",
       }), department: "Team Leadership" },
@@ -490,6 +479,7 @@ const ROSTER_2026: YearRoster = {
         }),
         section("Structure", [
           slot("Section Lead", "Mira Barsoum", {
+            photo: "mira-barsoum-2026",
             linkedIn: "https://www.linkedin.com/in/mira-barsoum-457531297/",
             gradYear: "2026",
             major: "Mechatronics and Robotics",
@@ -556,42 +546,42 @@ const ROSTER_2026: YearRoster = {
       sections: [
         section("AI", [
           slot("Section Lead", "Mohamed Bassem", {
-            cardBackdrop: 3,
             photo: "mohamed-bassem-2026",
             linkedIn: "https://www.linkedin.com/in/mohamed-bassem-abbas/",
             gradYear: "2026",
             major: "Computer & Communication Engineering",
           }),
           slot("Member", "Abdelrahman Aboelwafa", {
-            cardBackdrop: 4,
             photo: "abdelrahman-yasser",
             linkedIn: "https://www.linkedin.com/in/abdelrahmanaboelwafa",
             gradYear: "2028+",
             major: "CCE",
           }),
           slot("Member", "Ahmed ElMetwalli", {
-            cardBackdrop: 3,
             photo: "ahmed-elmetwalli",
             linkedIn: "https://www.linkedin.com/in/ahmed-el-mitwally-71385433b/",
             gradYear: "2028",
             major: "Computer and Communications",
           }),
           slot("Member", "Dina Shiha", {
-            cardBackdrop: 4,
             photo: "dina-shiha",
             linkedIn: "https://www.linkedin.com/in/dina-shiha-822b43203",
             gradYear: "2026",
             major: "Electromechanical Engineering",
           }),
           slot("Member", "Fai Raafat", {
-            cardBackdrop: 3,
             photo: "fai-raafat",
             linkedIn: "https://linkedin.com/in/fai-rotan-6832b835a",
             gradYear: "2027",
             major: "CCE",
           }),
+          slot("Member", "Jana Hani", {
+            photo: "jana-hani",
+            linkedIn: "https://www.linkedin.com/in/jana-elmenoufi-644319256/",
+            gradYear: "2026",
+            major: "Mechatronics",
+          }),
           slot("Member", "Reem Eldalil", {
-            cardBackdrop: 4,
             photo: "reem-eldalil-2026",
             linkedIn: "https://eg.linkedin.com/in/reem-eldalil-645127223",
             gradYear: "2027",
@@ -613,14 +603,12 @@ const ROSTER_2026: YearRoster = {
         // Youssef Hozayen also runs Hardware, on top of his top-level Vice Lead card.
         section("Hardware", [
           slot("Section Lead", "Youssef Hozayen", {
-            cardBackdrop: 3,
             photo: "youssef-hozayen-2026",
             linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
             gradYear: "2027",
             major: "Mechatronics and robotics engineering",
           }),
           slot("Vice Section Lead", "Menna Ezzat", {
-            cardBackdrop: 4,
             photo: "menna-ezzat-2026",
             linkedIn: "https://www.linkedin.com/in/menna-ezzat-bba468267/",
             gradYear: "2026",
@@ -635,21 +623,18 @@ const ROSTER_2026: YearRoster = {
             major: "Mechatronics and Robotics",
           }),
           slot("Member", "Rewan Gomaa", {
-            cardBackdrop: 3,
             photo: "rewan-gomaa",
             linkedIn: "https://www.linkedin.com/in/rewan-mohamed-b5549624a/",
             gradYear: "2027",
             major: "Mechatronics",
           }),
           slot("Member", "Youssef Fawzy", {
-            cardBackdrop: 4,
             photo: "youssef-fawzy",
             linkedIn: "https://www.linkedin.com/in/youssef-fawzy-1b93242a6/",
             gradYear: "2027",
             major: "Mechatronics and robotics",
           }),
           slot("Member", "Youssef Morgan", {
-            cardBackdrop: 3,
             photo: "youssef-morgan",
             linkedIn: "https://www.linkedin.com/in/youssefadell11",
             gradYear: "2027",
@@ -688,13 +673,19 @@ const ROSTER_2026: YearRoster = {
           // No portrait yet — hidden rather than shown as an empty slot.
           // Add a `photo` and drop `hidden` to bring the card back.
           slot("Member", "Ahmed Ibrahim", { hidden: true }),
-          // Onto a row of his own, below the other two.
+          // Onto a second row, below the other two — Nour sits beside Tarek.
           slot("Member", "Tarek Mohamed", {
             breakBefore: true,
             photo: "tarek-mohamed",
             linkedIn: "https://www.linkedin.com/in/tarek-mohamed-elsayed-08b120403",
             gradYear: "2027",
             major: "Computer and Communication",
+          }),
+          slot("Member", "Nour Walid", {
+            photo: "nour-walid",
+            linkedIn: "https://www.linkedin.com/in/nour-walid-6b2b8b262/",
+            gradYear: "2026",
+            major: "Mechatronics",
           }),
         ], {
           blurb:

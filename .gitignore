@@ -32,3 +32,30 @@ Thumbs.db
 # Claude Code agent state / worktrees
 .claude/
 exports/
+
+# Art source — full-resolution plates the shipped assets are derived from.
+#
+# Nothing here is imported or bundled; it is the input to the scripts in
+# scripts/, kept out of the repo because it is large (~8 MB and growing) and
+# only whoever is re-cutting an image needs it.
+#
+#   art-source/members/<slug>.webp         the portrait straight off the phone
+#   art-source/members/<slug>-cutout.png   the same frame, background removed
+#
+# Both are on one coordinate grid, which is what lets
+# scripts/recrop-portraits.mjs re-frame a card in a couple of seconds. Without
+# them that script cannot run — so if you need to re-crop a portrait and this
+# folder is missing, ask whoever added the member for their copy.
+art-source/
+
+# Camera originals. iPhone portraits arrive as HEIC; Vite's glob in team.ts only
+# picks up jpg/jpeg/png/webp, so these never shipped — they were just sitting in
+# the assets folder at ~2 MB each.
+*.HEIC
+*.heic
+
+# Raw backdrop plates. lightmode_card3.png is the source card-backdrop-light.webp
+# was generated from (the recipe is in the comment beside it in theme.css); the
+# other three are alternates that were not taken. Same reasoning as art-source —
+# source material, not build input.
+src/assets/team/lightmode_card*.png
