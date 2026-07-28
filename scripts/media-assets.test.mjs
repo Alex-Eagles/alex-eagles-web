@@ -1,50 +1,47 @@
 import assert from "node:assert/strict";
-import { readFile, stat } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import test from "node:test";
 
 const mediaPlacements = [
   {
     component: "src/pages/Home.tsx",
-    video: "public/media/homepage-background.mp4",
-    poster: "public/media/homepage-background-poster.jpg",
-    maxVideoBytes: 10 * 1024 * 1024,
+    image: "public/media/homepage-background-poster.jpg",
   },
   {
     component: "src/pages/Home.tsx",
-    video: "public/media/homepage-mobile.mp4",
-    poster: "public/media/homepage-mobile-poster.jpg",
-    maxVideoBytes: 8 * 1024 * 1024,
+    image: "public/media/homepage-mobile-poster.jpg",
   },
   {
     component: "src/pages/Blog.tsx",
-    video: "public/media/blog-hero.mp4",
-    poster: "public/media/blog-hero-poster.jpg",
-    maxVideoBytes: 25 * 1024 * 1024,
+    image: "public/media/blog-hero-poster.jpg",
   },
 ];
 
 for (const placement of mediaPlacements) {
-  test(`${placement.video} is published and used`, async () => {
-    const [videoStats, posterStats, component] = await Promise.all([
-      stat(placement.video),
-      stat(placement.poster),
+  test(`${placement.image} is published and used`, async () => {
+    const [imageStats, component] = await Promise.all([
+      stat(placement.image),
       readFile(placement.component, "utf8"),
     ]);
 
-    assert.ok(videoStats.size > 0, `${placement.video} should not be empty`);
+    assert.ok(imageStats.size > 0, `${placement.image} should not be empty`);
     assert.ok(
-      videoStats.size <= placement.maxVideoBytes,
-      `${placement.video} exceeds its web-delivery size budget`,
+      imageStats.size <= 250 * 1024,
+      `${placement.image} exceeds its web-delivery size budget`,
     );
-    assert.ok(posterStats.size > 0, `${placement.poster} should not be empty`);
-    assert.ok(
-      posterStats.size <= 250 * 1024,
-      `${placement.poster} exceeds its web-delivery size budget`,
-    );
-    assert.ok(component.includes(`/${placement.video.replace("public/", "")}`));
-    assert.ok(component.includes(`/${placement.poster.replace("public/", "")}`));
+    assert.ok(component.includes(`/${placement.image.replace("public/", "")}`));
   });
 }
+
+test("no video assets ship with the site", async () => {
+  const videoExtensions = [".mp4", ".webm", ".mov", ".ogv", ".m4v"];
+  const files = await readdir("public/media");
+  const videos = files.filter((file) =>
+    videoExtensions.some((extension) => file.toLowerCase().endsWith(extension)),
+  );
+
+  assert.deepEqual(videos, [], "public/media should contain no video files");
+});
 
 test("Vercel caches published media for repeat visits", async () => {
   const config = JSON.parse(await readFile("vercel.json", "utf8"));

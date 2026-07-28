@@ -99,15 +99,16 @@ Client-side routing via React Router. Routes are declared in `src/App.tsx`:
 
 | Route       | Page       | Status        |
 | ----------- | ---------- | ------------- |
-| `/`         | Home       | ✅ Video landing page |
+| `/`         | Home       | ✅ Image landing page |
 | `/team`     | Team       | 🚧 Coming soon |
-| `/blog`     | Blog       | ✅ Video landing page |
+| `/blog`     | Blog       | ✅ Image landing page |
 | `/vehicles` | Vehicles   | 🚧 Coming soon |
 | `/gallery`  | Gallery    | 🚧 Coming soon |
 | `/history`  | History    | 🚧 Coming soon |
 | `*`         | NotFound   | 404 fallback  |
 
-The **Home** and **Blog** routes have video-led landing pages. Home remains
+The **Home** and **Blog** routes have image-led landing pages, backed by the
+full-bleed stills in `public/media/` (see `AmbientImage`). Home remains
 clearly marked as being in active development; Team, Vehicles, Gallery, and
 History render a polished, on-brand `ComingSoon` placeholder.
 

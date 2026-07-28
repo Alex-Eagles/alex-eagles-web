@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import AeLogo from "@/components/ui/AeLogo";
-import AmbientVideo from "@/components/ui/AmbientVideo";
+import AmbientImage from "@/components/ui/AmbientImage";
 import Button from "@/components/ui/Button";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -10,9 +10,9 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  *
  * Layering (back → front):
  *   1. Radial brand gradient      — always present; also the fallback if no
- *                                    video file is provided.
- *   2. Drone background video      — muted / autoplay / loop.
- *   3. Darkening overlay           — keeps headline text readable over video.
+ *                                    image file is provided.
+ *   2. Drone background still      — full-bleed, decorative.
+ *   3. Darkening overlay           — keeps headline text readable over it.
  *   4. Animated indigo grid        — subtle aerospace texture.
  *   5. Bottom fade into the page.
  *   6. Floating brand crest + copy — parallaxes gently on scroll.
@@ -26,7 +26,7 @@ export default function Hero() {
 
   return (
     <header className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* 1. Base radial gradient (also the no-video fallback). */}
+      {/* 1. Base radial gradient (also the no-image fallback). */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -36,19 +36,14 @@ export default function Hero() {
         }}
       />
 
-      {/* 2. Drone background video. */}
-      <AmbientVideo
-        src="/media/homepage-background.mp4"
-        poster="/media/homepage-background-poster.jpg"
-        mobileSrc="/media/homepage-mobile.mp4"
-        mobilePoster="/media/homepage-mobile-poster.jpg"
-        label="homepage background video"
+      {/* 2. Drone background still. */}
+      <AmbientImage
+        src="/media/homepage-background-poster.jpg"
+        mobileSrc="/media/homepage-mobile-poster.jpg"
         className="absolute inset-0"
-        preload="auto"
-        controlClassName="bottom-6 right-6 md:bottom-8 md:right-8"
       />
 
-      {/* 3. Darkening overlay for text contrast over the video. */}
+      {/* 3. Darkening overlay for text contrast over the image. */}
       <div
         aria-hidden="true"
         className="absolute inset-0"

@@ -1,11 +1,11 @@
 import { Construction, Radio } from "lucide-react";
 import AeLogo from "@/components/ui/AeLogo";
-import AmbientVideo from "@/components/ui/AmbientVideo";
+import AmbientImage from "@/components/ui/AmbientImage";
 import Button from "@/components/ui/Button";
 
 /**
- * Video-led holding page. It preserves the site's under-construction status
- * while giving desktop and mobile visitors footage tailored to their screens.
+ * Image-led holding page. It preserves the site's under-construction status
+ * while giving desktop and mobile visitors artwork tailored to their screens.
  */
 export default function Home() {
   return (
@@ -19,15 +19,10 @@ export default function Home() {
         }}
       />
 
-      <AmbientVideo
-        src="/media/homepage-background.mp4"
-        poster="/media/homepage-background-poster.jpg"
-        mobileSrc="/media/homepage-mobile.mp4"
-        mobilePoster="/media/homepage-mobile-poster.jpg"
-        label="homepage background video"
+      <AmbientImage
+        src="/media/homepage-background-poster.jpg"
+        mobileSrc="/media/homepage-mobile-poster.jpg"
         className="absolute inset-0"
-        preload="auto"
-        controlClassName="bottom-6 right-6 md:bottom-8 md:right-8"
       />
 
       <div

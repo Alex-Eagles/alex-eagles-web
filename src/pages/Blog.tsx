@@ -1,10 +1,10 @@
 import { BookOpen, MapPin, Timer } from "lucide-react";
 import type { ReactNode } from "react";
-import AmbientVideo from "@/components/ui/AmbientVideo";
+import AmbientImage from "@/components/ui/AmbientImage";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
-/** Blog landing page — field footage followed by the build-log introduction. */
+/** Blog landing page — a field still followed by the build-log introduction. */
 export default function Blog() {
   return (
     <>
@@ -18,13 +18,9 @@ export default function Blog() {
           }}
         />
 
-        <AmbientVideo
-          src="/media/blog-hero.mp4"
-          poster="/media/blog-hero-poster.jpg"
-          label="build-log background video"
+        <AmbientImage
+          src="/media/blog-hero-poster.jpg"
           className="absolute inset-0"
-          preload="metadata"
-          controlClassName="bottom-6 right-6 md:bottom-8 md:right-8"
         />
 
         <div
@@ -66,7 +62,7 @@ export default function Blog() {
 
           <div className="flex flex-wrap gap-3 text-white/75">
             <MetaPill icon={<MapPin size={14} />} text="Alexandria, Egypt" />
-            <MetaPill icon={<Timer size={14} />} text="02:28 field footage" />
+            <MetaPill icon={<Timer size={14} />} text="Updated weekly" />
           </div>
         </div>
       </header>
@@ -89,9 +85,9 @@ export default function Blog() {
           <ScrollReveal delay={0.1}>
             <div className="border-l-2 border-brand pl-6">
               <p className="m-0 font-sans text-[17px] leading-[1.75] text-fg-muted">
-                New field notes are being assembled from the same workshop and
-                flight tests shown above. This build log will document the
-                decisions, iterations, and people behind each milestone.
+                New field notes are being assembled from the workshop and
+                flight tests behind this season. This build log will document
+                the decisions, iterations, and people behind each milestone.
               </p>
               <p className="mb-0 mt-5 font-mono text-xs font-semibold uppercase tracking-[0.12em] text-brand-light">
                 First entries in preparation
