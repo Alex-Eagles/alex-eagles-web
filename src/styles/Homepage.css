@@ -1,0 +1,38 @@
+/* Fixed full-viewport drone-video background, shared by every section on
+ * the Homepage. Sits behind the scrolling content (z-index 0), which stays
+ * on top at z-index 10 (see global.css's documented z-index scale). */
+.homepage-bg-video {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.homepage-bg-video-el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A light veil over the clip — just enough to keep section text legible and
+ * tame visual noise, while letting the footage read clearly behind everything.
+ * Theme-aware: a soft dark veil over the dark clip, a soft light veil over the
+ * light clip (a dark scrim in light mode would wrongly darken the bright clip).
+ * Nudge these opacities to taste — lower = more video, higher = more contrast. */
+.homepage-bg-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 10, 20, 0.3);
+}
+
+:root[data-theme="light"] .homepage-bg-scrim {
+  background: rgba(238, 240, 250, 0.35);
+}
+
+.homepage-content {
+  position: relative;
+  z-index: 10;
+}

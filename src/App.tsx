@@ -4,8 +4,9 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import IntroSplash from "@/components/ui/IntroSplash";
 
-import Home from "@/pages/Home";
+import Homepage from "@/pages/Homepage";
 import Team from "@/pages/Team";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
@@ -39,6 +40,8 @@ function ScrollToTop() {
 export default function App() {
   return (
     <>
+      <IntroSplash />
+
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -49,7 +52,8 @@ export default function App() {
 
       <main id="main-content">
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* <Route path="/" element={<Home />} /> */}
+          <Route path="/" element={<Homepage />} />
           <Route path="/team" element={<Team />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogPost />} />

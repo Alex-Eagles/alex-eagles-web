@@ -1,0 +1,128 @@
+.sponsors {
+  padding: 60px 20px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  text-align: center;
+  font-family: var(--font-sans);
+}
+
+/* Header */
+.sponsors-header h2 {
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.sponsors-header p {
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
+/* Marquee wrapper: hides overflow and fades the edges */
+.sponsors-marquee {
+  overflow: hidden;
+  position: relative;
+  max-width: 900px;
+  margin: auto;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+/* The scrolling row itself. Width is auto because content is duplicated in JSX */
+.sponsors-track {
+  display: flex;
+  width: max-content;
+  gap: 25px;
+  animation: sponsors-scroll 12s linear infinite;
+}
+
+/* Pause on hover so users can read a name if they want to */
+.sponsors-marquee:hover .sponsors-track {
+  animation-play-state: paused;
+}
+
+.sponsor-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  width: 180px;
+  height: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.sponsor-card img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Fallback for sponsors without a logo file yet — text sits on the same
+ * white chip, so it needs its own dark, theme-independent color. */
+.sponsor-card--text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #1a1a2e;
+  white-space: nowrap;
+}
+
+.sponsor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--elevation-2);
+}
+
+@keyframes sponsors-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* Exactly -50% because the sponsor list is duplicated once */
+    transform: translateX(-50%);
+  }
+}
+
+/* Footer */
+.sponsors-footer {
+  margin-top: 40px;
+}
+
+.sponsors-footer p {
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+}
+
+.sponsors-footer button {
+  padding: 12px 25px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.sponsors-footer button:hover {
+  background: var(--brand-light);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sponsor-card {
+    width: 130px;
+    height: 70px;
+    padding: 12px;
+  }
+
+  .sponsor-card--text {
+    font-size: 15px;
+  }
+}

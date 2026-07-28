@@ -424,12 +424,12 @@
   --toggle-opacity: 0.52;
 
   /* Surfaces (back → front) */
-  --bg-primary: #07091c; /* deep-space navy — page background   */
-  --bg-surface: #0d1035; /* section backgrounds                 */
-  --bg-elevated: #161a50; /* cards, modals, elevated elements    */
-  --bg-glass: rgba(22, 26, 80, 0.6); /* glassmorphic overlays (navbar etc.) */
-  --canvas: #0d1035; /* alias: section canvas behind cards   */
-  --card: #161a50; /* the card surface itself             */
+  --bg-primary: #060a14; /* near-black aerospace-night blue — page background */
+  --bg-surface: #0b1224; /* section backgrounds                 */
+  --bg-elevated: #121b34; /* cards, modals, elevated elements    */
+  --bg-glass: rgba(18, 27, 52, 0.65); /* glassmorphic overlays (navbar etc.) */
+  --canvas: #0b1224; /* alias: section canvas behind cards   */
+  --card: #121b34; /* the card surface itself             */
 
   /* ── Chapter bands ────────────────────────────────────────────────────────
    * The two — and only two — background tones a long page alternates between
@@ -513,8 +513,8 @@
   --text-muted: #8286b7;
 
   /* Borders */
-  --border-subtle: rgba(60, 64, 181, 0.18);
-  --border-solid: #1e2258;
+  --border-subtle: rgba(59, 130, 246, 0.18);
+  --border-solid: #1b2846;
 
   /* 4-level elevation system */
   --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4);
@@ -561,9 +561,9 @@
 
   --bg-primary: #f7f8ff; /* faintly indigo-tinted white          */
   --bg-surface: #ffffff;
-  --bg-elevated: #eceeff;
+  --bg-elevated: #eaf2ff;
   --bg-glass: rgba(255, 255, 255, 0.75);
-  --canvas: #eceeff; /* section canvas behind cards          */
+  --canvas: #eaf2ff; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
 
   /* ── Chapter bands (LIGHT) ────────────────────────────────────────────────
@@ -642,12 +642,12 @@
   --jump-row-hover: rgba(60, 64, 181, 0.10);
   --jump-row-active: rgba(20, 54, 168, 0.13);
 
-  --text-primary: #0d1030; /* deep navy text                       */
-  --text-secondary: #3b3f7a;
-  --text-muted: #6366a8;
+  --text-primary: #0b1220; /* deep cool navy text                  */
+  --text-secondary: #35507a;
+  --text-muted: #6b84ac;
 
-  --border-subtle: #d4d6f0;
-  --border-solid: #b0b3e0;
+  --border-subtle: #d7e6fb;
+  --border-solid: #aecbf2;
 
   --elevation-1: 0 1px 3px rgba(60, 64, 181, 0.08);
   --elevation-2: 0 4px 12px rgba(60, 64, 181, 0.12);

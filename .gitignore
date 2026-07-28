@@ -9,6 +9,9 @@ dist-ssr
 exports
 *.local
 
+# Local secrets (EmailJS keys, etc.) — copy .env.example to .env and fill in
+.env
+
 # Logs
 logs
 *.log
@@ -59,3 +62,6 @@ art-source/
 # other three are alternates that were not taken. Same reasoning as art-source —
 # source material, not build input.
 src/assets/team/lightmode_card*.png
+# Python bytecode cache (ui-ux-pro-max skill scripts)
+__pycache__/
+*.pyc
