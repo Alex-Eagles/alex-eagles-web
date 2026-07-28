@@ -129,6 +129,16 @@ export interface TeamMember {
    * for it currently.
    */
   major?: string;
+  /**
+   * Keep the slot in this file but off the page. For someone who's on the
+   * roster but has no portrait yet: the card would otherwise render as a
+   * "Drop portrait" placeholder in the middle of a finished grid.
+   *
+   * `section()` strips these when it builds, so nothing downstream — the grid,
+   * the headcounts, the hero totals — has to know about them. Delete the flag
+   * (and add a `photo`) to bring one back.
+   */
+  hidden?: boolean;
 }
 
 /**
@@ -347,8 +357,10 @@ const section = (
   name,
   id: slugify(name),
   // `department` is always the section name, so it's stamped on here rather
-  // than repeated on every row.
-  members: members.map((m) => ({ ...m, department: name })),
+  // than repeated on every row. Hidden slots are dropped at this point, so
+  // they exist in the source above but nowhere downstream — no card, no
+  // headcount, no hero total.
+  members: members.filter((m) => !m.hidden).map((m) => ({ ...m, department: name })),
   ...(opts.blurb ? { blurb: opts.blurb } : {}),
   ...(opts.icon ? { icon: opts.icon } : {}),
   ...(opts.stackLeads ? { stackLeads: true } : {}),
@@ -555,8 +567,10 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Mechatronics",
           }),
-          // Submitted the form, no photo yet.
+          // No portrait yet — hidden rather than shown as an empty slot.
+          // Add a `photo` and drop `hidden` to bring the card back.
           slot("Member", "Hossam Eldin Elshazly", {
+            hidden: true,
             linkedIn: "https://www.linkedin.com/in/hossam-eldeen-2158a4284/",
             gradYear: "2027",
             major: "Computer and communication",
@@ -580,7 +594,10 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2026",
             major: "Mechatronics",
           }),
+          // No portrait yet — hidden rather than shown as an empty slot.
+          // Add a `photo` and drop `hidden` to bring the card back.
           slot("Vice Section Lead", "Lina Tarek", {
+            hidden: true,
             linkedIn: "https://www.linkedin.com/in/lina-ahmed-baa06a232",
             gradYear: "2027",
             major: "Mechatronics and Robotics",
@@ -633,11 +650,11 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Mechatronics",
           }),
-          // Drops to the second row so the two unfilled slots sit together
-          // rather than splitting 3 + 1 across the three-across grid.
-          slot("Member", "Ahmed Ibrahim", { breakBefore: true }),
-          // Submitted the form, no photo yet.
+          // No portrait yet — hidden rather than shown as an empty slot.
+          // Add a `photo` and drop `hidden` to bring the card back.
+          slot("Member", "Ahmed Ibrahim", { hidden: true }),
           slot("Member", "Tarek Mohamed", {
+            photo: "tarek-mohamed",
             linkedIn: "https://www.linkedin.com/in/tarek-mohamed-elsaye",
             gradYear: "2027",
             major: "Computer and Communication",
