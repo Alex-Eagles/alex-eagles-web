@@ -16,7 +16,6 @@ import Features from "./Features";
 import Video from "./Video";
 import Updates from "./Updates";
 import Sponsors from "./Sponsors";
-import Contact from "./Contact";
 import TeamStructure from "./TeamStructure";
 
 export default function Homepage() {
@@ -50,7 +49,6 @@ export default function Homepage() {
         <Updates />
         <Video />
         <Sponsors />
-        <Contact />
       </div>
     </>
   );
