@@ -1,0 +1,809 @@
+/* "Built by Subsystems" — top-down pyramid org chart with per-subsystem
+ * colors/icons and a single light bulb relaying down the whole path:
+ * Team Leader -> Vice Lead -> branch point -> splits into two, one per
+ * Lead -> cascades through each Lead's 3 subteam pills. Theme-aware via
+ * the tokens below (dark-mode default, crisp white + light-blue for
+ * light mode, matching the team logo). Namespaced with tp-. */
+:root,
+:root[data-theme="dark"] {
+  --ts-bg: #0a0e1f;
+  --ts-text: #ffffff;
+  --ts-text-muted-1: rgba(255, 255, 255, 0.65);
+  --ts-text-muted-2: rgba(255, 255, 255, 0.5);
+  --ts-text-muted-3: rgba(255, 255, 255, 0.35);
+  --ts-border: rgba(255, 255, 255, 0.12);
+  --ts-border-soft: rgba(255, 255, 255, 0.2);
+  --ts-grid-line: rgba(255, 255, 255, 0.04);
+  --ts-arm: linear-gradient(90deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08));
+  --ts-radar-ring: rgba(255, 255, 255, 0.08);
+  --ts-shadow: rgba(0, 0, 0, 0.6);
+  --ts-card-bg: rgba(255, 255, 255, 0.03);
+  --ts-gold: #f59e0b;
+  --ts-gold-text: #fde68a;
+  --ts-gold-bg: rgba(245, 158, 11, 0.08);
+}
+
+/* Light mode — a crisp white + light-blue palette matching the team logo,
+ * instead of the site's generic pale blue-gray tokens. White page/section
+ * background, light-blue-tinted card surfaces, and visibly blue (not
+ * barely-there) borders/grid/glow, so it still reads as a technical
+ * diagram rather than washing out flat. */
+:root[data-theme="light"] {
+  --ts-bg: #ffffff;
+  --ts-text: #0b1220;
+  --ts-text-muted-1: #3b5a8a;
+  --ts-text-muted-2: #5b7bab;
+  --ts-text-muted-3: #8aa4c9;
+  --ts-border: #bfdbfe;
+  --ts-border-soft: #dbeafe;
+  --ts-grid-line: rgba(59, 130, 246, 0.1);
+  --ts-arm: linear-gradient(90deg, #93c5fd, #dbeafe);
+  --ts-radar-ring: #bfdbfe;
+  --ts-shadow: rgba(59, 130, 246, 0.18);
+  --ts-card-bg: #eff6ff;
+  --ts-gold: var(--gold);
+  --ts-gold-text: var(--gold);
+  --ts-gold-bg: rgba(180, 83, 9, 0.1);
+}
+
+.tp-section {
+  position: relative;
+  overflow: hidden;
+  background: var(--ts-bg);
+  padding: 100px 6% 120px;
+}
+
+.tp-grid-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(var(--ts-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ts-grid-line) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: ae-grid 8s linear infinite;
+}
+
+.tp-layout,
+.tp-chart {
+  position: relative;
+  z-index: 1;
+}
+
+.tp-layout {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+}
+
+.tp-intro {
+  max-width: 440px;
+  text-align: left;
+}
+
+.tp-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ts-text-muted-2);
+}
+
+.tp-eyebrow-index {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.tp-eyebrow-line {
+  flex: 0 0 60px;
+  height: 1px;
+  background: var(--ts-border-soft);
+}
+
+.tp-headline {
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(36px, 4.6vw, 54px);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--ts-text);
+  margin: 0 0 24px;
+}
+
+.tp-headline-line {
+  display: block;
+}
+
+.tp-headline-accent {
+  color: #3b82f6;
+}
+
+.tp-copy {
+  max-width: 52ch;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ts-text-muted-1);
+}
+
+.tp-chart {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.tp-tier--single {
+  display: flex;
+  justify-content: center;
+}
+
+.tp-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ts-text);
+  background: var(--ts-card-bg);
+  border: 1px solid var(--ts-border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* bolder, high-contrast edge in light mode, on every box — the pale blue
+ * (and, for Leader/Vice Lead/Lead boxes, gold/accent-colored) borders were
+ * too soft against the white/light-blue background to read as defined
+ * boxes. Higher specificity than .tp-box--top/.tp-box--lead so this wins
+ * on every side, including top. */
+:root[data-theme="light"] .tp-box {
+  border-width: 2px;
+  border-color: #000000;
+}
+
+.tp-box--top {
+  border-top: 2px solid var(--ts-gold);
+  color: var(--ts-gold-text);
+}
+
+.tp-box--top svg {
+  color: var(--ts-gold);
+}
+
+.tp-connector {
+  position: relative;
+  width: 2px;
+  height: 28px;
+  margin: 0 auto;
+  background: var(--ts-border);
+  /* travel distance for the ball below, kept as a custom property (rather
+   * than duplicating each keyframe per height) so it inherits down into
+   * ::after and can be overridden per variant/breakpoint in one place. */
+  --tp-travel: 28px;
+}
+
+/* A single bulb relays down the whole path in one shared timeline: Leader
+ * (lights first) -> ball travels -> Vice Lead (lights on arrival) -> ball
+ * travels -> branch point (bar lights) -> splits into two balls, one per
+ * lead column -> each Lead box (lights on arrival) -> ball continues ->
+ * cascades through its 3 subteam pills. Only one dot per path is ever
+ * visible moving at a time; boxes/bars glow exactly when the dot reaches
+ * them. The ball travels via `transform: translateY()`, not `top` — top/
+ * left trigger layout on every frame of a continuously-looping animation;
+ * transform is GPU-composited and cheap, which matters here since several
+ * of these run at once alongside the box/bar paint flashes. */
+.tp-connector::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #60a5fa;
+  box-shadow: 0 0 8px 2px rgba(96, 165, 250, 0.7);
+  transform: translateY(0);
+  animation-duration: 5.6s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+.tp-connector--top::after {
+  animation-name: tp-pulse-leg1;
+}
+
+.tp-connector--branch::after {
+  animation-name: tp-pulse-leg2;
+}
+
+/* the bulb originates here each cycle — the Leader box gets its own brief
+ * glow right at the loop boundary (0%/100% are the same instant), so it
+ * lights just as the dot is "born" there before traveling down leg 1. */
+.tp-box--lit-0 {
+  animation: tp-box-flash-0 5.6s linear infinite;
+}
+
+@keyframes tp-box-flash-0 {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px #60a5fa, 0 0 26px 6px rgba(96, 165, 250, 0.55);
+  }
+  3%,
+  97% {
+    box-shadow: none;
+  }
+}
+
+/* leg 1: Leader -> Vice Lead. Arrival at 13% is the anchor everything else
+ * below is built from — each stage's glow starts rising at the exact %
+ * its trigger arrives (never a beat before), and the next ball's fade-in
+ * starts the instant that glow finishes: no dead gaps, no anticipation. */
+@keyframes tp-pulse-leg1 {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  13% {
+    transform: translateY(var(--tp-travel));
+    opacity: 1;
+  }
+  15%,
+  100% {
+    transform: translateY(var(--tp-travel));
+    opacity: 0;
+  }
+}
+
+/* the box glows starting exactly at 13% — the instant the ball arrives —
+ * not before. */
+.tp-box--lit-1 {
+  animation: tp-box-flash-1 5.6s linear infinite;
+}
+
+@keyframes tp-box-flash-1 {
+  0%,
+  13% {
+    box-shadow: none;
+  }
+  15% {
+    box-shadow: 0 0 0 1px #60a5fa, 0 0 26px 6px rgba(96, 165, 250, 0.55);
+  }
+  18%,
+  100% {
+    box-shadow: none;
+  }
+}
+
+/* leg 2: Vice Lead -> branch point. Fade-in starts at 18%, the instant Vice
+ * Lead's glow finished — a clean handoff, no gap and no overlap. */
+@keyframes tp-pulse-leg2 {
+  0%,
+  18% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  31% {
+    transform: translateY(var(--tp-travel));
+    opacity: 1;
+  }
+  33%,
+  100% {
+    transform: translateY(var(--tp-travel));
+    opacity: 0;
+  }
+}
+
+.tp-tier3 {
+  position: relative;
+  padding-top: 32px;
+}
+
+.tp-tier3::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: var(--ts-border);
+  animation: tp-bar-flash 5.6s linear infinite;
+}
+
+@keyframes tp-bar-flash {
+  0%,
+  31% {
+    background: var(--ts-border);
+    box-shadow: none;
+  }
+  33% {
+    background: #60a5fa;
+    box-shadow: 0 0 10px 2px rgba(96, 165, 250, 0.6);
+  }
+  36%,
+  100% {
+    background: var(--ts-border);
+    box-shadow: none;
+  }
+}
+
+/* the single ball visibly divides right on the bar: two dots race outward
+ * from the center to each side, starting the same instant (31%) the trunk
+ * ball arrives there and the bar lights — same point in space and time, so
+ * it reads as one ball becoming two rather than a separate, disconnected
+ * blink. Left/right travel here is a % of the bar's own (responsive)
+ * width, which `transform: translateX()` can't express without measuring
+ * the container in JS — kept as `left` as a deliberate, narrow exception:
+ * only 2 elements, ~2% of the cycle, opacity 0 the rest of the time. */
+.tp-split-ball {
+  position: absolute;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: #60a5fa;
+  box-shadow: 0 0 8px 2px rgba(96, 165, 250, 0.7);
+  animation-duration: 5.6s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: left, opacity;
+}
+
+.tp-split-ball--left {
+  animation-name: tp-split-left;
+}
+
+.tp-split-ball--right {
+  animation-name: tp-split-right;
+}
+
+@keyframes tp-split-left {
+  0%,
+  31% {
+    left: 50%;
+    opacity: 0;
+  }
+  33% {
+    opacity: 1;
+  }
+  38% {
+    left: 25%;
+    opacity: 1;
+  }
+  40%,
+  100% {
+    left: 25%;
+    opacity: 0;
+  }
+}
+
+@keyframes tp-split-right {
+  0%,
+  31% {
+    left: 50%;
+    opacity: 0;
+  }
+  33% {
+    opacity: 1;
+  }
+  38% {
+    left: 75%;
+    opacity: 1;
+  }
+  40%,
+  100% {
+    left: 75%;
+    opacity: 0;
+  }
+}
+
+.tp-leads {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.tp-lead-column {
+  position: relative;
+}
+
+/* the branch bar splits into two balls here, one per lead column — reuses
+ * the same .tp-connector/::after mechanism as the trunk legs above, just
+ * absolutely positioned to sit in the gap above each lead box. */
+.tp-connector--split {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  height: 32px;
+  margin: 0;
+  transform: translateX(-50%);
+  background: var(--accent);
+  opacity: 0.4;
+  --tp-travel: 32px;
+}
+
+.tp-connector--split::after {
+  animation-name: tp-pulse-leg3;
+  background: var(--accent);
+  box-shadow: 0 0 8px 2px var(--accent);
+}
+
+/* leg 3: branch point -> each Lead box (two balls, same timeline). Fade-in
+ * starts at 40%, the instant the horizontal split finished fading out at
+ * that same spot — the ball keeps going straight down with no gap. */
+@keyframes tp-pulse-leg3 {
+  0%,
+  40% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  42% {
+    opacity: 1;
+  }
+  53% {
+    transform: translateY(var(--tp-travel));
+    opacity: 1;
+  }
+  55%,
+  100% {
+    transform: translateY(var(--tp-travel));
+    opacity: 0;
+  }
+}
+
+.tp-box--lead {
+  width: 100%;
+  flex-direction: column;
+  gap: 8px;
+  border-color: var(--accent);
+  padding: 18px 12px;
+  font-size: 13px;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.tp-box--lead:hover {
+  transform: translateY(-5px);
+  background: var(--ts-card-bg);
+}
+
+/* both leads flash together — the branch point is where the single bulb's
+ * path splits, so this is the one moment two boxes light up at once. */
+.tp-box--lit-2 {
+  animation: tp-box-flash-2 5.6s linear infinite;
+}
+
+@keyframes tp-box-flash-2 {
+  0%,
+  53% {
+    box-shadow: none;
+  }
+  55% {
+    box-shadow: 0 0 0 1px var(--accent), 0 0 26px 6px var(--accent);
+  }
+  58%,
+  100% {
+    box-shadow: none;
+  }
+}
+
+.tp-lead-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* the light keeps going past the Lead box, down into its subteam list —
+ * both the line's own pulse and a discrete traveling ball (via .tp-connector
+ * shared on this element too). */
+.tp-lead-connector {
+  width: 2px;
+  height: 16px;
+  margin: 0 auto;
+  background: var(--accent);
+  opacity: 0.4;
+  animation: tp-connector-flash 5.6s linear infinite;
+  --tp-travel: 16px;
+}
+
+.tp-lead-connector::after {
+  animation-name: tp-pulse-leg4;
+  background: var(--accent);
+  box-shadow: 0 0 8px 2px var(--accent);
+}
+
+/* leg 4: Lead box -> subteam list. Fade-in starts at 58%, the instant the
+ * Lead box finishes flashing. Arrival at 69% is where the subteam cascade
+ * below picks up. */
+@keyframes tp-pulse-leg4 {
+  0%,
+  58% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  69% {
+    transform: translateY(var(--tp-travel));
+    opacity: 1;
+  }
+  71%,
+  100% {
+    transform: translateY(var(--tp-travel));
+    opacity: 0;
+  }
+}
+
+@keyframes tp-connector-flash {
+  0%,
+  69% {
+    opacity: 0.4;
+    box-shadow: none;
+  }
+  71% {
+    opacity: 1;
+    box-shadow: 0 0 8px 2px var(--accent);
+  }
+  74%,
+  100% {
+    opacity: 0.4;
+    box-shadow: none;
+  }
+}
+
+.tp-owns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tp-owns-item {
+  position: relative;
+  padding: 10px 12px;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--ts-text-muted-1);
+  background: var(--ts-card-bg);
+  border: 1px solid var(--ts-border);
+  border-left: 2px solid var(--accent);
+  border-radius: 6px;
+  animation: tp-owns-flash 5.6s linear infinite;
+}
+
+/* a short connector (line + traveling ball) between each subteam pill,
+ * sitting in the flex gap below it — same convention as every other
+ * connector in this diagram, just short enough to fit an 8px gap. Only
+ * the first two pills get one; there's nothing below the last pill. */
+.tp-owns-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 2px;
+  height: 8px;
+  transform: translateX(-50%);
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.tp-owns-item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px 2px var(--accent);
+  transform: translateY(0);
+  opacity: 0;
+  animation-duration: 5.6s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+/* leg 5: subteam pill 1 -> pill 2. Fade-in starts at 74%, the instant
+ * pill 1 finishes flashing. Travel window is 3% of the cycle (~0.17s) for
+ * this 8px hop, matching the ~45px/s speed the trunk legs travel at above
+ * (e.g. leg 1: 28px over 11% = ~45px/s). */
+.tp-owns-item:nth-child(1)::after {
+  animation-name: tp-pulse-leg5;
+}
+
+@keyframes tp-pulse-leg5 {
+  0%,
+  74% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+  78% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+  79%,
+  100% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+
+/* leg 6: subteam pill 2 -> pill 3. Same speed, one beat later. */
+.tp-owns-item:nth-child(2)::after {
+  animation-name: tp-pulse-leg6;
+}
+
+@keyframes tp-pulse-leg6 {
+  0%,
+  83% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  84% {
+    opacity: 1;
+  }
+  87% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+  88%,
+  100% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+
+/* same bold black edge in light mode, on the subteam pills too */
+:root[data-theme="light"] .tp-owns-item {
+  border-width: 2px;
+  border-color: #000000;
+}
+
+/* the bulb cascades down the three subteam pills in turn */
+.tp-owns-item:nth-child(1) {
+  animation-name: tp-owns-flash-1;
+}
+
+.tp-owns-item:nth-child(2) {
+  animation-name: tp-owns-flash-2;
+}
+
+.tp-owns-item:nth-child(3) {
+  animation-name: tp-owns-flash-3;
+}
+
+@keyframes tp-owns-flash-1 {
+  0%,
+  69% {
+    box-shadow: none;
+  }
+  71% {
+    box-shadow: 0 0 16px 1px var(--accent);
+  }
+  74%,
+  100% {
+    box-shadow: none;
+  }
+}
+
+@keyframes tp-owns-flash-2 {
+  0%,
+  78% {
+    box-shadow: none;
+  }
+  80% {
+    box-shadow: 0 0 16px 1px var(--accent);
+  }
+  83%,
+  100% {
+    box-shadow: none;
+  }
+}
+
+@keyframes tp-owns-flash-3 {
+  0%,
+  87% {
+    box-shadow: none;
+  }
+  89% {
+    box-shadow: 0 0 16px 1px var(--accent);
+  }
+  92%,
+  100% {
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 1000px) {
+  .tp-layout {
+    grid-template-columns: 1fr;
+    gap: 56px;
+  }
+
+  .tp-intro {
+    max-width: 560px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .tp-eyebrow {
+    justify-content: center;
+  }
+
+  .tp-copy {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .tp-leads {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .tp-tier3::before {
+    display: none;
+  }
+
+  .tp-connector--split {
+    top: -28px;
+    height: 28px;
+    --tp-travel: 28px;
+  }
+
+  .tp-tier3 {
+    padding-top: 28px;
+  }
+}
+
+/* the relay is a continuous infinite-loop animation — mandatory to collapse
+ * under reduced motion. The traveling balls need an explicit opacity:0
+ * (their only opacity control is the animation itself); everything else's
+ * un-animated resting state is already the correct "off" look. */
+@media (prefers-reduced-motion: reduce) {
+  .tp-grid-bg,
+  .tp-box--lit-0,
+  .tp-box--lit-1,
+  .tp-box--lit-2,
+  .tp-tier3::before,
+  .tp-lead-connector,
+  .tp-owns-item {
+    animation: none;
+  }
+
+  .tp-connector::after,
+  .tp-split-ball,
+  .tp-owns-item::after {
+    animation: none;
+    opacity: 0;
+  }
+}

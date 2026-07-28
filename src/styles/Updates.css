@@ -14,6 +14,17 @@
   color: var(--text-primary);
 }
 
+/* Elevated canvas behind the grid — mirrors the blog page's "nested card
+ * depth" panel (a bordered, slightly-elevated surface the cards sit on top
+ * of), instead of the cards floating directly on the section background. */
+.updates-canvas {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--elevation-2);
+}
+
 /* container */
 .updates-list {
   display: grid;
@@ -21,51 +32,82 @@
   gap: 20px;
 }
 
-/* each square box */
+/* each card — bold display-font title + a bordered footer for the date,
+ * same shape as the blog page's post cards (title / meta / bordered
+ * footer), minus the cover photo + category badge achievements don't have
+ * data for. */
 .update-item {
   position: relative;
   background: var(--card);
-  padding: 20px;
-  border-radius: 10px;
+  padding: 26px 24px 20px;
+  border-radius: 14px;
   text-align: left;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  border-left: 5px solid var(--brand);
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--brand);
   box-shadow: var(--elevation-1);
 
-  aspect-ratio: 1 / 1;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .update-item:hover {
   background: var(--bg-elevated);
+  border-color: var(--brand);
   transform: translateY(-4px);
   box-shadow: var(--elevation-2);
 }
 
-/* Corner pill, mirrors the reference blog card's category badge. */
-.update-badge {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: var(--brand);
-  color: #fff;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
+.update-item-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
-/* text styles */
-.update-item h3 {
-  margin: 0;
-  padding-right: 64px; /* clear the badge */
-  font-size: 22px;
+.update-item-footer {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.update-item-date {
+  font-family: var(--font-mono);
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.3;
-  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Block + fit-content width so it sits left, unaffected by the section's
+ * own text-align: center (which only governs inline content, not block
+ * boxes' own position). */
+.updates-cta {
+  display: block;
+  width: fit-content;
+  margin-top: 32px;
+  padding: 14px 24px;
+  background: var(--brand);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.updates-cta:hover {
+  background: var(--brand-light);
+  transform: translateY(-2px);
 }
 
 /* Stack to one column on small screens */
