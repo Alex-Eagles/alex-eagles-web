@@ -10,31 +10,31 @@ function Technical() {
       <div className="space-y-6 lg:grid lg:grid-cols-3 lg:gap-6 lg:space-y-0">
         <Card
           title="Weight"
-          impact={"7500g"}
-          description="High-performance engine with advanced fuel efficiency."
-          icon={Plus}
-        />
-        <Card
-          title="Weight (Without Payload)"
           impact={"6500g"}
           description="High-performance engine with advanced fuel efficiency."
           icon={Plus}
         />
+        {/* <Card
+          title="Weight (Without Payload)"
+          impact={"6500g"}
+          description="High-performance engine with advanced fuel efficiency."
+          icon={Plus}
+        /> */}
         <Card
           title="Flight time"
-          impact={"35mins"}
+          impact={"40mins"}
           description="High-performance engine with advanced fuel efficiency."
           icon={Plus}
         />
         <Card
           title="Propulsion System"
-          impact={"465kv"}
+          impact={"320kv"}
           description="KDE 4215"
           icon={Plus}
         />
         <Card
           title="Power System"
-          impact={"800Wh"}
+          impact={"20Ah"}
           description="6S8P Custom LiOn Pack"
           icon={Plus}
         />
