@@ -76,13 +76,19 @@ export default function Vehicles() {
 
         // Rewrite relative asset URLs (href/src="assets/…", url(assets/…)) to
         // absolute /vehicle/… so they resolve from any SPA route.
-        const abs = (u: string) =>
-          u.startsWith("assets/") ? `/vehicle/${u}` : u;
+        // "./image-slot.js" resolves against /vehicles and 404s, so sibling
+        // scripts are rewritten alongside the asset paths.
+        const abs = (u: string) => {
+          if (u.startsWith("assets/")) return `/vehicle/${u}`;
+          if (u.startsWith("./")) return `/vehicle/${u.slice(2)}`;
+          return null;
+        };
         doc.querySelectorAll<HTMLElement>("[src],[href],[poster]").forEach(
           (el) => {
             (["src", "href", "poster"] as const).forEach((attr) => {
               const v = el.getAttribute(attr);
-              if (v && v.startsWith("assets/")) el.setAttribute(attr, abs(v));
+              const next = v && abs(v);
+              if (next) el.setAttribute(attr, next);
             });
           },
         );

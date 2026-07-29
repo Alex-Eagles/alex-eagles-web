@@ -360,7 +360,13 @@ export function useSearchHighlight() {
     );
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") clearHighlights();
+      // Escape closes a card as well, so stand the retries down with it or one
+      // fires afterwards and moves the page.
+      if (e.key === "Escape") {
+        settled = true;
+        timers.forEach(clearTimeout);
+        clearHighlights();
+      }
     };
     document.addEventListener("keydown", onKey);
 

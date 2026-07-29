@@ -1119,27 +1119,45 @@ class Component extends DCLogic {
         el.style.opacity = '1';
         el.style.transform = 'none';
       });
+      const centreOn = (el) => {
+        const r = el.getBoundingClientRect();
+        return Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2);
+      };
+      // Images and the build section keep resizing for a while after boot, so a
+      // single scroll lands somewhere that is stale a frame later. Re-centre every
+      // frame until the card stops moving, and only then open it: the lock
+      // captures the offset it finds, and closing restores that same offset, so
+      // the reader ends up where the card actually is.
+      let pending = -1;
       const openStop = (i) => {
         if (!DATA[i] || !items[i]) return;
+        if (pending === i) return;
         if (openIdx === i && modal.style.display === 'flex') return;
+        pending = i;
         revealAll();
         goTo(i + 1);
-        // Scroll, let it land, then open. The lock captures whatever offset it
-        // finds, so opening first pins the page at the wrong place.
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          const r = items[i].getBoundingClientRect();
-          jumpTo(Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2));
-          requestAnimationFrame(() => open(i));
-        }));
+        let frames = 0, steady = 0, lastTop = NaN;
+        const settle = () => {
+          if (pending !== i) return;
+          const card = items[i];
+          const want = centreOn(card);
+          if (Math.abs(window.scrollY - want) > 2) jumpTo(want);
+          const top = card.getBoundingClientRect().top;
+          steady = Math.abs(top - lastTop) < 1 ? steady + 1 : 0;
+          lastTop = top;
+          if (steady >= 3 || ++frames > 90) {
+            pending = -1;
+            open(i);
+            return;
+          }
+          requestAnimationFrame(settle);
+        };
+        requestAnimationFrame(settle);
       };
       window.__vptOpenStop = openStop;
       const stopParam = new URLSearchParams(location.search).get('stop');
       const wanted = stopParam === null || stopParam === '' ? NaN : Number(stopParam);
-      if (Number.isInteger(wanted) && DATA[wanted]) {
-        const run = () => setTimeout(() => openStop(wanted), 150);
-        if (document.readyState === 'complete') run();
-        else window.addEventListener('load', run, { once: true });
-      }
+      if (Number.isInteger(wanted) && DATA[wanted]) openStop(wanted);
       window.addEventListener('load', () => { measure(); paint(); }, { once: true });
     }, 90);
 
