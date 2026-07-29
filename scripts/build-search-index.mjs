@@ -437,69 +437,7 @@ if (existsSync(vehicleHtml)) {
   // deep-link to the stop exactly as blog results deep-link to a post. Indexed
   // before the generic sweep so the copy that also appears on the card carries
   // the parameter rather than landing twice.
-  const claimed = new Set();
-  const claim = (route, page, text, params) => {
-    add(route, page, text, params);
-    const cleaned = cleanText(text);
-    if (cleaned) claimed.add(cleaned.toLowerCase());
-  };
-
-  // Visible card copy: kicker, title, excerpt, date.
-  const article = /<article class="vpt-item" data-idx="(\d+)">([\s\S]*?)<\/article>/g;
-  let card;
-  let cards = 0;
-  while ((card = article.exec(html)) !== null) {
-    const [, idx, inner] = card;
-    const params = "stop=" + idx;
-    const page = "Vehicles \u00b7 Development process";
-    const pick = (re) => (re.exec(inner) ?? [])[1];
-    for (const text of [
-      pick(/<h3 class="vpt-title">([\s\S]*?)<\/h3>/),
-      pick(/<p class="vpt-text">([\s\S]*?)<\/p>/),
-      pick(/<div class="vpt-kicker">([\s\S]*?)<\/div>/),
-      pick(/<div class="vpt-date">([\s\S]*?)<\/div>/),
-    ]) {
-      if (text) claim("/vehicles", page, text.replace(/&amp;/g, "&").trim(), params);
-    }
-    cards += 1;
-  }
-
-  // Full copy, which only exists in the card once it is opened.
-  const block = /const DATA = \[([\s\S]*?)\n {6}\];/.exec(html);
-  if (block) {
-    const entry = /\{ badge: '([^']*)', title: '([^']*)', date: '([^']*)',[\s\S]*?text: '((?:[^'\\]|\\.)*)' \}/g;
-    let m;
-    let stop = 0;
-    while ((m = entry.exec(block[1])) !== null) {
-      const [, badge, title, date, body] = m;
-      const params = "stop=" + stop;
-      const page = "Vehicles \u00b7 Development process";
-      // cleanText caps entries at 400 characters, so a long card body would be
-      // dropped whole and its copy never found. Split it into sentence-sized
-      // pieces, each pointing at the same stop.
-      const full = body.replace(/\\'/g, "'");
-      const pieces = [];
-      let piece = "";
-      for (const sentence of full.split(/(?<=\.)\s+/)) {
-        if ((piece + " " + sentence).trim().length > 300 && piece) {
-          pieces.push(piece.trim());
-          piece = sentence;
-        } else {
-          piece = (piece + " " + sentence).trim();
-        }
-      }
-      if (piece) pieces.push(piece.trim());
-      for (const text of [title, ...pieces, badge + " " + date]) {
-        claim("/vehicles", page, text, params);
-      }
-      stop += 1;
-    }
-    console.log(`  ${cards} timeline cards, ${stop} stops deep-linked`);
-  }
-
   for (const text of textFromHtml(html)) {
-    const cleaned = cleanText(text);
-    if (cleaned && claimed.has(cleaned.toLowerCase())) continue;
     add("/vehicles", "Vehicles", text);
   }
 }

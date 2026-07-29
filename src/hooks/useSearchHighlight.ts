@@ -258,6 +258,9 @@ function ancestorReveals(el: Element): Element[] {
 }
 
 function attempt(terms: string[], target: string | null, anchor: string | null): boolean {
+  // A card is open over the page. Search never opens one, so this is the reader's
+  // own doing: leave them alone rather than scrolling the page underneath it.
+  if (openDialog()) return true;
   const roots = collectRoots();
   ensureShadowStyles(roots);
   touched = roots;
@@ -265,11 +268,6 @@ function attempt(terms: string[], target: string | null, anchor: string | null):
   // An anchored result (a history milestone) names its element outright, and
   // everything is then searched inside it — cheaper and unambiguous.
   let scope: Element | null = null;
-  // A card is open over the page: the copy the reader clicked usually lives only
-  // in that card, so search it rather than the page behind it. The window is
-  // locked while it is open, so nothing underneath moves.
-  const dialog = openDialog();
-  if (dialog && !anchor) scope = dialog;
   if (anchor) {
     for (const root of roots) {
       const found = root.querySelector("#" + CSS.escape(anchor));
@@ -324,6 +322,14 @@ function attempt(terms: string[], target: string | null, anchor: string | null):
   if (!focus) return false;
 
   settleReveals(focus);
+  // The timeline is a horizontal rail: a match can be laid out but scrolled off
+  // to the side, so ask the rail to bring its stop into view first.
+  const stop = focus.closest?.<HTMLElement>(".vpt-item");
+  const showStop = (window as unknown as { __vptShowStop?: (i: number) => void }).__vptShowStop;
+  if (stop && showStop) {
+    const idx = Number(stop.dataset.idx);
+    if (Number.isInteger(idx)) showStop(idx);
+  }
   scrollToCenter(focus);
   return true;
 }

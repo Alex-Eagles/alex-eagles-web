@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 
 /**
  * Vehicles page — the Clover build experience, rendered INLINE (no iframe).
@@ -29,36 +28,6 @@ const SUPPORT_URL = "/vehicle/support.js";
 export default function Vehicles() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const { search } = useLocation();
-
-  /**
-   * A search result for a timeline stop deep-links with ?stop=<index>. The route
-   * stays mounted while the query changes, so the static bundle's own boot-time
-   * read only ever fires once — searching again from this page has to be driven
-   * from here. Polls because the bundle hydrates asynchronously.
-   */
-  useEffect(() => {
-    const raw = new URLSearchParams(search).get("stop");
-    if (raw === null || raw === "") return;
-    const stop = Number(raw);
-    if (!Number.isInteger(stop)) return;
-
-    let tries = 0;
-    const call = () => {
-      const open = (window as unknown as { __vptOpenStop?: (i: number) => void }).__vptOpenStop;
-      if (open) {
-        open(stop);
-        return true;
-      }
-      return false;
-    };
-    if (call()) return;
-    const timer = window.setInterval(() => {
-      if (call() || ++tries > 40) window.clearInterval(timer);
-    }, 120);
-    return () => window.clearInterval(timer);
-  }, [search]);
-
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
@@ -174,7 +143,7 @@ export default function Vehicles() {
       body.style.overflow = "";
       document.documentElement.style.overflow = "";
       document.documentElement.style.paddingRight = "";
-      delete (window as unknown as { __vptOpenStop?: unknown }).__vptOpenStop;
+      delete (window as unknown as { __vptShowStop?: unknown }).__vptShowStop;
     };
   }, []);
 
