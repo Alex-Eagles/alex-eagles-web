@@ -1,12 +1,12 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { AWARDS, AWARDS_FOOTNOTE } from "../data/home";
+import { AWARD_YEARS_LATEST_FIRST } from "../data/home";
 import { useReveal } from "../hooks/useReveal";
 import "../styles/TrackRecord.css";
 
 /**
- * "What we've won" — the season results, three cards plus the long tail as a
- * footnote. Replaces the old hardcoded "Latest Achievements" list.
+ * "What we've won" — every competition result, newest season first, one card
+ * per year. A year that won more than once lists each award on its own line.
  */
 export default function TrackRecord() {
   const rootRef = useRef(null);
@@ -23,7 +23,7 @@ export default function TrackRecord() {
 
         <div className="tr-head">
           <h2 className="tr-headline" data-reveal="" data-reveal-delay="60">
-            What we&rsquo;ve <span className="tr-headline-accent">won.</span>
+            What we&rsquo;ve <span className="tr-headline-accent">won</span>
           </h2>
 
           <Link
@@ -37,28 +37,33 @@ export default function TrackRecord() {
         </div>
 
         <ul className="tr-grid">
-          {AWARDS.map((award, i) => (
+          {AWARD_YEARS_LATEST_FIRST.map(({ year, awards }, i) => (
             <li
               className="tr-card"
-              key={`${award.year}-${award.event}`}
+              key={year}
               data-reveal=""
-              data-reveal-delay={80 + i * 60}
+              /* Cap the stagger so the last cards don't sit visibly waiting. */
+              data-reveal-delay={Math.min(80 + i * 50, 320)}
             >
-              <div className="tr-card-top">
-                <span className="tr-card-year">{award.year}</span>
-                <span className="tr-card-event">{award.event}</span>
-              </div>
+              <span className="tr-card-year">{year}</span>
 
-              <p className="tr-card-placement">{award.placement}</p>
-              <h3 className="tr-card-title">{award.title}</h3>
-              <p className="tr-card-blurb">{award.blurb}</p>
+              <ul className="tr-card-awards">
+                {awards.map((award) => (
+                  <li
+                    className="tr-card-award"
+                    key={`${award.title}-${award.competition}`}
+                  >
+                    {award.place && (
+                      <span className="tr-card-place">{award.place}</span>
+                    )}
+                    <span className="tr-card-title">{award.title}</span>
+                    <span className="tr-card-event">{award.competition}</span>
+                  </li>
+                ))}
+              </ul>
             </li>
           ))}
         </ul>
-
-        <p className="tr-footnote" data-reveal="" data-reveal-delay="200">
-          {AWARDS_FOOTNOTE}
-        </p>
       </div>
     </section>
   );

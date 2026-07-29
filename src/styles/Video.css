@@ -68,10 +68,89 @@
   -webkit-text-stroke: 2px var(--wf-watermark-stroke);
 }
 
+/* Copy on the left, the flight video on the right. The right column is given
+ * slightly more room than the left so a 16:9 frame lands at a useful size
+ * rather than being squeezed by the headline column. */
+.video-layout {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--maxw-content);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 72px;
+}
+
 .video-content {
   position: relative;
   z-index: 2;
   max-width: 640px;
+}
+
+/* ─── Flight video ────────────────────────────────────────────────────────── */
+
+.video-embed {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--wf-border-soft);
+  border-radius: var(--radius-xl);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: var(--elevation-3);
+}
+
+.video-embed-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Shown until YOUTUBE_ID is filled in — an empty embed would render as a
+ * YouTube error page, which looks broken rather than unfinished. */
+.video-embed-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+
+.video-embed-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: var(--wf-accent);
+  color: #fff;
+  /* Optical nudge: a triangle centred by the box looks left-heavy. */
+  padding-left: 4px;
+}
+
+.video-embed-label {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--wf-text);
+}
+
+.video-embed-hint {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--wf-text-muted-2);
 }
 
 .video-eyebrow {
@@ -140,6 +219,19 @@
 .video-cta:hover {
   background: var(--wf-cta-hover);
   transform: translateY(-2px);
+}
+
+/* Stack before the two columns get too narrow to hold a headline and a 16:9
+ * frame side by side. */
+@media (max-width: 960px) {
+  .video-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+
+  .video {
+    min-height: 0;
+  }
 }
 
 @media (max-width: 720px) {

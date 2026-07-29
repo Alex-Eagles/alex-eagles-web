@@ -1,19 +1,8 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
+import { TICKER_RESULTS } from "../data/home";
 import { useReveal } from "../hooks/useReveal";
 import "../styles/Hero.css";
-
-/**
- * Results that scroll along the bottom edge of the hero. The list is rendered
- * twice in the markup so the rail can loop by translating exactly -50% — the
- * second copy is what's on screen while the first wraps around.
- */
-const TICKER = [
-  "1st Design & Presentation · SUAS 2025",
-  "5th Overall · UAVC 2025",
-  "1st Design · SAE Aerodesign 2022",
-  "Best Use of Science · NASA Space Apps",
-];
 
 export default function Hero() {
   const rootRef = useRef(null);
@@ -25,10 +14,19 @@ export default function Hero() {
 
   return (
     <section className="hero" ref={rootRef}>
-      {/* Backdrop. The design calls for the fisheye flight clip here — drop the
-          file into public/ and swap this <img> for a muted, looping, autoplay
-          <video> with the same class; the scrim and layout need no changes. */}
-      <img className="hero-media" src="/drone.jpg" alt="" aria-hidden="true" />
+      {/* Muted, looping flight footage. The poster paints immediately so the
+          hero is never a black rectangle while the file buffers. */}
+      <video
+        className="hero-media"
+        src="/hero.mp4"
+        poster="/hero-poster.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+      />
       <div className="hero-scrim" aria-hidden="true" />
 
       <div className="hero-body">
@@ -41,12 +39,7 @@ export default function Hero() {
           Alex Eagles
         </h1>
 
-        <p className="hero-lede" data-reveal="" data-reveal-delay="160">
-          Students who design, build and fly autonomous aircraft — airframe,
-          avionics and autonomy, all made in-house.
-        </p>
-
-        <div className="hero-actions" data-reveal="" data-reveal-delay="240">
+        <div className="hero-actions" data-reveal="" data-reveal-delay="160">
           <Link className="hero-cta hero-cta--solid" to="/vehicles">
             See the aircraft
           </Link>
@@ -74,7 +67,7 @@ export default function Hero() {
         <div className="hero-ticker-rail">
           {[0, 1].map((copy) => (
             <div className="hero-ticker-row" key={copy}>
-              {TICKER.map((result) => (
+              {TICKER_RESULTS.map((result) => (
                 <span className="hero-ticker-item" key={result}>
                   {result}
                 </span>

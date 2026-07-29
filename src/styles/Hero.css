@@ -52,9 +52,11 @@
   align-items: center;
   gap: 14px;
   margin: 0 0 20px;
+  /* Same mono/size/tracking the Team Overview and Watch Us Fly eyebrows use,
+   * so all three section labels read as one system. */
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.24em;
+  font-size: 13px;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #c7d4ee;
 }
@@ -79,31 +81,25 @@
   color: #fff;
 }
 
-.hero-lede {
-  max-width: 520px;
-  margin: 24px 0 0;
-  font-size: 18px;
-  line-height: 1.7;
-  color: #d3ddf2;
-  text-wrap: pretty;
-}
-
 /* ─── Calls to action ─────────────────────────────────────────────────────── */
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   margin-top: 34px;
 }
 
+/* Matches the buttons used everywhere else on the site (Contact, Sponsors):
+ * Inter, 16px, 10px radius, brand fill, brand-light on hover. */
 .hero-cta {
-  padding: 15px 28px;
+  padding: 14px 26px;
   border: 1px solid transparent;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   transition:

@@ -100,7 +100,7 @@
 
 .tr-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 18px;
   margin: 40px 0 0;
   padding: 0;
@@ -125,32 +125,36 @@
   transform: translateY(-3px);
 }
 
-.tr-card-top {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
 .tr-card-year {
+  display: block;
   font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
   font-size: 40px;
   line-height: 1;
   color: var(--text-primary);
-  /* Keeps the three years optically aligned across cards. */
+  /* Keeps the years optically aligned down each column. */
   font-variant-numeric: tabular-nums;
 }
 
-.tr-card-event {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+/* ─── Award lines within a card ───────────────────────────────────────────── */
+
+.tr-card-awards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-.tr-card-placement {
-  margin: 18px 0 0;
+/* A year that won twice gets a rule between its awards so the two don't read
+ * as one run-on entry. */
+.tr-card-award + .tr-card-award {
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.tr-card-place {
+  display: block;
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.16em;
@@ -159,34 +163,26 @@
 }
 
 .tr-card-title {
-  margin: 8px 0 0;
+  display: block;
+  margin-top: 6px;
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-primary);
   text-wrap: balance;
 }
 
-.tr-card-blurb {
-  margin: 12px 0 0;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  text-wrap: pretty;
-}
-
-/* ─── Footnote ────────────────────────────────────────────────────────────── */
-
-.tr-footnote {
-  max-width: 640px;
-  margin: 26px 0 0;
-  font-size: 14px;
-  line-height: 1.8;
+.tr-card-event {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--text-muted);
-  text-wrap: pretty;
 }
 
 /* ─── Responsive ──────────────────────────────────────────────────────────── */

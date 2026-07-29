@@ -58,45 +58,99 @@ export const LATEST_POSTS: BlogPost[] = [
   },
 ];
 
-export interface Award {
-  year: string;
-  /** Competition shorthand, shown small against the year. */
-  event: string;
-  /** Placement line, e.g. "1st place" or "1st design · 5th overall". */
-  placement: string;
+export interface AwardLine {
+  /** Placement, where the award has one. Named awards carry no ranking. */
+  place?: string;
   title: string;
-  blurb: string;
+  competition: string;
 }
 
-/** The headline results in the "What we've won" section. Three cards only —
- *  the long tail lives in AWARDS_FOOTNOTE and the full run is on /history. */
-export const AWARDS: Award[] = [
+export interface AwardYear {
+  year: string;
+  awards: AwardLine[];
+}
+
+/**
+ * Every competition result, kept chronological to match the History page's
+ * source data. Both the "What we've won" cards and the hero ticker read from
+ * this one list, so a new season only ever has to be added in one place.
+ * 2013 is the founding year and won nothing, so it isn't listed here.
+ */
+export const AWARD_YEARS: AwardYear[] = [
   {
-    year: "2025",
-    event: "SUAS",
-    placement: "1st place",
-    title: "Design & presentation",
-    blurb: "Highest-scoring report and defense in the competition.",
+    year: "2017",
+    awards: [
+      { place: "2nd Place", title: "Best Design", competition: "SAE Aero Design" },
+    ],
   },
   {
-    year: "2025",
-    event: "UAVC",
-    placement: "1st design · 5th overall",
-    title: "Top five in the air",
-    blurb:
-      "Best documentation on the field, and the aircraft held up on mission day.",
+    year: "2018",
+    awards: [
+      { place: "1st Place", title: "Best Design", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2019",
+    awards: [
+      { place: "3rd Place", title: "Best Design", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2020",
+    awards: [
+      { place: "3rd Place", title: "Overall", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2021",
+    awards: [
+      { title: "Best Design Award", competition: "UAVC" },
+      { place: "4th Place", title: "Overall", competition: "SAE Aero Design" },
+    ],
   },
   {
     year: "2022",
-    event: "SAE",
-    placement: "1st place",
-    title: "Design & presentation",
-    blurb: "The season that set the standard we still build to.",
+    awards: [
+      { place: "1st Place", title: "Best Design", competition: "SAE Aero Design" },
+      {
+        place: "1st Place",
+        title: "Best Presentation",
+        competition: "SAE Aero Design",
+      },
+    ],
+  },
+  {
+    year: "2023",
+    awards: [
+      { place: "11th Place", title: "Overall", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2024",
+    awards: [{ place: "5th Place", title: "Overall", competition: "UAVC" }],
+  },
+  {
+    year: "2025",
+    awards: [
+      { place: "5th Place", title: "Overall", competition: "UAVC" },
+      { title: "Best Technical Design Report", competition: "UAVC" },
+      { title: "Best Technical Design Report", competition: "SUAS" },
+    ],
   },
 ];
 
-export const AWARDS_FOOTNOTE =
-  "Also on the shelf: 3rd overall at SAE Aerodesign 2020, best design at MTC 2021, best use of science at NASA Space Apps.";
+/** Newest first, which is the order both the cards and the ticker show. */
+export const AWARD_YEARS_LATEST_FIRST: AwardYear[] = [...AWARD_YEARS].reverse();
+
+/** One flat line per award, for the hero ticker. */
+export const TICKER_RESULTS: string[] = AWARD_YEARS_LATEST_FIRST.flatMap(
+  ({ year, awards }) =>
+    awards.map((award) =>
+      [award.place, award.title, `${award.competition} ${year}`]
+        .filter(Boolean)
+        .join(" · "),
+    ),
+);
 
 export interface Sponsor {
   name: string;

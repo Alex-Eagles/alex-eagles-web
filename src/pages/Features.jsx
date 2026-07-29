@@ -28,7 +28,7 @@ function Features() {
         </h2>
 
         <p className="features-copy-text">
-          Established in 2013 at Alexandria University — a multidisciplinary
+          Established in 2013 at Alexandria University: a multidisciplinary
           team of aerospace, mechatronics, electrical, and software engineers
           who design, build, and fly autonomous aircraft end to end.
         </p>

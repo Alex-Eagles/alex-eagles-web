@@ -17,7 +17,7 @@ const TOP_ROLES = [
     id: "vice",
     title: "Team Vice Lead",
     lit: 1,
-    desc: "Runs the week: schedules, design reviews, logistics and travel — and stands in for the leader whenever needed.",
+    desc: "Runs the week: schedules, design reviews, logistics and travel, and stands in for the leader whenever needed.",
   },
 ];
 
@@ -27,19 +27,19 @@ const LEADS = [
     lead: "Mechanical Lead",
     icon: Wrench,
     color: "#8b5cf6",
-    desc: "The aircraft as a physical object — its shape, its strength and its thrust.",
+    desc: "Keeps aerodesign, structures and propulsion working to the same set of numbers, so the airframe comes together as one aircraft.",
     children: [
       {
-        name: "Propulsion",
-        desc: "Motor, ESC and propeller selection, thrust testing and endurance budgets.",
-      },
-      {
-        name: "Aero Design",
-        desc: "Wing and fuselage aerodynamics, stability and performance sizing.",
+        name: "Aerodesign",
+        desc: "We shape how the aircraft flies: the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
       },
       {
         name: "Structure",
-        desc: "Carbon layups, load paths and manufacturing of every structural part.",
+        desc: "We design and build the airframe that holds everything together: sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
+      },
+      {
+        name: "Propulsion",
+        desc: "We power the aircraft: selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
       },
     ],
   },
@@ -48,19 +48,19 @@ const LEADS = [
     lead: "Autonomous Lead",
     icon: Cpu,
     color: "#3b82f6",
-    desc: "Onboard hardware, flight software and perception — everything that lets the aircraft think for itself.",
+    desc: "Manages the integration between the autonomous subsystems, so software, hardware and AI arrive as one working stack rather than three separate ones.",
     children: [
       {
         name: "Software",
-        desc: "Flight logic, ground station and mission autonomy — waypoints to full autonomous runs.",
+        desc: "We write the software that flies the aircraft on its own: the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
       },
       {
         name: "Hardware",
-        desc: "Avionics boards, power distribution, wiring and sensor integration.",
+        desc: "We build the electronics that make the aircraft think: the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
       },
       {
-        name: "Computer Vision",
-        desc: "Detection, classification and geolocation of targets from the onboard camera.",
+        name: "AI",
+        desc: "We give the aircraft its eyes: detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
       },
     ],
   },

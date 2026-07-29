@@ -905,10 +905,9 @@
 .tp-node-desc {
   display: grid;
   grid-template-rows: 0fr;
-  max-width: 34ch;
-  /* Boxes here centre their text, so the capped-width block needs auto side
-   * margins or it would sit off to the left inside a centred box. */
-  margin-inline: auto;
+  /* Full box width rather than a ch cap: these run to a few sentences, and a
+   * narrow measure would turn each one into a very tall column. */
+  max-width: 100%;
   margin-top: 0;
   opacity: 0;
   font-family: var(--font-sans);
@@ -917,6 +916,9 @@
   line-height: 1.6;
   letter-spacing: 0;
   text-transform: none;
+  /* The boxes centre their labels, but these run to several sentences and
+   * centred body copy is genuinely hard to read, so it ranges left. */
+  text-align: left;
   color: var(--ts-text-muted-1);
   text-wrap: pretty;
   transition:
