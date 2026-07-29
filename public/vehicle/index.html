@@ -1046,8 +1046,10 @@ class Component extends DCLogic {
         if (bar > 0) docEl.style.paddingRight = bar + 'px';
       };
       const unlockScroll = () => { docEl.style.overflow = ''; docEl.style.paddingRight = ''; };
+      let openIdx = -1;
       const open = (i) => {
         const d = DATA[i]; if (!d) return;
+        openIdx = i;
         document.getElementById('vpt-m-badge').textContent = d.badge;
         document.getElementById('vpt-m-title').textContent = d.title;
         document.getElementById('vpt-m-meta').textContent = d.date;
@@ -1063,6 +1065,7 @@ class Component extends DCLogic {
         panel.style.transform = 'scale(.96) translateY(8px)';
         const done = () => {
           modal.style.display = 'none';
+          openIdx = -1;
           unlockScroll();
         };
         setTimeout(done, reduce ? 0 : 220);
@@ -1087,12 +1090,25 @@ class Component extends DCLogic {
       // highlighter's early passes to have scrolled the section into place, so
       // the card locks the page where the reader can see it and closing lands
       // them back on the same view.
+      // Search deep-links land here. Park the page on the stop first so closing
+      // the card reveals the timeline rather than wherever the reader started,
+      // then open it. Exposed because the route stays mounted across searches,
+      // so a second search only changes the query string.
+      const openStop = (i) => {
+        if (!DATA[i] || !items[i]) return;
+        if (openIdx === i && modal.style.display === 'flex') return;
+        goTo(i + 1);
+        const r = items[i].getBoundingClientRect();
+        window.scrollTo({
+          top: Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2),
+          behavior: 'auto',
+        });
+        open(i);
+      };
+      window.__vptOpenStop = openStop;
       const stopParam = new URLSearchParams(location.search).get('stop');
       const wanted = stopParam === null || stopParam === '' ? NaN : Number(stopParam);
-      if (Number.isInteger(wanted) && DATA[wanted]) {
-        goTo(wanted + 1);
-        setTimeout(() => open(wanted), 800);
-      }
+      if (Number.isInteger(wanted) && DATA[wanted]) setTimeout(() => openStop(wanted), 420);
       window.addEventListener('load', () => { measure(); paint(); }, { once: true });
     }, 90);
 

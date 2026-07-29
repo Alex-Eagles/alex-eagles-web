@@ -203,8 +203,8 @@ function paint(ranges: Range[]) {
  * at a card, not the page behind it. Scrolling now would move the ground under
  * them and land somewhere else when the card closes.
  */
-function modalOpen(): boolean {
-  return [...document.querySelectorAll('[aria-modal="true"]')].some(isLaidOut);
+function openDialog(): Element | null {
+  return [...document.querySelectorAll('[aria-modal="true"]')].find(isLaidOut) ?? null;
 }
 
 /**
@@ -214,7 +214,18 @@ function modalOpen(): boolean {
  */
 function scrollToCenter(el: Element) {
   for (let node = el.parentElement; node; node = node.parentElement) {
-    if (node.scrollTop && getComputedStyle(node).overflowY === "hidden") node.scrollTop = 0;
+    const style = getComputedStyle(node);
+    if (style.overflowY === "hidden") {
+      if (node.scrollTop) node.scrollTop = 0;
+      continue;
+    }
+    // A real scroller, such as the card modal's own body: bring the match into
+    // view inside it before touching the window.
+    if (/auto|scroll/.test(style.overflowY) && node.scrollHeight > node.clientHeight + 2) {
+      const r = el.getBoundingClientRect();
+      const b = node.getBoundingClientRect();
+      node.scrollTop += r.top - b.top - Math.max(0, (node.clientHeight - r.height) / 2);
+    }
   }
   const rect = el.getBoundingClientRect();
   const top = rect.top + window.scrollY - Math.max(0, (window.innerHeight - rect.height) / 2);
@@ -247,7 +258,6 @@ function ancestorReveals(el: Element): Element[] {
 }
 
 function attempt(terms: string[], target: string | null, anchor: string | null): boolean {
-  if (modalOpen()) return true;
   const roots = collectRoots();
   ensureShadowStyles(roots);
   touched = roots;
@@ -255,6 +265,11 @@ function attempt(terms: string[], target: string | null, anchor: string | null):
   // An anchored result (a history milestone) names its element outright, and
   // everything is then searched inside it — cheaper and unambiguous.
   let scope: Element | null = null;
+  // A card is open over the page: the copy the reader clicked usually lives only
+  // in that card, so search it rather than the page behind it. The window is
+  // locked while it is open, so nothing underneath moves.
+  const dialog = openDialog();
+  if (dialog && !anchor) scope = dialog;
   if (anchor) {
     for (const root of roots) {
       const found = root.querySelector("#" + CSS.escape(anchor));
