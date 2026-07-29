@@ -1,5 +1,5 @@
 .updates {
-  padding: 100px 10%;
+  padding: var(--space-section-y) 10%;
   text-align: center;
   background: var(--bg-glass);
   backdrop-filter: blur(20px);

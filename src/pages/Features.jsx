@@ -7,6 +7,7 @@ function Features() {
         <img src="/who%20we%20are.JPG" alt="" />
       </div>
       <div className="features-scrim" aria-hidden="true" />
+      <div className="features-fade" aria-hidden="true" />
 
       <span className="features-watermark" aria-hidden="true">
         2013

@@ -22,6 +22,7 @@ export default function TeamStructure() {
   return (
     <section className="tp-section">
       <div className="tp-grid-bg" aria-hidden="true" />
+      <div className="tp-seam-bridge" aria-hidden="true" />
 
       <div className="tp-layout">
         <div className="tp-intro">

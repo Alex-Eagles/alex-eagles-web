@@ -50,7 +50,10 @@
   position: relative;
   overflow: hidden;
   background: var(--ts-bg);
-  padding: 100px 6% 120px;
+  /* top padding uses the tight variant — this section follows Features'
+   * fade-to-bg transition, so the full section gap would stack on top of
+   * that and read as an oversized blank gap before the content starts. */
+  padding: var(--space-section-y-tight) 6% var(--space-section-y);
 }
 
 .tp-grid-bg {
@@ -61,6 +64,20 @@
     linear-gradient(90deg, var(--ts-grid-line) 1px, transparent 1px);
   background-size: 60px 60px;
   animation: ae-grid 8s linear infinite;
+}
+
+/* Seam bridge — a thin indigo divider plus a soft tint fading down into the
+ * section, standing in for a hard cut where the Features fade hands off. */
+.tp-seam-bridge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: 1;
+  pointer-events: none;
+  border-top: 2px solid rgba(36, 37, 153, 0.35);
+  background: linear-gradient(to bottom, rgba(36, 37, 153, 0.08), transparent);
 }
 
 .tp-layout,
@@ -168,6 +185,12 @@
 :root[data-theme="light"] .tp-box {
   border-width: 2px;
   border-color: #000000;
+}
+
+/* ...except the subsystem Lead boxes: keep their signature accent-colored
+ * border in light mode too (matching dark mode), just bolder for contrast. */
+:root[data-theme="light"] .tp-box--lead {
+  border-color: var(--accent);
 }
 
 .tp-box--top {
@@ -682,10 +705,12 @@
   }
 }
 
-/* same bold black edge in light mode, on the subteam pills too */
+/* same bold black edge in light mode, on the subteam pills too — but keep
+ * their left edge in the subsystem's accent color, matching dark mode. */
 :root[data-theme="light"] .tp-owns-item {
   border-width: 2px;
   border-color: #000000;
+  border-left-color: var(--accent);
 }
 
 /* the bulb cascades down the three subteam pills in turn */

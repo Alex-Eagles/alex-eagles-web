@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import "../styles/Hero.css";
 
 export default function Hero() {
@@ -16,6 +17,11 @@ export default function Hero() {
         >
           Discover More
         </button>
+      </div>
+
+      <div className="hero-scroll-indicator" aria-hidden="true">
+        <ChevronDown className="hero-scroll-arrow" />
+        <ChevronDown className="hero-scroll-arrow hero-scroll-arrow--second" />
       </div>
     </section>
   );

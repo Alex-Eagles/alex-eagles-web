@@ -83,6 +83,15 @@
 
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
+
+  /* Section vertical rhythm. --space-section-y is the standard top/bottom
+   * padding used by full-bleed page sections (Video, Features/"Who We Are",
+   * Updates, TeamStructure/"Team Overview"). --space-section-y-tight is for
+   * a section that immediately follows one which already fades/blends into
+   * it — using the full value there would stack two gaps into one
+   * oversized blank space at the seam. */
+  --space-section-y: 100px;
+  --space-section-y-tight: 64px;
 }
 
 /* ----------------------------------------------------------------------------

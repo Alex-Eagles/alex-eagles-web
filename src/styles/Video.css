@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   background: var(--wf-bg);
-  padding: 100px 6%;
+  padding: var(--space-section-y) 6%;
 }
 
 /* decorative watermark — sits in normal document flow, stacked above the
