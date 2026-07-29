@@ -79,7 +79,7 @@
   .vpt-nav:hover { background:rgba(217,48,42,0.16); border-color:rgba(217,48,42,0.55); }
   .vpt-nav:active { transform:scale(.94); }
   .vpt-nav[data-off="1"] { opacity:.3; pointer-events:none; }
-  .vpt-item { flex:0 0 clamp(250px,26vw,318px); display:flex; flex-direction:column; justify-content:flex-end; scroll-snap-align:start; scroll-snap-stop:always; opacity:0; transform:translateY(24px); transition:opacity .7s cubic-bezier(.19,1,.22,1), transform .7s cubic-bezier(.19,1,.22,1); }
+  .vpt-item { flex:0 0 clamp(250px,26vw,318px); display:flex; flex-direction:column; justify-content:flex-end; opacity:0; transform:translateY(24px); transition:opacity .7s cubic-bezier(.19,1,.22,1), transform .7s cubic-bezier(.19,1,.22,1); }
   .vpt-item[data-in="1"] { opacity:1; transform:none; }
   .vpt-card { cursor:pointer; transition:transform .35s cubic-bezier(.19,1,.22,1); }
   .vpt-card:hover, .vpt-card:focus-visible { transform:translateY(-4px); outline:none; }
@@ -121,6 +121,7 @@
   @media (prefers-reduced-motion: reduce) {
     .vpt-item { opacity:1; transform:none; transition:none; }
     .vpt-card, .vpt-shell, .vpt-media::before, .vpt-stop, .vpt-date { transition:none; }
+    #vpt-fill, #vpt-head { transition:none; }
   }
   @keyframes vp-grid { from { background-position:0 0; } to { background-position:64px 64px; } }
   @keyframes vp-bounce { 0%,100% { transform:translateY(0); opacity:.45; } 50% { transform:translateY(9px); opacity:1; } }
@@ -395,11 +396,11 @@
       </div>
     </div>
 
-    <div id="vpt-scroller" tabindex="0" aria-label="Development timeline" style="position:relative; margin-top:clamp(44px,6vh,72px); overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
+    <div id="vpt-scroller" tabindex="0" aria-label="Development timeline" style="position:relative; margin-top:clamp(44px,6vh,72px); overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;">
       <div id="vpt-track" style="position:relative; display:flex; align-items:stretch; gap:clamp(20px,2.4vw,34px); padding:0 max(32px,calc((100vw - 1180px) / 2 + 32px)) 6px;">
         <div id="vpt-rail" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; background:linear-gradient(90deg, rgba(60,64,181,0) 0%, rgba(96,165,250,0.32) 5%, rgba(96,165,250,0.32) 95%, rgba(60,64,181,0) 100%);"></div>
-        <div id="vpt-fill" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; transform:scaleX(0); transform-origin:0 50%; background:linear-gradient(90deg,#3c40b5,#d9302a); will-change:transform;"></div>
-        <div id="vpt-head" aria-hidden="true" style="position:absolute; left:0; bottom:36px; width:12px; height:12px; margin-left:-6px; border-radius:9999px; background:#d9302a; box-shadow:0 0 12px rgba(217,48,42,0.9), 0 0 28px rgba(217,48,42,0.45); will-change:transform,opacity; transition:opacity .16s ease;"></div>
+        <div id="vpt-fill" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; transform:scaleX(0); transform-origin:0 50%; background:linear-gradient(90deg,#3c40b5,#d9302a); will-change:transform; transition:transform .5s cubic-bezier(.19,1,.22,1);"></div>
+        <div id="vpt-head" aria-hidden="true" style="position:absolute; left:0; bottom:36px; width:12px; height:12px; margin-left:-6px; border-radius:9999px; background:#d9302a; box-shadow:0 0 12px rgba(217,48,42,0.9), 0 0 28px rgba(217,48,42,0.45); will-change:transform,opacity; transition:transform .5s cubic-bezier(.19,1,.22,1), opacity .16s ease;"></div>
 
         <article class="vpt-item" data-idx="0">
           <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Concept and design">
@@ -592,7 +593,7 @@
               <div class="vpg-tile" data-idx="4" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
                 <video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Cool drone footage.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Drone footage.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="5" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
@@ -663,8 +664,7 @@
   <section style="position:relative; background:#07091c; padding:120px 32px; text-align:center;">
     <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:720px; margin:0 auto;">
       <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0; color:#f0f2ff;">Clover in action.</h2>
-      <p style="font-size:18px; color:#c3c6ea; margin:20px 0 36px; line-height:1.6;">See Clover in action and follow the team through the SUAS 2026 campaign.</p>
-
+      
       <!-- FRR flight video (Vimeo) — 16:9 responsive embed, starts at 2:00 (#t=120s) -->
       <div style="position:relative; width:100%; max-width:960px; margin:0 auto 36px; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.5);">
         <iframe src="https://www.youtube.com/embed/wCEXFQytIk8?rel=0" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="Clover in action"></iframe>
@@ -712,10 +712,10 @@ class Component extends DCLogic {
         { k: 'Field note 02 · Flight',      t: 'Airborne.',         d: 'Clover in the air during a test sortie — holding attitude under its own power.' },
         { k: 'Field note 03 · Fabrication', t: 'Cut in-house.',     d: 'Machining the carbon-fiber top plate on our CNC, tuned to the exact build layout.' },
         { k: 'Field note 04 · Prototype',   t: 'Where it started.', d: 'The wooden proof-of-concept frame that validated the geometry before carbon.' },
-        { k: 'Field note 05 · Display',    t: 'Cool drone footage.',  d: 'Clover on the pad with the arm lighting live and the team mark projected on the ground beneath it.' },
+        { k: 'Field note 05 · Display',    t: 'Drone footage.',       d: '' },
         { k: 'Field note 06 · Night',      t: 'Lit up.',            d: 'Navigation and arm lighting running at full brightness during a night systems check.' },
         { k: 'Field note 07 · Night',      t: 'Hover, after dark.', d: 'Holding a steady hover under floodlight, the projected mark tracking the aircraft below.' },
-        { k: 'Field note 08 · Field',      t: 'Ready on the grass.', d: 'Payload strapped down, props on, waiting for the go on a field sortie.' },
+        { k: 'Field note 08 · Field',      t: 'Ready on the grass.', d: 'Props on, batteries in, waiting for the go on a field sortie.' },
       ];
       const N = meta.length, PAGES = pages.length;
       let page = 0, active = 0, from = null;
@@ -811,7 +811,7 @@ class Component extends DCLogic {
 
       const head = document.getElementById('vpt-head');
       const rail = document.getElementById('vpt-rail');
-      let trackW = 0, stopX = [], queued = false;
+      let trackW = 0, stopX = [];
 
       // The track is a block box the width of the scroller, so its flex children
       // overflow it: `width:100%` on the rail and the fill would only cover one
@@ -836,52 +836,105 @@ class Component extends DCLogic {
         if (s) s.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.6)' }, { transform: 'scale(1)' }], { duration: 440, easing: 'cubic-bezier(.19,1,.22,1)' });
       };
 
-      // The rail light is the section's one piece of storytelling motion: it walks
-      // the timeline as you scroll and fires each year's stop as it reaches it.
-      const sync = () => {
+      // The rail light is what the user actually scrubs. One horizontal gesture
+      // advances it to the next stop and it rests there; the panel only scrolls
+      // when the stop it landed on would otherwise be off screen. Scrolling
+      // therefore reads as walking the timeline, not sliding a carousel.
+      // Light positions: 0 = start of the rail, 1..N = the stops, N+1 = the end.
+      const LAST = items.length + 1;
+      let li = 0, settleT = 0;
+
+      const headFor = (i) => (i <= 0 ? 0 : i >= LAST ? trackW : stopX[i - 1]);
+
+      const paint = () => {
         if (!trackW || !stopX.length) return;
-        const max = sc.scrollWidth - sc.clientWidth;
-        const p = max > 4 ? Math.min(1, Math.max(0, sc.scrollLeft / max)) : 1;
-        const headX = p * trackW;
-        if (fill) fill.style.transform = 'scaleX(' + (headX / trackW).toFixed(4) + ')';
-        if (head) {
-          head.style.transform = 'translate3d(' + headX.toFixed(1) + 'px,0,0)';
-          const inside = stopX.some(x => Math.abs(headX - x) < 9);
-          head.style.opacity = inside ? '0' : '1';
-        }
+        const hx = headFor(li);
+        if (fill) fill.style.transform = 'scaleX(' + (hx / trackW).toFixed(4) + ')';
+        if (head) head.style.transform = 'translate3d(' + hx.toFixed(1) + 'px,0,0)';
         items.forEach((it, i) => {
-          const lit = headX >= stopX[i] - 1;
+          const lit = li >= i + 1;
           if ((it.dataset.lit === '1') !== lit) { it.dataset.lit = lit ? '1' : '0'; if (lit) pulse(it); }
         });
-        if (prev) prev.dataset.off = sc.scrollLeft <= 4 ? '1' : '0';
-        if (next) next.dataset.off = sc.scrollLeft >= max - 4 ? '1' : '0';
-      };
-      const onScroll = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; sync(); }); };
-      const padLeft = () => parseFloat(getComputedStyle(track).paddingLeft) || 0;
-      const snapAt = (i) => items[i].offsetLeft - padLeft();
-      const nearest = () => {
-        let best = 0, bd = Infinity;
-        items.forEach((it, i) => { const d = Math.abs(snapAt(i) - sc.scrollLeft); if (d < bd) { bd = d; best = i; } });
-        return best;
-      };
-      const nudge = (dir) => {
-        const max = sc.scrollWidth - sc.clientWidth;
-        const t = Math.max(0, Math.min(items.length - 1, nearest() + dir));
-        let x = Math.max(0, Math.min(max, snapAt(t)));
-        // snap targets past the end clamp to max, so a step that would not move
-        // runs to the extreme instead and the rail light can finish its travel
-        if (dir > 0 && x <= sc.scrollLeft + 1) x = max;
-        if (dir < 0 && x >= sc.scrollLeft - 1) x = 0;
-        sc.scrollTo({ left: x, behavior: reduce ? 'auto' : 'smooth' });
+        if (prev) prev.dataset.off = li <= 0 ? '1' : '0';
+        if (next) next.dataset.off = li >= LAST ? '1' : '0';
       };
 
-      sc.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', () => { measure(); sync(); }, { passive: true });
+      // Parked on a stop, only that stop's circle shows. The travelling dot is
+      // visible while it is between stops, so it reads as leaving the circle.
+      const settle = () => {
+        if (head) head.style.opacity = (li >= 1 && li <= items.length) ? '0' : '1';
+      };
+
+      const reveal = () => {
+        const max = Math.max(0, sc.scrollWidth - sc.clientWidth);
+        let sl = sc.scrollLeft;
+        if (li <= 0) sl = 0;
+        else if (li >= LAST) sl = max;
+        else {
+          const r = items[li - 1].getBoundingClientRect();
+          const tr = track.getBoundingClientRect();
+          const left = r.left - tr.left, right = left + r.width, m = 28;
+          if (right > sl + sc.clientWidth - m) sl = right - sc.clientWidth + m;
+          if (left < sl + m) sl = left - m;
+        }
+        sl = Math.max(0, Math.min(max, sl));
+        if (Math.abs(sl - sc.scrollLeft) > 1) sc.scrollTo({ left: sl, behavior: reduce ? 'auto' : 'smooth' });
+      };
+
+      const goTo = (i) => {
+        const t = Math.max(0, Math.min(LAST, i));
+        if (t === li) return;
+        li = t;
+        if (head) head.style.opacity = '1';
+        paint();
+        reveal();
+        clearTimeout(settleT);
+        settleT = setTimeout(settle, reduce ? 0 : 520);
+      };
+      const stepLight = (dir) => goTo(li + dir);
+      // The arrows cover ground faster than a gesture: from the start of the rail
+      // the first press reaches the third stop, then every other stop, then the end.
+      const nudge = (dir) => goTo(dir > 0
+        ? (li === 0 ? 3 : li + 2)
+        : (li === 3 ? 0 : li - 2));
+
+      let lock = 0;
+      const fire = (dir) => {
+        const now = Date.now();
+        if (now < lock) return;
+        lock = now + (reduce ? 0 : 430);
+        stepLight(dir);
+      };
+
+      // Horizontal wheel and trackpad swipes are taken over so they move the light
+      // rather than free-running the panel. Vertical intent is left alone so the
+      // page still scrolls normally over this section.
+      sc.addEventListener('wheel', (e) => {
+        const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+        const d = horiz ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+        if (!d) return;
+        e.preventDefault();
+        if (Math.abs(d) > 4) fire(d > 0 ? 1 : -1);
+      }, { passive: false });
+
+      let tx = 0, ty = 0, taken = false;
+      sc.addEventListener('touchstart', (e) => {
+        const t = e.touches[0]; tx = t.clientX; ty = t.clientY; taken = false;
+      }, { passive: true });
+      sc.addEventListener('touchmove', (e) => {
+        const t = e.touches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+        if (taken || Math.abs(dx) < 24 || Math.abs(dx) <= Math.abs(dy)) return;
+        e.preventDefault();
+        taken = true;
+        fire(dx < 0 ? 1 : -1);
+      }, { passive: false });
+
+      window.addEventListener('resize', () => { measure(); paint(); settle(); }, { passive: true });
       if (prev) prev.addEventListener('click', () => nudge(-1));
       if (next) next.addEventListener('click', () => nudge(1));
       sc.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight') { e.preventDefault(); nudge(1); }
-        else if (e.key === 'ArrowLeft') { e.preventDefault(); nudge(-1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); stepLight(1); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); stepLight(-1); }
       });
 
       const io2 = new IntersectionObserver((ents) => ents.forEach(en => { if (en.isIntersecting) { en.target.dataset.in = '1'; io2.unobserve(en.target); } }), { threshold: 0.25 });
@@ -1006,8 +1059,9 @@ class Component extends DCLogic {
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex') close(); });
 
       measure();
-      sync();
-      window.addEventListener('load', () => { measure(); sync(); }, { once: true });
+      paint();
+      settle();
+      window.addEventListener('load', () => { measure(); paint(); }, { once: true });
     }, 90);
 
     const p = this.props || {};
