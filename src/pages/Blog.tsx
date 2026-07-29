@@ -7,7 +7,7 @@ import BlogPostModal from "@/components/blog/BlogPostModal";
 import { fadeUp, staggerParent, viewportOnce } from "@/lib/motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTheme } from "@/context/ThemeContext";
-import { BLOG_POSTS, type BlogFilter, type BlogPostFull } from "@/data/blog";
+import { BLOG_FILTERS, BLOG_POSTS, type BlogFilter, type BlogPostFull } from "@/data/blog";
 
 /** Posts shown per "page" before Load more reveals the next batch. */
 const PAGE_SIZE = 6;
@@ -26,14 +26,49 @@ export default function Blog() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedPost, setSelectedPost] = useState<BlogPostFull | null>(null);
 
-  // A search result points at a specific card, so open it on arrival.
+  /**
+   * A search result points at one card. Behave like a visitor who found it:
+   * switch to its category, page it into view, scroll to it, and only then
+   * open it — so closing the card leaves you where the card is.
+   */
   const [searchParams] = useSearchParams();
   const postParam = searchParams.get("post");
+  const openedFor = useRef<string | null>(null);
+
   useEffect(() => {
     if (!postParam) return;
     const match = BLOG_POSTS.find((p) => String(p.id) === postParam);
-    if (match) setSelectedPost(match);
+    if (!match) return;
+    if (BLOG_FILTERS.some((f) => f.id === match.category)) setActiveFilter(match.category);
   }, [postParam]);
+
+  useEffect(() => {
+    if (!postParam || openedFor.current === postParam) return;
+    const match = BLOG_POSTS.find((p) => String(p.id) === postParam);
+    if (!match) return;
+
+    const list =
+      activeFilter === "all"
+        ? BLOG_POSTS
+        : BLOG_POSTS.filter((post) => post.category === activeFilter);
+    const index = list.findIndex((post) => String(post.id) === postParam);
+    if (index === -1) return;
+
+    // Still behind "load more" — page it in and let the effect run again.
+    if (index >= visibleCount) {
+      setVisibleCount(Math.ceil((index + 1) / PAGE_SIZE) * PAGE_SIZE);
+      return;
+    }
+
+    const card = document.getElementById("blog-card-" + postParam);
+    if (!card) return;
+    card.scrollIntoView({ behavior: "auto", block: "center" });
+
+    openedFor.current = postParam;
+    const timer = window.setTimeout(() => setSelectedPost(match), 550);
+    return () => clearTimeout(timer);
+  }, [postParam, activeFilter, visibleCount]);
+
   const reduced = useReducedMotion();
   const { isDark } = useTheme();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -87,7 +122,12 @@ export default function Blog() {
                 viewport={viewportOnce}
               >
                 {visiblePosts.map((post) => (
-                  <motion.div key={post.id} variants={reduced ? undefined : fadeUp}>
+                  <motion.div
+                    key={post.id}
+                    id={`blog-card-${post.id}`}
+                    className="scroll-mt-28"
+                    variants={reduced ? undefined : fadeUp}
+                  >
                     <BlogCard {...post} onClick={() => setSelectedPost(post)} />
                   </motion.div>
                 ))}

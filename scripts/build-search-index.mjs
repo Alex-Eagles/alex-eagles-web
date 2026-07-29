@@ -247,15 +247,38 @@ function cleanText(raw) {
   if (/^\d+(\.\d+)?(px|rem|em|%|vh|vw|s|ms)$/.test(text)) return null;
   if (text.startsWith("-")) return null;
   if (/<[a-z/]/i.test(text)) return null;
+  // Unresolved template placeholders — "${post.title}", "My address: {email}".
+  if (/\$\{|\{[a-zA-Z_$][\w$]*\}/.test(text)) return null;
+  if (!/\s/.test(text)) {
+    // Single tokens that are plainly code: css utilities and constants.
+    if (text.includes(":")) return null;
+    if (text.includes("_") && !text.includes("@")) return null;
+  }
+  // Utility class lists: several css-ish tokens, most of them hyphenated.
+  // Deliberately not "two tokens" — that ate real copy like "6 sub-teams".
   const tokens = text.split(" ");
+  const cssish = tokens.filter((t) => /[-:[]/.test(t)).length;
   if (
-    tokens.length > 1 &&
+    tokens.length >= 3 &&
     tokens.every((t) => /^[a-z0-9:_[\]().,%/!-]+$/.test(t)) &&
-    tokens.some((t) => /[-:[]/.test(t))
+    cssish * 2 >= tokens.length
   ) {
     return null;
   }
   return text;
+}
+
+const ENTITIES = {
+  nbsp: " ", amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", middot: "·",
+  mdash: "—", ndash: "–", hellip: "…", times: "×", deg: "°", rsquo: "'",
+  lsquo: "'", ldquo: '"', rdquo: '"', trade: "™", reg: "®", copy: "©",
+};
+
+function decodeEntities(text) {
+  return text
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&([a-z]+);/gi, (whole, name) => ENTITIES[name.toLowerCase()] ?? whole);
 }
 
 function textFromHtml(html) {
@@ -264,7 +287,7 @@ function textFromHtml(html) {
     .replace(/<style[\s\S]*?<\/style>/gi, " ")
     .replace(/<!--[\s\S]*?-->/g, " ")
     .split(/<[^>]+>/)
-    .map((s) => s.replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").trim())
+    .map((s) => decodeEntities(s).trim())
     .filter(Boolean);
 }
 

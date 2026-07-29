@@ -5,8 +5,11 @@ const HIGHLIGHT_NAME = "ae-search";
 const TINT_CLASS = "ae-search-fallback";
 const TARGET_CLASS = "ae-search-target";
 const STYLE_ATTR = "data-ae-search-style";
-const MAX_MATCHES = 200;
-const RETRY_DELAYS = [100, 300, 700, 1400, 2400, 3600, 5000];
+/** Kept small on purpose: every painted range is re-measured on animated pages. */
+const MAX_MATCHES = 40;
+const RETRY_DELAYS = [100, 300, 700, 1200, 1800, 2600, 3600, 5000];
+/** How long we keep re-scrolling to correct for late layout shifts. */
+const SETTLE_MS = 2200;
 
 const SHADOW_CSS = `::highlight(${HIGHLIGHT_NAME}){background-color:#fde047;color:#1a1a1a}
 .${TARGET_CLASS}{outline:3px solid #fde047;outline-offset:3px;border-radius:4px}`;
@@ -15,7 +18,6 @@ type HighlightRegistry = { set(k: string, v: unknown): void; delete(k: string): 
 interface HighlightCtor {
   new (...ranges: Range[]): unknown;
 }
-
 type Root = Document | ShadowRoot;
 
 function highlightApi(): { registry: HighlightRegistry; Ctor: HighlightCtor } | null {
@@ -27,25 +29,26 @@ function highlightApi(): { registry: HighlightRegistry; Ctor: HighlightCtor } | 
 
 const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const isLaidOut = (el: Element) => el.getClientRects().length > 0;
+const isIndexable = (el: Element) => !el.closest("nav, script, style, noscript, [data-search-ui]");
 
-/** Elements whose animation we paused, to be restored on cleanup. */
-let frozen: HTMLElement[] = [];
+/** Roots we have painted into, so cleanup doesn't have to re-walk the document. */
+let touched: Root[] = [document];
 
 function clearHighlights() {
   highlightApi()?.registry.delete(HIGHLIGHT_NAME);
-  for (const root of collectRoots()) {
+  for (const root of touched) {
     root
       .querySelectorAll("." + TINT_CLASS + ", ." + TARGET_CLASS)
       .forEach((el) => el.classList.remove(TINT_CLASS, TARGET_CLASS));
   }
-  for (const el of frozen) el.style.animationPlayState = "";
-  frozen = [];
+  touched = [document];
 }
 
 /**
- * The document plus every open shadow root — the Vehicles page mounts its
- * build experience into custom elements, and their text is otherwise invisible
- * to both the tree walker and querySelectorAll.
+ * The document plus every open shadow root — the Vehicles page mounts its build
+ * experience into custom elements, whose text is otherwise invisible to both
+ * querySelectorAll and the tree walker.
  */
 function collectRoots(): Root[] {
   const roots: Root[] = [document];
@@ -73,54 +76,62 @@ function ensureShadowStyles(roots: Root[]) {
   }
 }
 
-function isIndexable(el: Element) {
-  return !el.closest("nav, script, style, noscript, [data-search-ui]");
-}
-
-function allElements(roots: Root[]): Element[] {
-  const out: Element[] = [];
-  for (const root of roots) {
-    root.querySelectorAll("*").forEach((el) => {
-      if (isIndexable(el)) out.push(el);
-    });
+/**
+ * Bring a hidden target on screen by driving whatever control owns it. The
+ * Vehicles gallery keeps every component page in the DOM but display:none until
+ * its dot is clicked, so a match on page 3 exists yet can never be seen.
+ * Returns true when something was activated and the caller should retry.
+ */
+function reveal(el: Element): boolean {
+  const page = el.closest<HTMLElement>(".vpg-page");
+  if (page && getComputedStyle(page).display === "none") {
+    const index = /vpg-page-(\d+)/.exec(page.id)?.[1];
+    const dots = document.querySelectorAll<HTMLElement>(".vpg-dot");
+    if (index !== undefined && dots[Number(index)]) {
+      dots[Number(index)].click();
+      return true;
+    }
   }
-  return out;
+  // A collapsed tile whose detail card is the thing we matched.
+  const tile = el.closest<HTMLElement>(".vpg-tile");
+  if (tile && tile !== el && !isLaidOut(el) && isLaidOut(tile)) {
+    tile.click();
+    return true;
+  }
+  return false;
 }
 
-/** Ranges for every occurrence of `pattern` across all roots. */
-function findRanges(roots: Root[], pattern: RegExp): Range[] {
+function findRanges(root: Node, pattern: RegExp, limit: number): Range[] {
   const ranges: Range[] = [];
-  for (const root of roots) {
-    const walker = document.createTreeWalker(root as unknown as Node, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) {
-        const parent = node.parentElement;
-        if (!parent || !isIndexable(parent)) return NodeFilter.FILTER_REJECT;
-        if (parent.closest("svg, canvas")) return NodeFilter.FILTER_REJECT;
-        return node.nodeValue && node.nodeValue.trim()
-          ? NodeFilter.FILTER_ACCEPT
-          : NodeFilter.FILTER_REJECT;
-      },
-    });
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!parent || !isIndexable(parent)) return NodeFilter.FILTER_REJECT;
+      if (parent.closest("svg, canvas")) return NodeFilter.FILTER_REJECT;
+      return node.nodeValue && node.nodeValue.trim()
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_REJECT;
+    },
+  });
 
-    let node: Node | null;
-    while ((node = walker.nextNode()) && ranges.length < MAX_MATCHES) {
-      const value = node.nodeValue ?? "";
-      pattern.lastIndex = 0;
-      let m: RegExpExecArray | null;
-      while ((m = pattern.exec(value)) && ranges.length < MAX_MATCHES) {
-        const start = m.index + (m[0].length - m[1].length);
-        if (!m[1]) break;
-        const range = document.createRange();
-        range.setStart(node, start);
-        range.setEnd(node, start + m[1].length);
-        ranges.push(range);
-      }
+  let node: Node | null;
+  while ((node = walker.nextNode()) && ranges.length < limit) {
+    const value = node.nodeValue ?? "";
+    pattern.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = pattern.exec(value)) && ranges.length < limit) {
+      if (!m[1]) break;
+      const start = m.index + (m[0].length - m[1].length);
+      const range = document.createRange();
+      range.setStart(node, start);
+      range.setEnd(node, start + m[1].length);
+      ranges.push(range);
     }
   }
   return ranges;
 }
 
-/** The exact phrase that was clicked, allowing for reflowed whitespace. */
+/** The exact phrase that was clicked, tolerant of reflowed whitespace. */
 function phrasePattern(target: string): RegExp | null {
   const words = norm(target).split(" ").filter(Boolean);
   if (!words.length) return null;
@@ -132,14 +143,19 @@ function termsPattern(terms: string[]): RegExp {
 }
 
 /** Elements labelled by attribute rather than text — sponsor logos, icon buttons. */
-function attributeMatches(elements: Element[], target: string): Element[] {
+function attributeMatches(roots: Root[], target: string): Element[] {
   const wanted = norm(target);
-  return elements.filter((el) =>
-    ["alt", "title", "aria-label"].some((a) => {
-      const value = norm(el.getAttribute(a) ?? "");
-      return value === wanted || value.includes(wanted);
-    }),
-  );
+  const out: Element[] = [];
+  for (const root of roots) {
+    root.querySelectorAll("[alt],[title],[aria-label]").forEach((el) => {
+      if (!isIndexable(el)) return;
+      const hit = ["alt", "title", "aria-label"].some((a) =>
+        norm(el.getAttribute(a) ?? "").includes(wanted),
+      );
+      if (hit) out.push(el);
+    });
+  }
+  return out;
 }
 
 function paint(ranges: Range[]) {
@@ -156,29 +172,13 @@ function paint(ranges: Range[]) {
   }
 }
 
-/**
- * Sponsors ride an infinite marquee, so a result would slide away before it
- * could be read. Pause any animated ancestor while the highlight is showing.
- */
-function freezeAnimations(el: Element) {
-  let node: Element | null = el;
-  while (node && node !== document.body) {
-    if (node instanceof HTMLElement) {
-      const name = getComputedStyle(node).animationName;
-      if (name && name !== "none") {
-        node.style.animationPlayState = "paused";
-        frozen.push(node);
-      }
-    }
-    node = node.parentElement;
-  }
-}
-
 function attempt(terms: string[], target: string | null, anchor: string | null): boolean {
   const roots = collectRoots();
   ensureShadowStyles(roots);
+  touched = roots;
 
-  // An anchored result (a history milestone) names its element outright.
+  // An anchored result (a history milestone) names its element outright, and
+  // everything is then searched inside it — cheaper and unambiguous.
   let scope: Element | null = null;
   if (anchor) {
     for (const root of roots) {
@@ -188,39 +188,61 @@ function attempt(terms: string[], target: string | null, anchor: string | null):
         break;
       }
     }
-    if (!scope) return false; // not rendered yet — let a later retry find it
+    if (!scope) return false; // not rendered yet — a later retry will find it
   }
 
-  // Highlight what was actually clicked ("Sara Gharib"), not just the query.
-  let ranges: Range[] = [];
   const phrase = target ? phrasePattern(target) : null;
-  if (phrase) ranges = findRanges(roots, phrase);
-  if (!ranges.length) ranges = findRanges(roots, termsPattern(terms));
+  const searchIn: Node[] = scope ? [scope] : roots;
 
-  const labelled = target ? attributeMatches(allElements(roots), target) : [];
+  // Highlight what was actually clicked ("Sara Gharib"), not merely the query.
+  let ranges: Range[] = [];
+  for (const root of searchIn) {
+    if (phrase) ranges.push(...findRanges(root, phrase, MAX_MATCHES - ranges.length));
+    if (ranges.length >= MAX_MATCHES) break;
+  }
+  if (!ranges.length && terms.length) {
+    const pattern = termsPattern(terms);
+    for (const root of searchIn) {
+      ranges.push(...findRanges(root, pattern, MAX_MATCHES - ranges.length));
+      if (ranges.length >= MAX_MATCHES) break;
+    }
+  }
+
+  const labelled = target && !scope ? attributeMatches(roots, target) : [];
   if (!ranges.length && !labelled.length && !scope) return false;
 
-  // Prefer matches inside the anchored element when there is one.
-  const scoped = scope ? ranges.filter((r) => scope.contains(r.startContainer)) : ranges;
-  const finalRanges = scoped.length ? scoped : ranges;
-  paint(finalRanges);
+  // A hidden match is worth nothing until whatever owns it is opened.
+  const firstEl = ranges[0]?.startContainer.parentElement ?? labelled[0] ?? scope;
+  if (firstEl && !isLaidOut(firstEl) && reveal(firstEl)) return false;
 
+  paint(ranges);
+  // Marquees duplicate their contents, so outline every copy — whichever one is
+  // on screen carries the highlight, without stopping the animation.
   for (const el of labelled) el.classList.add(TARGET_CLASS);
 
+  const visibleRange = ranges.find((r) => {
+    const el = r.startContainer.parentElement;
+    return el && isLaidOut(el);
+  });
   const focus =
-    finalRanges[0]?.startContainer.parentElement ?? labelled[0] ?? scope ?? null;
+    visibleRange?.startContainer.parentElement ??
+    labelled.find(isLaidOut) ??
+    (scope && isLaidOut(scope) ? scope : null) ??
+    ranges[0]?.startContainer.parentElement ??
+    labelled[0] ??
+    scope;
   if (!focus) return false;
 
-  freezeAnimations(focus);
-  // Instant, not smooth: a long scroll animation on a marquee or a pinned
-  // section lands somewhere else by the time it finishes.
+  // Instant, not smooth: a long scroll animation on a pinned section lands
+  // somewhere else by the time it finishes.
   focus.scrollIntoView({ behavior: "auto", block: "center" });
   return true;
 }
 
 /**
  * Highlights the clicked search result and scrolls to it, retrying while the
- * route finishes rendering — several pages mount content asynchronously.
+ * route finishes rendering — several pages mount content asynchronously, and
+ * a few only reveal it once a control is driven.
  */
 export function useSearchHighlight() {
   const { pathname, search } = useLocation();
@@ -233,12 +255,18 @@ export function useSearchHighlight() {
 
     const terms = query.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
     const target = params.get("t");
+    const anchor = params.get("a");
     if (!terms.length && !target) return;
 
-    let done = false;
+    const startedAt = Date.now();
+    let settled = false;
     const timers = RETRY_DELAYS.map((delay) =>
       window.setTimeout(() => {
-        if (!done && attempt(terms, target, params.get("a"))) done = true;
+        if (settled) return;
+        // Keep correcting while the page is still moving under us, then stop.
+        if (attempt(terms, target, anchor) && Date.now() - startedAt > SETTLE_MS) {
+          settled = true;
+        }
       }, delay),
     );
 
@@ -248,7 +276,7 @@ export function useSearchHighlight() {
     document.addEventListener("keydown", onKey);
 
     return () => {
-      done = true;
+      settled = true;
       timers.forEach(clearTimeout);
       document.removeEventListener("keydown", onKey);
       clearHighlights();
