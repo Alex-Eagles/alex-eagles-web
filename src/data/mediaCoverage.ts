@@ -87,6 +87,13 @@ export interface CoverageItem {
   id: string;
   /** The channel or paper, as it should read on the tile. */
   outlet: string;
+  /**
+   * The outlet’s name in its own language, when that differs from the Latin
+   * form on the tile. Not rendered as a caption — it goes on the tile’s
+   * accessible name so the site search can find the outlet the way an Arabic
+   * reader would actually type it.
+   */
+  outletNative?: string;
   /** Its logo, in `public/press/outlets/`. Dark-on-transparent — see above. */
   outletLogo: string;
   kind: CoverageKind;
@@ -167,6 +174,7 @@ export const mediaCoverage: CoverageItem[] = [
   {
     id: "youm7-2022-article",
     outlet: "Youm7",
+    outletNative: "اليوم السابع",
     outletLogo: "/press/outlets/youm7.webp",
     kind: "article",
     thumbnail: "/press/youm7-article.webp",

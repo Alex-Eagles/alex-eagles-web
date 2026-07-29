@@ -198,7 +198,42 @@ function paint(ranges: Range[]) {
   }
 }
 
+/**
+ * A modal has taken the viewport: the body is pinned and the reader is looking
+ * at a card, not the page behind it. Scrolling now would move the ground under
+ * them and land somewhere else when the card closes.
+ */
+function modalOpen(): boolean {
+  return document.body.style.position === "fixed";
+}
+
+/**
+ * Scroll-reveal blocks start translated down and transparent. Landing on one
+ * mid-animation shows a section with its heading offset and its spacing wrong,
+ * so settle every reveal in the section we are about to scroll to.
+ */
+function settleReveals(focus: Element) {
+  const section = focus.closest("section") ?? focus.parentElement;
+  const blocks = section ? [...section.querySelectorAll("[data-reveal]")] : [];
+  for (const el of [...blocks, ...ancestorReveals(focus)]) {
+    const style = (el as HTMLElement).style;
+    style.opacity = "1";
+    style.transform = "none";
+  }
+}
+
+function ancestorReveals(el: Element): Element[] {
+  const out: Element[] = [];
+  let node: Element | null = el;
+  while (node) {
+    if (node.hasAttribute?.("data-reveal")) out.push(node);
+    node = node.parentElement;
+  }
+  return out;
+}
+
 function attempt(terms: string[], target: string | null, anchor: string | null): boolean {
+  if (modalOpen()) return true;
   const roots = collectRoots();
   ensureShadowStyles(roots);
   touched = roots;
@@ -259,6 +294,7 @@ function attempt(terms: string[], target: string | null, anchor: string | null):
     scope;
   if (!focus) return false;
 
+  settleReveals(focus);
   // Instant, not smooth: a long scroll animation on a pinned section lands
   // somewhere else by the time it finishes.
   focus.scrollIntoView({ behavior: "auto", block: "center" });
@@ -301,9 +337,27 @@ export function useSearchHighlight() {
     };
     document.addEventListener("keydown", onKey);
 
+    // Any click ends the search state: the reader has moved on, and leaving the
+    // retries armed means a later one yanks the page back after they have opened
+    // a card or scrolled away. Click rather than pointerdown so that a touch
+    // drag scrolls the page without cancelling, and the guard covers the click
+    // that navigated here in the first place.
+    let dismiss = () => {};
+    const armed = window.setTimeout(() => {
+      dismiss = () => {
+        settled = true;
+        timers.forEach(clearTimeout);
+        clearHighlights();
+        document.removeEventListener("click", dismiss, true);
+      };
+      document.addEventListener("click", dismiss, true);
+    }, 250);
+
     return () => {
       settled = true;
       timers.forEach(clearTimeout);
+      window.clearTimeout(armed);
+      document.removeEventListener("click", dismiss, true);
       document.removeEventListener("keydown", onKey);
       clearHighlights();
     };

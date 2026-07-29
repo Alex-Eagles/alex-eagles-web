@@ -220,7 +220,7 @@ function CoverageTile({
         // which, read aloud on its own, names neither the outlet nor where the
         // link goes. This is the only place a screen reader gets both, plus
         // the warning that it leaves the site.
-        aria-label={`${item.outlet} — ${KIND_LABELS[item.kind]}${
+        aria-label={`${item.outlet}${item.outletNative ? ` (${item.outletNative})` : ""} — ${KIND_LABELS[item.kind]}${
           item.date ? `, ${item.date}` : ""
         } (opens in a new tab)`}
         className={

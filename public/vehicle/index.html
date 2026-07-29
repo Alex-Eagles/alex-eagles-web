@@ -596,7 +596,7 @@
               <div class="vpg-tile" data-idx="4" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
                 <video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Drone footage.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Drone footage.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="5" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
@@ -608,7 +608,7 @@
               <div class="vpg-tile" data-idx="6" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
                 <img src="assets/gallery/night-hover.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">NIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Hover, after dark.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="7" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
@@ -1083,6 +1083,17 @@ class Component extends DCLogic {
       measure();
       paint();
       settle();
+
+      // A search result for a timeline stop deep-links to it with ?stop=<index>,
+      // the same way a blog result opens its post. Left late enough for the
+      // highlighter's early passes to have scrolled the section into place, so
+      // the card locks the page where the reader can see it and closing lands
+      // them back on the same view.
+      const wanted = Number(new URLSearchParams(location.search).get('stop'));
+      if (Number.isInteger(wanted) && DATA[wanted]) {
+        goTo(wanted + 1);
+        setTimeout(() => open(wanted), 800);
+      }
       window.addEventListener('load', () => { measure(); paint(); }, { once: true });
     }, 90);
 

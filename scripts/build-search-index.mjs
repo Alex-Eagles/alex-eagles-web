@@ -44,7 +44,7 @@ const STRUCTURED_FILES = new Set(
 const CONTENT_KEYS = new Set([
   "children", "name", "title", "label", "text", "heading", "headline", "blurb",
   "excerpt", "caption", "description", "role", "roleLabel", "author", "category",
-  "venue", "venueDetail", "quote", "outlet", "abstract", "mission", "unit",
+  "venue", "venueDetail", "quote", "outlet", "outletNative", "abstract", "mission", "unit",
   "place", "competition", "language", "department", "major", "alt", "tag",
   "subteam", "year", "num", "date", "readTime", "eyebrow", "subtitle", "body",
   "email", "location", "address", "phone", "fullName", "shortName",
@@ -243,7 +243,8 @@ function cleanText(raw) {
   if (/\.(jpe?g|png|webp|svg|mp4|css|js|json|glb|gltf|woff2?)$/i.test(text)) return null;
   if (/^\d{4}$/.test(text)) return text; // a year is meaningful copy
   if (/^#[0-9a-f]{3,8}$/i.test(text)) return null;
-  if (!/[A-Za-z]/.test(text)) return null;
+  // Any script, not just Latin: outlet names like اليوم السابع carry no Latin letter.
+  if (!/\p{L}/u.test(text)) return null;
   if (/^[a-z0-9]+([-_][a-z0-9]+)+$/.test(text)) return null;
   if (/^\d+(\.\d+)?(px|rem|em|%|vh|vw|s|ms)$/.test(text)) return null;
   if (text.startsWith("-")) return null;
@@ -430,7 +431,35 @@ for (const { path, page, entry } of [...ROUTES, ...SHARED]) {
 // The Vehicles page injects a prebuilt static bundle, so its copy lives in HTML.
 const vehicleHtml = resolve(ROOT, "public/vehicle/index.html");
 if (existsSync(vehicleHtml)) {
-  for (const text of textFromHtml(readFileSync(vehicleHtml, "utf8"))) {
+  const html = readFileSync(vehicleHtml, "utf8");
+
+  // The development-process timeline opens each stop as a modal, so its results
+  // deep-link to the stop exactly as blog results deep-link to a post. Indexed
+  // before the generic sweep so the copy that also appears on the card carries
+  // the parameter rather than landing twice.
+  const claimed = new Set();
+  const block = /const DATA = \[([\s\S]*?)\n {6}\];/.exec(html);
+  if (block) {
+    const entry = /\{ badge: '([^']*)', title: '([^']*)', date: '([^']*)',[\s\S]*?text: '((?:[^'\\]|\\.)*)' \}/g;
+    let m;
+    let stop = 0;
+    while ((m = entry.exec(block[1])) !== null) {
+      const [, badge, title, date, body] = m;
+      const params = "stop=" + stop;
+      const page = "Vehicles · Development process";
+      for (const text of [title, body.replace(/\\'/g, "'"), badge + " " + date]) {
+        add("/vehicles", page, text, params);
+        const cleaned = cleanText(text);
+        if (cleaned) claimed.add(cleaned.toLowerCase());
+      }
+      stop += 1;
+    }
+    console.log(`  ${stop} timeline stops deep-linked`);
+  }
+
+  for (const text of textFromHtml(html)) {
+    const cleaned = cleanText(text);
+    if (cleaned && claimed.has(cleaned.toLowerCase())) continue;
     add("/vehicles", "Vehicles", text);
   }
 }
