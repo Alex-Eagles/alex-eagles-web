@@ -106,8 +106,9 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "" }: P
   }, [active]);
 
   const go = (hit: SearchHit) => {
-    const q = query.trim();
-    navigate(`${hit.route}?q=${encodeURIComponent(q)}`);
+    const parts = [`q=${encodeURIComponent(query.trim())}`, `t=${encodeURIComponent(hit.text.slice(0, 140))}`];
+    if (hit.params) parts.push(hit.params);
+    navigate(`${hit.route}?${parts.join('&')}`);
     close();
   };
 
@@ -141,7 +142,7 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "" }: P
   const showPanel = query.trim().length >= 2;
 
   return (
-    <div ref={boxRef} className={`relative flex items-center ${wrapperClassName}`}>
+    <div ref={boxRef} data-search-ui className={`relative flex items-center ${wrapperClassName}`}>
       <button
         type="button"
         onClick={() => (open ? close() : setOpen(true))}

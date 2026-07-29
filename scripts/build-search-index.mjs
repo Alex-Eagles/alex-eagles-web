@@ -168,7 +168,7 @@ function extractStrings(code) {
       else if (top && top.type === "(" && !lastKey) {
         key = DENY_CALLEES.has(top.callee) ? null : "__call";
       }
-      if (key) out.push({ key, value });
+      if (key) out.push({ key, value, pos: i });
       lastKey = null;
       i = j + 1;
       continue;
@@ -267,15 +267,34 @@ function textFromHtml(html) {
 const records = [];
 const seenPerRoute = new Map();
 
-function add(route, page, text) {
+function add(route, page, text, params) {
   const cleaned = cleanText(text);
   if (!cleaned) return;
-  const key = route + " " + cleaned.toLowerCase();
-  if (!seenPerRoute.has(route)) seenPerRoute.set(route, new Set());
-  const seen = seenPerRoute.get(route);
+  const scope = route + (params ? "?" + params : "");
+  if (!seenPerRoute.has(scope)) seenPerRoute.set(scope, new Set());
+  const seen = seenPerRoute.get(scope);
   if (seen.has(cleaned.toLowerCase())) return;
   seen.add(cleaned.toLowerCase());
-  records.push({ id: key, text: cleaned, route, page });
+  const record = { id: scope + " " + cleaned.toLowerCase(), text: cleaned, route, page };
+  if (params) record.params = params;
+  records.push(record);
+}
+
+
+/**
+ * Byte ranges of the per-year roster declarations (`const ROSTER_2025 = …`),
+ * so a name links to the year tab that actually renders it.
+ */
+function yearRanges(code) {
+  const found = [];
+  const re = /const\s+ROSTER_(\d{4})\b/g;
+  let m;
+  while ((m = re.exec(code))) found.push({ year: m[1], start: m.index });
+  found.sort((a, b) => a.start - b.start);
+  return found.map((entry, i) => ({
+    ...entry,
+    end: i + 1 < found.length ? found[i + 1].start : Infinity,
+  }));
 }
 
 for (const { path, page, entry } of [...ROUTES, ...SHARED]) {
@@ -295,8 +314,13 @@ for (const { path, page, entry } of [...ROUTES, ...SHARED]) {
     } catch {
       continue; // unparseable file — skip rather than fail the build
     }
-    for (const { key, value } of extractStrings(code)) {
-      if (key === "__call" || CONTENT_KEYS.has(key)) add(path, page, value);
+    const ranges = yearRanges(code);
+    for (const { key, value, pos } of extractStrings(code)) {
+      if (key !== "__call" && !CONTENT_KEYS.has(key)) continue;
+      const range = ranges.find((r) => pos >= r.start && pos < r.end);
+      const params = range ? "year=" + range.year : undefined;
+      const label = range ? page + " · " + range.year : page;
+      add(path, label, value, params);
     }
   }
 }

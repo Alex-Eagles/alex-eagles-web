@@ -5,6 +5,7 @@ export interface SearchDoc {
   text: string;
   route: string;
   page: string;
+  params?: string;
 }
 
 export interface SearchHit extends SearchDoc {
@@ -22,7 +23,7 @@ export function loadEngine(): Promise<MiniSearchType<SearchDoc>> {
     ]).then(([{ default: MiniSearch }, docs]) => {
       const engine = new MiniSearch<SearchDoc>({
         fields: ["text", "page"],
-        storeFields: ["text", "route", "page"],
+        storeFields: ["text", "route", "page", "params"],
         searchOptions: { boost: { text: 3 }, combineWith: "AND" },
       });
       engine.addAll((docs.default ?? docs) as unknown as SearchDoc[]);
@@ -54,7 +55,7 @@ export async function runSearch(query: string, limit = 10): Promise<SearchHit[]>
   const results: SearchHit[] = [];
   const seenText = new Set<string>();
   for (const hit of raw) {
-    const key = hit.route + "|" + hit.text;
+    const key = hit.route + "|" + (hit.params ?? "") + "|" + hit.text;
     if (seenText.has(key)) continue;
     seenText.add(key);
     results.push({
@@ -62,6 +63,7 @@ export async function runSearch(query: string, limit = 10): Promise<SearchHit[]>
       text: hit.text,
       route: hit.route,
       page: hit.page,
+      params: hit.params,
       terms: hit.terms ?? [],
     });
     if (results.length >= limit) break;

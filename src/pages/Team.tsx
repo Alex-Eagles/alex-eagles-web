@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import crew2026_1280 from "@/assets/team/crew-2026-1280.webp";
 import crew2026_1920 from "@/assets/team/crew-2026-1920.webp";
 import crew2026_2560 from "@/assets/team/crew-2026-2560.webp";
@@ -41,6 +42,15 @@ export default function Team({
   initialYear?: RosterYear;
 } = {}) {
   const [year, setYear] = useState<RosterYear>(initialYear ?? ROSTER_YEARS[0]);
+
+  // A search result for a past roster carries ?year=, so open that tab.
+  const [searchParams] = useSearchParams();
+  const yearParam = searchParams.get("year");
+  useEffect(() => {
+    if (yearParam && (ROSTER_YEARS as readonly string[]).includes(yearParam)) {
+      setYear(yearParam as RosterYear);
+    }
+  }, [yearParam]);
   const scrollY = useScrollPosition();
 
   /*
