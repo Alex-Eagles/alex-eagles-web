@@ -142,18 +142,42 @@ export const AWARD_YEARS: AwardYear[] = [
 /** Newest first, which is the order the ticker shows. */
 export const AWARD_YEARS_LATEST_FIRST: AwardYear[] = [...AWARD_YEARS].reverse();
 
-export interface FeaturedAward extends AwardLine {
+/**
+ * A run of title text, optionally picked out in the accent color. Titles are
+ * segmented rather than plain strings so a card can highlight the words that
+ * name the award ("Technical Design") without the component having to
+ * string-match its own copy.
+ */
+export interface AwardTitlePart {
+  text: string;
+  accent?: boolean;
+}
+
+export interface FeaturedAward extends Omit<AwardLine, "title"> {
+  title: AwardTitlePart[];
   year: string;
 }
+
+/** The award name both 2025 report wins share, highlight and all. */
+const TECHNICAL_DESIGN_REPORT: AwardTitlePart[] = [
+  { text: "Best " },
+  { text: "Technical Design", accent: true },
+  { text: " Report" },
+];
 
 /**
  * The three results the homepage leads with — the whole of the 2025 season.
  * The full record lives on the History page, which the section links out to.
  */
 export const FEATURED_AWARDS: FeaturedAward[] = [
-  { place: "5th", title: "Overall", competition: "UAVC", year: "2025" },
-  { title: "Best Technical Design Report", competition: "UAVC", year: "2025" },
-  { title: "Best Technical Design Report", competition: "SUAS", year: "2025" },
+  {
+    place: "5th",
+    title: [{ text: "Overall" }],
+    competition: "UAVC",
+    year: "2025",
+  },
+  { title: TECHNICAL_DESIGN_REPORT, competition: "UAVC", year: "2025" },
+  { title: TECHNICAL_DESIGN_REPORT, competition: "SUAS", year: "2025" },
 ];
 
 /** One flat line per award, for the hero ticker. */

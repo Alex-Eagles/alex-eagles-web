@@ -1,8 +1,8 @@
 /* "Watch Us Fly" — a giant outlined "SUAS" watermark with an overlapping
  * year, a bold 3-line headline, and a CTA to the Vehicles page. Theme-aware
  * (dark-mode default, white + light-blue for light mode, matching the team
- * logo) — unlike Hero, this section no longer carries a photo/video
- * background (moved to Hero), so there's no reason to lock it dark. */
+ * logo), including the flight photo behind the copy column — both themes get
+ * their own shot and their own wash over it. */
 :root,
 :root[data-theme="dark"] {
   --wf-bg: #0a0e1f;
@@ -20,7 +20,8 @@
 :root[data-theme="light"] {
   --wf-bg: #ffffff;
   --wf-text: #0b1220;
-  --wf-text-muted-1: #3b5a8a;
+  /* Deepened from #3b5a8a: this copy now sits over a photo, not flat white. */
+  --wf-text-muted-1: #2b4670;
   --wf-text-muted-2: #5b7bab;
   --wf-border-soft: #dbeafe;
   --wf-accent: #3b82f6;
@@ -38,6 +39,63 @@
   align-items: center;
   background: var(--wf-bg);
   padding: var(--space-section-y) 6%;
+}
+
+/* ─── Photo backdrop ──────────────────────────────────────────────────────── */
+
+/* A flight photo per theme, swapped in CSS so the browser only ever fetches
+ * the rule that matches. Anchored to the left half and masked to nothing well
+ * before the right column, so it sits behind the copy and never runs under
+ * the video frame. */
+.video-photo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 62%;
+  z-index: 0;
+  background-image: url("/Home/flight-backdrop-dark.jpg");
+  background-size: cover;
+  background-position: left center;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 0%,
+    #000 38%,
+    transparent 80%
+  );
+  mask-image: linear-gradient(90deg, #000 0%, #000 38%, transparent 80%);
+}
+
+:root[data-theme="light"] .video-photo {
+  background-image: url("/Home/flight-backdrop-light.jpg");
+}
+
+/* Full-bleed on purpose: the wash is the same hue as --wf-bg, so it's
+ * invisible everywhere the photo isn't and there's no edge to line up. Top
+ * and bottom stops are the strongest, keeping the section's seams clean. */
+.video-photo-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 14, 31, 0.92) 0%,
+    rgba(10, 14, 31, 0.58) 45%,
+    rgba(10, 14, 31, 0.94) 100%
+  );
+}
+
+/* Lighter than the dark wash and lighter than this photo used to carry
+ * elsewhere on the page — the light-mode shot is bright enough that a heavy
+ * white veil erased it, so this leans on the mask's horizontal falloff to
+ * protect the copy instead of flooding the whole frame. */
+:root[data-theme="light"] .video-photo-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(255, 255, 255, 0.55) 45%,
+    rgba(255, 255, 255, 0.86) 100%
+  );
 }
 
 /* decorative watermark — sits in normal document flow, stacked above the

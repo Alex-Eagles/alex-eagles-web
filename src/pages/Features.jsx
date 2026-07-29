@@ -24,7 +24,7 @@ function Features() {
           <span className="features-headline-line">
             Engineers <span className="features-headline-accent">First.</span>
           </span>
-          <span className="features-headline-line">Aviators Second.</span>
+          <span className="features-headline-line">Aviators Second</span>
         </h2>
 
         <p className="features-copy-text">

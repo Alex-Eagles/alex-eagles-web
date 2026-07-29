@@ -85,12 +85,6 @@ export default function TeamStructure() {
 
   return (
     <section className="tp-section">
-      {/* Photo backdrop (one per theme, picked in CSS) under an indigo wash —
-          the wash is what keeps the chart's thin lines and small type legible
-          over a busy photograph. */}
-      <div className="tp-photo" aria-hidden="true" />
-      <div className="tp-photo-scrim" aria-hidden="true" />
-      <div className="tp-grid-bg" aria-hidden="true" />
       <div className="tp-seam-bridge" aria-hidden="true" />
 
       <div className="tp-layout">
@@ -104,7 +98,7 @@ export default function TeamStructure() {
           <h2 className="tp-headline">
             <span className="tp-headline-line">Built by</span>
             <span className="tp-headline-line tp-headline-accent">
-              Subsystems.
+              Subsystems
             </span>
           </h2>
 

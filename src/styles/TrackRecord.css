@@ -96,21 +96,56 @@
   transform: translateY(1px);
 }
 
+/* ─── Panel ───────────────────────────────────────────────────────────────── */
+
+/* A recessed shelf the cards sit on. The depth cue is the pair of shadows:
+ * an *inset* one along the top edge (light falls from above, so the panel's
+ * own lip casts down into itself) plus an outer drop shadow beneath, which
+ * together read as a slab lifted off the section rather than a flat block of
+ * a different color. */
+.tr-panel {
+  position: relative;
+  margin-top: 40px;
+  padding: 34px;
+  /* Darker than --card on purpose: the cards are the raised objects, so the
+     shelf under them has to sit lower in tone or the two merge. */
+  background: linear-gradient(180deg, #0d1529 0%, #090f1e 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    var(--elevation-3);
+}
+
+/* Light mode can't use black for the recess — it turns the panel grey. A blue
+ * -tinted inset over a faintly cooler surface keeps the same "pressed in"
+ * read while the panel stays white-ish. */
+:root[data-theme="light"] .tr-panel {
+  background: #f4f8ff;
+  box-shadow:
+    inset 0 2px 6px rgba(37, 99, 235, 0.12),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.9),
+    var(--elevation-2);
+}
+
 /* ─── Cards ───────────────────────────────────────────────────────────────── */
 
 /* Three results, three columns. auto-fit rather than a hard `repeat(3, …)` so
  * they drop to two-up and then one-up on their own as the viewport narrows. */
 .tr-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
-  margin: 40px 0 0;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* The inset top edge is the card's only ornament — no drop shadow, so the
- * cards read as panels on the surface rather than floating chips.
+/* Shape is unchanged — same padding, radius, min-height and top brand edge as
+ * before. What's new is the elevation: a three-stop shadow (tight contact
+ * shadow, mid, and a wide soft cast) so each card reads as a solid object
+ * standing on the panel, plus a 1px inner top highlight for the lit edge.
  *
  * The competition sits at the top and the award title is pushed to the
  * bottom, so titles of very different lengths ("Overall" vs "Best Technical
@@ -123,18 +158,64 @@
   gap: 32px;
   min-height: 210px;
   padding: 26px 24px 28px;
-  background: var(--card);
+  background: linear-gradient(180deg, #1a2544 0%, #121b34 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  box-shadow: inset 0 2px 0 var(--brand);
+  box-shadow:
+    inset 0 2px 0 var(--brand),
+    inset 0 3px 0 -1px rgba(255, 255, 255, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 6px 14px rgba(0, 0, 0, 0.35),
+    0 14px 34px rgba(0, 0, 0, 0.3);
+  /* Named so the hover can tilt around the card's own base rather than its
+   * centre — the bottom edge stays planted on the panel as the top lifts. */
+  transform-origin: center bottom;
   transition:
     border-color var(--transition-base),
+    box-shadow var(--transition-base),
     transform var(--transition-base);
 }
 
-.tr-card:hover {
+:root[data-theme="light"] .tr-card {
+  background: var(--card);
+  box-shadow:
+    inset 0 2px 0 var(--brand),
+    0 1px 2px rgba(37, 99, 235, 0.1),
+    0 6px 14px rgba(37, 99, 235, 0.13),
+    0 14px 34px rgba(37, 99, 235, 0.12);
+}
+
+/* Lifts off the panel and throws a longer shadow, as if picked up toward the
+ * viewer. The shadow growing faster than the travel is what sells the height
+ * — a card that only moves reads as sliding, not rising. */
+.tr-card:hover,
+.tr-card:focus-within {
   border-color: var(--brand);
-  transform: translateY(-3px);
+  transform: translateY(-8px) scale(1.015);
+  box-shadow:
+    inset 0 2px 0 var(--brand),
+    inset 0 3px 0 -1px rgba(255, 255, 255, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.32),
+    0 14px 28px rgba(0, 0, 0, 0.42),
+    0 30px 60px rgba(0, 0, 0, 0.38);
+}
+
+:root[data-theme="light"] .tr-card:hover,
+:root[data-theme="light"] .tr-card:focus-within {
+  box-shadow:
+    inset 0 2px 0 var(--brand),
+    0 2px 4px rgba(37, 99, 235, 0.12),
+    0 14px 28px rgba(37, 99, 235, 0.18),
+    0 30px 60px rgba(37, 99, 235, 0.16);
+}
+
+/* The hover is decorative motion, so it goes away — but the border and shadow
+ * still change, which is what actually signals "this is the one". */
+@media (prefers-reduced-motion: reduce) {
+  .tr-card:hover,
+  .tr-card:focus-within {
+    transform: none;
+  }
 }
 
 .tr-card-event {
@@ -160,9 +241,11 @@
 }
 
 /* Inline, so "5th" and "Overall" read as one phrase with the placement picked
- * out in the hot accent rather than sitting on its own line. */
-.tr-card-place {
-  color: var(--spark);
+ * out rather than sitting on its own line. The red matches "First." in
+ * Features' headline — the page's one accent for a standout word. */
+.tr-card-place,
+.tr-card-accent {
+  color: #e5484d;
 }
 
 /* ─── Responsive ──────────────────────────────────────────────────────────── */

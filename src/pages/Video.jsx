@@ -10,6 +10,11 @@ const YOUTUBE_ID = "1K5YwEMZjnU";
 export default function Video() {
   return (
     <section className="video">
+      {/* Flight photo behind the copy column only (one per theme, picked in
+          CSS), fading out before it reaches the embed on the right. */}
+      <div className="video-photo" aria-hidden="true" />
+      <div className="video-photo-scrim" aria-hidden="true" />
+
       <div className="video-layout">
         <div className="video-content">
           <div className="video-watermark" aria-hidden="true">
@@ -29,7 +34,7 @@ export default function Video() {
               Flown by
             </span>
             <span className="video-headline-line video-headline-accent">
-              the team.
+              the team
             </span>
           </h2>
 

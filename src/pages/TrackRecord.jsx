@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FEATURED_AWARDS } from "../data/home";
 import { useReveal } from "../hooks/useReveal";
@@ -36,27 +36,41 @@ export default function TrackRecord() {
           </Link>
         </div>
 
-        <ul className="tr-grid">
-          {FEATURED_AWARDS.map((award, i) => (
-            <li
-              className="tr-card"
-              key={`${award.title}-${award.competition}-${award.year}`}
-              data-reveal=""
-              data-reveal-delay={80 + i * 90}
-            >
-              <span className="tr-card-event">
-                {award.competition} · {award.year}
-              </span>
+        {/* The cards sit ON a panel rather than directly on the section, so the
+            row reads as a shelf of trophies rather than three loose tiles. */}
+        <div className="tr-panel" data-reveal="">
+          <ul className="tr-grid">
+            {FEATURED_AWARDS.map((award, i) => (
+              <li
+                className="tr-card"
+                key={`${award.competition}-${award.year}-${award.title
+                  .map((part) => part.text)
+                  .join("")}`}
+                data-reveal=""
+                data-reveal-delay={80 + i * 90}
+              >
+                <span className="tr-card-event">
+                  {award.competition} · {award.year}
+                </span>
 
-              <span className="tr-card-title">
-                {award.place && (
-                  <span className="tr-card-place">{award.place} </span>
-                )}
-                {award.title}
-              </span>
-            </li>
-          ))}
-        </ul>
+                <span className="tr-card-title">
+                  {award.place && (
+                    <span className="tr-card-place">{award.place} </span>
+                  )}
+                  {award.title.map((part, p) =>
+                    part.accent ? (
+                      <span className="tr-card-accent" key={p}>
+                        {part.text}
+                      </span>
+                    ) : (
+                      <Fragment key={p}>{part.text}</Fragment>
+                    ),
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );
