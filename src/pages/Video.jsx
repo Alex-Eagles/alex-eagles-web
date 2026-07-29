@@ -1,14 +1,11 @@
 import { Link } from "react-router-dom";
-import { Play } from "lucide-react";
 import "../styles/Video.css";
 
 /**
- * The unlisted YouTube video's ID: the part after `v=` in its watch URL, e.g.
+ * The YouTube video's ID: the part after `v=` in its watch URL, e.g.
  * https://www.youtube.com/watch?v=dQw4w9WgXcQ → "dQw4w9WgXcQ".
- * Leave empty and the section shows a placeholder frame instead of a broken
- * embed. Unlisted videos embed exactly like public ones; private ones do not.
  */
-const YOUTUBE_ID = "";
+const YOUTUBE_ID = "1K5YwEMZjnU";
 
 export default function Video() {
   return (
@@ -47,27 +44,18 @@ export default function Video() {
           </Link>
         </div>
 
+        {/* nocookie host: same embed, but YouTube holds off on tracking
+            cookies until someone actually presses play. */}
         <div className="video-embed">
-          {YOUTUBE_ID ? (
-            <iframe
-              className="video-embed-frame"
-              src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_ID}`}
-              title="Alex Eagles flight footage"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              loading="lazy"
-            />
-          ) : (
-            <div className="video-embed-placeholder">
-              <span className="video-embed-icon" aria-hidden="true">
-                <Play size={22} />
-              </span>
-              <p className="video-embed-label">Flight footage goes here</p>
-              <p className="video-embed-hint">
-                Set YOUTUBE_ID in Video.jsx to the unlisted video&rsquo;s ID
-              </p>
-            </div>
-          )}
+          <iframe
+            className="video-embed-frame"
+            src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_ID}`}
+            title="Alex Eagles flight footage"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+            loading="lazy"
+          />
         </div>
       </div>
     </section>

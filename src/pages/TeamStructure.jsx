@@ -1,5 +1,6 @@
 import { Fragment, useState } from "react";
-import { Wrench, Cpu, Crown } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Wrench, Cpu } from "lucide-react";
 import "../styles/TeamStructure.css";
 
 /**
@@ -84,6 +85,11 @@ export default function TeamStructure() {
 
   return (
     <section className="tp-section">
+      {/* Photo backdrop (one per theme, picked in CSS) under an indigo wash —
+          the wash is what keeps the chart's thin lines and small type legible
+          over a busy photograph. */}
+      <div className="tp-photo" aria-hidden="true" />
+      <div className="tp-photo-scrim" aria-hidden="true" />
       <div className="tp-grid-bg" aria-hidden="true" />
       <div className="tp-seam-bridge" aria-hidden="true" />
 
@@ -107,7 +113,11 @@ export default function TeamStructure() {
             parallel and the leads keep them in sync.
           </p>
 
-          <p className="tp-hint">Hover a role to see what it owns</p>
+          <p className="tp-hint">Hover a role to see what it does</p>
+
+          <Link to="/team" className="tp-cta">
+            Meet the team
+          </Link>
         </div>
 
         <div
@@ -125,10 +135,7 @@ export default function TeamStructure() {
                   )}
                   {...nodeProps(role.id)}
                 >
-                  <span className="tp-node-head">
-                    <Crown size={16} />
-                    {role.title}
-                  </span>
+                  <span className="tp-node-head">{role.title}</span>
                   <span className="tp-node-desc">
                     <span>{role.desc}</span>
                   </span>

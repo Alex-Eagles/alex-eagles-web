@@ -109,50 +109,6 @@
   border: 0;
 }
 
-/* Shown until YOUTUBE_ID is filled in — an empty embed would render as a
- * YouTube error page, which looks broken rather than unfinished. */
-.video-embed-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 24px;
-  text-align: center;
-}
-
-.video-embed-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 54px;
-  height: 54px;
-  margin-bottom: 4px;
-  border-radius: 50%;
-  background: var(--wf-accent);
-  color: #fff;
-  /* Optical nudge: a triangle centred by the box looks left-heavy. */
-  padding-left: 4px;
-}
-
-.video-embed-label {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--wf-text);
-}
-
-.video-embed-hint {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--wf-text-muted-2);
-}
-
 .video-eyebrow {
   display: flex;
   align-items: center;
@@ -177,9 +133,12 @@
   background: var(--wf-border-soft);
 }
 
+/* Sized to keep "Built in-house." on one line: the copy column lost width when
+ * the video moved in beside it, and at the old 58px cap the longest line broke
+ * across its own hyphen ("BUILT IN- / HOUSE."). */
 .video-headline {
   font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(36px, 4.6vw, 58px);
+  font-size: clamp(30px, 3.4vw, 46px);
   line-height: 1.05;
   text-transform: uppercase;
   color: var(--wf-text);

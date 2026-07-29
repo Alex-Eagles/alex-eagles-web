@@ -1,12 +1,12 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { AWARD_YEARS_LATEST_FIRST } from "../data/home";
+import { FEATURED_AWARDS } from "../data/home";
 import { useReveal } from "../hooks/useReveal";
 import "../styles/TrackRecord.css";
 
 /**
- * "What we've won" — every competition result, newest season first, one card
- * per year. A year that won more than once lists each award on its own line.
+ * "What we've won" — the three results from the latest season, one per card.
+ * The full record is a click away rather than laid out here.
  */
 export default function TrackRecord() {
   const rootRef = useRef(null);
@@ -37,30 +37,23 @@ export default function TrackRecord() {
         </div>
 
         <ul className="tr-grid">
-          {AWARD_YEARS_LATEST_FIRST.map(({ year, awards }, i) => (
+          {FEATURED_AWARDS.map((award, i) => (
             <li
               className="tr-card"
-              key={year}
+              key={`${award.title}-${award.competition}-${award.year}`}
               data-reveal=""
-              /* Cap the stagger so the last cards don't sit visibly waiting. */
-              data-reveal-delay={Math.min(80 + i * 50, 320)}
+              data-reveal-delay={80 + i * 90}
             >
-              <span className="tr-card-year">{year}</span>
+              <span className="tr-card-event">
+                {award.competition} · {award.year}
+              </span>
 
-              <ul className="tr-card-awards">
-                {awards.map((award) => (
-                  <li
-                    className="tr-card-award"
-                    key={`${award.title}-${award.competition}`}
-                  >
-                    {award.place && (
-                      <span className="tr-card-place">{award.place}</span>
-                    )}
-                    <span className="tr-card-title">{award.title}</span>
-                    <span className="tr-card-event">{award.competition}</span>
-                  </li>
-                ))}
-              </ul>
+              <span className="tr-card-title">
+                {award.place && (
+                  <span className="tr-card-place">{award.place} </span>
+                )}
+                {award.title}
+              </span>
             </li>
           ))}
         </ul>

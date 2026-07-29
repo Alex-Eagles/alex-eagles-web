@@ -17,7 +17,9 @@
   --ts-arm: linear-gradient(90deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08));
   --ts-radar-ring: rgba(255, 255, 255, 0.08);
   --ts-shadow: rgba(0, 0, 0, 0.6);
-  --ts-card-bg: rgba(255, 255, 255, 0.03);
+  /* Nudged up from 0.03 now that a photograph sits behind the chart — the
+     boxes need slightly more body to separate from it. */
+  --ts-card-bg: rgba(255, 255, 255, 0.07);
   --ts-gold: #f59e0b;
   --ts-gold-text: #fde68a;
   --ts-gold-bg: rgba(245, 158, 11, 0.08);
@@ -54,6 +56,63 @@
    * fade-to-bg transition, so the full section gap would stack on top of
    * that and read as an oversized blank gap before the content starts. */
   padding: var(--space-section-y-tight) 6% var(--space-section-y);
+}
+
+/* ─── Photo backdrop ──────────────────────────────────────────────────────── */
+
+/* A flight photo per theme. Swapping via CSS (rather than an <img> with a
+ * theme prop) means the browser only ever fetches the rule that matches. */
+.tp-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("/Home/subsystems-bg-dark.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+:root[data-theme="light"] .tp-photo {
+  background-image: url("/Home/subsystems-bg-light.jpg");
+}
+
+/* The indigo wash. It does two jobs: pushes the photo back far enough that the
+ * chart's hairlines and 12px pills stay readable over it, and darkens the top
+ * and bottom edges so the section still meets its neighbours cleanly instead
+ * of cutting to a photo. */
+.tp-photo-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(
+      120% 80% at 50% 42%,
+      rgba(36, 37, 153, 0.38),
+      transparent 72%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(10, 14, 31, 0.9) 0%,
+      rgba(10, 14, 31, 0.56) 42%,
+      rgba(10, 14, 31, 0.92) 100%
+    );
+}
+
+/* Light mode inverts the job: the wash is mostly white so the section's dark
+ * type and black box borders keep their contrast, with the indigo left as a
+ * tint rather than a shadow. */
+:root[data-theme="light"] .tp-photo-scrim {
+  background:
+    radial-gradient(
+      120% 80% at 50% 42%,
+      rgba(49, 46, 129, 0.14),
+      transparent 72%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(255, 255, 255, 0.8) 42%,
+      rgba(255, 255, 255, 0.95) 100%
+    );
 }
 
 .tp-grid-bg {
@@ -205,10 +264,6 @@
 .tp-box--top {
   border-top: 2px solid var(--ts-gold);
   color: var(--ts-gold-text);
-}
-
-.tp-box--top svg {
-  color: var(--ts-gold);
 }
 
 .tp-connector {
@@ -945,4 +1000,35 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ts-text-muted-2);
+}
+
+/* The chart names the subsystems; this is the way through to the people in
+ * them. Same shape as every other button on the site (Inter, 10px radius,
+ * brand fill) — --brand is already theme-aware, so it darkens for contrast in
+ * light mode on its own. */
+.tp-cta {
+  display: inline-block;
+  margin-top: 28px;
+  padding: 14px 26px;
+  border-radius: 10px;
+  background: var(--brand);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.tp-cta:hover {
+  background: var(--brand-light);
+  color: #ffffff;
+}
+
+.tp-cta:active {
+  transform: translateY(1px);
 }

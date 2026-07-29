@@ -72,9 +72,9 @@ export interface AwardYear {
 
 /**
  * Every competition result, kept chronological to match the History page's
- * source data. Both the "What we've won" cards and the hero ticker read from
- * this one list, so a new season only ever has to be added in one place.
- * 2013 is the founding year and won nothing, so it isn't listed here.
+ * source data. This is what the hero ticker scrolls through; the "What we've
+ * won" cards lead with FEATURED_AWARDS below instead. 2013 is the founding
+ * year and won nothing, so it isn't listed here.
  */
 export const AWARD_YEARS: AwardYear[] = [
   {
@@ -139,8 +139,22 @@ export const AWARD_YEARS: AwardYear[] = [
   },
 ];
 
-/** Newest first, which is the order both the cards and the ticker show. */
+/** Newest first, which is the order the ticker shows. */
 export const AWARD_YEARS_LATEST_FIRST: AwardYear[] = [...AWARD_YEARS].reverse();
+
+export interface FeaturedAward extends AwardLine {
+  year: string;
+}
+
+/**
+ * The three results the homepage leads with — the whole of the 2025 season.
+ * The full record lives on the History page, which the section links out to.
+ */
+export const FEATURED_AWARDS: FeaturedAward[] = [
+  { place: "5th", title: "Overall", competition: "UAVC", year: "2025" },
+  { title: "Best Technical Design Report", competition: "UAVC", year: "2025" },
+  { title: "Best Technical Design Report", competition: "SUAS", year: "2025" },
+];
 
 /** One flat line per award, for the hero ticker. */
 export const TICKER_RESULTS: string[] = AWARD_YEARS_LATEST_FIRST.flatMap(

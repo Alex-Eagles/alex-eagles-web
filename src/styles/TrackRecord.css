@@ -98,9 +98,11 @@
 
 /* ─── Cards ───────────────────────────────────────────────────────────────── */
 
+/* Three results, three columns. auto-fit rather than a hard `repeat(3, …)` so
+ * they drop to two-up and then one-up on their own as the viewport narrows. */
 .tr-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
   margin: 40px 0 0;
   padding: 0;
@@ -108,8 +110,18 @@
 }
 
 /* The inset top edge is the card's only ornament — no drop shadow, so the
- * cards read as panels on the surface rather than floating chips. */
+ * cards read as panels on the surface rather than floating chips.
+ *
+ * The competition sits at the top and the award title is pushed to the
+ * bottom, so titles of very different lengths ("Overall" vs "Best Technical
+ * Design Report") still share a baseline across the row instead of each
+ * floating at its own height. */
 .tr-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: 210px;
   padding: 26px 24px 28px;
   background: var(--card);
   border: 1px solid var(--border-subtle);
@@ -125,64 +137,32 @@
   transform: translateY(-3px);
 }
 
-.tr-card-year {
-  display: block;
-  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
-  font-size: 40px;
-  line-height: 1;
-  color: var(--text-primary);
-  /* Keeps the years optically aligned down each column. */
-  font-variant-numeric: tabular-nums;
-}
-
-/* ─── Award lines within a card ───────────────────────────────────────────── */
-
-.tr-card-awards {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin: 18px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* A year that won twice gets a rule between its awards so the two don't read
- * as one run-on entry. */
-.tr-card-award + .tr-card-award {
-  padding-top: 14px;
-  border-top: 1px solid var(--border-subtle);
-}
-
-.tr-card-place {
-  display: block;
+.tr-card-event {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--spark);
+  color: var(--text-muted);
 }
 
+/* Condensed rather than the section's slab face: "Best Technical Design
+ * Report" is four words that have to hold together at display size, and a
+ * slab that wide would wrap to four cramped lines. */
 .tr-card-title {
-  display: block;
-  margin-top: 6px;
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: clamp(28px, 2.6vw, 36px);
   font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--text-primary);
   text-wrap: balance;
 }
 
-.tr-card-event {
-  display: block;
-  margin-top: 6px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-muted);
+/* Inline, so "5th" and "Overall" read as one phrase with the placement picked
+ * out in the hot accent rather than sitting on its own line. */
+.tr-card-place {
+  color: var(--spark);
 }
 
 /* ─── Responsive ──────────────────────────────────────────────────────────── */

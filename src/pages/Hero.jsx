@@ -1,12 +1,26 @@
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { TICKER_RESULTS } from "../data/home";
+import { useTheme } from "../context/ThemeContext";
 import { useReveal } from "../hooks/useReveal";
 import "../styles/Hero.css";
+
+/**
+ * One clip per theme: a daylight campus flight for light mode, a night flight
+ * for dark. Only the active one is ever in the DOM, so a visitor downloads a
+ * single video rather than both.
+ */
+const HERO_MEDIA = {
+  dark: { src: "/Home/hero-night.mp4", poster: "/Home/hero-night-poster.jpg" },
+  light: { src: "/Home/hero-light.mp4", poster: "/Home/hero-light-poster.jpg" },
+};
 
 export default function Hero() {
   const rootRef = useRef(null);
   useReveal(rootRef);
+
+  const { theme } = useTheme();
+  const media = HERO_MEDIA[theme] ?? HERO_MEDIA.dark;
 
   const scrollToAbout = () => {
     document.querySelector(".features")?.scrollIntoView({ behavior: "smooth" });
@@ -15,11 +29,14 @@ export default function Hero() {
   return (
     <section className="hero" ref={rootRef}>
       {/* Muted, looping flight footage. The poster paints immediately so the
-          hero is never a black rectangle while the file buffers. */}
+          hero is never a black rectangle while the file buffers. Keyed by
+          theme so switching modes remounts the element and actually loads the
+          other clip, rather than leaving the old one decoded in place. */}
       <video
+        key={theme}
         className="hero-media"
-        src="/hero.mp4"
-        poster="/hero-poster.jpg"
+        src={media.src}
+        poster={media.poster}
         autoPlay
         muted
         loop
