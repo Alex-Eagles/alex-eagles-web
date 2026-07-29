@@ -490,7 +490,7 @@
 
     <div id="vpt-scroller" tabindex="0" aria-label="Development timeline" style="position:relative; margin-top:clamp(44px,6vh,72px); overflow-x:auto; overflow-y:hidden; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;">
       <div id="vpt-track" style="position:relative; display:flex; align-items:stretch; gap:clamp(20px,2.4vw,34px); padding:0 max(32px,calc((100vw - 1180px) / 2 + 32px)) 6px;">
-        <div aria-hidden="true" style="position:absolute; left:0; right:0; bottom:41px; height:2px; background:linear-gradient(90deg, rgba(60,64,181,0) 0%, rgba(96,165,250,0.32) 5%, rgba(96,165,250,0.32) 95%, rgba(60,64,181,0) 100%);"></div>
+        <div id="vpt-rail" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; background:linear-gradient(90deg, rgba(60,64,181,0) 0%, rgba(96,165,250,0.32) 5%, rgba(96,165,250,0.32) 95%, rgba(60,64,181,0) 100%);"></div>
         <div id="vpt-fill" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; transform:scaleX(0); transform-origin:0 50%; background:linear-gradient(90deg,#3c40b5,#d9302a); will-change:transform;"></div>
         <div id="vpt-head" aria-hidden="true" style="position:absolute; left:0; bottom:36px; width:12px; height:12px; margin-left:-6px; border-radius:9999px; background:#d9302a; box-shadow:0 0 12px rgba(217,48,42,0.9), 0 0 28px rgba(217,48,42,0.45); will-change:transform;"></div>
 
@@ -718,6 +718,7 @@ class Component extends DCLogic {
       const modal = document.getElementById('vpt-modal');
       if (!sc || !track || !modal) return;
       const items = [...track.querySelectorAll('.vpt-item')];
+      if (!items.length) return;
       const fill = document.getElementById('vpt-fill');
       const prev = document.getElementById('vpt-prev');
       const next = document.getElementById('vpt-next');
@@ -739,11 +740,23 @@ class Component extends DCLogic {
       ];
 
       const head = document.getElementById('vpt-head');
+      const rail = document.getElementById('vpt-rail');
       let trackW = 0, stopX = [], queued = false;
 
+      // The track is a block box the width of the scroller, so its flex children
+      // overflow it: `width:100%` on the rail and the fill would only cover one
+      // viewport, not the full timeline. Both are pinned to the real content
+      // width so scaleX(1) reaches the actual end of the line.
+      // Measured off the last card rather than scrollWidth: the rail and the fill
+      // are absolutely positioned children of the track, so once they are sized
+      // they would prop scrollWidth open and it could never shrink on resize.
       const measure = () => {
         const tr = track.getBoundingClientRect();
-        trackW = track.scrollWidth || tr.width;
+        const last = items[items.length - 1].getBoundingClientRect();
+        const padRight = parseFloat(getComputedStyle(track).paddingRight) || 0;
+        trackW = Math.max(1, last.right - tr.left + padRight);
+        if (rail) rail.style.width = trackW + 'px';
+        if (fill) fill.style.width = trackW + 'px';
         stopX = items.map(it => { const r = it.querySelector('.vpt-stop').getBoundingClientRect(); return r.left - tr.left + r.width / 2; });
       };
 
