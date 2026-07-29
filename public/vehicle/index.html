@@ -71,6 +71,46 @@
   @media (max-width:460px) {
     .vpg-page { grid-template-columns:1fr !important; grid-auto-rows:64vw !important; }
   }
+  /* ---- DEVELOPMENT PROCESS timeline ---- */
+  #vpt-scroller { scrollbar-width:none; }
+  #vpt-scroller::-webkit-scrollbar { display:none; }
+  #vpt-scroller:focus-visible { outline:2px solid #d9302a; outline-offset:-4px; }
+  .vpt-nav { transition:background .3s cubic-bezier(.32,.72,0,1), border-color .3s cubic-bezier(.32,.72,0,1), transform .3s cubic-bezier(.32,.72,0,1); }
+  .vpt-nav:hover { background:rgba(217,48,42,0.18); border-color:rgba(217,48,42,0.6); }
+  .vpt-nav:active { transform:scale(.94); }
+  .vpt-nav[data-off="1"] { opacity:.32; pointer-events:none; }
+  .vpt-item { flex:0 0 clamp(258px,27vw,332px); display:flex; flex-direction:column; justify-content:flex-end; scroll-snap-align:center; opacity:0; transform:translateY(34px); filter:blur(6px); transition:opacity .8s cubic-bezier(.32,.72,0,1), transform .8s cubic-bezier(.32,.72,0,1), filter .8s cubic-bezier(.32,.72,0,1); }
+  .vpt-item[data-in="1"] { opacity:1; transform:none; filter:blur(0); }
+  .vpt-card { cursor:pointer; transition:transform .55s cubic-bezier(.32,.72,0,1); }
+  .vpt-card:hover, .vpt-card:focus-visible { transform:translateY(-8px); outline:none; }
+  .vpt-shell { padding:7px; border-radius:26px; background:rgba(60,64,181,0.12); border:1px solid rgba(96,165,250,0.14); transition:background .55s cubic-bezier(.32,.72,0,1), border-color .55s cubic-bezier(.32,.72,0,1); }
+  .vpt-card:hover .vpt-shell, .vpt-card:focus-visible .vpt-shell { background:rgba(217,48,42,0.12); border-color:rgba(217,48,42,0.4); }
+  .vpt-core { border-radius:19px; overflow:hidden; background:#0b0e2b; box-shadow:inset 0 1px 0 rgba(255,255,255,0.07); }
+  .vpt-media { position:relative; aspect-ratio:16/10; background:radial-gradient(120% 100% at 50% 0%, #1d2356 0%, #0c1030 62%, #080a22 100%); background-image:linear-gradient(rgba(96,165,250,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,0.05) 1px,transparent 1px),radial-gradient(120% 100% at 50% 0%, #1d2356 0%, #0c1030 62%, #080a22 100%); background-size:26px 26px,26px 26px,cover; display:flex; align-items:center; justify-content:center; }
+  .vpt-media::after { content:attr(data-kind) " · placeholder"; position:absolute; left:12px; top:12px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#8b8fc8; background:rgba(8,10,28,0.55); border:1px solid rgba(96,165,250,0.18); border-radius:9999px; padding:4px 9px; }
+  .vpt-media::before { content:"▶"; width:52px; height:52px; border-radius:9999px; border:1px solid rgba(217,48,42,0.5); background:rgba(217,48,42,0.12); color:#d9302a; display:flex; align-items:center; justify-content:center; font-size:16px; padding-left:3px; transition:transform .55s cubic-bezier(.32,.72,0,1), background .55s cubic-bezier(.32,.72,0,1); }
+  .vpt-media[data-kind="photo"]::before { content:"◫"; padding-left:0; font-size:20px; }
+  .vpt-card:hover .vpt-media::before { transform:scale(1.12); background:rgba(217,48,42,0.22); }
+  .vpt-body { padding:20px 20px 22px; }
+  .vpt-kicker { font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#d9302a; margin-bottom:9px; }
+  .vpt-title { font-family:'Barlow Condensed'; font-weight:700; font-size:25px; line-height:1.02; letter-spacing:-0.01em; color:#f0f2ff; margin:0 0 9px; }
+  .vpt-text { font-family:'Barlow'; font-size:14px; line-height:1.6; color:#a8ace0; margin:0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .vpt-stem { width:1px; height:26px; margin:18px auto 0; background:linear-gradient(180deg, rgba(96,165,250,0) 0%, rgba(96,165,250,0.45) 100%); }
+  .vpt-stoprow { display:flex; justify-content:center; height:16px; }
+  .vpt-stop { width:16px; height:16px; border-radius:9999px; background:#3c40b5; box-shadow:0 0 0 4px rgba(60,64,181,0.22), 0 0 16px rgba(60,64,181,0.5); transition:background .45s cubic-bezier(.32,.72,0,1), box-shadow .45s cubic-bezier(.32,.72,0,1), transform .45s cubic-bezier(.32,.72,0,1); }
+  .vpt-item[data-on="1"] .vpt-stop { background:#d9302a; transform:scale(1.14); box-shadow:0 0 0 5px rgba(217,48,42,0.2), 0 0 20px rgba(217,48,42,0.6); }
+  .vpt-date { margin-top:16px; height:18px; font-family:'JetBrains Mono'; font-size:12.5px; line-height:18px; letter-spacing:.1em; text-transform:uppercase; text-align:center; color:#8b8fc8; transition:color .45s ease; }
+  .vpt-item[data-on="1"] .vpt-date { color:#f0f2ff; }
+  #vpt-close:hover { opacity:.72; }
+  @media (max-width:760px) {
+    .vpt-item { flex:0 0 78vw; }
+    #vpt-track { padding-left:20px; padding-right:20px; }
+    #vp-process > div:nth-of-type(3) { padding-left:20px; padding-right:20px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vpt-item { opacity:1; transform:none; filter:none; transition:none; }
+    .vpt-card, .vpt-shell, .vpt-media::before { transition:none; }
+  }
   @keyframes vp-grid { from { background-position:0 0; } to { background-position:64px 64px; } }
   @keyframes vp-bounce { 0%,100% { transform:translateY(0); opacity:.45; } 50% { transform:translateY(9px); opacity:1; } }
   @keyframes vp-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
@@ -429,6 +469,138 @@
     </div>
   </section>
 
+  <!-- ========================= DEVELOPMENT PROCESS ========================= -->
+  <section id="vp-process" style="position:relative; background:#090c26; padding:clamp(88px,12vh,140px) 0; overflow:hidden;">
+    <div aria-hidden="true" style="position:absolute; left:-8%; top:-10%; width:52%; height:60%; background:radial-gradient(closest-side, rgba(60,64,181,0.34), transparent 70%); pointer-events:none;"></div>
+    <div aria-hidden="true" style="position:absolute; right:-6%; bottom:-14%; width:44%; height:58%; background:radial-gradient(closest-side, rgba(217,48,42,0.16), transparent 70%); pointer-events:none;"></div>
+
+    <div style="position:relative; max-width:1180px; margin:0 auto; padding:0 32px;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;">
+        <div>
+          <span style="display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono'; font-size:10px; font-weight:500; letter-spacing:.22em; text-transform:uppercase; color:#9aa0e8; border:1px solid rgba(96,165,250,0.22); background:rgba(60,64,181,0.14); border-radius:9999px; padding:6px 13px;"><span style="width:5px; height:5px; border-radius:9999px; background:#d9302a; box-shadow:0 0 9px #d9302a;"></span>Build log</span>
+          <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:18px 0 0; color:#f0f2ff;">Clover development process.</h2>
+          <div style="height:2px; width:52px; background:#d9302a; margin-top:16px;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div id="vpt-prev" role="button" tabindex="0" aria-label="Previous milestone" class="vpt-nav" style="width:48px; height:48px; border-radius:9999px; background:rgba(60,64,181,0.16); border:1px solid rgba(96,165,250,0.28); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:24px; line-height:1; user-select:none;">‹</div>
+          <div id="vpt-next" role="button" tabindex="0" aria-label="Next milestone" class="vpt-nav" style="width:48px; height:48px; border-radius:9999px; background:rgba(60,64,181,0.16); border:1px solid rgba(96,165,250,0.28); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:24px; line-height:1; user-select:none;">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="vpt-scroller" tabindex="0" aria-label="Development timeline" style="position:relative; margin-top:clamp(44px,6vh,72px); overflow-x:auto; overflow-y:hidden; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;">
+      <div id="vpt-track" style="position:relative; display:flex; align-items:stretch; gap:clamp(20px,2.4vw,34px); padding:0 max(32px,calc((100vw - 1180px) / 2 + 32px)) 6px;">
+        <div aria-hidden="true" style="position:absolute; left:0; right:0; bottom:41px; height:2px; background:linear-gradient(90deg, rgba(60,64,181,0) 0%, rgba(96,165,250,0.32) 5%, rgba(96,165,250,0.32) 95%, rgba(60,64,181,0) 100%);"></div>
+        <div id="vpt-fill" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:0; background:linear-gradient(90deg,#3c40b5,#d9302a); box-shadow:0 0 14px rgba(217,48,42,0.45); transition:width .18s linear;"></div>
+
+        <article class="vpt-item" data-idx="0">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Concept lock">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media" data-kind="photo"></div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Phase 01 · Design</div>
+                  <h3 class="vpt-title">Concept lock.</h3>
+                  <p class="vpt-text">Mission profile, mass budget and airframe geometry frozen after four competing quad layouts were traded against SUAS 2026 rules.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Mar 2025</div>
+        </article>
+
+        <article class="vpt-item" data-idx="1">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Wooden prototype">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media" data-kind="photo"></div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Phase 02 · Prototype</div>
+                  <h3 class="vpt-title">Wooden prototype.</h3>
+                  <p class="vpt-text">A plywood mock of the full frame validated arm spacing, motor clearance and payload volume before a single carbon sheet was cut.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">May 2025</div>
+        </article>
+
+        <article class="vpt-item" data-idx="2">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Carbon in-house">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media" data-kind="video"></div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Phase 03 · Fabrication</div>
+                  <h3 class="vpt-title">Carbon, in-house.</h3>
+                  <p class="vpt-text">Top and bottom plates machined on our own CNC. Every toolpath written by the team, every part measured against the CAD before assembly.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Aug 2025</div>
+        </article>
+
+        <article class="vpt-item" data-idx="3">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Avionics integration">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media" data-kind="photo"></div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Phase 04 · Avionics</div>
+                  <h3 class="vpt-title">Systems integrated.</h3>
+                  <p class="vpt-text">Cube Orange, Here3+ GNSS, the SIYI gimbal and our in-house power board wired onto one harness — then bench-tested rail by rail.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Nov 2025</div>
+        </article>
+
+        <article class="vpt-item" data-idx="4">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: First autonomous flight">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media" data-kind="video"></div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Phase 05 · Flight</div>
+                  <h3 class="vpt-title">First autonomous flight.</h3>
+                  <p class="vpt-text">Clover flew a full waypoint mission unattended, held altitude within tolerance and returned to launch on its own logic.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Feb 2026</div>
+        </article>
+      </div>
+    </div>
+
+    <!-- lightbox — mirrors the /blog post modal -->
+    <div id="vpt-modal" role="dialog" aria-modal="true" aria-label="Milestone detail" style="display:none; position:fixed; inset:0; z-index:90; align-items:center; justify-content:center; padding:16px;">
+      <div id="vpt-scrim" style="position:absolute; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px); opacity:0; transition:opacity .2s ease;"></div>
+      <div id="vpt-panel" style="position:relative; width:100%; max-width:720px; max-height:85dvh; border-radius:18px; border:1px solid #d9302a; background:#101433; box-shadow:0 30px 90px rgba(0,0,0,0.6); overflow:hidden; opacity:0; transform:scale(.94) translateY(12px); transition:opacity .22s cubic-bezier(.16,1,.3,1), transform .22s cubic-bezier(.16,1,.3,1);">
+        <div id="vpt-close" role="button" tabindex="0" aria-label="Close" style="position:absolute; z-index:2; top:18px; right:18px; width:44px; height:44px; border-radius:9999px; background:#d9302a; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:17px; line-height:1; transition:opacity .2s ease;">✕</div>
+        <div style="max-height:85dvh; overflow-y:auto; overscroll-behavior:contain; padding:clamp(22px,3.4vw,34px);">
+          <span id="vpt-m-badge" style="display:inline-flex; align-items:center; border-radius:9999px; padding:4px 13px; background:#d9302a; color:#fff; font-family:'Barlow'; font-size:12px; font-weight:600; letter-spacing:.04em; margin-bottom:14px;"></span>
+          <h2 id="vpt-m-title" style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(28px,4vw,38px); line-height:1.05; letter-spacing:-0.01em; margin:0 0 12px; padding-right:44px; color:#f0f2ff;"></h2>
+          <div id="vpt-m-meta" style="font-family:'JetBrains Mono'; font-size:12px; letter-spacing:.06em; text-transform:uppercase; font-weight:500; color:#8b8fc8; margin-bottom:18px;"></div>
+          <div id="vpt-m-media" style="border-radius:12px; overflow:hidden; margin-bottom:18px;"></div>
+          <p id="vpt-m-text" style="font-family:'Barlow'; font-size:15.5px; line-height:1.68; color:#c3c6ea; margin:0;"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ========================= CTA ========================= -->
   <section style="position:relative; background:#07091c; padding:120px 32px; text-align:center;">
     <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:720px; margin:0 auto;">
@@ -537,6 +709,104 @@ class Component extends DCLogic {
       document.getElementById('vpg-back').addEventListener('click', back);
       setActive(0);
     }, 80);
+
+    // ---- development process: horizontal timeline + blog-style lightbox ----
+    setTimeout(() => {
+      const sc = document.getElementById('vpt-scroller');
+      const track = document.getElementById('vpt-track');
+      const modal = document.getElementById('vpt-modal');
+      if (!sc || !track || !modal) return;
+      const items = [...track.querySelectorAll('.vpt-item')];
+      const fill = document.getElementById('vpt-fill');
+      const prev = document.getElementById('vpt-prev');
+      const next = document.getElementById('vpt-next');
+      const panel = document.getElementById('vpt-panel');
+      const scrim = document.getElementById('vpt-scrim');
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const DATA = [
+        { badge: 'Phase 01 · Design', title: 'Concept lock.', date: 'March 2025', read: '4 min read', kind: 'photo',
+          text: 'The campaign opened on paper. Four quad layouts were drawn against the SUAS 2026 rulebook and traded on endurance, payload volume and the realistic limits of what we could machine ourselves. Mass budget was fixed first and everything downstream had to fit inside it — a discipline that later kept the airframe honest when the avionics list grew. By the end of the phase the geometry, motor class and payload bay were frozen, and the team could start cutting instead of arguing.' },
+        { badge: 'Phase 02 · Prototype', title: 'Wooden prototype.', date: 'May 2025', read: '3 min read', kind: 'photo',
+          text: 'Before a single carbon sheet was touched, the full frame was reproduced in plywood. It cost almost nothing and answered the questions that CAD could not: whether the arms cleared the props under load, whether the battery actually slid into its bay with the harness attached, and whether a person could service the aircraft in the field without dismantling half of it. Three revisions came out of that mock — all of them cheap.' },
+        { badge: 'Phase 03 · Fabrication', title: 'Carbon, in-house.', date: 'August 2025', read: '5 min read', kind: 'video',
+          text: 'Top and bottom plates were machined on our own CNC, with every toolpath written by the team. Cutting carbon in-house turned a multi-week supplier loop into a same-day iteration: a plate could be revised in the morning and flown on the bench that evening. Each part came off the machine and went straight to a measurement pass against the CAD before it was allowed near the assembly bench.' },
+        { badge: 'Phase 04 · Avionics', title: 'Systems integrated.', date: 'November 2025', read: '5 min read', kind: 'photo',
+          text: 'The Cube Orange, Here3+ GNSS module, SIYI A8 mini gimbal and our in-house power board were brought onto a single harness. The power stage was validated rail by rail on the bench — input decoupling, the 12 V and 5 V bucks, then the low-noise LDO feeding the sensitive electronics — before anything was allowed to draw from the main pack. Wiring was routed for serviceability, not for the shortest path.' },
+        { badge: 'Phase 05 · Flight', title: 'First autonomous flight.', date: 'February 2026', read: '4 min read', kind: 'video',
+          text: 'Clover flew a complete waypoint mission with no pilot input: it launched, held altitude inside tolerance across the circuit, tracked each waypoint and returned to launch on its own logic. Telemetry from that sortie set the baseline for every tuning pass since, and marked the point where the aircraft stopped being a build and started being a competition vehicle.' },
+      ];
+
+      const step = () => { const it = items[0]; return it ? it.getBoundingClientRect().width + 26 : 320; };
+      const maxScroll = () => Math.max(1, sc.scrollWidth - sc.clientWidth);
+
+      const sync = () => {
+        const p = sc.scrollLeft / maxScroll();
+        if (fill) fill.style.width = (6 + p * 94).toFixed(2) + '%';
+        if (prev) prev.dataset.off = sc.scrollLeft <= 4 ? '1' : '0';
+        if (next) next.dataset.off = sc.scrollLeft >= maxScroll() - 4 ? '1' : '0';
+        const mid = sc.getBoundingClientRect().left + sc.clientWidth / 2;
+        let best = 0, bd = Infinity;
+        items.forEach((it, i) => { const r = it.getBoundingClientRect(); const d = Math.abs(r.left + r.width / 2 - mid); if (d < bd) { bd = d; best = i; } });
+        items.forEach((it, i) => { it.dataset.on = i === best ? '1' : '0'; });
+      };
+      const nudge = (dir) => sc.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
+
+      sc.addEventListener('scroll', sync, { passive: true });
+      window.addEventListener('resize', sync, { passive: true });
+      if (prev) prev.addEventListener('click', () => nudge(-1));
+      if (next) next.addEventListener('click', () => nudge(1));
+      sc.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); nudge(1); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); nudge(-1); }
+      });
+
+      const io2 = new IntersectionObserver((ents) => ents.forEach(en => { if (en.isIntersecting) { en.target.dataset.in = '1'; io2.unobserve(en.target); } }), { threshold: 0.25 });
+      items.forEach((it, i) => { it.style.transitionDelay = (i * 90) + 'ms'; io2.observe(it); });
+
+      let lockY = 0;
+      const open = (i) => {
+        const d = DATA[i]; if (!d) return;
+        document.getElementById('vpt-m-badge').textContent = d.badge;
+        document.getElementById('vpt-m-title').textContent = d.title;
+        document.getElementById('vpt-m-meta').textContent = d.date + ' · ' + d.read;
+        document.getElementById('vpt-m-media').innerHTML = '<div class="vpt-media" data-kind="' + d.kind + '" style="aspect-ratio:16/9;"></div>';
+        document.getElementById('vpt-m-text').textContent = d.text;
+        modal.style.display = 'flex';
+        lockY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = '-' + lockY + 'px';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => { scrim.style.opacity = '1'; panel.style.opacity = '1'; panel.style.transform = 'none'; });
+      };
+      const close = () => {
+        scrim.style.opacity = '0';
+        panel.style.opacity = '0';
+        panel.style.transform = 'scale(.96) translateY(8px)';
+        const done = () => {
+          modal.style.display = 'none';
+          const b = document.documentElement.style.scrollBehavior;
+          document.documentElement.style.scrollBehavior = 'auto';
+          document.body.style.position = ''; document.body.style.top = ''; document.body.style.width = ''; document.body.style.overflow = '';
+          window.scrollTo(0, lockY);
+          document.documentElement.style.scrollBehavior = b;
+        };
+        setTimeout(done, reduce ? 0 : 220);
+      };
+
+      items.forEach((it, i) => {
+        const card = it.querySelector('.vpt-card');
+        if (!card) return;
+        card.addEventListener('click', () => open(i));
+        card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(i); } });
+      });
+      scrim.addEventListener('click', close);
+      document.getElementById('vpt-close').addEventListener('click', close);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex') close(); });
+
+      sync();
+    }, 90);
 
     const p = this.props || {};
     const gridOn = p.gridTexture ?? true;
