@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Vehicles page — the Clover build experience, rendered INLINE (no iframe).
+ * Vehicles page — the Neith build experience, rendered INLINE (no iframe).
  *
  * The experience is a self-contained "Design Component" static page under
  * public/vehicle/ (an <x-dc> template + a component <script> + the support.js
@@ -148,7 +148,15 @@ export default function Vehicles() {
   }, []);
 
   return (
-    <div ref={hostRef} data-vehicle-root>
+    // The bundle is fetched after mount, so this container is empty for a beat
+    // and the Footer rides up under the Navbar before the page drops in. Hold a
+    // viewport of height in the page's own background colour so the first paint
+    // is the page arriving, not the footer flashing past.
+    <div
+      ref={hostRef}
+      data-vehicle-root
+      style={{ minHeight: "100dvh", backgroundColor: "#07091c" }}
+    >
       {error && (
         <p style={{ padding: 32, color: "var(--text-muted)" }}>
           Couldn’t load the vehicle experience. {error}

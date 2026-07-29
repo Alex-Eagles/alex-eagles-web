@@ -1,6 +1,6 @@
 /**
- * Builds the web-ready media for the vehicle page's "Clover development process"
- * timeline and the "Clover in action" gallery from the raw camera/CAD sources.
+ * Builds the web-ready media for the vehicle page's "Neith development process"
+ * timeline and the "Neith in action" gallery from the raw camera/CAD sources.
  *
  *   node scripts/process-vehicle-media.mjs [sourceDir]
  *

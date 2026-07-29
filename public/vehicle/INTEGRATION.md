@@ -25,12 +25,12 @@ so the catch-all won't intercept it.)
 Replace `src/pages/Vehicles.tsx` with:
 
 ```tsx
-/** Vehicles page — the Clover build experience, served as a static page. */
+/** Vehicles page — the Neith build experience, served as a static page. */
 export default function Vehicles() {
   return (
     <iframe
       src="/vehicle/index.html"
-      title="Clover — the vehicle"
+      title="Neith — the vehicle"
       style={{ display: "block", width: "100%", height: "100vh", border: 0 }}
     />
   );

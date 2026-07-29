@@ -1,4 +1,4 @@
-# Git LFS — large binary media for the /vehicles Clover experience.
+# Git LFS — large binary media for the /vehicles Neith experience.
 #
 # The vehicle page ships ~99 MB of media (build-sequence frames, gallery videos,
 # 3D models, component photos). Storing these through Git LFS keeps the main repo
