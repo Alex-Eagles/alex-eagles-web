@@ -2,10 +2,10 @@
  * team.ts — the roster behind the Team page.
  *
  * Shape follows the design handoff: a page is one *year*, a year has a
- * leadership trio plus a list of *divisions*, and each division has *sections*
- * whose members are the card grid.
+ * small leadership row (two or three cards) plus a list of *divisions*, and
+ * each division has *sections* whose members are the card grid.
  *
- *   year → leadership[3]
+ *   year → leadership[] (2–3)
  *        → divisions[] → sections[] → members[]
  *
  * ---------------------------------------------------------------------------
@@ -202,8 +202,11 @@ export interface Division {
 
 export interface YearRoster {
   year: string;
-  /** Exactly three: left card, centre card (the raised one), right card. */
-  leadership: [TeamMember, TeamMember, TeamMember];
+  /**
+   * The leadership row. Two cards render side by side (left, right); three
+   * render with the middle card raised (left, centre, right).
+   */
+  leadership: TeamMember[];
   divisions: Division[];
 }
 
@@ -427,15 +430,6 @@ const ROSTER_2026: YearRoster = {
   year: "2026",
   leadership: [
     {
-      ...slot("Vice Lead", "Youssef Hozayen", {
-        photo: "youssef-hozayen-2026",
-        linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
-        gradYear: "2027",
-        major: "Mechatronics and robotics engineering",
-      }),
-      department: "Team Leadership",
-    },
-    {
       ...slot("Team Leader", "Farah Harfoush", {
         photo: "farah-harfoush-2026",
         linkedIn: "https://www.linkedin.com/in/farah-harfoush-9297ab280",
@@ -444,10 +438,15 @@ const ROSTER_2026: YearRoster = {
       }),
       department: "Team Leadership",
     },
-    { ...slot("Autonomous Lead", "Ziad Essam", {
-        photo: "ziad-essam",
-        linkedIn: "https://www.linkedin.com/in/ziad-essam-a202b3244",
-      }), department: "Team Leadership" },
+    {
+      ...slot("Vice Lead", "Youssef Hozayen", {
+        photo: "youssef-hozayen-2026",
+        linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
+        gradYear: "2027",
+        major: "Mechatronics and robotics engineering",
+      }),
+      department: "Team Leadership",
+    },
   ],
   divisions: [
     {
@@ -874,20 +873,19 @@ export const ROSTERS: Record<RosterYear, YearRoster> = {
 /**
  * Headline counts for a roster year — what the hero states under the year tabs.
  *
- * `members` counts filled roster slots, not distinct individuals: someone who
- * holds two posts (Ziad Essam is EM Integration Lead *and* Head of Autonomous;
- * Youssef Hozayen is Vice Lead *and* runs Hardware) is counted in each, because
- * the number is describing the roster the page actually shows. Unfilled slots
- * are still skipped — an empty placeholder isn't a member.
+ * `members` counts distinct individuals, not filled slots: someone who holds
+ * two posts (Youssef Hozayen is Vice Lead *and* runs Hardware) is counted once,
+ * so the headline reflects how many people are actually on the team. Unfilled
+ * slots are skipped — an empty placeholder isn't a member.
  */
 export function rosterStats(roster: YearRoster): {
   members: number;
   divisions: number;
   subTeams: number;
 } {
-  let members = 0;
+  const names = new Set<string>();
   const add = (list: TeamMember[]) => {
-    for (const m of list) if (hasName(m)) members++;
+    for (const m of list) if (hasName(m)) names.add(m.name.trim().toLowerCase());
   };
 
   add(roster.leadership);
@@ -900,7 +898,7 @@ export function rosterStats(roster: YearRoster): {
     }
   }
 
-  return { members, divisions: roster.divisions.length, subTeams };
+  return { members: names.size, divisions: roster.divisions.length, subTeams };
 }
 
 export interface NavGroup {
