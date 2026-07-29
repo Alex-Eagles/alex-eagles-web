@@ -160,6 +160,30 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * GALLERY-SPECIFIC KEYFRAMES — 3D spatial gallery HUD animations.
+ * --------------------------------------------------------------------------*/
+@keyframes gallery-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    filter: drop-shadow(0 0 2px var(--brand-light));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px var(--brand-light));
+  }
+}
+
+@keyframes gallery-grid-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ----------------------------------------------------------------------------
  * SMALL REUSABLE HELPERS (kept as plain classes; used by several components).
  * --------------------------------------------------------------------------*/
 @layer components {
