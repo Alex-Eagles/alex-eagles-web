@@ -5,6 +5,7 @@ import { NAV_LINKS } from "@/data/site";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTheme } from "@/context/ThemeContext";
 import AeLogo from "@/components/ui/AeLogo";
+import SearchBox from "@/components/search/SearchBox";
 
 /**
  * Navbar — a thin, centered pill of page links (translated from Home.dc.html).
@@ -94,6 +95,7 @@ export default function Navbar() {
               </Link>
             );
           })}
+          <SearchBox variant="pill" />
         </div>
       </nav>
 
@@ -113,6 +115,9 @@ export default function Navbar() {
       >
         <Menu size={22} />
       </button>
+
+      {/* ---------- Mobile: search (top-right) ---------- */}
+      <SearchBox variant="floating" wrapperClassName="fixed top-5 right-5 z-40 md:hidden" />
 
       {/* ---------- Mobile: full-screen overlay menu ---------- */}
       {menuOpen && (
