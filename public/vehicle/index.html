@@ -131,9 +131,9 @@
   @keyframes vp-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
   a { color:#60a5fa; text-decoration:none; }
   a:hover { color:#93c5fd; }
-  @keyframes vp-pulse-ring { 0%,100% { box-shadow:0 0 0 0 rgba(245,158,11,0.35); } 50% { box-shadow:0 0 0 8px rgba(245,158,11,0); } }
+  @keyframes vp-pulse-ring { 0%,100% { box-shadow:0 0 0 0 rgba(217,48,42,0.35); } 50% { box-shadow:0 0 0 8px rgba(217,48,42,0); } }
   @keyframes vp-mount-in { from { opacity:0; transform:translateY(9px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
-  @keyframes vp-num-flash { 0% { color:#fff; text-shadow:0 0 14px rgba(245,158,11,0.9); } 100% { color:#f59e0b; text-shadow:none; } }
+  @keyframes vp-num-flash { 0% { color:#fff; text-shadow:0 0 14px rgba(217,48,42,0.9); } 100% { color:#d9302a; text-shadow:none; } }
   @keyframes vp-callout-in { from { opacity:0; transform:translateY(9px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
   @keyframes vp-callout-pop { 0% { transform:scale(0); } 62% { transform:scale(1.3); } 100% { transform:scale(1); } }
   #vp-build-skip:hover { background:rgba(60,64,181,0.92)!important; border-color:#60a5fa!important; color:#fff!important; }
@@ -162,8 +162,8 @@
 
       <!-- spec rail + eyebrow, top-right (offset below the fixed nav pill) -->
       <div class="vp-hero-specs" style="position:absolute; right:40px; top:calc(80px + 60px); display:flex; flex-direction:column; align-items:flex-end; z-index:3;">
-        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); font-family:'Inter'; font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#c3c6ea; display:flex; align-items:center; gap:10px; margin-bottom:22px;">SUAS 2026 · Competition Vehicle<span style="width:8px; height:8px; border-radius:9999px; background:#f59e0b; box-shadow:0 0 10px #f59e0b;"></span></div>
-        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); display:flex; flex-direction:column; text-align:right; border-right:2px solid rgba(245,158,11,0.6); padding-right:22px;">
+        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); font-family:'Inter'; font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#c3c6ea; display:flex; align-items:center; gap:10px; margin-bottom:22px;">SUAS 2026 · Competition Vehicle<span style="width:8px; height:8px; border-radius:9999px; background:#d9302a; box-shadow:0 0 10px #d9302a;"></span></div>
+        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); display:flex; flex-direction:column; text-align:right; border-right:2px solid rgba(217,48,42,0.6); padding-right:22px;">
           <div style="padding:14px 0;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">6.4<span style="font-size:15px; color:#8b8fc8;"> kg</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Dry weight</div></div>
           <div style="padding:14px 0; border-top:1px solid rgba(60,64,181,0.3);"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">28<span style="font-size:15px; color:#8b8fc8;"> Ah</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Battery</div></div>
           <div style="padding:14px 0; border-top:1px solid rgba(60,64,181,0.3);"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">40<span style="font-size:15px; color:#8b8fc8;"> min</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Endurance</div></div>
@@ -208,7 +208,7 @@
         <div style="flex:0 0 auto;">
           <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:10px;">How it comes together</div>
           <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(30px,4.4vw,48px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">From bare frame to flight-ready.</h2>
-          <div style="height:2px; width:52px; background:#f59e0b; margin-top:14px;"></div>
+          <div style="height:2px; width:52px; background:#d9302a; margin-top:14px;"></div>
         </div>
 
         <!-- canvas fills the middle; crossfades to the clean render at flight-ready -->
@@ -219,8 +219,8 @@
             <!-- cinematic on-frame callout: caption naming the part being mounted -->
             <div id="vp-build-callout" aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; z-index:3; opacity:0; transition:opacity .4s ease;">
               <div id="vp-callout-card" style="position:absolute; left:50%; top:20%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center;">
-                <div id="vp-callout-inner" style="display:flex; flex-direction:column; align-items:center; gap:3px; background:rgba(8,10,28,0.82); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px); border:1px solid rgba(245,158,11,0.5); border-radius:9px; padding:9px 15px; box-shadow:0 10px 30px rgba(0,0,0,0.55); white-space:nowrap;">
-                  <span id="vp-callout-index" style="font-family:'JetBrains Mono'; font-weight:700; font-size:10px; letter-spacing:.16em; color:#f59e0b;">01 &middot; NOW MOUNTING</span>
+                <div id="vp-callout-inner" style="display:flex; flex-direction:column; align-items:center; gap:3px; background:rgba(8,10,28,0.82); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px); border:1px solid rgba(217,48,42,0.5); border-radius:9px; padding:9px 15px; box-shadow:0 10px 30px rgba(0,0,0,0.55); white-space:nowrap;">
+                  <span id="vp-callout-index" style="font-family:'JetBrains Mono'; font-weight:700; font-size:10px; letter-spacing:.16em; color:#d9302a;">01 &middot; NOW MOUNTING</span>
                   <span id="vp-callout-name" style="font-family:'Barlow'; font-weight:600; font-size:clamp(16px,1.7vw,20px); line-height:1.05; color:#f4f6ff;">Carbon-fiber bottom plate</span>
                 </div>
               </div>
@@ -232,15 +232,15 @@
         <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:12px;">
           <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
             <span style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; color:#565a94;">NOW INSTALLING</span>
-            <span id="vp-stage-num" style="font-family:'JetBrains Mono'; font-weight:700; font-size:15px; color:#f59e0b;">01 / 11</span>
+            <span id="vp-stage-num" style="font-family:'JetBrains Mono'; font-weight:700; font-size:15px; color:#d9302a;">01 / 11</span>
             <span id="vp-stage-phase" style="margin-left:auto; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.12em; color:#60a5fa;">FRAME</span>
           </div>
           <div style="display:flex; align-items:center; gap:12px; min-height:34px;">
-            <span aria-hidden="true" style="flex:0 0 auto; width:7px; height:7px; border-radius:9999px; background:#f59e0b; box-shadow:0 0 12px rgba(245,158,11,.8); animation:vp-float 1.6s ease-in-out infinite;"></span>
+            <span aria-hidden="true" style="flex:0 0 auto; width:7px; height:7px; border-radius:9999px; background:#d9302a; box-shadow:0 0 12px rgba(217,48,42,.8); animation:vp-float 1.6s ease-in-out infinite;"></span>
             <span id="vp-stage-label" style="font-family:'Barlow'; font-weight:600; font-size:clamp(20px,2.4vw,27px); line-height:1.1; color:#f0f2ff;">Carbon-fiber bottom plate</span>
           </div>
           <div style="position:relative; height:3px; width:100%; background:rgba(60,64,181,0.25); border-radius:9999px; overflow:hidden;">
-            <div id="vp-build-bar" style="position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg,#3c40b5,#f59e0b); border-radius:9999px; transition:width .1s linear;"></div>
+            <div id="vp-build-bar" style="position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg,#3c40b5,#d9302a); border-radius:9999px; transition:width .1s linear;"></div>
           </div>
           <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.06em; color:#565a94;">
             <span data-step="0">FRAME</span>
@@ -278,14 +278,14 @@
             <line x1="4.7" y1="42.4" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
             <line x1="20.4" y1="16.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
           </svg>
-          <div data-exp-marker="cube" style="position:absolute; left:50%; top:6%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:#f59e0b; color:#07091c; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">1</div>
+          <div data-exp-marker="cube" style="position:absolute; left:50%; top:6%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:#d9302a; color:#07091c; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">1</div>
           <div data-exp-marker="gnss" style="position:absolute; left:79.6%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">2</div>
           <div data-exp-marker="cam" style="position:absolute; left:95.3%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">3</div>
           <div data-exp-marker="link" style="position:absolute; left:89.8%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">4</div>
           <div data-exp-marker="pdb" style="position:absolute; left:65.7%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">5</div>
           <div data-exp-marker="bec" style="position:absolute; left:34.3%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">6</div>
-          <div data-exp-marker="custom" style="position:absolute; left:10.2%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #f59e0b; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">7</div>
-          <div data-exp-marker="prop" style="position:absolute; left:4.7%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #f59e0b; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">8</div>
+          <div data-exp-marker="custom" style="position:absolute; left:10.2%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #d9302a; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">7</div>
+          <div data-exp-marker="prop" style="position:absolute; left:4.7%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #d9302a; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">8</div>
           <div data-exp-marker="batt" style="position:absolute; left:20.4%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">9</div>
         </div>
       </div>
@@ -318,10 +318,10 @@
         </div>
         <div style="padding:28px 30px;">
           <div data-exp-panel="cube">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">01 · COMPUTE — FLIGHT CONTROLLER</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">01 · COMPUTE — FLIGHT CONTROLLER</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Pixhawk Cube Orange 2</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every decision starts here. A high-performance STM32 runs the entire autonomy loop in real time — fusing every sensor into one trusted picture of attitude and position and commanding the props thousands of times per second.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> redundant IMU stack, deterministic execution and vibration-isolated sensors.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> redundant IMU stack, deterministic execution and vibration-isolated sensors.</p>
           </div>
           <div data-exp-panel="gnss" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">02 · SENSING — POSITIONING</div>
@@ -330,10 +330,10 @@
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> DroneCAN-native and raised 9–15 cm above the frame, clear of propulsion EMI.</p>
           </div>
           <div data-exp-panel="cam" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">03 · PAYLOAD — GIMBAL CAMERA</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">03 · PAYLOAD — GIMBAL CAMERA</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">SIYI A8 Mini</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Eyes that stay level while the aircraft doesn't. A 4K 8MP Sony sensor rides a 3-axis FOC-stabilised gimbal with 6× digital zoom, feeding imagery down the ground link over HDMI and Ethernet.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
           </div>
           <div data-exp-panel="link" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · COMMS — DATA LINK</div>
@@ -354,16 +354,16 @@
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> removes the separate receiver battery while isolating noise-sensitive systems from the high-current bus.</p>
           </div>
           <div data-exp-panel="custom" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Alex Eagles Power Board</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The only board on this aircraft we designed ourselves — drawn, routed, fabricated and flown by the team. It splits the MAUCH feed into dedicated rails: input decoupling, two buck converters for 12 V and 5 V, and an LDO for a low-noise 5 V rail for the most sensitive electronics.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> a modular power stage tailored to this airframe — less wiring, cleaner separation, revisable in-house.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> a modular power stage tailored to this airframe — less wiring, cleaner separation, revisable in-house.</p>
           </div>
           <div data-exp-panel="prop" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">08 · PROPULSION — ×4</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">08 · PROPULSION — ×4</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">T-Motor 6007 II System</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF22 props — one factory-tuned system per arm across the quad.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
           </div>
           <div data-exp-panel="batt" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER — MAIN BATTERY</div>
@@ -558,7 +558,7 @@
         <div>
           <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">In the field</div>
           <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Vehicle&rsquo;s gallery.</h2>
-          <div style="height:2px; width:52px; background:#f59e0b; margin-top:16px;"></div>
+          <div style="height:2px; width:52px; background:#d9302a; margin-top:16px;"></div>
         </div>
       </div>
 
@@ -570,25 +570,25 @@
               <div class="vpg-tile" data-idx="0" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
                 <video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Flight-ready.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Flight-ready.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="1" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
                 <video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Airborne.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Airborne.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="2" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
                 <video src="assets/gallery/cnc-machining.mp4" poster="assets/gallery/cnc-machining.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">FABRICATION</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Cut in-house.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FABRICATION</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Cut in-house.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="3" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
                 <img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(5,6,26,0.92), transparent 60%);"></div>
-                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">PROTOTYPE</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Where it started.</div></div>
+                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">PROTOTYPE</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Where it started.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
             </div>
@@ -622,7 +622,7 @@
           <div id="vpg-next" role="button" tabindex="0" aria-label="Next page" style="flex:0 0 auto; width:48px; height:48px; border-radius:9999px; background:rgba(60,64,181,0.16); border:1px solid rgba(96,165,250,0.32); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:24px; user-select:none; transition:background .2s ease;">›</div>
         </div>
         <div id="vpg-dots" style="display:flex; justify-content:center; align-items:center; gap:9px; margin-top:18px;">
-          <div class="vpg-dot" data-page="0" role="button" tabindex="0" style="width:24px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:#f59e0b;"></div>
+          <div class="vpg-dot" data-page="0" role="button" tabindex="0" style="width:24px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:#d9302a;"></div>
           <div class="vpg-dot" data-page="1" role="button" tabindex="0" style="width:9px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:rgba(96,165,250,0.35);"></div>
         </div>
       </div>
@@ -639,7 +639,7 @@
             <div class="vpg-sm" data-idx="6" style="display:none;"><img src="assets/gallery/night-hover.webp" alt="Clover hovering at night" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
             <div class="vpg-sm" data-idx="7" style="display:none;"><img src="assets/gallery/field-ready.webp" alt="Clover ready for a field sortie" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
             <div style="position:absolute; left:0; right:0; bottom:0; padding:22px 20px 18px; background:linear-gradient(to top, rgba(5,6,26,0.92), transparent); pointer-events:none;">
-              <div id="vpg-kicker" style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#f59e0b; margin-bottom:8px;"></div>
+              <div id="vpg-kicker" style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#d9302a; margin-bottom:8px;"></div>
               <div id="vpg-title" style="font-family:'Barlow Condensed'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-bottom:8px;"></div>
               <p id="vpg-desc" style="font-family:'Inter'; font-size:13.5px; line-height:1.6; color:#c3c6ea; margin:0; max-width:560px;"></p>
             </div>
@@ -664,12 +664,12 @@
   </section>
 
   <!-- ========================= CTA ========================= -->
-  <section style="position:relative; background:#07091c; padding:120px 32px; text-align:center;">
-    <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:720px; margin:0 auto;">
-      <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0; color:#f0f2ff;">Clover in action.</h2>
+  <section style="position:relative; background:#07091c; padding:clamp(96px,13vh,150px) 32px clamp(104px,14vh,160px); text-align:center;">
+    <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:1000px; margin:0 auto;">
+      <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0 0 clamp(34px,5vh,56px); color:#f0f2ff;">Clover in action</h2>
       
-      <!-- FRR flight video (Vimeo) — 16:9 responsive embed, starts at 2:00 (#t=120s) -->
-      <div style="position:relative; width:100%; max-width:960px; margin:0 auto 36px; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+      <!-- flight video: unlisted YouTube cut, 16:9 responsive embed -->
+      <div style="position:relative; width:100%; max-width:960px; margin:0 auto clamp(40px,5.5vh,60px); aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.5);">
         <iframe src="https://www.youtube.com/embed/wCEXFQytIk8?rel=0" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="Clover in action"></iframe>
       </div>
 
@@ -732,7 +732,7 @@ class Component extends DCLogic {
       const setPage = (p, dir) => {
         page = (p + PAGES) % PAGES;
         pages.forEach((pg, i) => { if (pg) pg.style.display = i === page ? 'grid' : 'none'; });
-        dots.forEach((d, i) => { d.style.width = i === page ? '24px' : '9px'; d.style.background = i === page ? '#f59e0b' : 'rgba(96,165,250,0.35)'; });
+        dots.forEach((d, i) => { d.style.width = i === page ? '24px' : '9px'; d.style.background = i === page ? '#d9302a' : 'rgba(96,165,250,0.35)'; });
         revealPage(dir);
       };
       const setActive = (i) => {
@@ -743,7 +743,7 @@ class Component extends DCLogic {
         document.getElementById('vpg-title').textContent = m.t;
         document.getElementById('vpg-desc').textContent = m.d;
         document.getElementById('vpg-counter').textContent = (active + 1) + ' / ' + N;
-        rails.forEach(r => { const on = Number(r.dataset.idx) === active; r.style.border = on ? '2px solid #f59e0b' : '1px solid rgba(60,64,181,0.4)'; r.style.boxShadow = on ? '0 0 0 1px rgba(245,158,11,0.4)' : 'none'; });
+        rails.forEach(r => { const on = Number(r.dataset.idx) === active; r.style.border = on ? '2px solid #d9302a' : '1px solid rgba(60,64,181,0.4)'; r.style.boxShadow = on ? '0 0 0 1px rgba(217,48,42,0.4)' : 'none'; });
       };
       const step = () => { const st = document.getElementById('vpg-stage'); if (st) st.animate([{ opacity: 0.35, transform: 'scale(.985)' }, { opacity: 1, transform: 'none' }], { duration: 340, easing: 'ease' }); };
       const flipIn = (r) => {
@@ -913,17 +913,30 @@ class Component extends DCLogic {
       // Horizontal wheel and trackpad swipes are taken over so they move the light
       // rather than free-running the panel. Vertical intent is left alone so the
       // page still scrolls normally over this section.
+      // A trackpad reports horizontal deltas and fine-grained vertical ones; a wheel
+      // mouse reports coarse vertical steps and no deltaX at all. Horizontal input
+      // always drives the light. Vertical input only does so for what looks like a
+      // wheel mouse, which has no other way to reach the timeline, so trackpad users
+      // keep ordinary page scrolling and use the horizontal axis instead.
+      let sawDeltaX = false;
       sc.addEventListener('wheel', (e) => {
+        if (e.deltaX !== 0) sawDeltaX = true;
         const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-        const d = horiz ? e.deltaX : e.deltaY;
-        if (!d) return;
-        const dir = d > 0 ? 1 : -1;
-        // A plain vertical wheel walks the light too, but at either end of the rail
-        // it is handed back to the page so the section can be scrolled past rather
-        // than trapping the reader in it.
-        if (!horiz && !e.shiftKey && ((dir > 0 && li >= LAST) || (dir < 0 && li <= 0))) return;
+        if (horiz || e.shiftKey) {
+          const d = horiz ? e.deltaX : e.deltaY;
+          if (!d) return;
+          e.preventDefault();
+          if (Math.abs(d) > 4) fire(d > 0 ? 1 : -1);
+          return;
+        }
+        if (!e.deltaY) return;
+        const wheelMouse = !sawDeltaX && (e.deltaMode !== 0 || Math.abs(e.deltaY) >= 100);
+        if (!wheelMouse) return;
+        const dir = e.deltaY > 0 ? 1 : -1;
+        // At either end of the rail the wheel is handed back so the page can scroll on.
+        if ((dir > 0 && li >= LAST) || (dir < 0 && li <= 0)) return;
         e.preventDefault();
-        if (Math.abs(d) > 4) fire(dir);
+        fire(dir);
       }, { passive: false });
 
       let tx = 0, ty = 0, taken = false;
@@ -1261,7 +1274,7 @@ class Component extends DCLogic {
         for (let i = 0; i < events.length; i++) if (prog >= events[i].at) ei = i;
         const ev = events[ei];
         if (numEl) numEl.textContent = String(ev.n).padStart(2, '0') + ' / 11';
-        if (phaseEl) { phaseEl.textContent = phases[ev.phase]; phaseEl.style.color = ev.phase === 3 ? '#f59e0b' : '#60a5fa'; }
+        if (phaseEl) { phaseEl.textContent = phases[ev.phase]; phaseEl.style.color = ev.phase === 3 ? '#d9302a' : '#60a5fa'; }
         if (ei !== lastEi) {
           lastEi = ei;
           setCallout(ev);
@@ -1273,7 +1286,7 @@ class Component extends DCLogic {
           if (numEl && !reduced) { numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = 'vp-num-flash .6s ease'; }
         }
         steps.forEach((s, i) => {
-          s.style.color = i <= ev.phase ? '#f59e0b' : '#565a94';
+          s.style.color = i <= ev.phase ? '#d9302a' : '#565a94';
           s.style.fontWeight = i === ev.phase ? '700' : '400';
         });
       };
@@ -1422,7 +1435,7 @@ class Component extends DCLogic {
       const goldSet = { cube: 1, cam: 1, custom: 1, prop: 1 };
       const pick = (id) => {
         navBtns.forEach((b) => {
-          const on = b.dataset.exp === id, ac = goldSet[b.dataset.exp] ? '#f59e0b' : '#60a5fa';
+          const on = b.dataset.exp === id, ac = goldSet[b.dataset.exp] ? '#d9302a' : '#60a5fa';
           b.style.background = on ? ac : 'transparent';
           b.style.color = on ? '#07091c' : '#c3c6ea';
           b.style.borderColor = on ? ac : 'rgba(60,64,181,0.4)';
@@ -1431,14 +1444,14 @@ class Component extends DCLogic {
         panels.forEach((p) => { p.style.display = p.dataset.expPanel === id ? 'block' : 'none'; });
         slots.forEach((s) => { s.style.display = s.id === 'vp-exp-' + id ? 'block' : 'none'; });
         marks.forEach((m) => {
-          const on = m.dataset.expMarker === id, gold = goldSet[m.dataset.expMarker], ac = gold ? '#f59e0b' : '#60a5fa';
+          const on = m.dataset.expMarker === id, gold = goldSet[m.dataset.expMarker], ac = gold ? '#d9302a' : '#60a5fa';
           m.style.background = on ? ac : 'rgba(13,16,53,0.92)';
           m.style.color = on ? '#07091c' : '#c3c6ea';
           m.style.borderColor = ac;
           m.style.borderStyle = 'solid';
           m.style.borderWidth = on ? '0' : '1.5px';
           m.style.zIndex = on ? '4' : '2';
-          m.style.boxShadow = on ? ('0 0 0 6px ' + (gold ? 'rgba(245,158,11,0.22)' : 'rgba(96,165,250,0.22)')) : 'none';
+          m.style.boxShadow = on ? ('0 0 0 6px ' + (gold ? 'rgba(217,48,42,0.22)' : 'rgba(96,165,250,0.22)')) : 'none';
         });
       };
       navBtns.forEach((b) => b.addEventListener('click', () => pick(b.dataset.exp)));
