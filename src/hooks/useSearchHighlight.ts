@@ -83,6 +83,31 @@ function ensureShadowStyles(roots: Root[]) {
  * Returns true when something was activated and the caller should retry.
  */
 function reveal(el: Element): boolean {
+  // The component explorer keeps every panel mounted but display:none, and
+  // switches them from a rail of buttons keyed by the same name.
+  const panel = el.closest<HTMLElement>("[data-exp-panel]");
+  if (panel && getComputedStyle(panel).display === "none") {
+    const key = panel.getAttribute("data-exp-panel");
+    const tab = document.querySelector<HTMLElement>(`[data-exp="${key}"]`);
+    if (tab) {
+      tab.click();
+      return true;
+    }
+  }
+
+  // The matching component photo is a sibling image toggled the same way.
+  const photo = el.closest<HTMLElement>('[id^="vp-exp-"]');
+  if (photo && getComputedStyle(photo).display === "none") {
+    const tab = document.querySelector<HTMLElement>(
+      `[data-exp="${photo.id.replace("vp-exp-", "")}"]`,
+    );
+    if (tab) {
+      tab.click();
+      return true;
+    }
+  }
+
+  // The photo gallery pages every tile set behind a dot.
   const page = el.closest<HTMLElement>(".vpg-page");
   if (page && getComputedStyle(page).display === "none") {
     const index = /vpg-page-(\d+)/.exec(page.id)?.[1];
@@ -92,6 +117,7 @@ function reveal(el: Element): boolean {
       return true;
     }
   }
+
   // A collapsed tile whose detail card is the thing we matched.
   const tile = el.closest<HTMLElement>(".vpg-tile");
   if (tile && tile !== el && !isLaidOut(el) && isLaidOut(tile)) {

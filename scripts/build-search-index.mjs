@@ -47,7 +47,8 @@ const CONTENT_KEYS = new Set([
   "venue", "venueDetail", "quote", "outlet", "abstract", "mission", "unit",
   "place", "competition", "language", "department", "major", "alt", "tag",
   "subteam", "year", "num", "date", "readTime", "eyebrow", "subtitle", "body",
-  "email", "location", "address", "phone",
+  "email", "location", "address", "phone", "fullName", "shortName",
+  "organisation", "organization", "summary", "detail", "note",
 ]);
 
 const STOP_VALUES = new Set([

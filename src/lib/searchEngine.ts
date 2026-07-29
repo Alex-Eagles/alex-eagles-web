@@ -41,7 +41,7 @@ export async function runSearch(query: string, limit = 10): Promise<SearchHit[]>
   const engine = await loadEngine();
   // Exact/prefix first; only spend fuzzy matching when that comes up short, so
   // clean queries never get polluted by near-misses.
-  const raw = engine.search(trimmed, { prefix: true, fuzzy: false });
+  let raw = engine.search(trimmed, { prefix: true, fuzzy: false });
   if (raw.length < limit) {
     const seen = new Set(raw.map((r) => r.id));
     const fuzzy = (term: string) => (term.length < 4 ? 0 : 2);
@@ -51,6 +51,13 @@ export async function runSearch(query: string, limit = 10): Promise<SearchHit[]>
         raw.push(hit);
       }
     }
+  }
+
+  // One wrong word shouldn't empty the list — "student unmanned aerial
+  // vehicle" still finds the SUAS card, which says "systems".
+  if (!raw.length) {
+    const fuzzy = (term: string) => (term.length < 4 ? 0 : 2);
+    raw = engine.search(trimmed, { prefix: true, fuzzy, maxFuzzy: 2, combineWith: "OR" });
   }
 
   const results: SearchHit[] = [];
