@@ -85,6 +85,9 @@
   .vpt-card:hover, .vpt-card:focus-visible { transform:translateY(-4px); outline:none; }
   .vpt-shell { border:1px solid rgba(60,64,181,0.3); background:#0a0c24; border-radius:12px; overflow:hidden; transition:border-color .35s ease; }
   .vpt-card:hover .vpt-shell, .vpt-card:focus-visible .vpt-shell { border-color:rgba(217,48,42,0.5); }
+  .vpt-item[data-cur="1"] .vpt-card { transform:translateY(-4px); }
+  .vpt-item[data-cur="1"] .vpt-shell { border-color:rgba(217,48,42,0.55); box-shadow:0 0 0 1px rgba(217,48,42,0.26), 0 18px 44px rgba(217,48,42,0.13); }
+  .vpt-item[data-cur="1"] .vpt-play { background:rgba(217,48,42,0.85); border-color:#d9302a; }
   .vpt-core { position:relative; }
   .vpt-media { position:relative; aspect-ratio:16/10; overflow:hidden; background:#0d1030; border-bottom:1px solid rgba(60,64,181,0.3); }
   .vpt-media img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .9s ease, transform .6s cubic-bezier(.19,1,.22,1); }
@@ -854,6 +857,7 @@ class Component extends DCLogic {
         items.forEach((it, i) => {
           const lit = li >= i + 1;
           if ((it.dataset.lit === '1') !== lit) { it.dataset.lit = lit ? '1' : '0'; if (lit) pulse(it); }
+          it.dataset.cur = (i === li - 1) ? '1' : '0';
         });
         if (prev) prev.dataset.off = li <= 0 ? '1' : '0';
         if (next) next.dataset.off = li >= LAST ? '1' : '0';
@@ -911,10 +915,15 @@ class Component extends DCLogic {
       // page still scrolls normally over this section.
       sc.addEventListener('wheel', (e) => {
         const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-        const d = horiz ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+        const d = horiz ? e.deltaX : e.deltaY;
         if (!d) return;
+        const dir = d > 0 ? 1 : -1;
+        // A plain vertical wheel walks the light too, but at either end of the rail
+        // it is handed back to the page so the section can be scrolled past rather
+        // than trapping the reader in it.
+        if (!horiz && !e.shiftKey && ((dir > 0 && li >= LAST) || (dir < 0 && li <= 0))) return;
         e.preventDefault();
-        if (Math.abs(d) > 4) fire(d > 0 ? 1 : -1);
+        if (Math.abs(d) > 4) fire(dir);
       }, { passive: false });
 
       let tx = 0, ty = 0, taken = false;
