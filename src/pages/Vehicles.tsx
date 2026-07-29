@@ -157,6 +157,18 @@ export default function Vehicles() {
       cancelled = true;
       injected.forEach((n) => n.parentNode?.removeChild(n));
       if (host) host.innerHTML = "";
+
+      // A card may have been open when we left. The bundle's teardown takes its
+      // listeners with it, so release the scroll lock here or the whole site is
+      // left unscrollable until a reload.
+      const body = document.body;
+      body.style.position = "";
+      body.style.top = "";
+      body.style.width = "";
+      body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.paddingRight = "";
+      delete (window as unknown as { __vptOpenStop?: unknown }).__vptOpenStop;
     };
   }, []);
 

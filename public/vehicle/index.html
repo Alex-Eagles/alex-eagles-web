@@ -1040,12 +1040,30 @@ class Component extends DCLogic {
       }, 3800);
 
       const docEl = document.documentElement;
-      const lockScroll = () => {
-        const bar = window.innerWidth - docEl.clientWidth;
-        docEl.style.overflow = 'hidden';
-        if (bar > 0) docEl.style.paddingRight = bar + 'px';
+      // html { scroll-behavior: smooth } is set site-wide, so an unguarded
+      // scrollTo animates and anything measuring straight after reads the old
+      // offset.
+      const jumpTo = (y) => {
+        const prev = docEl.style.scrollBehavior;
+        docEl.style.scrollBehavior = 'auto';
+        window.scrollTo(0, y);
+        docEl.style.scrollBehavior = prev;
       };
-      const unlockScroll = () => { docEl.style.overflow = ''; docEl.style.paddingRight = ''; };
+      // Same lock the blog modal uses.
+      let lockY = 0;
+      const lockScroll = () => {
+        lockY = window.scrollY;
+        const b = document.body;
+        b.style.position = 'fixed';
+        b.style.top = '-' + lockY + 'px';
+        b.style.width = '100%';
+        b.style.overflow = 'hidden';
+      };
+      const unlockScroll = () => {
+        const b = document.body;
+        b.style.position = ''; b.style.top = ''; b.style.width = ''; b.style.overflow = '';
+        jumpTo(lockY);
+      };
       let openIdx = -1;
       const open = (i) => {
         const d = DATA[i]; if (!d) return;
@@ -1094,21 +1112,34 @@ class Component extends DCLogic {
       // the card reveals the timeline rather than wherever the reader started,
       // then open it. Exposed because the route stays mounted across searches,
       // so a second search only changes the query string.
+      // Sections sit at opacity 0 until their reveal observer fires. Landing deep
+      // in the page and locking it can leave everything unpainted, which reads as
+      // a blank screen, so settle them all before touching scroll.
+      const revealAll = () => document.querySelectorAll('[data-reveal]').forEach((el) => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      });
       const openStop = (i) => {
         if (!DATA[i] || !items[i]) return;
         if (openIdx === i && modal.style.display === 'flex') return;
+        revealAll();
         goTo(i + 1);
-        const r = items[i].getBoundingClientRect();
-        window.scrollTo({
-          top: Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2),
-          behavior: 'auto',
-        });
-        open(i);
+        // Scroll, let it land, then open. The lock captures whatever offset it
+        // finds, so opening first pins the page at the wrong place.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const r = items[i].getBoundingClientRect();
+          jumpTo(Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2));
+          requestAnimationFrame(() => open(i));
+        }));
       };
       window.__vptOpenStop = openStop;
       const stopParam = new URLSearchParams(location.search).get('stop');
       const wanted = stopParam === null || stopParam === '' ? NaN : Number(stopParam);
-      if (Number.isInteger(wanted) && DATA[wanted]) setTimeout(() => openStop(wanted), 420);
+      if (Number.isInteger(wanted) && DATA[wanted]) {
+        const run = () => setTimeout(() => openStop(wanted), 150);
+        if (document.readyState === 'complete') run();
+        else window.addEventListener('load', run, { once: true });
+      }
       window.addEventListener('load', () => { measure(); paint(); }, { once: true });
     }, 90);
 
