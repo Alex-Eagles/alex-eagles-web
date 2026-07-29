@@ -86,11 +86,12 @@
   .vpt-shell { border:1px solid rgba(60,64,181,0.3); background:#0a0c24; border-radius:12px; overflow:hidden; transition:border-color .35s ease; }
   .vpt-card:hover .vpt-shell, .vpt-card:focus-visible .vpt-shell { border-color:rgba(217,48,42,0.5); }
   .vpt-core { position:relative; }
-  .vpt-media { position:relative; aspect-ratio:16/10; background-color:#0d1030; background-image:linear-gradient(rgba(96,165,250,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,0.05) 1px,transparent 1px); background-size:24px 24px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(60,64,181,0.3); }
-  .vpt-media::before { content:"▣"; font-size:27px; line-height:1; color:rgba(96,165,250,0.42); transition:color .35s ease; }
-  .vpt-media[data-kind="video"]::before { content:"▶"; font-size:21px; }
-  .vpt-media::after { content:attr(data-kind); position:absolute; left:0; right:0; bottom:14px; text-align:center; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:#565c9c; }
-  .vpt-card:hover .vpt-media::before { color:rgba(217,48,42,0.75); }
+  .vpt-media { position:relative; aspect-ratio:16/10; overflow:hidden; background:#0d1030; border-bottom:1px solid rgba(60,64,181,0.3); }
+  .vpt-media img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .9s ease, transform .6s cubic-bezier(.19,1,.22,1); }
+  .vpt-media img[data-on="1"] { opacity:1; }
+  .vpt-card:hover .vpt-media img { transform:scale(1.045); }
+  .vpt-play { position:absolute; right:11px; bottom:11px; width:32px; height:32px; border-radius:9999px; background:rgba(8,10,28,0.7); border:1px solid rgba(96,165,250,0.3); color:#f0f2ff; display:flex; align-items:center; justify-content:center; font-size:11px; padding-left:2px; transition:background .35s ease, border-color .35s ease; }
+  .vpt-card:hover .vpt-play { background:rgba(217,48,42,0.85); border-color:#d9302a; }
   .vpt-body { padding:18px 18px 20px; }
   .vpt-kicker { font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#d9302a; margin-bottom:8px; }
   .vpt-title { font-family:'Barlow Condensed'; font-weight:700; font-size:23px; line-height:1.04; letter-spacing:-0.01em; color:#f0f2ff; margin:0 0 8px; }
@@ -101,6 +102,15 @@
   .vpt-item[data-lit="1"] .vpt-stop { background:#d9302a; box-shadow:0 0 0 4px rgba(217,48,42,0.16), 0 0 18px rgba(217,48,42,0.55); }
   .vpt-date { margin-top:16px; height:18px; font-family:'JetBrains Mono'; font-size:12.5px; line-height:18px; letter-spacing:.1em; text-transform:uppercase; text-align:center; color:#6d72ab; transition:color .35s ease; }
   .vpt-item[data-lit="1"] .vpt-date { color:#f0f2ff; }
+  .vpt-mstage { position:relative; aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:#07091c; border:1px solid rgba(60,64,181,0.3); }
+  .vpt-mslide { position:absolute; inset:0; display:none; }
+  .vpt-mslide[data-on="1"] { display:block; }
+  .vpt-mslide img, .vpt-mslide video { width:100%; height:100%; object-fit:contain; background:#07091c; display:block; }
+  .vpt-marrow { position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:9999px; background:rgba(8,10,28,0.72); border:1px solid rgba(96,165,250,0.3); color:#f0f2ff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; line-height:1; z-index:2; transition:background .25s ease, border-color .25s ease; }
+  .vpt-marrow:hover { background:rgba(217,48,42,0.8); border-color:#d9302a; }
+  .vpt-mdots { display:flex; justify-content:center; align-items:center; gap:7px; margin-top:12px; }
+  .vpt-mdot { width:7px; height:7px; border-radius:9999px; background:rgba(96,165,250,0.3); cursor:pointer; transition:width .25s ease, background .25s ease; }
+  .vpt-mdot[data-on="1"] { width:20px; background:#d9302a; }
   #vpt-close:hover { opacity:.72; }
   @media (max-width:760px) {
     .vpt-item { flex:0 0 78vw; }
@@ -407,29 +417,29 @@
               </div>
             </div>
             <div id="vpg-page-1" class="vpg-page" style="display:none; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,19vw,210px); grid-auto-flow:dense; gap:14px;">
-              <div class="vpg-tile" data-idx="0" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
-                <img src="assets/gallery/flight-ready.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+              <div class="vpg-tile" data-idx="4" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
+                <video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 05</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Ground test.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Show off.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
-              <div class="vpg-tile" data-idx="1" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
-                <img src="assets/gallery/first-flight.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+              <div class="vpg-tile" data-idx="5" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/night-lights.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 06</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Climb-out.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">NIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Lit up.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
-              <div class="vpg-tile" data-idx="2" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
-                <img src="assets/gallery/cnc-cut.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+              <div class="vpg-tile" data-idx="6" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/night-hover.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 07</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Toolpath.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">NIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Hover, after dark.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
-              <div class="vpg-tile" data-idx="3" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
-                <img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
-                <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(5,6,26,0.92), transparent 60%);"></div>
-                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 08</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Bench check.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              <div class="vpg-tile" data-idx="7" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
+                <img src="assets/gallery/field-ready.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FIELD</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Ready on the grass.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
             </div>
           </div>
@@ -448,6 +458,10 @@
             <div class="vpg-sm" data-idx="1" style="display:none;"><video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
             <div class="vpg-sm" data-idx="2" style="display:none;"><video src="assets/gallery/cnc-cut.mp4" poster="assets/gallery/cnc-cut.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
             <div class="vpg-sm" data-idx="3" style="display:none;"><img src="assets/gallery/wooden-prototype.png" alt="Wooden prototype" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="4" style="display:none;"><video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="5" style="display:none;"><img src="assets/gallery/night-lights.webp" alt="Clover lit up on the pad" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="6" style="display:none;"><img src="assets/gallery/night-hover.webp" alt="Clover hovering at night" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="7" style="display:none;"><img src="assets/gallery/field-ready.webp" alt="Clover ready for a field sortie" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
             <div style="position:absolute; left:0; right:0; bottom:0; padding:22px 20px 18px; background:linear-gradient(to top, rgba(5,6,26,0.92), transparent); pointer-events:none;">
               <div id="vpg-kicker" style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#f59e0b; margin-bottom:8px;"></div>
               <div id="vpg-title" style="font-family:'Barlow Condensed'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-bottom:8px;"></div>
@@ -463,6 +477,10 @@
             <div class="vpg-railitem" data-idx="1" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/first-flight.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Airborne</div></div>
             <div class="vpg-railitem" data-idx="2" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/cnc-cut.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Cut in-house</div></div>
             <div class="vpg-railitem" data-idx="3" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Prototype</div></div>
+            <div class="vpg-railitem" data-idx="4" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/show-off.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Show off</div></div>
+            <div class="vpg-railitem" data-idx="5" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/night-lights.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Lit up</div></div>
+            <div class="vpg-railitem" data-idx="6" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/night-hover.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Night hover</div></div>
+            <div class="vpg-railitem" data-idx="7" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/field-ready.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Field ready</div></div>
           </div>
         </div>
       </div>
@@ -495,68 +513,16 @@
         <div id="vpt-head" aria-hidden="true" style="position:absolute; left:0; bottom:36px; width:12px; height:12px; margin-left:-6px; border-radius:9999px; background:#d9302a; box-shadow:0 0 12px rgba(217,48,42,0.9), 0 0 28px rgba(217,48,42,0.45); will-change:transform;"></div>
 
         <article class="vpt-item" data-idx="0">
-          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Concept lock">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Concept and design">
             <div class="vpt-shell">
               <div class="vpt-core">
-                <div class="vpt-media" data-kind="photo"></div>
+                <div class="vpt-media">
+                  <img src="assets/process/01-concept-cad.webp" alt="" loading="lazy" data-on="1">
+                </div>
                 <div class="vpt-body">
                   <div class="vpt-kicker">Design</div>
-                  <h3 class="vpt-title">Concept lock.</h3>
-                  <p class="vpt-text">Mission profile, mass budget and airframe geometry frozen after four competing quad layouts were traded against SUAS 2026 rules.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="vpt-stem"></div>
-          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
-          <div class="vpt-date">Mar 2025</div>
-        </article>
-
-        <article class="vpt-item" data-idx="1">
-          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Wooden prototype">
-            <div class="vpt-shell">
-              <div class="vpt-core">
-                <div class="vpt-media" data-kind="photo"></div>
-                <div class="vpt-body">
-                  <div class="vpt-kicker">Prototype</div>
-                  <h3 class="vpt-title">Wooden prototype.</h3>
-                  <p class="vpt-text">A plywood mock of the full frame validated arm spacing, motor clearance and payload volume before a single carbon sheet was cut.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="vpt-stem"></div>
-          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
-          <div class="vpt-date">May 2025</div>
-        </article>
-
-        <article class="vpt-item" data-idx="2">
-          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Carbon in-house">
-            <div class="vpt-shell">
-              <div class="vpt-core">
-                <div class="vpt-media" data-kind="video"></div>
-                <div class="vpt-body">
-                  <div class="vpt-kicker">Fabrication</div>
-                  <h3 class="vpt-title">Carbon, in-house.</h3>
-                  <p class="vpt-text">Top and bottom plates machined on our own CNC. Every toolpath written by the team, every part measured against the CAD before assembly.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="vpt-stem"></div>
-          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
-          <div class="vpt-date">Aug 2025</div>
-        </article>
-
-        <article class="vpt-item" data-idx="3">
-          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Avionics integration">
-            <div class="vpt-shell">
-              <div class="vpt-core">
-                <div class="vpt-media" data-kind="photo"></div>
-                <div class="vpt-body">
-                  <div class="vpt-kicker">Avionics</div>
-                  <h3 class="vpt-title">Systems integrated.</h3>
-                  <p class="vpt-text">Cube Orange, Here3+ GNSS, the SIYI gimbal and our in-house power board wired onto one harness, then bench-tested rail by rail.</p>
+                  <h3 class="vpt-title">Concept &amp; design.</h3>
+                  <p class="vpt-text">Every build begins as a digital sketch in Fusion 360, where the payload bay, arm geometry, motor mounts and gimbal placement are set before a single part exists.</p>
                 </div>
               </div>
             </div>
@@ -566,22 +532,112 @@
           <div class="vpt-date">Nov 2025</div>
         </article>
 
-        <article class="vpt-item" data-idx="4">
-          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: First autonomous flight">
+        <article class="vpt-item" data-idx="1">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Wooden prototype">
             <div class="vpt-shell">
               <div class="vpt-core">
-                <div class="vpt-media" data-kind="video"></div>
+                <div class="vpt-media">
+                  <img src="assets/process/02-prototype-top.webp" alt="" loading="lazy" data-on="1">
+                  <img src="assets/process/02-prototype-stand.webp" alt="" loading="lazy" data-on="0">
+                </div>
                 <div class="vpt-body">
-                  <div class="vpt-kicker">Flight</div>
-                  <h3 class="vpt-title">First autonomous flight.</h3>
-                  <p class="vpt-text">Clover flew a full waypoint mission unattended, held altitude within tolerance and returned to launch on its own logic.</p>
+                  <div class="vpt-kicker">Prototype</div>
+                  <h3 class="vpt-title">Wooden prototype.</h3>
+                  <p class="vpt-text">A full-scale wooden frame built to verify the mechanical design: dimensions, arm spacing, propeller clearance and how easily the internals could be reached.</p>
                 </div>
               </div>
             </div>
           </div>
           <div class="vpt-stem"></div>
           <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
-          <div class="vpt-date">Feb 2026</div>
+          <div class="vpt-date">May 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="2">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Carbon CNC fabrication">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/03-carbon-plate.webp" alt="" loading="lazy" data-on="1">
+                  <img src="assets/process/03-cnc-cut.webp" alt="" loading="lazy" data-on="0">
+                  <img src="assets/process/03-cnc-pass.webp" alt="" loading="lazy" data-on="0">
+                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Fabrication</div>
+                  <h3 class="vpt-title">Carbon CNC fabrication.</h3>
+                  <p class="vpt-text">Precision CNC-machined carbon fibre, cut to exact tolerances for the rigidity and durability the airframe needs under real flight loads.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="3">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: System integration">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/04-integration-top.webp" alt="" loading="lazy" data-on="1">
+                  <img src="assets/process/04-integration-wiring.webp" alt="" loading="lazy" data-on="0">
+                  <img src="assets/process/04-integration-bay.webp" alt="" loading="lazy" data-on="0">
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Integration</div>
+                  <h3 class="vpt-title">System integration.</h3>
+                  <p class="vpt-text">Electronics, flight controller, motors, wiring, battery and the gimbal-mounted camera brought onto one airframe and made to work as a single system.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="4">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Autotuning">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/05-autotune.webp" alt="" loading="lazy" data-on="1">
+                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Control tuning</div>
+                  <h3 class="vpt-title">Autotuning.</h3>
+                  <p class="vpt-text">The controller twitches each axis against a disturbance it generates itself, then raises the rate gains to the sharpest response Clover holds without overshoot.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="5">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Flight testing">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/06-flight-test.webp" alt="" loading="lazy" data-on="1">
+                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Flight</div>
+                  <h3 class="vpt-title">Flight testing.</h3>
+                  <p class="vpt-text">Stability, endurance, control response and payload performance measured under real conditions, then refined until the platform is genuinely field-ready.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
         </article>
       </div>
     </div>
@@ -595,7 +651,7 @@
           <span id="vpt-m-badge" style="display:inline-flex; align-items:center; border-radius:9999px; padding:4px 13px; background:#d9302a; color:#fff; font-family:'Barlow'; font-size:12px; font-weight:600; letter-spacing:.04em; margin-bottom:14px;"></span>
           <h2 id="vpt-m-title" style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(28px,4vw,38px); line-height:1.05; letter-spacing:-0.01em; margin:0 0 12px; padding-right:44px; color:#f0f2ff;"></h2>
           <div id="vpt-m-meta" style="font-family:'JetBrains Mono'; font-size:12px; letter-spacing:.06em; text-transform:uppercase; font-weight:500; color:#8b8fc8; margin-bottom:18px;"></div>
-          <div id="vpt-m-media" style="border-radius:12px; overflow:hidden; margin-bottom:18px;"></div>
+          <div id="vpt-m-media" style="margin-bottom:18px;"></div>
           <p id="vpt-m-text" style="font-family:'Barlow'; font-size:15.5px; line-height:1.68; color:#c3c6ea; margin:0;"></p>
         </div>
       </div>
@@ -654,6 +710,10 @@ class Component extends DCLogic {
         { k: 'Field note 02 · Flight',      t: 'Airborne.',         d: 'Clover in the air during a test sortie — holding attitude under its own power.' },
         { k: 'Field note 03 · Fabrication', t: 'Cut in-house.',     d: 'Machining the carbon-fiber top plate on our CNC, tuned to the exact build layout.' },
         { k: 'Field note 04 · Prototype',   t: 'Where it started.', d: 'The wooden proof-of-concept frame that validated the geometry before carbon.' },
+        { k: 'Field note 05 · Display',    t: 'Show off.',           d: 'Clover on the pad with the arm lighting live and the team mark projected on the ground beneath it.' },
+        { k: 'Field note 06 · Night',      t: 'Lit up.',            d: 'Navigation and arm lighting running at full brightness during a night systems check.' },
+        { k: 'Field note 07 · Night',      t: 'Hover, after dark.', d: 'Holding a steady hover under floodlight, the projected mark tracking the aircraft below.' },
+        { k: 'Field note 08 · Field',      t: 'Ready on the grass.', d: 'Payload strapped down, props on, waiting for the go on a field sortie.' },
       ];
       const N = meta.length, PAGES = pages.length;
       let page = 0, active = 0, from = null;
@@ -727,16 +787,24 @@ class Component extends DCLogic {
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       const DATA = [
-        { badge: 'Design', title: 'Concept lock.', date: 'March 2025', kind: 'photo',
-          text: 'The campaign opened on paper. Four quad layouts were drawn against the SUAS 2026 rulebook and traded on endurance, payload volume and the realistic limits of what we could machine ourselves. Mass budget was fixed first, and everything downstream had to fit inside it. That discipline kept the airframe honest later, when the avionics list grew. By the end of the stage the geometry, motor class and payload bay were frozen, and the team could start cutting instead of arguing.' },
-        { badge: 'Prototype', title: 'Wooden prototype.', date: 'May 2025', kind: 'photo',
-          text: 'Before a single carbon sheet was touched, the full frame was reproduced in plywood. It cost almost nothing and answered the questions CAD could not: whether the arms cleared the props under load, whether the battery actually slid into its bay with the harness attached, and whether one person could service the aircraft in the field without dismantling half of it. Three revisions came out of that mock, all of them cheap.' },
-        { badge: 'Fabrication', title: 'Carbon, in-house.', date: 'August 2025', kind: 'video',
-          text: 'Top and bottom plates were machined on our own CNC, with every toolpath written by the team. Cutting carbon in-house turned a multi-week supplier loop into a same-day iteration: a plate could be revised in the morning and tested on the bench that evening. Each part came off the machine and went straight to a measurement pass against the CAD before it was allowed near the assembly bench.' },
-        { badge: 'Avionics', title: 'Systems integrated.', date: 'November 2025', kind: 'photo',
-          text: 'The Cube Orange, Here3+ GNSS module, SIYI A8 mini gimbal and our in-house power board were brought onto a single harness. The power stage was validated rail by rail on the bench, starting with input decoupling, then the 12 V and 5 V bucks, then the low-noise LDO that feeds the sensitive electronics. Nothing drew from the main pack until each rail held. Wiring was routed for serviceability, not for the shortest path.' },
-        { badge: 'Flight', title: 'First autonomous flight.', date: 'February 2026', kind: 'video',
-          text: 'Clover flew a complete waypoint mission with no pilot input: it launched, held altitude inside tolerance across the circuit, tracked each waypoint and returned to launch on its own logic. Telemetry from that sortie set the baseline for every tuning pass since, and marked the point where the aircraft stopped being a build and started being a competition vehicle.' },
+        { badge: 'Design', title: 'Concept & design.', date: 'November 2025',
+          media: [{ t: 'i', s: 'assets/process/01-concept-cad.webp' }],
+          text: 'Every build begins as a digital sketch in Fusion 360. Here we define the core architecture of the airframe: the central payload bay, arm geometry, motor mounts, landing gear and camera gimbal placement, refining dimensions and weight distribution before a single physical part is made. This stage lets us iterate quickly, test structural assumptions, and validate the design against mission requirements.' },
+        { badge: 'Prototype', title: 'Wooden prototype.', date: 'May 2026',
+          media: [{ t: 'i', s: 'assets/process/02-prototype-top.webp' }, { t: 'i', s: 'assets/process/02-prototype-stand.webp' }],
+          text: 'Before manufacturing the carbon fiber frame, a full-scale wooden prototype was built to verify the mechanical design. It was used to check the overall dimensions, arm spacing, propeller clearance, battery installation, and accessibility of the internal components. Building the prototype allowed design issues to be identified and corrected early, reducing the risk of costly modifications after the carbon fiber frame was manufactured.' },
+        { badge: 'Fabrication', title: 'Carbon CNC fabrication.', date: 'June 2026',
+          media: [{ t: 'i', s: 'assets/process/03-carbon-plate.webp' }, { t: 'v', s: 'assets/process/03-cnc-cut.mp4', p: 'assets/process/03-cnc-cut.webp' }, { t: 'v', s: 'assets/process/03-cnc-pass.mp4', p: 'assets/process/03-cnc-pass.webp' }],
+          text: 'With the design validated, we move to precision manufacturing using CNC-machined carbon fiber. This stage produces lightweight, high-strength components built to exact tolerances, giving the airframe the durability and rigidity needed for real-world flight loads and stresses.' },
+        { badge: 'Integration', title: 'System integration.', date: 'June 2026',
+          media: [{ t: 'i', s: 'assets/process/04-integration-top.webp' }, { t: 'i', s: 'assets/process/04-integration-wiring.webp' }, { t: 'i', s: 'assets/process/04-integration-bay.webp' }],
+          text: 'Next we bring the airframe to life by integrating the electronics, flight controller, motors, wiring, battery and payload systems, including the gimbal-mounted camera. This is where mechanical design meets functional engineering, ensuring every component works together as a cohesive system.' },
+        { badge: 'Control tuning', title: 'Autotuning.', date: 'June 2026',
+          media: [{ t: 'v', s: 'assets/process/05-autotune.mp4', p: 'assets/process/05-autotune.webp' }],
+          text: 'Tuning a controller by hand means picking a gain, flying, watching the aircraft oscillate, landing and picking again. AutoTune removes the guesswork. Held in a stable hover, the flight controller twitches one axis at a time by roughly 20 degrees against a disturbance it generates itself, measures how quickly Clover answers and how far it overshoots, and walks the rate gains up until the response is as sharp as the airframe can hold without ringing. Roll, pitch and yaw each take a few minutes, and the tune is written to the aircraft on landing. What comes out is a controller matched to this exact machine, its mass, its arm length and its propellers, instead of a generic starting point.' },
+        { badge: 'Flight', title: 'Flight testing.', date: 'June 2026',
+          media: [{ t: 'v', s: 'assets/process/06-flight-test.mp4', p: 'assets/process/06-flight-test.webp' }],
+          text: 'Finally, the fully integrated platform undergoes rigorous flight and payload testing. We evaluate stability, endurance, control response, and payload performance under real-world conditions, refining the system until it meets our standards for reliability and field readiness.' },
       ];
 
       const head = document.getElementById('vpt-head');
@@ -799,13 +867,90 @@ class Component extends DCLogic {
       const io2 = new IntersectionObserver((ents) => ents.forEach(en => { if (en.isIntersecting) { en.target.dataset.in = '1'; io2.unobserve(en.target); } }), { threshold: 0.25 });
       items.forEach((it, i) => { it.style.transitionDelay = (i * 90) + 'ms'; io2.observe(it); });
 
+      let mSlides = [], mDots = [], mIdx = 0;
+      const setSlide = (i) => {
+        if (!mSlides.length) return;
+        mIdx = (i + mSlides.length) % mSlides.length;
+        mSlides.forEach((el, k) => {
+          const on = k === mIdx;
+          el.dataset.on = on ? '1' : '0';
+          const v = el.querySelector('video');
+          if (v) { if (on) { v.muted = true; const q = v.play(); if (q && q.catch) q.catch(() => {}); } else { v.pause(); } }
+        });
+        mDots.forEach((d, k) => { d.dataset.on = k === mIdx ? '1' : '0'; });
+      };
+      const renderMedia = (d) => {
+        const box = document.getElementById('vpt-m-media');
+        box.innerHTML = '';
+        mSlides = []; mDots = []; mIdx = 0;
+        const stage = document.createElement('div');
+        stage.className = 'vpt-mstage';
+        d.media.forEach((m) => {
+          const sl = document.createElement('div');
+          sl.className = 'vpt-mslide';
+          sl.innerHTML = m.t === 'v'
+            ? '<video src="' + m.s + '" poster="' + m.p + '" muted loop playsinline controls preload="none"></video>'
+            : '<img src="' + m.s + '" alt="">';
+          stage.appendChild(sl);
+          mSlides.push(sl);
+        });
+        if (d.media.length > 1) {
+          const mk = (txt, side, dir) => {
+            const b = document.createElement('div');
+            b.className = 'vpt-marrow';
+            b.setAttribute('role', 'button');
+            b.setAttribute('tabindex', '0');
+            b.setAttribute('aria-label', dir < 0 ? 'Previous item' : 'Next item');
+            b.style[side] = '12px';
+            b.textContent = txt;
+            b.addEventListener('click', (e) => { e.stopPropagation(); setSlide(mIdx + dir); });
+            return b;
+          };
+          stage.appendChild(mk('\u2039', 'left', -1));
+          stage.appendChild(mk('\u203a', 'right', 1));
+        }
+        box.appendChild(stage);
+        if (d.media.length > 1) {
+          const dots = document.createElement('div');
+          dots.className = 'vpt-mdots';
+          d.media.forEach((m, k) => {
+            const dot = document.createElement('div');
+            dot.className = 'vpt-mdot';
+            dot.setAttribute('role', 'button');
+            dot.setAttribute('tabindex', '0');
+            dot.setAttribute('aria-label', 'Show item ' + (k + 1));
+            dot.addEventListener('click', () => setSlide(k));
+            dots.appendChild(dot);
+            mDots.push(dot);
+          });
+          box.appendChild(dots);
+        }
+        setSlide(0);
+      };
+
+      const cards = items.map(it => [...it.querySelectorAll('.vpt-media img')]);
+      const cyc = items.map(() => 0);
+      let inView = false;
+      new IntersectionObserver((e) => { inView = e[0].isIntersecting; }, { threshold: 0.12 }).observe(sc);
+      if (!reduce) setInterval(() => {
+        if (!inView || modal.style.display === 'flex') return;
+        cards.forEach((arr, i) => {
+          if (arr.length < 2) return;
+          setTimeout(() => {
+            arr[cyc[i]].dataset.on = '0';
+            cyc[i] = (cyc[i] + 1) % arr.length;
+            arr[cyc[i]].dataset.on = '1';
+          }, i * 220);
+        });
+      }, 3800);
+
       let lockY = 0;
       const open = (i) => {
         const d = DATA[i]; if (!d) return;
         document.getElementById('vpt-m-badge').textContent = d.badge;
         document.getElementById('vpt-m-title').textContent = d.title;
         document.getElementById('vpt-m-meta').textContent = d.date;
-        document.getElementById('vpt-m-media').innerHTML = '<div class="vpt-media" data-kind="' + d.kind + '" style="aspect-ratio:16/9;"></div>';
+        renderMedia(d);
         document.getElementById('vpt-m-text').textContent = d.text;
         modal.style.display = 'flex';
         lockY = window.scrollY;
