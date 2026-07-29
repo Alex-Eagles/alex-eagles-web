@@ -72,14 +72,14 @@
     .vpg-page { grid-template-columns:1fr !important; grid-auto-rows:64vw !important; }
   }
   /* ---- DEVELOPMENT PROCESS timeline ---- */
-  #vpt-scroller { scrollbar-width:none; }
+  #vpt-scroller { scrollbar-width:none; scroll-padding-left:max(32px,calc((100vw - 1180px) / 2 + 32px)); }
   #vpt-scroller::-webkit-scrollbar { display:none; }
   #vpt-scroller:focus-visible { outline:1px solid #d9302a; outline-offset:-3px; }
   .vpt-nav { transition:background .25s ease, border-color .25s ease, transform .25s ease; }
   .vpt-nav:hover { background:rgba(217,48,42,0.16); border-color:rgba(217,48,42,0.55); }
   .vpt-nav:active { transform:scale(.94); }
   .vpt-nav[data-off="1"] { opacity:.3; pointer-events:none; }
-  .vpt-item { flex:0 0 clamp(250px,26vw,318px); display:flex; flex-direction:column; justify-content:flex-end; scroll-snap-align:center; opacity:0; transform:translateY(24px); transition:opacity .7s cubic-bezier(.19,1,.22,1), transform .7s cubic-bezier(.19,1,.22,1); }
+  .vpt-item { flex:0 0 clamp(250px,26vw,318px); display:flex; flex-direction:column; justify-content:flex-end; scroll-snap-align:start; scroll-snap-stop:always; opacity:0; transform:translateY(24px); transition:opacity .7s cubic-bezier(.19,1,.22,1), transform .7s cubic-bezier(.19,1,.22,1); }
   .vpt-item[data-in="1"] { opacity:1; transform:none; }
   .vpt-card { cursor:pointer; transition:transform .35s cubic-bezier(.19,1,.22,1); }
   .vpt-card:hover, .vpt-card:focus-visible { transform:translateY(-4px); outline:none; }
@@ -115,6 +115,7 @@
   @media (max-width:760px) {
     .vpt-item { flex:0 0 78vw; }
     #vpt-track { padding-left:20px; padding-right:20px; }
+    #vpt-scroller { scroll-padding-left:20px; }
     #vp-process > div:nth-of-type(3) { padding-left:20px; padding-right:20px; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -394,7 +395,7 @@
       </div>
     </div>
 
-    <div id="vpt-scroller" tabindex="0" aria-label="Development timeline" style="position:relative; margin-top:clamp(44px,6vh,72px); overflow-x:auto; overflow-y:hidden; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;">
+    <div id="vpt-scroller" tabindex="0" aria-label="Development timeline" style="position:relative; margin-top:clamp(44px,6vh,72px); overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
       <div id="vpt-track" style="position:relative; display:flex; align-items:stretch; gap:clamp(20px,2.4vw,34px); padding:0 max(32px,calc((100vw - 1180px) / 2 + 32px)) 6px;">
         <div id="vpt-rail" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; background:linear-gradient(90deg, rgba(60,64,181,0) 0%, rgba(96,165,250,0.32) 5%, rgba(96,165,250,0.32) 95%, rgba(60,64,181,0) 100%);"></div>
         <div id="vpt-fill" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; transform:scaleX(0); transform-origin:0 50%; background:linear-gradient(90deg,#3c40b5,#d9302a); will-change:transform;"></div>
@@ -856,8 +857,23 @@ class Component extends DCLogic {
         if (next) next.dataset.off = sc.scrollLeft >= max - 4 ? '1' : '0';
       };
       const onScroll = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; sync(); }); };
-      const step = () => { const it = items[0]; return it ? it.getBoundingClientRect().width + 26 : 320; };
-      const nudge = (dir) => sc.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
+      const padLeft = () => parseFloat(getComputedStyle(track).paddingLeft) || 0;
+      const snapAt = (i) => items[i].offsetLeft - padLeft();
+      const nearest = () => {
+        let best = 0, bd = Infinity;
+        items.forEach((it, i) => { const d = Math.abs(snapAt(i) - sc.scrollLeft); if (d < bd) { bd = d; best = i; } });
+        return best;
+      };
+      const nudge = (dir) => {
+        const max = sc.scrollWidth - sc.clientWidth;
+        const t = Math.max(0, Math.min(items.length - 1, nearest() + dir));
+        let x = Math.max(0, Math.min(max, snapAt(t)));
+        // snap targets past the end clamp to max, so a step that would not move
+        // runs to the extreme instead and the rail light can finish its travel
+        if (dir > 0 && x <= sc.scrollLeft + 1) x = max;
+        if (dir < 0 && x >= sc.scrollLeft - 1) x = 0;
+        sc.scrollTo({ left: x, behavior: reduce ? 'auto' : 'smooth' });
+      };
 
       sc.addEventListener('scroll', onScroll, { passive: true });
       window.addEventListener('resize', () => { measure(); sync(); }, { passive: true });
