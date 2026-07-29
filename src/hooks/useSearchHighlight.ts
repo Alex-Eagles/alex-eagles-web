@@ -204,7 +204,21 @@ function paint(ranges: Range[]) {
  * them and land somewhere else when the card closes.
  */
 function modalOpen(): boolean {
-  return document.body.style.position === "fixed";
+  return [...document.querySelectorAll('[aria-modal="true"]')].some(isLaidOut);
+}
+
+/**
+ * scrollIntoView also scrolls every clipped ancestor. The vehicle page's
+ * sections are overflow:hidden, so it shifted their content up and cut the
+ * heading off. Reset any ancestor it would move, then scroll the window itself.
+ */
+function scrollToCenter(el: Element) {
+  for (let node = el.parentElement; node; node = node.parentElement) {
+    if (node.scrollTop && getComputedStyle(node).overflowY === "hidden") node.scrollTop = 0;
+  }
+  const rect = el.getBoundingClientRect();
+  const top = rect.top + window.scrollY - Math.max(0, (window.innerHeight - rect.height) / 2);
+  window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
 }
 
 /**
@@ -295,9 +309,7 @@ function attempt(terms: string[], target: string | null, anchor: string | null):
   if (!focus) return false;
 
   settleReveals(focus);
-  // Instant, not smooth: a long scroll animation on a pinned section lands
-  // somewhere else by the time it finishes.
-  focus.scrollIntoView({ behavior: "auto", block: "center" });
+  scrollToCenter(focus);
   return true;
 }
 

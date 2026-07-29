@@ -1039,7 +1039,13 @@ class Component extends DCLogic {
         });
       }, 3800);
 
-      let lockY = 0;
+      const docEl = document.documentElement;
+      const lockScroll = () => {
+        const bar = window.innerWidth - docEl.clientWidth;
+        docEl.style.overflow = 'hidden';
+        if (bar > 0) docEl.style.paddingRight = bar + 'px';
+      };
+      const unlockScroll = () => { docEl.style.overflow = ''; docEl.style.paddingRight = ''; };
       const open = (i) => {
         const d = DATA[i]; if (!d) return;
         document.getElementById('vpt-m-badge').textContent = d.badge;
@@ -1048,11 +1054,7 @@ class Component extends DCLogic {
         renderMedia(d);
         document.getElementById('vpt-m-text').textContent = d.text;
         modal.style.display = 'flex';
-        lockY = window.scrollY;
-        document.body.style.position = 'fixed';
-        document.body.style.top = '-' + lockY + 'px';
-        document.body.style.width = '100%';
-        document.body.style.overflow = 'hidden';
+        lockScroll();
         requestAnimationFrame(() => { scrim.style.opacity = '1'; panel.style.opacity = '1'; panel.style.transform = 'none'; });
       };
       const close = () => {
@@ -1061,11 +1063,7 @@ class Component extends DCLogic {
         panel.style.transform = 'scale(.96) translateY(8px)';
         const done = () => {
           modal.style.display = 'none';
-          const b = document.documentElement.style.scrollBehavior;
-          document.documentElement.style.scrollBehavior = 'auto';
-          document.body.style.position = ''; document.body.style.top = ''; document.body.style.width = ''; document.body.style.overflow = '';
-          window.scrollTo(0, lockY);
-          document.documentElement.style.scrollBehavior = b;
+          unlockScroll();
         };
         setTimeout(done, reduce ? 0 : 220);
       };
@@ -1089,7 +1087,8 @@ class Component extends DCLogic {
       // highlighter's early passes to have scrolled the section into place, so
       // the card locks the page where the reader can see it and closing lands
       // them back on the same view.
-      const wanted = Number(new URLSearchParams(location.search).get('stop'));
+      const stopParam = new URLSearchParams(location.search).get('stop');
+      const wanted = stopParam === null || stopParam === '' ? NaN : Number(stopParam);
       if (Number.isInteger(wanted) && DATA[wanted]) {
         goTo(wanted + 1);
         setTimeout(() => open(wanted), 800);
