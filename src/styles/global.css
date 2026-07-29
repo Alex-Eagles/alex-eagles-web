@@ -591,3 +591,15 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+/* Search result highlighting (see useSearchHighlight). */
+::highlight(ae-search) {
+  background-color: #fde047;
+  color: #1a1a1a;
+}
+
+.ae-search-fallback {
+  background-color: #fde047;
+  color: #1a1a1a;
+  border-radius: 3px;
+}

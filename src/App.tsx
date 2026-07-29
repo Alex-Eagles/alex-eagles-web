@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import IntroSplash from "@/components/ui/IntroSplash";
+import { useSearchHighlight } from "@/hooks/useSearchHighlight";
 
 import Homepage from "@/pages/Homepage";
 import Team from "@/pages/Team";
@@ -38,6 +39,8 @@ function ScrollToTop() {
  * import for the real page as it's designed — nothing else here changes.
  */
 export default function App() {
+  useSearchHighlight();
+
   return (
     <>
       <IntroSplash />
