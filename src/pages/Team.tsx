@@ -366,12 +366,18 @@ export default function Team({
             </h2>
           </div>
 
-          {/* [left, centre, right] — the centre card is the raised one. */}
+          {/* Two cards sit side by side [left, right]; three raise the middle
+              one [left, centre, right]. The centre treatment only kicks in for
+              the true middle card of a three-card row. */}
           <div className={styles.leadershipRow}>
             {roster.leadership.map((leader, i) => (
               <div
                 key={leader.id}
-                className={i === 1 ? styles.leaderCentre : styles.leaderSide}
+                className={
+                  roster.leadership.length === 3 && i === 1
+                    ? styles.leaderCentre
+                    : styles.leaderSide
+                }
               >
                 <Card
                   member={leader}
