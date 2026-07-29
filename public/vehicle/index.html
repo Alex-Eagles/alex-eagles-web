@@ -71,14 +71,69 @@
   @media (max-width:460px) {
     .vpg-page { grid-template-columns:1fr !important; grid-auto-rows:64vw !important; }
   }
+  /* ---- DEVELOPMENT PROCESS timeline ---- */
+  #vpt-scroller { scrollbar-width:none; scroll-padding-left:max(32px,calc((100vw - 1180px) / 2 + 32px)); }
+  #vpt-scroller::-webkit-scrollbar { display:none; }
+  #vpt-scroller:focus-visible { outline:1px solid #d9302a; outline-offset:-3px; }
+  .vpt-nav { transition:background .25s ease, border-color .25s ease, transform .25s ease; }
+  .vpt-nav:hover { background:rgba(217,48,42,0.16); border-color:rgba(217,48,42,0.55); }
+  .vpt-nav:active { transform:scale(.94); }
+  .vpt-nav[data-off="1"] { opacity:.3; pointer-events:none; }
+  .vpt-item { flex:0 0 clamp(250px,26vw,318px); display:flex; flex-direction:column; justify-content:flex-end; opacity:0; transform:translateY(24px); transition:opacity .7s cubic-bezier(.19,1,.22,1), transform .7s cubic-bezier(.19,1,.22,1); }
+  .vpt-item[data-in="1"] { opacity:1; transform:none; }
+  .vpt-card { cursor:pointer; transition:transform .35s cubic-bezier(.19,1,.22,1); }
+  .vpt-card:hover, .vpt-card:focus-visible { transform:translateY(-4px); outline:none; }
+  .vpt-shell { border:1px solid rgba(60,64,181,0.3); background:#0a0c24; border-radius:12px; overflow:hidden; transition:border-color .35s ease; }
+  .vpt-card:hover .vpt-shell, .vpt-card:focus-visible .vpt-shell { border-color:rgba(217,48,42,0.5); }
+  .vpt-item[data-cur="1"] .vpt-card { transform:translateY(-4px); }
+  .vpt-item[data-cur="1"] .vpt-shell { border-color:rgba(217,48,42,0.55); box-shadow:0 0 0 1px rgba(217,48,42,0.26), 0 18px 44px rgba(217,48,42,0.13); }
+  .vpt-item[data-cur="1"] .vpt-play { background:rgba(217,48,42,0.85); border-color:#d9302a; }
+  .vpt-core { position:relative; }
+  .vpt-media { position:relative; aspect-ratio:16/10; overflow:hidden; background:#0d1030; border-bottom:1px solid rgba(60,64,181,0.3); }
+  .vpt-media img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .9s ease, transform .6s cubic-bezier(.19,1,.22,1); }
+  .vpt-media img[data-on="1"] { opacity:1; }
+  .vpt-card:hover .vpt-media img { transform:scale(1.045); }
+  .vpt-play { position:absolute; right:11px; bottom:11px; width:32px; height:32px; border-radius:9999px; background:rgba(8,10,28,0.7); border:1px solid rgba(96,165,250,0.3); color:#f0f2ff; display:flex; align-items:center; justify-content:center; font-size:11px; padding-left:2px; transition:background .35s ease, border-color .35s ease; }
+  .vpt-card:hover .vpt-play { background:rgba(217,48,42,0.85); border-color:#d9302a; }
+  .vpt-body { padding:18px 18px 20px; }
+  .vpt-kicker { font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#d9302a; margin-bottom:8px; }
+  .vpt-title { font-family:'Barlow Condensed'; font-weight:700; font-size:23px; line-height:1.04; letter-spacing:-0.01em; color:#f0f2ff; margin:0 0 8px; }
+  .vpt-text { font-family:'Barlow'; font-size:14px; line-height:1.6; color:#a8ace0; margin:0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .vpt-stem { width:1px; height:26px; margin:18px auto 0; background:linear-gradient(180deg, rgba(96,165,250,0) 0%, rgba(96,165,250,0.4) 100%); }
+  .vpt-stoprow { display:flex; justify-content:center; height:16px; }
+  .vpt-stop { width:16px; height:16px; border-radius:9999px; background:#2b2f9e; transition:background .35s ease, box-shadow .35s ease; }
+  .vpt-item[data-lit="1"] .vpt-stop { background:#d9302a; box-shadow:0 0 0 4px rgba(217,48,42,0.16), 0 0 18px rgba(217,48,42,0.55); }
+  .vpt-date { margin-top:16px; height:18px; font-family:'JetBrains Mono'; font-size:12.5px; line-height:18px; letter-spacing:.1em; text-transform:uppercase; text-align:center; color:#6d72ab; transition:color .35s ease; }
+  .vpt-item[data-lit="1"] .vpt-date { color:#f0f2ff; }
+  .vpt-mstage { position:relative; aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:#07091c; border:1px solid rgba(60,64,181,0.3); }
+  .vpt-mslide { position:absolute; inset:0; display:none; }
+  .vpt-mslide[data-on="1"] { display:block; }
+  .vpt-mslide img, .vpt-mslide video { width:100%; height:100%; object-fit:contain; background:#07091c; display:block; }
+  .vpt-marrow { position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:9999px; background:rgba(8,10,28,0.72); border:1px solid rgba(96,165,250,0.3); color:#f0f2ff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; line-height:1; z-index:2; transition:background .25s ease, border-color .25s ease; }
+  .vpt-marrow:hover { background:rgba(217,48,42,0.8); border-color:#d9302a; }
+  .vpt-mdots { display:flex; justify-content:center; align-items:center; gap:7px; margin-top:12px; }
+  .vpt-mdot { width:7px; height:7px; border-radius:9999px; background:rgba(96,165,250,0.3); cursor:pointer; transition:width .25s ease, background .25s ease; }
+  .vpt-mdot[data-on="1"] { width:20px; background:#d9302a; }
+  #vpt-close:hover { opacity:.72; }
+  @media (max-width:760px) {
+    .vpt-item { flex:0 0 78vw; }
+    #vpt-track { padding-left:20px; padding-right:20px; }
+    #vpt-scroller { scroll-padding-left:20px; }
+    #vp-process > div:nth-of-type(3) { padding-left:20px; padding-right:20px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vpt-item { opacity:1; transform:none; transition:none; }
+    .vpt-card, .vpt-shell, .vpt-media::before, .vpt-stop, .vpt-date { transition:none; }
+    #vpt-fill, #vpt-head { transition:none; }
+  }
   @keyframes vp-grid { from { background-position:0 0; } to { background-position:64px 64px; } }
   @keyframes vp-bounce { 0%,100% { transform:translateY(0); opacity:.45; } 50% { transform:translateY(9px); opacity:1; } }
   @keyframes vp-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
   a { color:#60a5fa; text-decoration:none; }
   a:hover { color:#93c5fd; }
-  @keyframes vp-pulse-ring { 0%,100% { box-shadow:0 0 0 0 rgba(245,158,11,0.35); } 50% { box-shadow:0 0 0 8px rgba(245,158,11,0); } }
+  @keyframes vp-pulse-ring { 0%,100% { box-shadow:0 0 0 0 rgba(217,48,42,0.35); } 50% { box-shadow:0 0 0 8px rgba(217,48,42,0); } }
   @keyframes vp-mount-in { from { opacity:0; transform:translateY(9px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
-  @keyframes vp-num-flash { 0% { color:#fff; text-shadow:0 0 14px rgba(245,158,11,0.9); } 100% { color:#f59e0b; text-shadow:none; } }
+  @keyframes vp-num-flash { 0% { color:#fff; text-shadow:0 0 14px rgba(217,48,42,0.9); } 100% { color:#d9302a; text-shadow:none; } }
   @keyframes vp-callout-in { from { opacity:0; transform:translateY(9px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
   @keyframes vp-callout-pop { 0% { transform:scale(0); } 62% { transform:scale(1.3); } 100% { transform:scale(1); } }
   #vp-build-skip:hover { background:rgba(60,64,181,0.92)!important; border-color:#60a5fa!important; color:#fff!important; }
@@ -107,8 +162,8 @@
 
       <!-- spec rail + eyebrow, top-right (offset below the fixed nav pill) -->
       <div class="vp-hero-specs" style="position:absolute; right:40px; top:calc(80px + 60px); display:flex; flex-direction:column; align-items:flex-end; z-index:3;">
-        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); font-family:'Inter'; font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#c3c6ea; display:flex; align-items:center; gap:10px; margin-bottom:22px;">SUAS 2026 · Competition Vehicle<span style="width:8px; height:8px; border-radius:9999px; background:#f59e0b; box-shadow:0 0 10px #f59e0b;"></span></div>
-        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); display:flex; flex-direction:column; text-align:right; border-right:2px solid rgba(245,158,11,0.6); padding-right:22px;">
+        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1); font-family:'Inter'; font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#c3c6ea; display:flex; align-items:center; gap:10px; margin-bottom:22px;">SUAS 2026 · Competition Vehicle<span style="width:8px; height:8px; border-radius:9999px; background:#d9302a; box-shadow:0 0 10px #d9302a;"></span></div>
+        <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); display:flex; flex-direction:column; text-align:right; border-right:2px solid rgba(217,48,42,0.6); padding-right:22px;">
           <div style="padding:14px 0;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">6.4<span style="font-size:15px; color:#8b8fc8;"> kg</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Dry weight</div></div>
           <div style="padding:14px 0; border-top:1px solid rgba(60,64,181,0.3);"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">28<span style="font-size:15px; color:#8b8fc8;"> Ah</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Battery</div></div>
           <div style="padding:14px 0; border-top:1px solid rgba(60,64,181,0.3);"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:36px; color:#f0f2ff; line-height:1;">40<span style="font-size:15px; color:#8b8fc8;"> min</span></div><div style="font-family:'Inter'; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:#8b8fc8; margin-top:5px;">Endurance</div></div>
@@ -153,7 +208,7 @@
         <div style="flex:0 0 auto;">
           <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:10px;">How it comes together</div>
           <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(30px,4.4vw,48px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">From bare frame to flight-ready.</h2>
-          <div style="height:2px; width:52px; background:#f59e0b; margin-top:14px;"></div>
+          <div style="height:2px; width:52px; background:#d9302a; margin-top:14px;"></div>
         </div>
 
         <!-- canvas fills the middle; crossfades to the clean render at flight-ready -->
@@ -164,8 +219,8 @@
             <!-- cinematic on-frame callout: caption naming the part being mounted -->
             <div id="vp-build-callout" aria-hidden="true" style="position:absolute; inset:0; pointer-events:none; z-index:3; opacity:0; transition:opacity .4s ease;">
               <div id="vp-callout-card" style="position:absolute; left:50%; top:20%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center;">
-                <div id="vp-callout-inner" style="display:flex; flex-direction:column; align-items:center; gap:3px; background:rgba(8,10,28,0.82); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px); border:1px solid rgba(245,158,11,0.5); border-radius:9px; padding:9px 15px; box-shadow:0 10px 30px rgba(0,0,0,0.55); white-space:nowrap;">
-                  <span id="vp-callout-index" style="font-family:'JetBrains Mono'; font-weight:700; font-size:10px; letter-spacing:.16em; color:#f59e0b;">01 &middot; NOW MOUNTING</span>
+                <div id="vp-callout-inner" style="display:flex; flex-direction:column; align-items:center; gap:3px; background:rgba(8,10,28,0.82); backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px); border:1px solid rgba(217,48,42,0.5); border-radius:9px; padding:9px 15px; box-shadow:0 10px 30px rgba(0,0,0,0.55); white-space:nowrap;">
+                  <span id="vp-callout-index" style="font-family:'JetBrains Mono'; font-weight:700; font-size:10px; letter-spacing:.16em; color:#d9302a;">01 &middot; NOW MOUNTING</span>
                   <span id="vp-callout-name" style="font-family:'Barlow'; font-weight:600; font-size:clamp(16px,1.7vw,20px); line-height:1.05; color:#f4f6ff;">Carbon-fiber bottom plate</span>
                 </div>
               </div>
@@ -177,15 +232,15 @@
         <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:12px;">
           <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
             <span style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; color:#565a94;">NOW INSTALLING</span>
-            <span id="vp-stage-num" style="font-family:'JetBrains Mono'; font-weight:700; font-size:15px; color:#f59e0b;">01 / 11</span>
+            <span id="vp-stage-num" style="font-family:'JetBrains Mono'; font-weight:700; font-size:15px; color:#d9302a;">01 / 11</span>
             <span id="vp-stage-phase" style="margin-left:auto; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.12em; color:#60a5fa;">FRAME</span>
           </div>
           <div style="display:flex; align-items:center; gap:12px; min-height:34px;">
-            <span aria-hidden="true" style="flex:0 0 auto; width:7px; height:7px; border-radius:9999px; background:#f59e0b; box-shadow:0 0 12px rgba(245,158,11,.8); animation:vp-float 1.6s ease-in-out infinite;"></span>
+            <span aria-hidden="true" style="flex:0 0 auto; width:7px; height:7px; border-radius:9999px; background:#d9302a; box-shadow:0 0 12px rgba(217,48,42,.8); animation:vp-float 1.6s ease-in-out infinite;"></span>
             <span id="vp-stage-label" style="font-family:'Barlow'; font-weight:600; font-size:clamp(20px,2.4vw,27px); line-height:1.1; color:#f0f2ff;">Carbon-fiber bottom plate</span>
           </div>
           <div style="position:relative; height:3px; width:100%; background:rgba(60,64,181,0.25); border-radius:9999px; overflow:hidden;">
-            <div id="vp-build-bar" style="position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg,#3c40b5,#f59e0b); border-radius:9999px; transition:width .1s linear;"></div>
+            <div id="vp-build-bar" style="position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg,#3c40b5,#d9302a); border-radius:9999px; transition:width .1s linear;"></div>
           </div>
           <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.06em; color:#565a94;">
             <span data-step="0">FRAME</span>
@@ -223,14 +278,14 @@
             <line x1="4.7" y1="42.4" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
             <line x1="20.4" y1="16.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
           </svg>
-          <div data-exp-marker="cube" style="position:absolute; left:50%; top:6%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:#f59e0b; color:#07091c; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">1</div>
+          <div data-exp-marker="cube" style="position:absolute; left:50%; top:6%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:#d9302a; color:#07091c; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">1</div>
           <div data-exp-marker="gnss" style="position:absolute; left:79.6%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">2</div>
           <div data-exp-marker="cam" style="position:absolute; left:95.3%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">3</div>
           <div data-exp-marker="link" style="position:absolute; left:89.8%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">4</div>
           <div data-exp-marker="pdb" style="position:absolute; left:65.7%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">5</div>
           <div data-exp-marker="bec" style="position:absolute; left:34.3%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">6</div>
-          <div data-exp-marker="custom" style="position:absolute; left:10.2%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #f59e0b; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">7</div>
-          <div data-exp-marker="prop" style="position:absolute; left:4.7%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #f59e0b; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">8</div>
+          <div data-exp-marker="custom" style="position:absolute; left:10.2%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #d9302a; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">7</div>
+          <div data-exp-marker="prop" style="position:absolute; left:4.7%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #d9302a; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">8</div>
           <div data-exp-marker="batt" style="position:absolute; left:20.4%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">9</div>
         </div>
       </div>
@@ -263,10 +318,10 @@
         </div>
         <div style="padding:28px 30px;">
           <div data-exp-panel="cube">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">01 · COMPUTE — FLIGHT CONTROLLER</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">01 · COMPUTE — FLIGHT CONTROLLER</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Pixhawk Cube Orange 2</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every decision starts here. A high-performance STM32 runs the entire autonomy loop in real time — fusing every sensor into one trusted picture of attitude and position and commanding the props thousands of times per second.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> redundant IMU stack, deterministic execution and vibration-isolated sensors.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> redundant IMU stack, deterministic execution and vibration-isolated sensors.</p>
           </div>
           <div data-exp-panel="gnss" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">02 · SENSING — POSITIONING</div>
@@ -275,10 +330,10 @@
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> DroneCAN-native and raised 9–15 cm above the frame, clear of propulsion EMI.</p>
           </div>
           <div data-exp-panel="cam" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">03 · PAYLOAD — GIMBAL CAMERA</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">03 · PAYLOAD — GIMBAL CAMERA</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">SIYI A8 Mini</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Eyes that stay level while the aircraft doesn't. A 4K 8MP Sony sensor rides a 3-axis FOC-stabilised gimbal with 6× digital zoom, feeding imagery down the ground link over HDMI and Ethernet.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
           </div>
           <div data-exp-panel="link" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · COMMS — DATA LINK</div>
@@ -299,16 +354,16 @@
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> removes the separate receiver battery while isolating noise-sensitive systems from the high-current bus.</p>
           </div>
           <div data-exp-panel="custom" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Alex Eagles Power Board</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The only board on this aircraft we designed ourselves — drawn, routed, fabricated and flown by the team. It splits the MAUCH feed into dedicated rails: input decoupling, two buck converters for 12 V and 5 V, and an LDO for a low-noise 5 V rail for the most sensitive electronics.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> a modular power stage tailored to this airframe — less wiring, cleaner separation, revisable in-house.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> a modular power stage tailored to this airframe — less wiring, cleaner separation, revisable in-house.</p>
           </div>
           <div data-exp-panel="prop" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#f59e0b; margin-bottom:8px;">08 · PROPULSION — ×4</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">08 · PROPULSION — ×4</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">T-Motor 6007 II System</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF22 props — one factory-tuned system per arm across the quad.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#f59e0b;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
           </div>
           <div data-exp-panel="batt" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER — MAIN BATTERY</div>
@@ -325,14 +380,185 @@
   <img id="vp-flyer" src="assets/drone.png" alt="" aria-hidden="true" style="position:fixed; left:0; top:0; width:0; height:0; object-fit:contain; pointer-events:none; z-index:40; opacity:0; will-change:left,top,width,height,transform; filter:drop-shadow(0 26px 60px rgba(0,0,0,0.55));">
 
 
+  <!-- ========================= DEVELOPMENT PROCESS ========================= -->
+  <section id="vp-process" style="position:relative; background:#090c26; padding:clamp(88px,12vh,140px) 0; overflow:hidden;">
+    <div aria-hidden="true" style="position:absolute; left:-8%; top:-10%; width:52%; height:60%; background:radial-gradient(closest-side, rgba(60,64,181,0.34), transparent 70%); pointer-events:none;"></div>
+    <div aria-hidden="true" style="position:absolute; right:-6%; bottom:-14%; width:44%; height:58%; background:radial-gradient(closest-side, rgba(217,48,42,0.16), transparent 70%); pointer-events:none;"></div>
+
+    <div style="position:relative; max-width:1180px; margin:0 auto; padding:0 32px;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;">
+        <div>
+          <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Clover development process.</h2>
+          <p style="font-family:'Barlow'; font-size:16px; line-height:1.6; color:#a8ace0; margin:16px 0 0; max-width:52ch;">Eleven months from the first geometry sketch to a full autonomous mission. Open any stop to read what happened there.</p>
+          <div style="height:2px; width:52px; background:#d9302a; margin-top:20px;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div id="vpt-prev" role="button" tabindex="0" aria-label="Previous milestone" class="vpt-nav" style="width:48px; height:48px; border-radius:9999px; background:rgba(60,64,181,0.16); border:1px solid rgba(96,165,250,0.28); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:24px; line-height:1; user-select:none;">‹</div>
+          <div id="vpt-next" role="button" tabindex="0" aria-label="Next milestone" class="vpt-nav" style="width:48px; height:48px; border-radius:9999px; background:rgba(60,64,181,0.16); border:1px solid rgba(96,165,250,0.28); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:24px; line-height:1; user-select:none;">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="vpt-scroller" tabindex="0" aria-label="Development timeline" style="position:relative; margin-top:clamp(44px,6vh,72px); overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;">
+      <div id="vpt-track" style="position:relative; display:flex; align-items:stretch; gap:clamp(20px,2.4vw,34px); padding:0 max(32px,calc((100vw - 1180px) / 2 + 32px)) 6px;">
+        <div id="vpt-rail" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; background:linear-gradient(90deg, rgba(60,64,181,0) 0%, rgba(96,165,250,0.32) 5%, rgba(96,165,250,0.32) 95%, rgba(60,64,181,0) 100%);"></div>
+        <div id="vpt-fill" aria-hidden="true" style="position:absolute; left:0; bottom:41px; height:2px; width:100%; transform:scaleX(0); transform-origin:0 50%; background:linear-gradient(90deg,#3c40b5,#d9302a); will-change:transform; transition:transform .5s cubic-bezier(.19,1,.22,1);"></div>
+        <div id="vpt-head" aria-hidden="true" style="position:absolute; left:0; bottom:36px; width:12px; height:12px; margin-left:-6px; border-radius:9999px; background:#d9302a; box-shadow:0 0 12px rgba(217,48,42,0.9), 0 0 28px rgba(217,48,42,0.45); will-change:transform,opacity; transition:transform .5s cubic-bezier(.19,1,.22,1), opacity .16s ease;"></div>
+
+        <article class="vpt-item" data-idx="0">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Concept and design">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/01-concept-cad.webp" alt="" loading="lazy" data-on="1">
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Design</div>
+                  <h3 class="vpt-title">Concept &amp; design.</h3>
+                  <p class="vpt-text">Every build begins as a digital sketch in Fusion 360, where the payload bay, arm geometry, motor mounts and gimbal placement are set before a single part exists.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Nov 2025</div>
+        </article>
+
+        <article class="vpt-item" data-idx="1">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Wooden prototype">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/02-prototype-top.webp" alt="" loading="lazy" data-on="1">
+                  <img src="assets/process/02-prototype-stand.webp" alt="" loading="lazy" data-on="0">
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Prototype</div>
+                  <h3 class="vpt-title">Wooden prototype.</h3>
+                  <p class="vpt-text">A full-scale wooden frame built to verify the mechanical design: dimensions, arm spacing, propeller clearance and how easily the internals could be reached.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">May 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="2">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Carbon CNC fabrication">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/03-carbon-plate.webp" alt="" loading="lazy" data-on="1">
+                  <img src="assets/process/03-cnc-cut.webp" alt="" loading="lazy" data-on="0">
+                  <img src="assets/process/03-cnc-pass.webp" alt="" loading="lazy" data-on="0">
+                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Fabrication</div>
+                  <h3 class="vpt-title">Carbon CNC fabrication.</h3>
+                  <p class="vpt-text">Precision CNC-machined carbon fibre, cut to exact tolerances for the rigidity and durability the airframe needs under real flight loads.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="3">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: System integration">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/04-integration-top.webp" alt="" loading="lazy" data-on="1">
+                  <img src="assets/process/04-integration-wiring.webp" alt="" loading="lazy" data-on="0">
+                  <img src="assets/process/04-integration-bay.webp" alt="" loading="lazy" data-on="0">
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Integration</div>
+                  <h3 class="vpt-title">System integration.</h3>
+                  <p class="vpt-text">Electronics, flight controller, motors, wiring, battery and the gimbal-mounted camera brought onto one airframe and made to work as a single system.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="4">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Autotuning">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/05-autotune.webp" alt="" loading="lazy" data-on="1">
+                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Control tuning</div>
+                  <h3 class="vpt-title">Autotuning.</h3>
+                  <p class="vpt-text">The controller twitches each axis against a disturbance it generates itself, then raises the rate gains to the sharpest response Clover holds without overshoot.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="5">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Flight testing">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/06-flight-test.webp" alt="" loading="lazy" data-on="1">
+                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Flight</div>
+                  <h3 class="vpt-title">Flight testing.</h3>
+                  <p class="vpt-text">Stability, endurance, control response and payload performance measured under real conditions, then refined until the platform is genuinely field-ready.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+      </div>
+    </div>
+
+    <!-- lightbox: mirrors the /blog post modal -->
+    <div id="vpt-modal" role="dialog" aria-modal="true" aria-label="Milestone detail" style="display:none; position:fixed; inset:0; z-index:90; align-items:center; justify-content:center; padding:16px;">
+      <div id="vpt-scrim" style="position:absolute; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px); opacity:0; transition:opacity .2s ease;"></div>
+      <div id="vpt-panel" style="position:relative; width:100%; max-width:720px; max-height:85dvh; border-radius:18px; border:1px solid #d9302a; background:#101433; box-shadow:0 30px 90px rgba(0,0,0,0.6); overflow:hidden; opacity:0; transform:scale(.94) translateY(12px); transition:opacity .22s cubic-bezier(.16,1,.3,1), transform .22s cubic-bezier(.16,1,.3,1);">
+        <div id="vpt-close" role="button" tabindex="0" aria-label="Close" style="position:absolute; z-index:2; top:18px; right:18px; width:44px; height:44px; border-radius:9999px; background:#d9302a; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:17px; line-height:1; transition:opacity .2s ease;">✕</div>
+        <div style="max-height:85dvh; overflow-y:auto; overscroll-behavior:contain; padding:clamp(22px,3.4vw,34px);">
+          <span id="vpt-m-badge" style="display:inline-flex; align-items:center; border-radius:9999px; padding:4px 13px; background:#d9302a; color:#fff; font-family:'Barlow'; font-size:12px; font-weight:600; letter-spacing:.04em; margin-bottom:14px;"></span>
+          <h2 id="vpt-m-title" style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(28px,4vw,38px); line-height:1.05; letter-spacing:-0.01em; margin:0 0 12px; padding-right:44px; color:#f0f2ff;"></h2>
+          <div id="vpt-m-meta" style="font-family:'JetBrains Mono'; font-size:12px; letter-spacing:.06em; text-transform:uppercase; font-weight:500; color:#8b8fc8; margin-bottom:18px;"></div>
+          <div id="vpt-m-media" style="margin-bottom:18px;"></div>
+          <p id="vpt-m-text" style="font-family:'Barlow'; font-size:15.5px; line-height:1.68; color:#c3c6ea; margin:0;"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ========================= GALLERY ========================= -->
   <section id="vp-gallery" style="position:relative; background:#0d1035; padding:120px 32px;">
     <div style="max-width:1180px; margin:0 auto;">
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
         <div>
           <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">In the field</div>
-          <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Clover in action.</h2>
-          <div style="height:2px; width:52px; background:#f59e0b; margin-top:16px;"></div>
+          <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Vehicle&rsquo;s gallery.</h2>
+          <div style="height:2px; width:52px; background:#d9302a; margin-top:16px;"></div>
         </div>
       </div>
 
@@ -344,59 +570,59 @@
               <div class="vpg-tile" data-idx="0" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
                 <video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Flight-ready.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Flight-ready.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="1" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
                 <video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Airborne.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Airborne.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="2" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
-                <video src="assets/gallery/cnc-cut.mp4" poster="assets/gallery/cnc-cut.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <video src="assets/gallery/cnc-machining.mp4" poster="assets/gallery/cnc-machining.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">FABRICATION</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Cut in-house.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FABRICATION</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Cut in-house.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="3" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
                 <img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(5,6,26,0.92), transparent 60%);"></div>
-                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">PROTOTYPE</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Where it started.</div></div>
+                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">PROTOTYPE</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Where it started.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
             </div>
             <div id="vpg-page-1" class="vpg-page" style="display:none; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,19vw,210px); grid-auto-flow:dense; gap:14px;">
-              <div class="vpg-tile" data-idx="0" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
-                <img src="assets/gallery/flight-ready.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+              <div class="vpg-tile" data-idx="4" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
+                <video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 05</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Ground test.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Drone footage.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
-              <div class="vpg-tile" data-idx="1" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
-                <img src="assets/gallery/first-flight.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+              <div class="vpg-tile" data-idx="5" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/night-lights.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 06</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Climb-out.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">NIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Lit up.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
-              <div class="vpg-tile" data-idx="2" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
-                <img src="assets/gallery/cnc-cut.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+              <div class="vpg-tile" data-idx="6" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/night-hover.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 07</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Toolpath.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+                
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
-              <div class="vpg-tile" data-idx="3" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
-                <img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
-                <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(5,6,26,0.92), transparent 60%);"></div>
-                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#f59e0b; margin-bottom:6px;">MORE · 08</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Bench check.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              <div class="vpg-tile" data-idx="7" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
+                <img src="assets/gallery/field-ready.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FIELD</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Ready on the grass.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
             </div>
           </div>
           <div id="vpg-next" role="button" tabindex="0" aria-label="Next page" style="flex:0 0 auto; width:48px; height:48px; border-radius:9999px; background:rgba(60,64,181,0.16); border:1px solid rgba(96,165,250,0.32); display:flex; align-items:center; justify-content:center; color:#f0f2ff; cursor:pointer; font-size:24px; user-select:none; transition:background .2s ease;">›</div>
         </div>
         <div id="vpg-dots" style="display:flex; justify-content:center; align-items:center; gap:9px; margin-top:18px;">
-          <div class="vpg-dot" data-page="0" role="button" tabindex="0" style="width:24px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:#f59e0b;"></div>
+          <div class="vpg-dot" data-page="0" role="button" tabindex="0" style="width:24px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:#d9302a;"></div>
           <div class="vpg-dot" data-page="1" role="button" tabindex="0" style="width:9px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:rgba(96,165,250,0.35);"></div>
         </div>
       </div>
@@ -406,10 +632,14 @@
           <div id="vpg-stage" style="position:relative; flex:1 1 auto; min-width:0; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; will-change:transform;">
             <div class="vpg-sm" data-idx="0" style="display:block;"><video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
             <div class="vpg-sm" data-idx="1" style="display:none;"><video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
-            <div class="vpg-sm" data-idx="2" style="display:none;"><video src="assets/gallery/cnc-cut.mp4" poster="assets/gallery/cnc-cut.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="2" style="display:none;"><video src="assets/gallery/cnc-machining.mp4" poster="assets/gallery/cnc-machining.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
             <div class="vpg-sm" data-idx="3" style="display:none;"><img src="assets/gallery/wooden-prototype.png" alt="Wooden prototype" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="4" style="display:none;"><video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="5" style="display:none;"><img src="assets/gallery/night-lights.webp" alt="Clover lit up on the pad" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="6" style="display:none;"><img src="assets/gallery/night-hover.webp" alt="Clover hovering at night" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="7" style="display:none;"><img src="assets/gallery/field-ready.webp" alt="Clover ready for a field sortie" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
             <div style="position:absolute; left:0; right:0; bottom:0; padding:22px 20px 18px; background:linear-gradient(to top, rgba(5,6,26,0.92), transparent); pointer-events:none;">
-              <div id="vpg-kicker" style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#f59e0b; margin-bottom:8px;"></div>
+              <div id="vpg-kicker" style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#d9302a; margin-bottom:8px;"></div>
               <div id="vpg-title" style="font-family:'Barlow Condensed'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-bottom:8px;"></div>
               <p id="vpg-desc" style="font-family:'Inter'; font-size:13.5px; line-height:1.6; color:#c3c6ea; margin:0; max-width:560px;"></p>
             </div>
@@ -421,8 +651,12 @@
           <div id="vpg-rail" class="rail" style="flex:0 0 128px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; padding-right:4px;">
             <div class="vpg-railitem" data-idx="0" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/flight-ready.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Flight-ready</div></div>
             <div class="vpg-railitem" data-idx="1" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/first-flight.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Airborne</div></div>
-            <div class="vpg-railitem" data-idx="2" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/cnc-cut.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Cut in-house</div></div>
+            <div class="vpg-railitem" data-idx="2" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/cnc-machining.webp" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Cut in-house</div></div>
             <div class="vpg-railitem" data-idx="3" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Prototype</div></div>
+            <div class="vpg-railitem" data-idx="4" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/show-off.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Show off</div></div>
+            <div class="vpg-railitem" data-idx="5" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/night-lights.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Lit up</div></div>
+            <div class="vpg-railitem" data-idx="6" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/night-hover.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Night hover</div></div>
+            <div class="vpg-railitem" data-idx="7" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/field-ready.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Field ready</div></div>
           </div>
         </div>
       </div>
@@ -430,14 +664,13 @@
   </section>
 
   <!-- ========================= CTA ========================= -->
-  <section style="position:relative; background:#07091c; padding:120px 32px; text-align:center;">
-    <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:720px; margin:0 auto;">
-      <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0; color:#f0f2ff;">Watch it fly.</h2>
-      <p style="font-size:18px; color:#c3c6ea; margin:20px 0 36px; line-height:1.6;">See Clover in action and follow the team through the SUAS 2026 campaign.</p>
-
-      <!-- FRR flight video (Vimeo) — 16:9 responsive embed, starts at 2:00 (#t=120s) -->
-      <div style="position:relative; width:100%; max-width:960px; margin:0 auto 36px; aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.5);">
-        <iframe src="https://player.vimeo.com/video/1207205400#t=120s" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Clover — flight-readiness review"></iframe>
+  <section style="position:relative; background:#07091c; padding:clamp(96px,13vh,150px) 32px clamp(104px,14vh,160px); text-align:center;">
+    <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:1000px; margin:0 auto;">
+      <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0 0 clamp(34px,5vh,56px); color:#f0f2ff;">Clover in action</h2>
+      
+      <!-- flight video: unlisted YouTube cut, 16:9 responsive embed -->
+      <div style="position:relative; width:100%; max-width:960px; margin:0 auto clamp(40px,5.5vh,60px); aspect-ratio:16/9; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+        <iframe src="https://www.youtube.com/embed/wCEXFQytIk8?rel=0" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="Clover in action"></iframe>
       </div>
 
       <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
@@ -451,9 +684,10 @@
 <script type="text/x-dc" data-dc-script data-props="{&quot;gridTexture&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;heroLoop&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;scrubReverse&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;buildDuration&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:35.5,&quot;min&quot;:3,&quot;max&quot;:40,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;buildScrollLength&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:575,&quot;min&quot;:150,&quot;max&quot;:900,&quot;step&quot;:25,&quot;unit&quot;:&quot;vh&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;frameBlend&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;scrubSmoothing&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.65,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;showCallouts&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Build sequence&quot;},&quot;explorerBg&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Spotlight&quot;,&quot;options&quot;:[&quot;Spotlight&quot;,&quot;Studio&quot;,&quot;Indigo&quot;,&quot;Carbon&quot;,&quot;Halo blue&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Explorer&quot;}}">
 class Component extends DCLogic {
   componentDidMount() {
-    const muteAll = () => document.querySelectorAll('video').forEach(v => { v.muted = true; v.defaultMuted = true; v.volume = 0; v.setAttribute('muted', ''); });
+    const muteAll = () => document.querySelectorAll('video').forEach(v => { v.muted = true; v.defaultMuted = true; v.volume = 0; v.setAttribute('muted', ''); if (!v.closest('#vp-hero')) { v.loop = true; v.setAttribute('loop', ''); } });
     muteAll();
     document.addEventListener('play', (e) => { if (e.target && e.target.tagName === 'VIDEO') { e.target.muted = true; e.target.volume = 0; } }, true);
+    document.addEventListener('ended', (e) => { const v = e.target; if (v && v.tagName === 'VIDEO' && v.loop !== false && !v.closest('#vp-hero')) { v.currentTime = 0; const q = v.play(); if (q && q.catch) q.catch(() => {}); } }, true);
     // gallery videos: load + play only when scrolled on-screen (one at a time), so the
     // preview server isn't hit with several large clips at once. Poster shows until then.
     const io = new IntersectionObserver((ents) => {
@@ -465,7 +699,7 @@ class Component extends DCLogic {
         else { v.pause(); }
       });
     }, { threshold: 0.2 });
-    setTimeout(() => document.querySelectorAll('#vp-gallery video').forEach(v => { v.removeAttribute('autoplay'); io.observe(v); }), 60);
+    setTimeout(() => document.querySelectorAll('#vp-gallery video').forEach(v => { v.removeAttribute('autoplay'); v.loop = true; io.observe(v); }), 60);
 
     // ---- gallery: arrow-paged mosaic + click-to-expand focus ----
     setTimeout(() => {
@@ -481,6 +715,10 @@ class Component extends DCLogic {
         { k: 'Field note 02 · Flight',      t: 'Airborne.',         d: 'Clover in the air during a test sortie — holding attitude under its own power.' },
         { k: 'Field note 03 · Fabrication', t: 'Cut in-house.',     d: 'Machining the carbon-fiber top plate on our CNC, tuned to the exact build layout.' },
         { k: 'Field note 04 · Prototype',   t: 'Where it started.', d: 'The wooden proof-of-concept frame that validated the geometry before carbon.' },
+        { k: 'Field note 05 · Display',    t: 'Drone footage.',       d: '' },
+        { k: 'Field note 06 · Night',      t: 'Lit up.',            d: 'Navigation and arm lighting running at full brightness during a night systems check.' },
+        { k: 'Field note 07 · Night',      t: 'Hover, after dark.', d: 'Holding a steady hover under floodlight, the projected mark tracking the aircraft below.' },
+        { k: 'Field note 08 · Field',      t: 'Ready on the grass.', d: 'Props on, batteries in, waiting for the go on a field sortie.' },
       ];
       const N = meta.length, PAGES = pages.length;
       let page = 0, active = 0, from = null;
@@ -494,7 +732,7 @@ class Component extends DCLogic {
       const setPage = (p, dir) => {
         page = (p + PAGES) % PAGES;
         pages.forEach((pg, i) => { if (pg) pg.style.display = i === page ? 'grid' : 'none'; });
-        dots.forEach((d, i) => { d.style.width = i === page ? '24px' : '9px'; d.style.background = i === page ? '#f59e0b' : 'rgba(96,165,250,0.35)'; });
+        dots.forEach((d, i) => { d.style.width = i === page ? '24px' : '9px'; d.style.background = i === page ? '#d9302a' : 'rgba(96,165,250,0.35)'; });
         revealPage(dir);
       };
       const setActive = (i) => {
@@ -505,7 +743,7 @@ class Component extends DCLogic {
         document.getElementById('vpg-title').textContent = m.t;
         document.getElementById('vpg-desc').textContent = m.d;
         document.getElementById('vpg-counter').textContent = (active + 1) + ' / ' + N;
-        rails.forEach(r => { const on = Number(r.dataset.idx) === active; r.style.border = on ? '2px solid #f59e0b' : '1px solid rgba(60,64,181,0.4)'; r.style.boxShadow = on ? '0 0 0 1px rgba(245,158,11,0.4)' : 'none'; });
+        rails.forEach(r => { const on = Number(r.dataset.idx) === active; r.style.border = on ? '2px solid #d9302a' : '1px solid rgba(60,64,181,0.4)'; r.style.boxShadow = on ? '0 0 0 1px rgba(217,48,42,0.4)' : 'none'; });
       };
       const step = () => { const st = document.getElementById('vpg-stage'); if (st) st.animate([{ opacity: 0.35, transform: 'scale(.985)' }, { opacity: 1, transform: 'none' }], { duration: 340, easing: 'ease' }); };
       const flipIn = (r) => {
@@ -537,6 +775,316 @@ class Component extends DCLogic {
       document.getElementById('vpg-back').addEventListener('click', back);
       setActive(0);
     }, 80);
+
+    // ---- development process: horizontal timeline + blog-style lightbox ----
+    setTimeout(() => {
+      const sc = document.getElementById('vpt-scroller');
+      const track = document.getElementById('vpt-track');
+      const modal = document.getElementById('vpt-modal');
+      if (!sc || !track || !modal) return;
+      const items = [...track.querySelectorAll('.vpt-item')];
+      if (!items.length) return;
+      const fill = document.getElementById('vpt-fill');
+      const prev = document.getElementById('vpt-prev');
+      const next = document.getElementById('vpt-next');
+      const panel = document.getElementById('vpt-panel');
+      const scrim = document.getElementById('vpt-scrim');
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const DATA = [
+        { badge: 'Design', title: 'Concept & design.', date: 'November 2025',
+          media: [{ t: 'i', s: 'assets/process/01-concept-cad.webp' }],
+          text: 'Every build begins as a digital sketch in Fusion 360. Here we define the core architecture of the airframe: the central payload bay, arm geometry, motor mounts, landing gear and camera gimbal placement, refining dimensions and weight distribution before a single physical part is made. This stage lets us iterate quickly, test structural assumptions, and validate the design against mission requirements.' },
+        { badge: 'Prototype', title: 'Wooden prototype.', date: 'May 2026',
+          media: [{ t: 'i', s: 'assets/process/02-prototype-top.webp' }, { t: 'i', s: 'assets/process/02-prototype-stand.webp' }],
+          text: 'Before manufacturing the carbon fiber frame, a full-scale wooden prototype was built to verify the mechanical design. It was used to check the overall dimensions, arm spacing, propeller clearance, battery installation, and accessibility of the internal components. Building the prototype allowed design issues to be identified and corrected early, reducing the risk of costly modifications after the carbon fiber frame was manufactured.' },
+        { badge: 'Fabrication', title: 'Carbon CNC fabrication.', date: 'June 2026',
+          media: [{ t: 'i', s: 'assets/process/03-carbon-plate.webp' }, { t: 'v', s: 'assets/process/03-cnc-cut.mp4', p: 'assets/process/03-cnc-cut.webp' }, { t: 'v', s: 'assets/process/03-cnc-pass.mp4', p: 'assets/process/03-cnc-pass.webp' }],
+          text: 'With the design validated, we move to precision manufacturing using CNC-machined carbon fiber. This stage produces lightweight, high-strength components built to exact tolerances, giving the airframe the durability and rigidity needed for real-world flight loads and stresses.' },
+        { badge: 'Integration', title: 'System integration.', date: 'June 2026',
+          media: [{ t: 'i', s: 'assets/process/04-integration-top.webp' }, { t: 'i', s: 'assets/process/04-integration-wiring.webp' }, { t: 'i', s: 'assets/process/04-integration-bay.webp' }],
+          text: 'Next we bring the airframe to life by integrating the electronics, flight controller, motors, wiring, battery and payload systems, including the gimbal-mounted camera. This is where mechanical design meets functional engineering, ensuring every component works together as a cohesive system.' },
+        { badge: 'Control tuning', title: 'Autotuning.', date: 'June 2026',
+          media: [{ t: 'v', s: 'assets/process/05-autotune.mp4', p: 'assets/process/05-autotune.webp' }],
+          text: 'A quadcopter only flies as well as its control gains, and those gains belong to one specific airframe: this mass, this arm length, these propellers. Set them by hand and you are guessing, flying, watching the aircraft wobble, then guessing again. AutoTune runs that search properly. Clover twitches each axis against a disturbance it generates itself, measures how fast it answers and how far it overshoots, and keeps the highest gains it can hold without ringing. We autotune so the aircraft is tuned to itself rather than to a number copied off someone else’s build.' },
+        { badge: 'Flight', title: 'Flight testing.', date: 'June 2026',
+          media: [{ t: 'v', s: 'assets/process/06-flight-test.mp4', p: 'assets/process/06-flight-test.webp' }],
+          text: 'Finally, the fully integrated platform undergoes rigorous flight and payload testing. We evaluate stability, endurance, control response, and payload performance under real-world conditions, refining the system until it meets our standards for reliability and field readiness.' },
+      ];
+
+      const head = document.getElementById('vpt-head');
+      const rail = document.getElementById('vpt-rail');
+      let trackW = 0, stopX = [];
+
+      // The track is a block box the width of the scroller, so its flex children
+      // overflow it: `width:100%` on the rail and the fill would only cover one
+      // viewport, not the full timeline. Both are pinned to the real content
+      // width so scaleX(1) reaches the actual end of the line.
+      // Measured off the last card rather than scrollWidth: the rail and the fill
+      // are absolutely positioned children of the track, so once they are sized
+      // they would prop scrollWidth open and it could never shrink on resize.
+      const measure = () => {
+        const tr = track.getBoundingClientRect();
+        const last = items[items.length - 1].getBoundingClientRect();
+        const padRight = parseFloat(getComputedStyle(track).paddingRight) || 0;
+        trackW = Math.max(1, last.right - tr.left + padRight);
+        if (rail) rail.style.width = trackW + 'px';
+        if (fill) fill.style.width = trackW + 'px';
+        stopX = items.map(it => { const r = it.querySelector('.vpt-stop').getBoundingClientRect(); return r.left - tr.left + r.width / 2; });
+      };
+
+      const pulse = (it) => {
+        if (reduce) return;
+        const s = it.querySelector('.vpt-stop');
+        if (s) s.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.6)' }, { transform: 'scale(1)' }], { duration: 440, easing: 'cubic-bezier(.19,1,.22,1)' });
+      };
+
+      // The rail light is what the user actually scrubs. One horizontal gesture
+      // advances it to the next stop and it rests there; the panel only scrolls
+      // when the stop it landed on would otherwise be off screen. Scrolling
+      // therefore reads as walking the timeline, not sliding a carousel.
+      // Light positions: 0 = start of the rail, 1..N = the stops, N+1 = the end.
+      const LAST = items.length + 1;
+      let li = 0, settleT = 0;
+
+      const headFor = (i) => (i <= 0 ? 0 : i >= LAST ? trackW : stopX[i - 1]);
+
+      const paint = () => {
+        if (!trackW || !stopX.length) return;
+        const hx = headFor(li);
+        if (fill) fill.style.transform = 'scaleX(' + (hx / trackW).toFixed(4) + ')';
+        if (head) head.style.transform = 'translate3d(' + hx.toFixed(1) + 'px,0,0)';
+        items.forEach((it, i) => {
+          const lit = li >= i + 1;
+          if ((it.dataset.lit === '1') !== lit) { it.dataset.lit = lit ? '1' : '0'; if (lit) pulse(it); }
+          it.dataset.cur = (i === li - 1) ? '1' : '0';
+        });
+        if (prev) prev.dataset.off = li <= 0 ? '1' : '0';
+        if (next) next.dataset.off = li >= LAST ? '1' : '0';
+      };
+
+      // Parked on a stop, only that stop's circle shows. The travelling dot is
+      // visible while it is between stops, so it reads as leaving the circle.
+      const settle = () => {
+        if (head) head.style.opacity = (li >= 1 && li <= items.length) ? '0' : '1';
+      };
+
+      const reveal = () => {
+        const max = Math.max(0, sc.scrollWidth - sc.clientWidth);
+        let sl = sc.scrollLeft;
+        if (li <= 0) sl = 0;
+        else if (li >= LAST) sl = max;
+        else {
+          const r = items[li - 1].getBoundingClientRect();
+          const tr = track.getBoundingClientRect();
+          const left = r.left - tr.left, right = left + r.width, m = 28;
+          if (right > sl + sc.clientWidth - m) sl = right - sc.clientWidth + m;
+          if (left < sl + m) sl = left - m;
+        }
+        sl = Math.max(0, Math.min(max, sl));
+        if (Math.abs(sl - sc.scrollLeft) > 1) sc.scrollTo({ left: sl, behavior: reduce ? 'auto' : 'smooth' });
+      };
+
+      const goTo = (i) => {
+        const t = Math.max(0, Math.min(LAST, i));
+        if (t === li) return;
+        li = t;
+        if (head) head.style.opacity = '1';
+        paint();
+        reveal();
+        clearTimeout(settleT);
+        settleT = setTimeout(settle, reduce ? 0 : 520);
+      };
+      const stepLight = (dir) => goTo(li + dir);
+      // The arrows cover ground faster than a gesture: from the start of the rail
+      // the first press reaches the third stop, then every other stop, then the end.
+      const nudge = (dir) => goTo(dir > 0
+        ? (li === 0 ? 3 : li + 2)
+        : (li === 3 ? 0 : li - 2));
+
+      let lock = 0;
+      const fire = (dir) => {
+        const now = Date.now();
+        if (now < lock) return;
+        lock = now + (reduce ? 0 : 430);
+        stepLight(dir);
+      };
+
+      // Horizontal wheel and trackpad swipes are taken over so they move the light
+      // rather than free-running the panel. Vertical intent is left alone so the
+      // page still scrolls normally over this section.
+      // A trackpad reports horizontal deltas and fine-grained vertical ones; a wheel
+      // mouse reports coarse vertical steps and no deltaX at all. Horizontal input
+      // always drives the light. Vertical input only does so for what looks like a
+      // wheel mouse, which has no other way to reach the timeline, so trackpad users
+      // keep ordinary page scrolling and use the horizontal axis instead.
+      let sawDeltaX = false;
+      sc.addEventListener('wheel', (e) => {
+        if (e.deltaX !== 0) sawDeltaX = true;
+        const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+        if (horiz || e.shiftKey) {
+          const d = horiz ? e.deltaX : e.deltaY;
+          if (!d) return;
+          e.preventDefault();
+          if (Math.abs(d) > 4) fire(d > 0 ? 1 : -1);
+          return;
+        }
+        if (!e.deltaY) return;
+        const wheelMouse = !sawDeltaX && (e.deltaMode !== 0 || Math.abs(e.deltaY) >= 100);
+        if (!wheelMouse) return;
+        const dir = e.deltaY > 0 ? 1 : -1;
+        // At either end of the rail the wheel is handed back so the page can scroll on.
+        if ((dir > 0 && li >= LAST) || (dir < 0 && li <= 0)) return;
+        e.preventDefault();
+        fire(dir);
+      }, { passive: false });
+
+      let tx = 0, ty = 0, taken = false;
+      sc.addEventListener('touchstart', (e) => {
+        const t = e.touches[0]; tx = t.clientX; ty = t.clientY; taken = false;
+      }, { passive: true });
+      sc.addEventListener('touchmove', (e) => {
+        const t = e.touches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+        if (taken || Math.abs(dx) < 24 || Math.abs(dx) <= Math.abs(dy)) return;
+        e.preventDefault();
+        taken = true;
+        fire(dx < 0 ? 1 : -1);
+      }, { passive: false });
+
+      window.addEventListener('resize', () => { measure(); paint(); settle(); }, { passive: true });
+      if (prev) prev.addEventListener('click', () => nudge(-1));
+      if (next) next.addEventListener('click', () => nudge(1));
+      sc.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); stepLight(1); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); stepLight(-1); }
+      });
+
+      const io2 = new IntersectionObserver((ents) => ents.forEach(en => { if (en.isIntersecting) { en.target.dataset.in = '1'; io2.unobserve(en.target); } }), { threshold: 0.25 });
+      items.forEach((it, i) => { it.style.transitionDelay = (i * 90) + 'ms'; io2.observe(it); });
+
+      let mSlides = [], mDots = [], mIdx = 0;
+      const setSlide = (i) => {
+        if (!mSlides.length) return;
+        mIdx = (i + mSlides.length) % mSlides.length;
+        mSlides.forEach((el, k) => {
+          const on = k === mIdx;
+          el.dataset.on = on ? '1' : '0';
+          const v = el.querySelector('video');
+          if (v) { if (on) { v.muted = true; const q = v.play(); if (q && q.catch) q.catch(() => {}); } else { v.pause(); } }
+        });
+        mDots.forEach((d, k) => { d.dataset.on = k === mIdx ? '1' : '0'; });
+      };
+      const renderMedia = (d) => {
+        const box = document.getElementById('vpt-m-media');
+        box.innerHTML = '';
+        mSlides = []; mDots = []; mIdx = 0;
+        const stage = document.createElement('div');
+        stage.className = 'vpt-mstage';
+        d.media.forEach((m) => {
+          const sl = document.createElement('div');
+          sl.className = 'vpt-mslide';
+          sl.innerHTML = m.t === 'v'
+            ? '<video src="' + m.s + '" poster="' + m.p + '" muted loop playsinline controls preload="none"></video>'
+            : '<img src="' + m.s + '" alt="">';
+          stage.appendChild(sl);
+          mSlides.push(sl);
+        });
+        if (d.media.length > 1) {
+          const mk = (txt, side, dir) => {
+            const b = document.createElement('div');
+            b.className = 'vpt-marrow';
+            b.setAttribute('role', 'button');
+            b.setAttribute('tabindex', '0');
+            b.setAttribute('aria-label', dir < 0 ? 'Previous item' : 'Next item');
+            b.style[side] = '12px';
+            b.textContent = txt;
+            b.addEventListener('click', (e) => { e.stopPropagation(); setSlide(mIdx + dir); });
+            return b;
+          };
+          stage.appendChild(mk('\u2039', 'left', -1));
+          stage.appendChild(mk('\u203a', 'right', 1));
+        }
+        box.appendChild(stage);
+        if (d.media.length > 1) {
+          const dots = document.createElement('div');
+          dots.className = 'vpt-mdots';
+          d.media.forEach((m, k) => {
+            const dot = document.createElement('div');
+            dot.className = 'vpt-mdot';
+            dot.setAttribute('role', 'button');
+            dot.setAttribute('tabindex', '0');
+            dot.setAttribute('aria-label', 'Show item ' + (k + 1));
+            dot.addEventListener('click', () => setSlide(k));
+            dots.appendChild(dot);
+            mDots.push(dot);
+          });
+          box.appendChild(dots);
+        }
+        setSlide(0);
+      };
+
+      const cards = items.map(it => [...it.querySelectorAll('.vpt-media img')]);
+      const cyc = items.map(() => 0);
+      let inView = false;
+      new IntersectionObserver((e) => { inView = e[0].isIntersecting; }, { threshold: 0.12 }).observe(sc);
+      if (!reduce) setInterval(() => {
+        if (!inView || modal.style.display === 'flex') return;
+        cards.forEach((arr, i) => {
+          if (arr.length < 2) return;
+          setTimeout(() => {
+            arr[cyc[i]].dataset.on = '0';
+            cyc[i] = (cyc[i] + 1) % arr.length;
+            arr[cyc[i]].dataset.on = '1';
+          }, i * 220);
+        });
+      }, 3800);
+
+      let lockY = 0;
+      const open = (i) => {
+        const d = DATA[i]; if (!d) return;
+        document.getElementById('vpt-m-badge').textContent = d.badge;
+        document.getElementById('vpt-m-title').textContent = d.title;
+        document.getElementById('vpt-m-meta').textContent = d.date;
+        renderMedia(d);
+        document.getElementById('vpt-m-text').textContent = d.text;
+        modal.style.display = 'flex';
+        lockY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = '-' + lockY + 'px';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => { scrim.style.opacity = '1'; panel.style.opacity = '1'; panel.style.transform = 'none'; });
+      };
+      const close = () => {
+        scrim.style.opacity = '0';
+        panel.style.opacity = '0';
+        panel.style.transform = 'scale(.96) translateY(8px)';
+        const done = () => {
+          modal.style.display = 'none';
+          const b = document.documentElement.style.scrollBehavior;
+          document.documentElement.style.scrollBehavior = 'auto';
+          document.body.style.position = ''; document.body.style.top = ''; document.body.style.width = ''; document.body.style.overflow = '';
+          window.scrollTo(0, lockY);
+          document.documentElement.style.scrollBehavior = b;
+        };
+        setTimeout(done, reduce ? 0 : 220);
+      };
+
+      items.forEach((it, i) => {
+        const card = it.querySelector('.vpt-card');
+        if (!card) return;
+        card.addEventListener('click', () => open(i));
+        card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(i); } });
+      });
+      scrim.addEventListener('click', close);
+      document.getElementById('vpt-close').addEventListener('click', close);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex') close(); });
+
+      measure();
+      paint();
+      settle();
+      window.addEventListener('load', () => { measure(); paint(); }, { once: true });
+    }, 90);
 
     const p = this.props || {};
     const gridOn = p.gridTexture ?? true;
@@ -726,7 +1274,7 @@ class Component extends DCLogic {
         for (let i = 0; i < events.length; i++) if (prog >= events[i].at) ei = i;
         const ev = events[ei];
         if (numEl) numEl.textContent = String(ev.n).padStart(2, '0') + ' / 11';
-        if (phaseEl) { phaseEl.textContent = phases[ev.phase]; phaseEl.style.color = ev.phase === 3 ? '#f59e0b' : '#60a5fa'; }
+        if (phaseEl) { phaseEl.textContent = phases[ev.phase]; phaseEl.style.color = ev.phase === 3 ? '#d9302a' : '#60a5fa'; }
         if (ei !== lastEi) {
           lastEi = ei;
           setCallout(ev);
@@ -738,7 +1286,7 @@ class Component extends DCLogic {
           if (numEl && !reduced) { numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = 'vp-num-flash .6s ease'; }
         }
         steps.forEach((s, i) => {
-          s.style.color = i <= ev.phase ? '#f59e0b' : '#565a94';
+          s.style.color = i <= ev.phase ? '#d9302a' : '#565a94';
           s.style.fontWeight = i === ev.phase ? '700' : '400';
         });
       };
@@ -887,7 +1435,7 @@ class Component extends DCLogic {
       const goldSet = { cube: 1, cam: 1, custom: 1, prop: 1 };
       const pick = (id) => {
         navBtns.forEach((b) => {
-          const on = b.dataset.exp === id, ac = goldSet[b.dataset.exp] ? '#f59e0b' : '#60a5fa';
+          const on = b.dataset.exp === id, ac = goldSet[b.dataset.exp] ? '#d9302a' : '#60a5fa';
           b.style.background = on ? ac : 'transparent';
           b.style.color = on ? '#07091c' : '#c3c6ea';
           b.style.borderColor = on ? ac : 'rgba(60,64,181,0.4)';
@@ -896,14 +1444,14 @@ class Component extends DCLogic {
         panels.forEach((p) => { p.style.display = p.dataset.expPanel === id ? 'block' : 'none'; });
         slots.forEach((s) => { s.style.display = s.id === 'vp-exp-' + id ? 'block' : 'none'; });
         marks.forEach((m) => {
-          const on = m.dataset.expMarker === id, gold = goldSet[m.dataset.expMarker], ac = gold ? '#f59e0b' : '#60a5fa';
+          const on = m.dataset.expMarker === id, gold = goldSet[m.dataset.expMarker], ac = gold ? '#d9302a' : '#60a5fa';
           m.style.background = on ? ac : 'rgba(13,16,53,0.92)';
           m.style.color = on ? '#07091c' : '#c3c6ea';
           m.style.borderColor = ac;
           m.style.borderStyle = 'solid';
           m.style.borderWidth = on ? '0' : '1.5px';
           m.style.zIndex = on ? '4' : '2';
-          m.style.boxShadow = on ? ('0 0 0 6px ' + (gold ? 'rgba(245,158,11,0.22)' : 'rgba(96,165,250,0.22)')) : 'none';
+          m.style.boxShadow = on ? ('0 0 0 6px ' + (gold ? 'rgba(217,48,42,0.22)' : 'rgba(96,165,250,0.22)')) : 'none';
         });
       };
       navBtns.forEach((b) => b.addEventListener('click', () => pick(b.dataset.exp)));

@@ -10,3 +10,4 @@ public/vehicle/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
 public/vehicle/**/*.glb filter=lfs diff=lfs merge=lfs -text
 public/vehicle/**/*.png filter=lfs diff=lfs merge=lfs -text
 public/vehicle/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/vehicle/**/*.webp filter=lfs diff=lfs merge=lfs -text
