@@ -1,0 +1,203 @@
+/* ============================================================================
+ * TrackRecord — "What we've won."
+ *
+ * Layout follows the v3 design: eyebrow rule, headline sharing a baseline with
+ * a right-aligned "Full history" link, a responsive card grid, then the long
+ * tail of results as a quiet footnote.
+ *
+ * Type note: the design draws these headlines in Barlow Condensed, but every
+ * other section on this page sets its headline in Alfa Slab One. A single
+ * section in a different display face reads as pasted-in, so the site's face
+ * wins here and the design's *structure* is what's carried over.
+ * ==========================================================================*/
+
+.tr-section {
+  padding: var(--space-section-y) 5%;
+  background: var(--bg-surface);
+}
+
+.tr-layout {
+  max-width: var(--maxw-content);
+  margin: 0 auto;
+}
+
+/* ─── Eyebrow ─────────────────────────────────────────────────────────────── */
+
+.tr-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tr-eyebrow-index {
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.tr-eyebrow-line {
+  flex: 0 0 60px;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+/* ─── Headline row ────────────────────────────────────────────────────────── */
+
+/* Headline and link sit on a shared baseline on wide screens, then stack. */
+.tr-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+
+.tr-headline {
+  margin: 0;
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(36px, 4.6vw, 54px);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.tr-headline-accent {
+  color: var(--brand);
+}
+
+.tr-cta {
+  padding: 14px 26px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-primary);
+  transition:
+    border-color var(--transition-base),
+    background var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.tr-cta:hover {
+  border-color: var(--brand);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.tr-cta:active {
+  transform: translateY(1px);
+}
+
+/* ─── Cards ───────────────────────────────────────────────────────────────── */
+
+.tr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The inset top edge is the card's only ornament — no drop shadow, so the
+ * cards read as panels on the surface rather than floating chips. */
+.tr-card {
+  padding: 26px 24px 28px;
+  background: var(--card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 2px 0 var(--brand);
+  transition:
+    border-color var(--transition-base),
+    transform var(--transition-base);
+}
+
+.tr-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-3px);
+}
+
+.tr-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tr-card-year {
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--text-primary);
+  /* Keeps the three years optically aligned across cards. */
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-card-event {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tr-card-placement {
+  margin: 18px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--spark);
+}
+
+.tr-card-title {
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+
+.tr-card-blurb {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* ─── Footnote ────────────────────────────────────────────────────────────── */
+
+.tr-footnote {
+  max-width: 640px;
+  margin: 26px 0 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .tr-head {
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .tr-grid {
+    margin-top: 32px;
+  }
+}

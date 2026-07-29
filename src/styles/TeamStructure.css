@@ -161,9 +161,11 @@
 }
 
 .tp-box {
+  /* Column so the hover description can stack under the label; the label row
+   * itself (icon + title) is .tp-node-head, which keeps the old flex-row. */
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
   padding: 14px 32px;
   font-family: var(--font-heading);
   font-weight: 700;
@@ -175,6 +177,13 @@
   border: 1px solid var(--ts-border);
   border-radius: 8px;
   text-align: center;
+}
+
+.tp-node-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* bolder, high-contrast edge in light mode, on every box — the pale blue
@@ -831,4 +840,107 @@
     animation: none;
     opacity: 0;
   }
+}
+
+/* ============================================================================
+ * ROLE HOVER — what each part of the org actually owns.
+ *
+ * Hovering (or tabbing to) any box dims the rest of the chart and expands that
+ * role's responsibilities underneath its label. Descriptions are always in the
+ * DOM and only visually collapsed, so screen readers get them unconditionally.
+ * ==========================================================================*/
+
+.tp-node {
+  cursor: default;
+  transition:
+    opacity var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base);
+}
+
+/* The two top boxes are content-sized flex items, so an expanding description
+ * would snap them much wider mid-hover. Pin the width and hover only changes
+ * height. (The Lead boxes and subteam pills are already full-width of their
+ * column, so they don't have this problem.) */
+.tp-tier--single .tp-box {
+  width: min(100%, 340px);
+}
+
+/* Lead boxes stack their icon ABOVE the title, unlike the top boxes which set
+ * the two side by side — .tp-node-head has to honour that. The box's own gap
+ * moves to 0 because the head now owns that spacing, and the description
+ * brings its own margin once it opens. */
+.tp-box--lead {
+  gap: 0;
+}
+
+.tp-box--lead .tp-node-head {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tp-node:focus-visible {
+  outline: 2px solid var(--accent, var(--brand));
+  outline-offset: 3px;
+}
+
+/* Everything that isn't the active role recedes, so the hovered branch is the
+ * only thing left reading on the board. */
+.tp-chart.has-active .tp-node:not(.is-active) {
+  opacity: 0.3;
+}
+
+/* Only border-color and background are set here on purpose: the idle
+ * traveling-light animation owns box-shadow, and a running animation beats a
+ * plain declaration. Pausing it instead holds the cascade in sync so it picks
+ * up where it left off rather than restarting and desyncing the choreography. */
+.tp-node.is-active {
+  border-color: var(--accent, var(--brand));
+  background: var(--bg-elevated);
+  animation-play-state: paused;
+}
+
+/* 0fr → 1fr expands to the text's exact height — no magic max-height number
+ * and no measuring in JS. The inner span carries the overflow clip. */
+.tp-node-desc {
+  display: grid;
+  grid-template-rows: 0fr;
+  max-width: 34ch;
+  /* Boxes here centre their text, so the capped-width block needs auto side
+   * margins or it would sit off to the left inside a centred box. */
+  margin-inline: auto;
+  margin-top: 0;
+  opacity: 0;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ts-text-muted-1);
+  text-wrap: pretty;
+  transition:
+    grid-template-rows var(--transition-slow),
+    opacity var(--transition-base),
+    margin-top var(--transition-slow);
+}
+
+.tp-node-desc > span {
+  overflow: hidden;
+}
+
+.tp-node.is-active .tp-node-desc {
+  grid-template-rows: 1fr;
+  margin-top: 9px;
+  opacity: 1;
+}
+
+/* Affordance for the hover — without it the interaction is undiscoverable. */
+.tp-hint {
+  margin: 18px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ts-text-muted-2);
 }

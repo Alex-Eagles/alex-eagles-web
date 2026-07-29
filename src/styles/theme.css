@@ -86,7 +86,8 @@
 
   /* Section vertical rhythm. --space-section-y is the standard top/bottom
    * padding used by full-bleed page sections (Video, Features/"Who We Are",
-   * Updates, TeamStructure/"Team Overview"). --space-section-y-tight is for
+   * TrackRecord/"What We've Won", TeamStructure/"Team Overview"). The
+   * --space-section-y-tight variant is for
    * a section that immediately follows one which already fades/blends into
    * it — using the full value there would stack two gaps into one
    * oversized blank space at the seam. */
@@ -114,6 +115,9 @@
   --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
   --gold-hover: #fbbf24;
   --sky: #38bdf8; /* technical links / data accent       */
+  --spark: #f26522; /* hot marker — placement labels, lead
+                       * top-edges, hero eyebrow rule. Used in
+                       * short bursts only, never as a fill.  */
 
   /* Text (cool blue-white, per brand) */
   --text-primary: #f5f9ff;
@@ -150,6 +154,8 @@
   --gold: #b45309; /* darker amber for AA contrast on light */
   --gold-hover: #92400e;
   --sky: #0284c7;
+  --spark: #c2410c; /* deepened so caps-size text still hits AA
+                       * on the light canvas                  */
 
   --text-primary: #0b1220; /* deep cool navy text                  */
   --text-secondary: #35507a;

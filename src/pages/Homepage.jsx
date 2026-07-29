@@ -3,7 +3,7 @@ import "../styles/Homepage.css";
 import Hero from "./Hero";
 import Features from "./Features";
 import Video from "./Video";
-import Updates from "./Updates";
+import TrackRecord from "./TrackRecord";
 import Sponsors from "./Sponsors";
 import TeamStructure from "./TeamStructure";
 
@@ -13,7 +13,7 @@ export default function Homepage() {
       <Hero />
       <Features />
       <TeamStructure />
-      <Updates />
+      <TrackRecord />
       <Video />
       <Sponsors />
     </div>

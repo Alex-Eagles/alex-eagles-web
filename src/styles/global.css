@@ -211,6 +211,29 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * SCROLL REVEAL — paired with the useReveal hook (src/hooks/useReveal.ts).
+ * A `data-reveal` element starts offset and transparent; the hook adds
+ * `.is-revealed` as it enters the viewport. Transform + opacity only, so the
+ * whole thing stays on the compositor and never triggers layout.
+ * --------------------------------------------------------------------------*/
+@layer components {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.9s cubic-bezier(0.22, 0.7, 0.3, 1),
+      transform 0.9s cubic-bezier(0.22, 0.7, 0.3, 1);
+    will-change: opacity, transform;
+  }
+
+  [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+}
+
+/* ----------------------------------------------------------------------------
  * REDUCED MOTION — honor the OS setting. Kills decorative + scroll animation.
  * (Framer Motion is handled separately via the useReducedMotion hook.)
  * --------------------------------------------------------------------------*/

@@ -58,6 +58,46 @@ export const LATEST_POSTS: BlogPost[] = [
   },
 ];
 
+export interface Award {
+  year: string;
+  /** Competition shorthand, shown small against the year. */
+  event: string;
+  /** Placement line, e.g. "1st place" or "1st design · 5th overall". */
+  placement: string;
+  title: string;
+  blurb: string;
+}
+
+/** The headline results in the "What we've won" section. Three cards only —
+ *  the long tail lives in AWARDS_FOOTNOTE and the full run is on /history. */
+export const AWARDS: Award[] = [
+  {
+    year: "2025",
+    event: "SUAS",
+    placement: "1st place",
+    title: "Design & presentation",
+    blurb: "Highest-scoring report and defense in the competition.",
+  },
+  {
+    year: "2025",
+    event: "UAVC",
+    placement: "1st design · 5th overall",
+    title: "Top five in the air",
+    blurb:
+      "Best documentation on the field, and the aircraft held up on mission day.",
+  },
+  {
+    year: "2022",
+    event: "SAE",
+    placement: "1st place",
+    title: "Design & presentation",
+    blurb: "The season that set the standard we still build to.",
+  },
+];
+
+export const AWARDS_FOOTNOTE =
+  "Also on the shelf: 3rd overall at SAE Aerodesign 2020, best design at MTC 2021, best use of science at NASA Space Apps.";
+
 export interface Sponsor {
   name: string;
   tag: string;
