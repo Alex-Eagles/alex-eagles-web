@@ -150,7 +150,8 @@
   /* The page's own accent — eyebrows, the active year tab, the jump-nav tab,
    * and the fallback for a card rendered outside a sub-team. Brand blue in
    * both themes, so it lives here rather than in the per-theme blocks. */
-  --team-accent: #3d3ecc;
+  /* --team-accent: #3d3ecc; */
+  --team-accent: #2727a3;
 
   --team-management: #3d3ecc; /* brand blue (accent)    */
   --team-aerodesign: #85b7eb; /* sky blue               */
@@ -460,8 +461,10 @@
   --brand-dark: #2b2f9e; /* deepest brand — pressed / gradients */
   --brand-glow: rgba(60, 64, 181, 0.25); /* glow behind brand elements          */
   --eyebrow: var(--brand-light); /* section kicker label above headings */
-  --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
-  --gold-hover: #fbbf24;
+  /* --gold: #f59e0b; CTAs, achievements, eagle gold      */
+  --gold:  #d9302a; /* CTAs, achievements, eagle gold      */
+  /* --gold-hover: #fbbf24; */
+  --gold-hover:  #d9302a;
   --sky: #60a5fa; /* technical links / data accent       */
   /* Halo behind --sky elements (timeline markers). On the near-black page a
    * real glow is what sells the marker as lit; see the light block for why the
@@ -616,8 +619,10 @@
   --brand-dark: #1e2258; /* deep indigo — pressed / gradients    */
   --brand-glow: rgba(60, 64, 181, 0.12);
   --eyebrow: var(--brand-light); /* label; brand-light is darker in light mode */
-  --gold: #b45309; /* darker amber for AA contrast on light */
-  --gold-hover: #92400e;
+  /* --gold: #b45309; /* darker amber for AA contrast on light */
+  /* --gold-hover: #92400e; */ 
+  --gold: #fe0800; /* darker amber for AA contrast on light */
+  --gold-hover:  #fc0800;
   --sky: #1d4ed8;
   /* Deliberately NOT a glow on light. A luminous halo only reads as "lit" when
    * it is brighter than what surrounds it — on a near-white page it just smears
