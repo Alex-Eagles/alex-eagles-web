@@ -534,7 +534,7 @@ function Milestone({
   );
 
   return (
-    <li className="relative pl-9 md:pl-0 pb-10 last:pb-0">
+    <li id={`achievement-${achievement.id}`} className="relative pl-9 md:pl-0 pb-10 last:pb-0">
       {/* The transform lives HERE, on the content, and never on the <li> — see
           the note about welded markers in the file header. */}
       <motion.div

@@ -108,6 +108,7 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "" }: P
   const go = (hit: SearchHit) => {
     const parts = [`q=${encodeURIComponent(query.trim())}`, `t=${encodeURIComponent(hit.text.slice(0, 140))}`];
     if (hit.params) parts.push(hit.params);
+    if (hit.anchor) parts.push(`a=${encodeURIComponent(hit.anchor)}`);
     navigate(`${hit.route}?${parts.join('&')}`);
     close();
   };

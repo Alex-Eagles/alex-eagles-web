@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import BlogHeader from "@/components/blog/BlogHeader";
 import BlogCard from "@/components/blog/BlogCard";
@@ -24,6 +25,15 @@ export default function Blog() {
   const [activeFilter, setActiveFilter] = useState<BlogFilter["id"]>("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedPost, setSelectedPost] = useState<BlogPostFull | null>(null);
+
+  // A search result points at a specific card, so open it on arrival.
+  const [searchParams] = useSearchParams();
+  const postParam = searchParams.get("post");
+  useEffect(() => {
+    if (!postParam) return;
+    const match = BLOG_POSTS.find((p) => String(p.id) === postParam);
+    if (match) setSelectedPost(match);
+  }, [postParam]);
   const reduced = useReducedMotion();
   const { isDark } = useTheme();
   const panelRef = useRef<HTMLDivElement>(null);
