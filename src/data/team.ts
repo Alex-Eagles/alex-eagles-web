@@ -46,7 +46,7 @@ export type Role =
   | "Vice Lead of Autonomous"
   | "EM Integration Lead"
   | "Section Lead"
-  | "Vice Section Lead"
+  | "Vice Lead"
   | "Member"
   | "Autonomous Lead";
 
@@ -68,7 +68,7 @@ export function roleTier(role: Role): Tier {
     case "Head of Autonomous":
       return "head";
     case "Vice Lead of Autonomous":
-    case "Vice Section Lead":
+    case "Vice Lead":
       return "vice";
     case "Section Lead":
       return "lead";
@@ -286,7 +286,7 @@ export function memberYearLabel(member: TeamMember, rosterYear: string): string 
  * The role text shown on the card. A generic "Section Lead" doesn't say which
  * section, so it's swapped for the sub-team-specific title — "Structure Lead",
  * "Aerodesign Lead" — using the section name already stamped onto `department`.
- * Every other role (Vice Section Lead, Member, the exec titles) shows as-is.
+ * Every other role (Vice Lead, Member, the exec titles) shows as-is.
  */
 export function memberRoleLabel(member: TeamMember): string {
   if (member.roleLabel) return member.roleLabel;
@@ -483,14 +483,14 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2026",
             major: "Mechatronics and Robotics",
           }),
-          slot("Vice Section Lead", "Momen Ashraf", {
+          slot("Vice Lead", "Momen Ashraf", {
             photo: "momen-ahraf",
             linkedIn: "https://www.linkedin.com/in/mo-men-ashraf-b73647423/",
             gradYear: "2027",
             major: "Mechatronics",
           }),
           // Also promoted to vice, per the intake form.
-          slot("Vice Section Lead", "Youssef Ibrahim", {
+          slot("Vice Lead", "Youssef Ibrahim", {
             photo: "youssef-ibrahim-2026",
             linkedIn: "https://www.linkedin.com/in/youssef-ibrahim-ba6761354/",
             gradYear: "2027",
@@ -606,7 +606,7 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Mechatronics and robotics engineering",
           }),
-          slot("Vice Section Lead", "Menna Ezzat", {
+          slot("Vice Lead", "Menna Ezzat", {
             photo: "menna-ezzat-2026",
             linkedIn: "https://www.linkedin.com/in/menna-ezzat-bba468267/",
             gradYear: "2026",
@@ -614,7 +614,7 @@ const ROSTER_2026: YearRoster = {
           }),
           // No portrait yet — hidden rather than shown as an empty slot.
           // Add a `photo` and drop `hidden` to bring the card back.
-          slot("Vice Section Lead", "Lina Tarek", {
+          slot("Vice Lead", "Lina Tarek", {
             hidden: true,
             linkedIn: "https://www.linkedin.com/in/lina-ahmed-baa06a232",
             gradYear: "2027",
@@ -718,7 +718,7 @@ const ROSTER_2025: YearRoster = {
           "Structure",
           [
             slot("Section Lead", "Mohamed Fathallah", { photo: "mohamed-fathallah" }),
-            slot("Vice Section Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
+            slot("Vice Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
             slot("Member", "Hana Waleed", { photo: "hana-waleed" }),
             slot("Member", "Hossam Eldeen", { photo: "hossam-eldeen" }),
             slot("Member", "Reem Eldalil", { photo: "reem-eldalil" }),
@@ -754,7 +754,7 @@ const ROSTER_2025: YearRoster = {
               tier: "vice",
               roleLabel: "Wing Lead",
             }),
-            slot("Vice Section Lead", "Abdelghfour Alaa", {
+            slot("Vice Lead", "Abdelghfour Alaa", {
               photo: "abdelghfour-alaa",
               roleLabel: "Wing Vice Lead",
             }),
@@ -784,7 +784,7 @@ const ROSTER_2025: YearRoster = {
           "Propulsion",
           [
             slot("Section Lead", "Adham Amr", { photo: "adham" }),
-            slot("Vice Section Lead", "Youssef Hozayen", { photo: "youssef-hozayen" }),
+            slot("Vice Lead", "Youssef Hozayen", { photo: "youssef-hozayen" }),
             slot("Member", "Mohamed Brbry", { photo: "mohamed-brbry" }),
             slot("Member", "Rana", { photo: "rana" }),
           ],
@@ -808,7 +808,7 @@ const ROSTER_2025: YearRoster = {
           "Software",
           [
             slot("Section Lead", "Maram Wael", { photo: "maram-wael" }),
-            slot("Vice Section Lead", "Ann Tarek", { photo: "ann-tarek" }),
+            slot("Vice Lead", "Ann Tarek", { photo: "ann-tarek" }),
             slot("Member", "Mazen Nazeih", { photo: "mazen-amr" }),
             slot("Member", "Sara Gharib", { photo: "sara-gharib" }),
             // Four members wrap 3 + 1 on their own, leaving John alone on the
