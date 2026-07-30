@@ -17,12 +17,20 @@ const TOP_ROLES = [
     id: "leader",
     title: "Team Leader",
     lit: 0,
+    // Matches the leadership card's id in Team.tsx (slugify(leader.role) for
+    // the "Team Leader" role) — lands on that specific card, not just the
+    // top of the leadership section.
+    to: "/team#team-leader",
     desc: "Sets the season plan, owns the competition roadmap and makes the final call when subsystems disagree.",
   },
   {
     id: "vice",
     title: "Team Vice Lead",
     lit: 1,
+    // Matches the "Vice Lead" role's card id — was previously the same
+    // #leadership anchor as Team Leader, which always landed on the leader's
+    // card since it comes first in the section.
+    to: "/team#vice-lead",
     desc: "Runs the week: schedules, design reviews, logistics and travel, and stands in for the leader whenever needed.",
   },
 ];
@@ -188,7 +196,7 @@ export default function TeamStructure() {
                     `tp-box tp-box--top tp-box--lit-${role.lit}`,
                     role.id,
                   )}
-                  {...nodeProps(role.id, "/team#leadership")}
+                  {...nodeProps(role.id, role.to)}
                 >
                   <span className="tp-node-head">{role.title}</span>
                   <span className="tp-node-desc">

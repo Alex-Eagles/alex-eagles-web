@@ -16,6 +16,7 @@ import {
   ROSTER_YEARS,
   ROSTERS,
   type Section,
+  slugify,
   splitByTier,
   splitRows,
   subTeamAccent,
@@ -400,6 +401,7 @@ export default function Team({
             {roster.leadership.map((leader, i) => (
               <div
                 key={leader.id}
+                id={slugify(leader.role)}
                 className={
                   roster.leadership.length === 3 && i === 1
                     ? styles.leaderCentre

@@ -333,6 +333,9 @@
 .leaderCentre {
   width: 340px;
   max-width: 100%;
+  /* Each carries its own #team-leader / #vice-lead anchor (Team.tsx) so a
+     deep link lands on that specific card, not just the section top. */
+  scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
 }
 
 /* --- divisions ----------------------------------------------------------- */
