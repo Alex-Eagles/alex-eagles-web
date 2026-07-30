@@ -41,12 +41,23 @@ function Marked({ text, terms }: { text: string; terms: string[] }) {
 }
 
 interface Props {
-  variant?: "pill" | "floating";
+  /**
+   * `pill`     — icon button in the desktop nav pill; the field drops below it.
+   * `floating` — standalone round glass button.
+   * `inline`   — no toggle button: the field is always open and the results list
+   *              flows underneath in normal layout. Used inside the mobile menu,
+   *              where an absolutely-positioned panel would escape the overlay.
+   */
+  variant?: "pill" | "floating" | "inline";
   wrapperClassName?: string;
+  /** Called after a result is picked — lets the mobile menu close itself. */
+  onNavigate?: () => void;
 }
 
-export default function SearchBox({ variant = "pill", wrapperClassName = "" }: Props) {
-  const [open, setOpen] = useState(false);
+export default function SearchBox({ variant = "pill", wrapperClassName = "", onNavigate }: Props) {
+  const inline = variant === "inline";
+  // The inline field has no button to toggle, so it starts (and stays) open.
+  const [open, setOpen] = useState(inline);
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [active, setActive] = useState(0);
@@ -60,9 +71,12 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "" }: P
 
   const terms = query.trim().toLowerCase().split(/\s+/).filter((t) => t.length > 1);
 
+  // Don't steal focus for the inline field: it mounts together with the mobile
+  // menu, and autofocusing there throws the on-screen keyboard over the links
+  // the user opened the menu to tap. They can tap the field when they want it.
   useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
+    if (open && !inline) inputRef.current?.focus();
+  }, [open, inline]);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -85,19 +99,21 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "" }: P
   }, [query]);
 
   const close = useCallback(() => {
-    setOpen(false);
+    // The inline field is the menu's permanent search row — collapsing it would
+    // leave an empty gap, so "close" there only means "clear what was typed".
+    if (!inline) setOpen(false);
     setQuery("");
     setHits([]);
-  }, []);
+  }, [inline]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || inline) return;
     const onPointer = (e: MouseEvent) => {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) close();
     };
     document.addEventListener("mousedown", onPointer);
     return () => document.removeEventListener("mousedown", onPointer);
-  }, [open, close]);
+  }, [open, inline, close]);
 
   useEffect(() => {
     listRef.current
@@ -111,6 +127,7 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "" }: P
     if (hit.anchor) parts.push(`a=${encodeURIComponent(hit.anchor)}`);
     navigate(`${hit.route}?${parts.join('&')}`);
     close();
+    onNavigate?.();
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -143,30 +160,58 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "" }: P
   const showPanel = query.trim().length >= 2;
 
   return (
-    <div ref={boxRef} data-search-ui className={`relative flex items-center ${wrapperClassName}`}>
-      <button
-        type="button"
-        onClick={() => (open ? close() : setOpen(true))}
-        onMouseEnter={() => loadEngine()}
-        aria-label="Search"
-        aria-expanded={open}
-        className={buttonClass}
-        style={buttonStyle}
-      >
-        {open ? <X size={18} /> : <Search size={18} />}
-      </button>
+    <div
+      ref={boxRef}
+      data-search-ui
+      className={
+        inline
+          ? `flex flex-col w-full ${wrapperClassName}`
+          : `relative flex items-center ${wrapperClassName}`
+      }
+    >
+      {!inline && (
+        <button
+          type="button"
+          onClick={() => (open ? close() : setOpen(true))}
+          onMouseEnter={() => loadEngine()}
+          aria-label="Search"
+          aria-expanded={open}
+          className={buttonClass}
+          style={buttonStyle}
+        >
+          {open ? <X size={18} /> : <Search size={18} />}
+        </button>
+      )}
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[min(22rem,85vw)] z-50">
+        <div
+          className={
+            inline
+              ? "w-full"
+              : "absolute right-0 top-full mt-2 w-[min(22rem,85vw)] z-50"
+          }
+        >
           <div className="relative">
+            {/* The inline field has no toggle button to carry the icon, so it
+                wears one inside the input as its affordance. */}
+            {inline && (
+              <Search
+                size={17}
+                className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ color: "var(--text-muted)" }}
+              />
+            )}
             <input
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={onKeyDown}
+              onFocus={() => loadEngine()}
               placeholder="Search the site…"
               aria-label="Search the site"
-              className="w-full pl-3 pr-9 py-2 text-sm rounded-lg outline-none"
+              className={`w-full pr-9 outline-none ${
+                inline ? "pl-10 py-3 text-base rounded-xl" : "pl-3 py-2 text-sm rounded-lg"
+              }`}
               style={{
                 background: "var(--card)",
                 border: "1px solid var(--border-subtle)",
@@ -186,7 +231,11 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "" }: P
           {showPanel && (
             <div
               ref={listRef}
-              className="mt-1 rounded-lg overflow-y-auto max-h-[min(24rem,60vh)]"
+              // Shorter cap inline: the on-screen keyboard eats the bottom half
+              // of the viewport, so a 60vh list would scroll off behind it.
+              className={`mt-1 rounded-lg overflow-y-auto ${
+                inline ? "max-h-[min(18rem,38vh)]" : "max-h-[min(24rem,60vh)]"
+              }`}
               style={{
                 background: "var(--card)",
                 border: "1px solid var(--border-subtle)",

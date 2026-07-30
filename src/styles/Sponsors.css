@@ -1,10 +1,17 @@
+/* Solid section background, matching the rest of the homepage's sections
+ * rather than the translucent glass this used to carry — the blurred glass read
+ * as a muddy, out-of-place panel in dark mode. Dark: the same aerospace-navy
+ * (#0a0e1f) every other section uses; light: white, alternating with the
+ * #e4e8ee Watch-Us-Fly section above it. */
 .sponsors {
   padding: 60px 20px;
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0a0e1f;
   text-align: center;
   font-family: var(--font-sans);
+}
+
+:root[data-theme="light"] .sponsors {
+  background: #ffffff;
 }
 
 /* Header */

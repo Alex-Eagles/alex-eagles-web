@@ -13,7 +13,6 @@
   --ts-text-muted-3: rgba(255, 255, 255, 0.35);
   --ts-border: rgba(255, 255, 255, 0.12);
   --ts-border-soft: rgba(255, 255, 255, 0.2);
-  --ts-grid-line: rgba(255, 255, 255, 0.04);
   --ts-arm: linear-gradient(90deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08));
   --ts-radar-ring: rgba(255, 255, 255, 0.08);
   --ts-shadow: rgba(0, 0, 0, 0.6);
@@ -29,14 +28,15 @@
  * barely-there) borders/grid/glow, so it still reads as a technical
  * diagram rather than washing out flat. */
 :root[data-theme="light"] {
-  --ts-bg: #ffffff;
+  /* Team-page light canvas (--team-bg), the "deeper" band tone — alternates
+     with the white sections above/below so the section reads as separated. */
+  --ts-bg: #e4e8ee;
   --ts-text: #0b1220;
   --ts-text-muted-1: #3b5a8a;
-  --ts-text-muted-2: #5b7bab;
+  --ts-text-muted-2: #4a6a99; /* was #5b7bab: 4.32:1, under AA at 11-13px */
   --ts-text-muted-3: #8aa4c9;
   --ts-border: #bfdbfe;
   --ts-border-soft: #dbeafe;
-  --ts-grid-line: rgba(59, 130, 246, 0.1);
   --ts-arm: linear-gradient(90deg, #93c5fd, #dbeafe);
   --ts-radar-ring: #bfdbfe;
   --ts-shadow: rgba(59, 130, 246, 0.18);
@@ -50,17 +50,24 @@
   position: relative;
   overflow: hidden;
   background: var(--ts-bg);
-  padding: 100px 6% 120px;
+  /* top padding uses the tight variant — this section follows Features'
+   * fade-to-bg transition, so the full section gap would stack on top of
+   * that and read as an oversized blank gap before the content starts. */
+  padding: var(--space-section-y-tight) 6% var(--space-section-y);
 }
 
-.tp-grid-bg {
+/* Seam bridge — a thin indigo divider plus a soft tint fading down into the
+ * section, standing in for a hard cut where the Features fade hands off. */
+.tp-seam-bridge {
   position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: linear-gradient(var(--ts-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--ts-grid-line) 1px, transparent 1px);
-  background-size: 60px 60px;
-  animation: ae-grid 8s linear infinite;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: 1;
+  pointer-events: none;
+  border-top: 2px solid rgba(36, 37, 153, 0.35);
+  background: linear-gradient(to bottom, rgba(36, 37, 153, 0.08), transparent);
 }
 
 .tp-layout,
@@ -96,8 +103,10 @@
   color: var(--ts-text-muted-2);
 }
 
+/* var(--brand) rather than a hardcoded #3b82f6: at 13px this needs 4.5:1, and
+ * the light theme's darker brand blue is what clears it against white. */
 .tp-eyebrow-index {
-  color: #3b82f6;
+  color: var(--sky);
   font-weight: 700;
 }
 
@@ -120,8 +129,11 @@
   display: block;
 }
 
+/* --brand-light, not --brand: the headline stays in the indigo family, but
+ * --brand itself only reaches 2.4:1 on this dark surface, under the 3:1 that
+ * large text needs. --brand-light clears it at 3.3:1. */
 .tp-headline-accent {
-  color: #3b82f6;
+  color: var(--brand-light);
 }
 
 .tp-copy {
@@ -144,9 +156,11 @@
 }
 
 .tp-box {
+  /* Column so the hover description can stack under the label; the label row
+   * itself (icon + title) is .tp-node-head, which keeps the old flex-row. */
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
   padding: 14px 32px;
   font-family: var(--font-heading);
   font-weight: 700;
@@ -160,6 +174,13 @@
   text-align: center;
 }
 
+.tp-node-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 /* bolder, high-contrast edge in light mode, on every box — the pale blue
  * (and, for Leader/Vice Lead/Lead boxes, gold/accent-colored) borders were
  * too soft against the white/light-blue background to read as defined
@@ -170,13 +191,15 @@
   border-color: #000000;
 }
 
+/* ...except the subsystem Lead boxes: keep their signature accent-colored
+ * border in light mode too (matching dark mode), just bolder for contrast. */
+:root[data-theme="light"] .tp-box--lead {
+  border-color: var(--accent);
+}
+
 .tp-box--top {
   border-top: 2px solid var(--ts-gold);
   color: var(--ts-gold-text);
-}
-
-.tp-box--top svg {
-  color: var(--ts-gold);
 }
 
 .tp-connector {
@@ -210,8 +233,8 @@
   height: 6px;
   margin-left: -3px;
   border-radius: 50%;
-  background: #60a5fa;
-  box-shadow: 0 0 8px 2px rgba(96, 165, 250, 0.7);
+  background: var(--brand-light);
+  box-shadow: 0 0 8px 2px rgba(84, 88, 204, 0.75);
   transform: translateY(0);
   animation-duration: 5.6s;
   animation-timing-function: linear;
@@ -237,7 +260,7 @@
 @keyframes tp-box-flash-0 {
   0%,
   100% {
-    box-shadow: 0 0 0 1px #60a5fa, 0 0 26px 6px rgba(96, 165, 250, 0.55);
+    box-shadow: 0 0 0 1px var(--brand-light), 0 0 26px 6px rgba(84, 88, 204, 0.6);
   }
   3%,
   97% {
@@ -280,7 +303,7 @@
     box-shadow: none;
   }
   15% {
-    box-shadow: 0 0 0 1px #60a5fa, 0 0 26px 6px rgba(96, 165, 250, 0.55);
+    box-shadow: 0 0 0 1px var(--brand-light), 0 0 26px 6px rgba(84, 88, 204, 0.6);
   }
   18%,
   100% {
@@ -333,8 +356,8 @@
     box-shadow: none;
   }
   33% {
-    background: #60a5fa;
-    box-shadow: 0 0 10px 2px rgba(96, 165, 250, 0.6);
+    background: var(--brand-light);
+    box-shadow: 0 0 10px 2px rgba(84, 88, 204, 0.65);
   }
   36%,
   100% {
@@ -359,8 +382,8 @@
   margin-left: -3px;
   margin-top: -2px;
   border-radius: 50%;
-  background: #60a5fa;
-  box-shadow: 0 0 8px 2px rgba(96, 165, 250, 0.7);
+  background: var(--brand-light);
+  box-shadow: 0 0 8px 2px rgba(84, 88, 204, 0.75);
   animation-duration: 5.6s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
@@ -682,10 +705,12 @@
   }
 }
 
-/* same bold black edge in light mode, on the subteam pills too */
+/* same bold black edge in light mode, on the subteam pills too — but keep
+ * their left edge in the subsystem's accent color, matching dark mode. */
 :root[data-theme="light"] .tp-owns-item {
   border-width: 2px;
   border-color: #000000;
+  border-left-color: var(--accent);
 }
 
 /* the bulb cascades down the three subteam pills in turn */
@@ -764,24 +789,88 @@
   }
 }
 
-@media (max-width: 560px) {
+/* Phones keep BOTH lead columns side by side. Stacking them turned the chart
+ * into a 1300px vertical list that read as a long menu, not an org chart, and
+ * the whole point of the diagram is that the two branches are parallel. Type
+ * and padding shrink instead. */
+@media (max-width: 640px) {
+  .tp-chart {
+    max-width: 100%;
+  }
+
+  .tp-leads {
+    gap: 10px;
+  }
+
+  .tp-box {
+    padding: 10px 12px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .tp-tier--single .tp-box {
+    width: 100%;
+  }
+
+  .tp-box--lead {
+    padding: 12px 8px;
+    font-size: 11px;
+  }
+
+  .tp-lead-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tp-lead-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .tp-owns {
+    gap: 6px;
+  }
+
+  .tp-owns-item {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .tp-connector {
+    height: 20px;
+    --tp-travel: 20px;
+  }
+
+  .tp-connector--split {
+    top: -22px;
+    height: 22px;
+    --tp-travel: 22px;
+  }
+
+  .tp-tier3 {
+    padding-top: 22px;
+  }
+
+  /* The hover descriptions are unreachable on touch and would double the
+     chart's height if they opened, so the chart stays a chart here. */
+  .tp-node-desc {
+    display: none;
+  }
+
+  .tp-hint {
+    display: none;
+  }
+}
+
+/* Below ~380px two columns of pills stop being readable. */
+@media (max-width: 379px) {
   .tp-leads {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 26px;
   }
 
   .tp-tier3::before {
     display: none;
-  }
-
-  .tp-connector--split {
-    top: -28px;
-    height: 28px;
-    --tp-travel: 28px;
-  }
-
-  .tp-tier3 {
-    padding-top: 28px;
   }
 }
 
@@ -790,7 +879,6 @@
  * (their only opacity control is the animation itself); everything else's
  * un-animated resting state is already the correct "off" look. */
 @media (prefers-reduced-motion: reduce) {
-  .tp-grid-bg,
   .tp-box--lit-0,
   .tp-box--lit-1,
   .tp-box--lit-2,
@@ -806,4 +894,145 @@
     animation: none;
     opacity: 0;
   }
+}
+
+/* ============================================================================
+ * ROLE HOVER — what each part of the org actually owns.
+ *
+ * Hovering (or tabbing to) any box dims the rest of the chart and expands that
+ * role's responsibilities underneath its label. Descriptions are always in the
+ * DOM and only visually collapsed, so screen readers get them unconditionally.
+ * ==========================================================================*/
+
+.tp-node {
+  cursor: default;
+  transition:
+    opacity var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base);
+}
+
+/* The two top boxes are content-sized flex items, so an expanding description
+ * would snap them much wider mid-hover. Pin the width and hover only changes
+ * height. (The Lead boxes and subteam pills are already full-width of their
+ * column, so they don't have this problem.) */
+.tp-tier--single .tp-box {
+  width: min(100%, 340px);
+}
+
+/* Lead boxes stack their icon ABOVE the title, unlike the top boxes which set
+ * the two side by side — .tp-node-head has to honour that. The box's own gap
+ * moves to 0 because the head now owns that spacing, and the description
+ * brings its own margin once it opens. */
+.tp-box--lead {
+  gap: 0;
+}
+
+.tp-box--lead .tp-node-head {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tp-node:focus-visible {
+  outline: 2px solid var(--accent, var(--brand));
+  outline-offset: 3px;
+}
+
+/* Everything that isn't the active role recedes, so the hovered branch is the
+ * only thing left reading on the board. */
+.tp-chart.has-active .tp-node:not(.is-active) {
+  opacity: 0.3;
+}
+
+/* Only border-color and background are set here on purpose: the idle
+ * traveling-light animation owns box-shadow, and a running animation beats a
+ * plain declaration.
+ *
+ * Deliberately NOT `animation-play-state: paused`. Pausing applies to the
+ * hovered element alone, so its clock stops while the rest of the chart keeps
+ * running — un-hovering then leaves it permanently out of phase with the
+ * other column, and the two Leads stop lighting together. The relay is one
+ * shared 5.6s timeline across both columns; nothing may stop independently of
+ * it, or the choreography drifts apart for the rest of the page's life. */
+.tp-node.is-active {
+  border-color: var(--accent, var(--brand));
+  background: var(--bg-elevated);
+}
+
+/* 0fr → 1fr expands to the text's exact height — no magic max-height number
+ * and no measuring in JS. The inner span carries the overflow clip. */
+.tp-node-desc {
+  display: grid;
+  grid-template-rows: 0fr;
+  /* Full box width rather than a ch cap: these run to a few sentences, and a
+   * narrow measure would turn each one into a very tall column. */
+  max-width: 100%;
+  margin-top: 0;
+  opacity: 0;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-transform: none;
+  /* The boxes centre their labels, but these run to several sentences and
+   * centred body copy is genuinely hard to read, so it ranges left. */
+  text-align: left;
+  color: var(--ts-text-muted-1);
+  text-wrap: pretty;
+  transition:
+    grid-template-rows var(--transition-slow),
+    opacity var(--transition-base),
+    margin-top var(--transition-slow);
+}
+
+.tp-node-desc > span {
+  overflow: hidden;
+}
+
+.tp-node.is-active .tp-node-desc {
+  grid-template-rows: 1fr;
+  margin-top: 9px;
+  opacity: 1;
+}
+
+/* Affordance for the hover — without it the interaction is undiscoverable. */
+.tp-hint {
+  margin: 18px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ts-text-muted-2);
+}
+
+/* The chart names the subsystems; this is the way through to the people in
+ * them. Same shape as every other button on the site (Inter, 10px radius,
+ * brand fill) — --brand is already theme-aware, so it darkens for contrast in
+ * light mode on its own. */
+.tp-cta {
+  display: inline-block;
+  margin-top: 28px;
+  padding: 14px 26px;
+  border-radius: 10px;
+  background: var(--brand);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.tp-cta:hover {
+  background: var(--brand-light);
+  color: #ffffff;
+}
+
+.tp-cta:active {
+  transform: translateY(1px);
 }

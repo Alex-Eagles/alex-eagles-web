@@ -20,12 +20,16 @@ import NotFound from "@/pages/NotFound";
  * keeps the previous page's scroll offset.
  */
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
+    // A hash means the destination wants a specific anchor (e.g. /team#software
+    // from the homepage org chart) — let the target page scroll itself there
+    // rather than yanking to the top and fighting it.
+    if (hash) return;
     // Block body (no implicit return) — an effect may only return a cleanup
     // function, never the value of window.scrollTo().
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, hash]);
   return null;
 }
 
@@ -36,13 +40,18 @@ function ScrollToTop() {
 export default function App() {
   useSearchHighlight();
 
+  // The /vehicles Neith experience is a fixed dark-only design, so the global
+  // light/dark toggle doesn't apply there — hide it on that route only.
+  const { pathname } = useLocation();
+  const showThemeToggle = pathname !== "/vehicles";
+
   return (
     <>
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
 
-      <ThemeToggle />
+      {showThemeToggle && <ThemeToggle />}
       <Navbar />
       <ScrollToTop />
 

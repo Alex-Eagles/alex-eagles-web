@@ -116,6 +116,15 @@
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
 
+  /* Vertical rhythm between full-bleed homepage sections. Fluid so it scales
+   * down on phones on its own — the homepage sections (Features, TeamStructure,
+   * TrackRecord, Video) read these for their top/bottom padding. `-tight` is
+   * for a section that follows another's fade/seam, where the full gap would
+   * stack on top and read as an oversized blank band. Restored here after a
+   * merge dropped them, which collapsed every section's vertical padding.    */
+  --space-section-y: clamp(72px, 9vw, 128px);
+  --space-section-y-tight: clamp(40px, 5vw, 72px);
+
   /* Layout anchors used by the CSS-module components (Team roster et al.).
    * `--page-max` / `--page-gutter` keep those modules aligned with the
    * Tailwind `--maxw-content` wrapper the rest of the site uses.            */
@@ -562,7 +571,11 @@
      body to stay legible. Same knob, see the dark block for what it does. */
   --toggle-opacity: 0.22;
 
-  --bg-primary: #f7f8ff; /* faintly indigo-tinted white          */
+  /* Page background matches the Team page's light canvas (--team-bg #e4e8ee),
+     a cool gray-blue, so the site's light mode reads as one palette. This is
+     the "deeper" of the two alternating section tones; --bg-surface (white) is
+     the lifted one. */
+  --bg-primary: #e4e8ee; /* team-page light canvas (cool gray-blue) */
   --bg-surface: #ffffff;
   --bg-elevated: #eaf2ff;
   --bg-glass: rgba(255, 255, 255, 0.75);

@@ -6,6 +6,7 @@ import {
   Youtube,
   type LucideIcon,
 } from "lucide-react";
+import TikTokIcon from "@/components/ui/TikTokIcon";
 
 /**
  * site.ts — global, cross-page content: navigation, brand strings, contact,
@@ -66,7 +67,7 @@ export const NEWSLETTER_EMAIL = {
 export interface SocialLink {
   label: string;
   href: string;
-  Icon: LucideIcon;
+  Icon: LucideIcon | typeof TikTokIcon;
 }
 
 /** Footer social row. `Icon` is a lucide component rendered as <Icon />. */
@@ -75,6 +76,7 @@ export const SOCIALS: SocialLink[] = [
   { label: "Facebook", href: "https://www.facebook.com/alexeagles2015/", Icon: Facebook },
   { label: "LinkedIn", href: "https://www.linkedin.com/company/alex-eagles-aero-design/posts/?feedView=all", Icon: Linkedin },
   { label: "YouTube", href: "https://www.youtube.com/@AlexEagles.aerodesign", Icon: Youtube },
+  { label: "TikTok", href: "https://www.tiktok.com/@alexeaglesaerodesign", Icon: TikTokIcon },
   { label: "GitHub", href: "https://github.com/Alex-Eagles", Icon: Github },
 ];
 

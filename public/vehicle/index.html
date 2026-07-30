@@ -45,6 +45,33 @@
        opacity the scroll JS sets on this element. */
     #vp-build-callout { display:none !important; }
   }
+  /* ---- BUILD SEQUENCE on phones: play it, don't make them scroll it ----
+     The desktop treatment pins a 300vh section and scrubs the 140 frames off
+     scroll position. On a phone that means three viewport-heights of
+     finger-dragging to get through one animation — and because every scroll on
+     touch is a `touchmove`, the cinematic autoplay was being handed straight
+     over to manual scrubbing the moment the user moved.
+     So on phones the JS tags the section `data-phone="1"` and plays the build as
+     a self-contained clip: the section collapses to its natural height and sits
+     in normal flow like any other, and video-style controls under the canvas
+     (play/pause, replay, draggable track) replace the scroll entirely.
+     Attribute-gated rather than a media query so the CSS and the JS can never
+     disagree about which mode is live. */
+  #vp-build-scroll[data-phone="1"] { height:auto !important; }
+  #vp-build-scroll[data-phone="1"] > div { position:relative !important; top:auto !important; height:auto !important; }
+  #vp-build-scroll[data-phone="1"] #vp-build-panel { height:auto !important; padding:56px 14px 40px !important; }
+  #vp-build-scroll[data-phone="1"] #vp-build-skip { display:none !important; }
+  /* The frames are a wide 1280x571 crop, so on a narrow screen give the canvas
+     the full panel width — otherwise `max-height` letterboxes it to a sliver. */
+  #vp-build-scroll[data-phone="1"] #vp-build-stagebox { width:100%; }
+  #vp-build-scroll[data-phone="1"] #vp-build-canvas { width:100%; max-height:none !important; }
+  /* data-clip, not data-phone: withheld under reduced-motion (see the JS). */
+  #vp-build-scroll[data-clip="1"] #vp-build-controls { display:flex !important; }
+  /* Taller track so it's a real touch target; touch-action:none stops a scrub
+     drag from scrolling the page out from under the finger. */
+  #vp-build-scroll[data-phone="1"] #vp-build-track { height:10px !important; touch-action:none; cursor:pointer; }
+  #vp-build-ctl { display:flex; align-items:center; justify-content:center; gap:7px; cursor:pointer; font-family:'JetBrains Mono'; font-weight:600; font-size:11px; letter-spacing:.1em; padding:9px 16px; border-radius:9999px; border:1px solid rgba(96,165,250,0.35); background:rgba(13,16,53,0.68); color:#c3c6ea; }
+  #vp-build-ctl:active { background:rgba(60,64,181,0.92); border-color:#60a5fa; color:#fff; }
   @media (max-width:400px) {
     .vp-hero-specs > div:last-child > div > div:first-child { font-size:19px !important; }
   }
@@ -155,6 +182,10 @@
     #vpt-track { padding-left:20px; padding-right:20px; }
     #vpt-scroller { scroll-padding-left:20px; }
     #vp-process > div:nth-of-type(3) { padding-left:20px; padding-right:20px; }
+    /* No scroll-scrub on phones: hide the prev/next arrows and the travelling
+       head dot; the rail shows fully filled and cards scroll natively. */
+    #vpt-prev, #vpt-next, #vpt-head { display:none !important; }
+    #vpt-fill { transition:none !important; }
   }
   @media (prefers-reduced-motion: reduce) {
     .vpt-item { opacity:1; transform:none; transition:none; }
@@ -238,7 +269,7 @@
         <span id="vp-build-skip-arrow" style="font-size:13px;">↓</span>
       </button>
 
-      <div style="position:relative; z-index:2; width:100%; max-width:1180px; height:100%; padding:72px 32px 44px; margin:0 auto; display:flex; flex-direction:column; justify-content:space-between; gap:20px;">
+      <div id="vp-build-panel" style="position:relative; z-index:2; width:100%; max-width:1180px; height:100%; padding:72px 32px 44px; margin:0 auto; display:flex; flex-direction:column; justify-content:space-between; gap:20px;">
         <!-- section label -->
         <div style="flex:0 0 auto;">
           <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:10px;">How it comes together</div>
@@ -274,7 +305,7 @@
             <span aria-hidden="true" style="flex:0 0 auto; width:7px; height:7px; border-radius:9999px; background:#d9302a; box-shadow:0 0 12px rgba(217,48,42,.8); animation:vp-float 1.6s ease-in-out infinite;"></span>
             <span id="vp-stage-label" style="font-family:'Barlow'; font-weight:600; font-size:clamp(20px,2.4vw,27px); line-height:1.1; color:#f0f2ff;">Carbon-fiber bottom plate</span>
           </div>
-          <div style="position:relative; height:3px; width:100%; background:rgba(60,64,181,0.25); border-radius:9999px; overflow:hidden;">
+          <div id="vp-build-track" role="slider" aria-label="Build progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="position:relative; height:3px; width:100%; background:rgba(60,64,181,0.25); border-radius:9999px; overflow:hidden;">
             <div id="vp-build-bar" style="position:absolute; left:0; top:0; height:100%; width:0%; background:linear-gradient(90deg,#3c40b5,#d9302a); border-radius:9999px; transition:width .1s linear;"></div>
           </div>
           <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.06em; color:#565a94;">
@@ -282,6 +313,20 @@
             <span data-step="1">POWERTRAIN</span>
             <span data-step="2">AVIONICS</span>
             <span data-step="3">ASSEMBLED</span>
+          </div>
+
+          <!-- Phone-only playback controls (CSS reveals these when the JS sets
+               data-phone="1" on the section). On phones the build is a clip, not
+               a scroll-scrub, so it needs the controls a video would have. -->
+          <div id="vp-build-controls" style="display:none; align-items:center; gap:9px; margin-top:4px;">
+            <button id="vp-build-ctl" type="button" aria-label="Pause build animation">
+              <span id="vp-build-ctl-icon" aria-hidden="true">&#10073;&#10073;</span>
+              <span id="vp-build-ctl-label">PAUSE</span>
+            </button>
+            <button id="vp-build-replay" type="button" aria-label="Replay build animation" style="display:flex; align-items:center; justify-content:center; gap:7px; cursor:pointer; font-family:'JetBrains Mono'; font-weight:600; font-size:11px; letter-spacing:.1em; padding:9px 16px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">
+              <span aria-hidden="true">&#8635;</span><span>REPLAY</span>
+            </button>
+            <span id="vp-build-time" style="margin-left:auto; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.06em; color:#565a94;">0:00 / 0:14</span>
           </div>
         </div>
       </div>
@@ -330,7 +375,7 @@
         <button data-exp="cube" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">1 · FC</button>
         <button data-exp="gnss" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">2 · GNSS</button>
         <button data-exp="cam" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">3 · Camera</button>
-        <button data-exp="link" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">4 · Link</button>
+        <button data-exp="link" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">4 · COMMS</button>
         <button data-exp="pdb" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">5 · PDB</button>
         <button data-exp="bec" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">6 · BEC</button>
         <button data-exp="custom" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">7 · Our PCB</button>
@@ -365,45 +410,45 @@
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> DroneCAN-native and raised 9–15 cm above the frame, clear of propulsion EMI.</p>
           </div>
           <div data-exp-panel="cam" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">03 · PAYLOAD — GIMBAL CAMERA</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">03 · GIMBAL CAMERA</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">SIYI A8 Mini</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Eyes that stay level while the aircraft doesn't. A 4K 8MP Sony sensor rides a 3-axis FOC-stabilised gimbal with 6× digital zoom, feeding imagery down the ground link over HDMI and Ethernet.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
           </div>
           <div data-exp-panel="link" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · COMMS — DATA LINK</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · TELEMETRY</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Herelink</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Three links collapsed into one. A single 2.4 GHz digital pipe carries RC control, MAVLink telemetry and 1080p video together — up to 20 km at roughly 110 ms latency.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> pilot, operator and observer all work from one link; the handheld becomes a full ground station.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> pilot, operator and observer all work from one link; the handheld device becomes a fully mobile ground station.</p>
           </div>
           <div data-exp-panel="pdb" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">05 · POWER — DISTRIBUTION</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Matek PDB HEX</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every amp passes through here. Heavy copper carries 2–12S / 6–60 V to the ESCs while an onboard sensor reads current to 264 A and streams voltage and current back to the Cube, alongside PWM routing and BLHeli32 telemetry.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every amp passes through here. Heavy copper carries 2–12S / 6–60 V to the ESCs while an onboard sensor reads current up to 264 A and streams voltage and current back to the Cube.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> the six-output variant on a quad leaves distribution headroom for payload growth — one board instead of a harness.</p>
           </div>
           <div data-exp-panel="bec" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">06 · POWER — REGULATION</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">MAUCH BEC</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Clean power, guarded from the noise of flight. It converts raw LiPo voltage into stable rails for the flight controller, GPS and LiDAR, absorbing ripple, transients and motor/ESC interference before they reach a sensor.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> removes the separate receiver battery while isolating noise-sensitive systems from the high-current bus.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> stable and redundant power supply isolating noise-sensitive systems from high-current bus.</p>
           </div>
           <div data-exp-panel="custom" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Alex Eagles Power Board</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The only board on this aircraft we designed ourselves — drawn, routed, fabricated and flown by the team. It splits the MAUCH feed into dedicated rails: input decoupling, two buck converters for 12 V and 5 V, and an LDO for a low-noise 5 V rail for the most sensitive electronics.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> a modular power stage tailored to this airframe — less wiring, cleaner separation, revisable in-house.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Designed, routed, and fabricated from scratch by us- splits HV battery rail into dedicated power supplies for all onboard electronics.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> all in 1 system power supply for all our aircrafts. </p>
           </div>
           <div data-exp-panel="prop" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">08 · PROPULSION — ×4</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">T-Motor 6007 II System</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF22 props — one factory-tuned system per arm across the quad.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF2211 props — one factory-tuned system per arm across the quad.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
           </div>
           <div data-exp-panel="batt" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER — MAIN BATTERY</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Tattu 28 000 mAh 6S</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission — a 28 000 mAh 6S LiPo feeding the entire platform through the distribution stage.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission — a 28 000 mAh 6S LiPo feeding the entire platform through the power distribution network.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> high capacity for long-endurance autonomous flights without swapping packs mid-mission.</p>
           </div>
         </div>
@@ -825,6 +870,11 @@ class Component extends DCLogic {
       const panel = document.getElementById('vpt-panel');
       const scrim = document.getElementById('vpt-scrim');
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // Mobile: the scroll-scrub timeline (gesture advances a rail light one stop
+      // at a time, JS drives the fill/head) is heavy and unintuitive on a phone.
+      // There, the rail is shown fully filled and the cards just scroll natively;
+      // the prev/next arrows are removed. Desktop keeps the full behaviour.
+      const isMobileTL = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
 
       const DATA = [
         { badge: 'Design', title: 'Concept & design.', date: 'November 2025',
@@ -953,38 +1003,43 @@ class Component extends DCLogic {
       // always drives the light. Vertical input only does so for what looks like a
       // wheel mouse, which has no other way to reach the timeline, so trackpad users
       // keep ordinary page scrolling and use the horizontal axis instead.
-      let sawDeltaX = false;
-      sc.addEventListener('wheel', (e) => {
-        if (e.deltaX !== 0) sawDeltaX = true;
-        const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-        if (horiz || e.shiftKey) {
-          const d = horiz ? e.deltaX : e.deltaY;
-          if (!d) return;
+      // Scroll-scrub takeover (wheel + horizontal swipe advancing the rail light)
+      // is desktop-only. On phones these are skipped entirely so the scroller
+      // scrolls natively with no interception or per-frame JS.
+      if (!isMobileTL) {
+        let sawDeltaX = false;
+        sc.addEventListener('wheel', (e) => {
+          if (e.deltaX !== 0) sawDeltaX = true;
+          const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+          if (horiz || e.shiftKey) {
+            const d = horiz ? e.deltaX : e.deltaY;
+            if (!d) return;
+            e.preventDefault();
+            if (Math.abs(d) > 4) fire(d > 0 ? 1 : -1);
+            return;
+          }
+          if (!e.deltaY) return;
+          const wheelMouse = !sawDeltaX && (e.deltaMode !== 0 || Math.abs(e.deltaY) >= 100);
+          if (!wheelMouse) return;
+          const dir = e.deltaY > 0 ? 1 : -1;
+          // At either end of the rail the wheel is handed back so the page can scroll on.
+          if ((dir > 0 && li >= LAST) || (dir < 0 && li <= 0)) return;
           e.preventDefault();
-          if (Math.abs(d) > 4) fire(d > 0 ? 1 : -1);
-          return;
-        }
-        if (!e.deltaY) return;
-        const wheelMouse = !sawDeltaX && (e.deltaMode !== 0 || Math.abs(e.deltaY) >= 100);
-        if (!wheelMouse) return;
-        const dir = e.deltaY > 0 ? 1 : -1;
-        // At either end of the rail the wheel is handed back so the page can scroll on.
-        if ((dir > 0 && li >= LAST) || (dir < 0 && li <= 0)) return;
-        e.preventDefault();
-        fire(dir);
-      }, { passive: false });
+          fire(dir);
+        }, { passive: false });
 
-      let tx = 0, ty = 0, taken = false;
-      sc.addEventListener('touchstart', (e) => {
-        const t = e.touches[0]; tx = t.clientX; ty = t.clientY; taken = false;
-      }, { passive: true });
-      sc.addEventListener('touchmove', (e) => {
-        const t = e.touches[0], dx = t.clientX - tx, dy = t.clientY - ty;
-        if (taken || Math.abs(dx) < 24 || Math.abs(dx) <= Math.abs(dy)) return;
-        e.preventDefault();
-        taken = true;
-        fire(dx < 0 ? 1 : -1);
-      }, { passive: false });
+        let tx = 0, ty = 0, taken = false;
+        sc.addEventListener('touchstart', (e) => {
+          const t = e.touches[0]; tx = t.clientX; ty = t.clientY; taken = false;
+        }, { passive: true });
+        sc.addEventListener('touchmove', (e) => {
+          const t = e.touches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+          if (taken || Math.abs(dx) < 24 || Math.abs(dx) <= Math.abs(dy)) return;
+          e.preventDefault();
+          taken = true;
+          fire(dx < 0 ? 1 : -1);
+        }, { passive: false });
+      }
 
       window.addEventListener('resize', () => { measure(); paint(); settle(); }, { passive: true });
       if (prev) prev.addEventListener('click', () => nudge(-1));
@@ -1118,6 +1173,10 @@ class Component extends DCLogic {
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex') close(); });
 
       measure();
+      // On mobile the rail is shown permanently full: park the light at the end
+      // so paint() fills it to scaleX(1) and lights every stop. Nothing moves it
+      // afterward (the scroll handlers are desktop-only), so it just stays full.
+      if (isMobileTL) li = LAST;
       paint();
       settle();
 
@@ -1235,9 +1294,26 @@ class Component extends DCLogic {
       revealEls.forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; });
     }
 
-    // ---- scroll-scrub build sequence ----
+    // ---- build sequence: scroll-scrubbed on desktop, an autoplaying clip on phones ----
+    // See the `data-phone` rules in the stylesheet for the reasoning. Tested on
+    // capability rather than width alone, so a phone turned landscape (>760px
+    // wide) doesn't drop back to the 300vh scroll version mid-session.
+    const phoneMode = window.matchMedia('(max-width:760px)').matches
+      || window.matchMedia('(hover:none) and (pointer:coarse)').matches;
     const scroller = document.getElementById('vp-build-scroll');
-    if (scroller) scroller.style.height = buildScroll + 'vh';
+    if (scroller) {
+      // On phones the height stays auto (the stylesheet enforces it) — there is
+      // no scroll distance to scrub, because nothing is scrubbed. `data-clip`
+      // additionally reveals the playback controls, and is withheld under
+      // reduced-motion: that reader gets the finished frame and no invitation to
+      // replay an animation they've asked not to see.
+      if (phoneMode) {
+        scroller.setAttribute('data-phone', '1');
+        if (!reduced) scroller.setAttribute('data-clip', '1');
+      } else {
+        scroller.style.height = buildScroll + 'vh';
+      }
+    }
     const bar = document.getElementById('vp-build-bar');
     const numEl = document.getElementById('vp-stage-num');
     const labelEl = document.getElementById('vp-stage-label');
@@ -1358,39 +1434,91 @@ class Component extends DCLogic {
         else { if (skipLabel) skipLabel.textContent = 'SKIP BACK UP'; if (skipArrow) skipArrow.textContent = '\u2191'; }
       };
 
-      if (skipBtn) {
-        skipBtn.addEventListener('click', () => {
-          const y = window.scrollY || 0;
-          const pageTop = scroller.getBoundingClientRect().top + y;
-          const dest = scrollDir >= 0 ? pageTop + scroller.offsetHeight : Math.max(0, pageTop - 4);
-          window.scrollTo({ top: dest, behavior: reduced ? 'auto' : 'smooth' });
-        });
-      }
-      window.addEventListener('scroll', updateSkip, { passive: true });
-      document.addEventListener('scroll', updateSkip, { passive: true, capture: true });
-      window.addEventListener('resize', updateSkip, { passive: true });
-      let last = -1;
-      const poll = () => {
-        const y = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        if (y !== last) { last = y; updateSkip(); }
+      // The skip control (and the per-frame scroll poll that drives it) only
+      // exists because the desktop section is 300vh of pinned scrubbing. In phone
+      // mode the section is a normal-height block, so there is nothing to skip —
+      // the button is hidden and the polling loop never starts.
+      if (!phoneMode) {
+        if (skipBtn) {
+          skipBtn.addEventListener('click', () => {
+            const y = window.scrollY || 0;
+            const pageTop = scroller.getBoundingClientRect().top + y;
+            const dest = scrollDir >= 0 ? pageTop + scroller.offsetHeight : Math.max(0, pageTop - 4);
+            window.scrollTo({ top: dest, behavior: reduced ? 'auto' : 'smooth' });
+          });
+        }
+        window.addEventListener('scroll', updateSkip, { passive: true });
+        document.addEventListener('scroll', updateSkip, { passive: true, capture: true });
+        window.addEventListener('resize', updateSkip, { passive: true });
+        let last = -1;
+        const poll = () => {
+          const y = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+          if (y !== last) { last = y; updateSkip(); }
+          requestAnimationFrame(poll);
+        };
         requestAnimationFrame(poll);
-      };
-      requestAnimationFrame(poll);
-      updateSkip();
+        updateSkip();
+      }
 
       // ---- hybrid playback: cinematic autoplay on enter, but hands over to scroll-scrub the moment the user scrolls ----
-      const DUR = buildDurMs; // ms — autoplay clip length (tweakable via "Build speed")
+      // ms — autoplay clip length (tweakable via "Build speed"). Phones watch this
+      // straight through rather than scrubbing it, and the configured desktop
+      // length is tuned for scrub feel (35s here) — far too long to sit and watch
+      // on a phone. Cap it there to a short-video length.
+      const PHONE_DUR_CAP = 14000;
+      const DUR = phoneMode ? Math.min(buildDurMs, PHONE_DUR_CAP) : buildDurMs;
       // trapezoid velocity: soft ease-in, long constant-speed middle, soft ease-out — far more natural than a peaky cubic
+      const EASE_A = 0.2;                         // ramp fraction at each end
       const easeInOut = (x) => {
-        const a = 0.2, area = 1 - a;              // a = ramp fraction at each end
+        const a = EASE_A, area = 1 - a;
         if (x < a) return (x * x / (2 * a)) / area;
         if (x > 1 - a) { const y = 1 - x; return (area - y * y / (2 * a)) / area; }
         return (x - a / 2) / area;
+      };
+      // Inverse of the above. The progress track displays *eased* progress, so a
+      // drag has to map the finger's position back to clip time — without this the
+      // handle lands up to ~6 points away from the finger inside the ramps.
+      const easeInOutInv = (e) => {
+        const a = EASE_A, area = 1 - a;
+        const eRamp = (a / 2) / area;              // eased value where the ramp ends
+        if (e <= eRamp) return Math.sqrt(Math.max(0, e * area * 2 * a));
+        if (e <= 1 - eRamp) return e * area + a / 2;
+        return 1 - Math.sqrt(Math.max(0, (1 - e) * area * 2 * a));
       };
       let t0 = 0, playing = false, done = false, rafId = 0;
       let mode = 'auto';       // 'auto' = timed clip · 'scrub' = follows scroll
       let lastE = 0;           // last eased progress applied (for smooth mode handoff)
       let curScrub = 0;        // smoothed scrub position
+      // Linear (pre-easing) position in the clip. Phone mode pauses and seeks on
+      // this, and `needRebase` makes the next frame re-anchor t0 to it — that's
+      // what lets playback resume from a pause or a drag without jumping.
+      let linP = 0;
+      let needRebase = true;
+
+      // ---- phone playback controls ----
+      // These elements are hidden on desktop, so the helpers just no-op there
+      // rather than every call site having to check phoneMode.
+      const ctlBtn = document.getElementById('vp-build-ctl');
+      const ctlIcon = document.getElementById('vp-build-ctl-icon');
+      const ctlLabel = document.getElementById('vp-build-ctl-label');
+      const replayBtn = document.getElementById('vp-build-replay');
+      const timeEl = document.getElementById('vp-build-time');
+      const trackEl = document.getElementById('vp-build-track');
+      const PAUSE_GLYPH = '❙❙', PLAY_GLYPH = '▶';
+      const fmt = (s) => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+      // Cheap enough to run every frame — text only, no layout-affecting writes.
+      const syncTime = () => {
+        if (!phoneMode) return;
+        if (timeEl) timeEl.textContent = fmt(linP * DUR / 1000) + ' / ' + fmt(DUR / 1000);
+        if (trackEl) trackEl.setAttribute('aria-valuenow', String(Math.round(linP * 100)));
+      };
+      // Button state — only on actual play/pause/finish transitions.
+      const syncCtl = () => {
+        if (ctlIcon) ctlIcon.textContent = playing ? PAUSE_GLYPH : PLAY_GLYPH;
+        if (ctlLabel) ctlLabel.textContent = playing ? 'PAUSE' : (linP >= 1 ? 'REPLAY' : 'PLAY');
+        if (ctlBtn) ctlBtn.setAttribute('aria-label', (playing ? 'Pause' : 'Play') + ' build animation');
+        syncTime();
+      };
       const applyFrame = (e) => {
         lastE = e;
         updateUI(e);
@@ -1398,27 +1526,74 @@ class Component extends DCLogic {
         curF = f; targetF = f; drawFrame(f);
         if (renderImg) { const o = e > 0.93 ? Math.min(1, (e - 0.93) / 0.05) : 0; renderImg.style.opacity = o.toFixed(2); canvas.style.opacity = (1 - o).toFixed(2); }
         if (callout) callout.style.opacity = (e > 0.955 || e < 0.004) ? '0' : '1';
+        syncTime();
       };
       const tick = (now) => {
         if (mode !== 'auto') return;   // user took over → stop the clip
-        if (!t0) t0 = now;
-        const p = Math.min(1, (now - t0) / DUR);
-        applyFrame(easeInOut(p));
-        if (p < 1) rafId = requestAnimationFrame(tick);
-        else { playing = false; done = true; }
+        if (needRebase) { t0 = now - linP * DUR; needRebase = false; }
+        linP = Math.min(1, (now - t0) / DUR);
+        applyFrame(easeInOut(linP));
+        if (linP < 1) rafId = requestAnimationFrame(tick);
+        else { playing = false; done = true; syncCtl(); }
       };
       const play = () => {
         if (mode !== 'auto' || playing || done) return;
-        playing = true; t0 = 0;
+        playing = true; needRebase = true;
         cancelAnimationFrame(rafId);
         rafId = requestAnimationFrame(tick);
+        syncCtl();
       };
       const rewind = () => {
         cancelAnimationFrame(rafId);
         playing = false; done = false; t0 = 0;
         mode = 'auto'; curScrub = 0;
+        linP = 0; needRebase = true;
         applyFrame(0);
+        syncCtl();
       };
+
+      // Pause / resume / seek — the phone equivalents of scrubbing by scroll.
+      const pauseClip = () => {
+        playing = false;
+        cancelAnimationFrame(rafId);
+        syncCtl();
+      };
+      const resumeClip = () => {
+        if (linP >= 1) { linP = 0; done = false; }   // finished → tapping play restarts
+        playing = true; needRebase = true;
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(tick);
+        syncCtl();
+      };
+      if (phoneMode && !reduced) {
+        if (ctlBtn) ctlBtn.addEventListener('click', () => (playing ? pauseClip() : resumeClip()));
+        if (replayBtn) replayBtn.addEventListener('click', () => { rewind(); resumeClip(); });
+
+        // Draggable track — the phone stand-in for scrubbing by scroll.
+        if (trackEl) {
+          let dragging = false;
+          const seek = (clientX) => {
+            const r = trackEl.getBoundingClientRect();
+            if (!r.width) return;
+            const u = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+            linP = easeInOutInv(u);   // u is where the finger is == eased progress
+            done = u >= 1;
+            needRebase = true;
+            applyFrame(u);
+            syncCtl();
+          };
+          trackEl.addEventListener('pointerdown', (e) => {
+            dragging = true;
+            if (trackEl.setPointerCapture) { try { trackEl.setPointerCapture(e.pointerId); } catch (err) {} }
+            pauseClip();          // grabbing the track takes manual control
+            seek(e.clientX);
+          });
+          trackEl.addEventListener('pointermove', (e) => { if (dragging) seek(e.clientX); });
+          const endDrag = () => { dragging = false; };
+          trackEl.addEventListener('pointerup', endDrag);
+          trackEl.addEventListener('pointercancel', endDrag);
+        }
+      }
 
       // scroll progress through the pinned section (0 at pin start, 1 at pin end)
       const scrubProgress = () => {
@@ -1449,7 +1624,6 @@ class Component extends DCLogic {
         scrubPrev = now;
         requestAnimationFrame(scrubTick);
       };
-      requestAnimationFrame(scrubTick);
 
       // any intentional scroll input while the section is engaged snaps to scrub
       const onUserScroll = () => {
@@ -1458,11 +1632,21 @@ class Component extends DCLogic {
         const mid = window.innerHeight * 0.5;
         if (r.top <= mid && r.bottom > mid) toScrub();
       };
-      ['wheel', 'touchmove', 'keydown'].forEach((evt) =>
-        window.addEventListener(evt, onUserScroll, { passive: true }));
+
+      // Neither of these runs in phone mode. This is the heart of the mobile fix:
+      // on touch, *any* scroll is a `touchmove`, so simply scrolling toward the
+      // section used to kill the cinematic clip and hand the animation over to
+      // finger-scrubbing across 300vh. Phones keep the clip and get the buttons
+      // above instead; the scrub loop stays parked so it costs nothing.
+      if (!phoneMode) {
+        requestAnimationFrame(scrubTick);
+        ['wheel', 'touchmove', 'keydown'].forEach((evt) =>
+          window.addEventListener(evt, onUserScroll, { passive: true }));
+      }
 
       applyFrame(0);
-      if (reduced) { applyFrame(1); done = true; }
+      syncCtl();
+      if (reduced) { applyFrame(1); linP = 1; done = true; syncCtl(); }
       else if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((ents) => {
           ents.forEach((e) => {

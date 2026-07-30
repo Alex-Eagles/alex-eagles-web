@@ -1,0 +1,277 @@
+/* ============================================================================
+ * TrackRecord — "What we've won."
+ *
+ * Layout follows the v3 design: eyebrow rule, headline sharing a baseline with
+ * a right-aligned "Full history" link, a responsive card grid, then the long
+ * tail of results as a quiet footnote.
+ *
+ * Type note: the design draws these headlines in Barlow Condensed, but every
+ * other section on this page sets its headline in Alfa Slab One. A single
+ * section in a different display face reads as pasted-in, so the site's face
+ * wins here and the design's *structure* is what's carried over.
+ * ==========================================================================*/
+
+.tr-section {
+  padding: var(--space-section-y) 5%;
+  background: var(--bg-surface);
+}
+
+.tr-layout {
+  max-width: var(--maxw-content);
+  margin: 0 auto;
+}
+
+/* ─── Eyebrow ─────────────────────────────────────────────────────────────── */
+
+.tr-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* --sky is the palette's accent-for-text token; --brand is a fill color and
+ * lands at 2.3:1 on this surface. */
+.tr-eyebrow-index {
+  font-weight: 700;
+  color: var(--sky);
+}
+
+.tr-eyebrow-line {
+  flex: 0 0 60px;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+/* ─── Headline row ────────────────────────────────────────────────────────── */
+
+/* Headline and link sit on a shared baseline on wide screens, then stack. */
+.tr-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+
+.tr-headline {
+  margin: 0;
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(36px, 4.6vw, 54px);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.tr-headline-accent {
+  color: #e5484d;
+}
+
+.tr-cta {
+  padding: 14px 26px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-primary);
+  transition:
+    border-color var(--transition-base),
+    background var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.tr-cta:hover {
+  border-color: var(--brand);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.tr-cta:active {
+  transform: translateY(1px);
+}
+
+/* ─── Panel ───────────────────────────────────────────────────────────────── */
+
+/* A recessed shelf the cards sit on. The depth cue is the pair of shadows:
+ * an *inset* one along the top edge (light falls from above, so the panel's
+ * own lip casts down into itself) plus an outer drop shadow beneath, which
+ * together read as a slab lifted off the section rather than a flat block of
+ * a different color. */
+.tr-panel {
+  position: relative;
+  margin-top: 40px;
+  padding: 34px;
+  /* Darker than --card on purpose: the cards are the raised objects, so the
+     shelf under them has to sit lower in tone or the two merge. */
+  background: linear-gradient(180deg, #0d1529 0%, #090f1e 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  /* Inner shelf recess (so cards read as sitting on it) PLUS a strong layered
+     outer drop shadow that lifts the whole panel off the section as one solid
+     3D slab. */
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 18px 36px rgba(0, 0, 0, 0.42),
+    0 40px 80px rgba(0, 0, 0, 0.4);
+}
+
+/* Light mode can't use black for the recess — it turns the panel grey. A blue
+ * -tinted inset over a faintly cooler surface keeps the same "pressed in"
+ * read while the panel stays white-ish. The outer cast is neutral near-black at
+ * readable strength (blue-tinted faint shadows barely register on light), so
+ * the panel lifts off the section as a real 3D slab like dark mode. */
+:root[data-theme="light"] .tr-panel {
+  background: #f4f8ff;
+  box-shadow:
+    inset 0 2px 6px rgba(37, 99, 235, 0.12),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.9),
+    0 2px 6px rgba(15, 23, 42, 0.14),
+    0 18px 36px rgba(15, 23, 42, 0.18),
+    0 40px 80px rgba(15, 23, 42, 0.17);
+}
+
+/* ─── Cards ───────────────────────────────────────────────────────────────── */
+
+/* Three results, three columns. auto-fit rather than a hard `repeat(3, …)` so
+ * they drop to two-up and then one-up on their own as the viewport narrows. */
+.tr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Shape is unchanged — same padding, radius, min-height and top brand edge as
+ * before. What's new is the elevation: a three-stop shadow (tight contact
+ * shadow, mid, and a wide soft cast) so each card reads as a solid object
+ * standing on the panel, plus a 1px inner top highlight for the lit edge.
+ *
+ * Competition and title are top-anchored and tightly coupled. They used to be
+ * pushed apart to bottom-align titles across the row, but with a min-height
+ * above the tallest card's content that left a void in every card. */
+.tr-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 22px 22px;
+  background: linear-gradient(180deg, #1a2544 0%, #121b34 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow:
+    inset 0 2px 0 var(--brand),
+    inset 0 3px 0 -1px rgba(255, 255, 255, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 6px 14px rgba(0, 0, 0, 0.35),
+    0 14px 34px rgba(0, 0, 0, 0.3);
+  /* Named so the hover can tilt around the card's own base rather than its
+   * centre — the bottom edge stays planted on the panel as the top lifts. */
+  transform-origin: center bottom;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+}
+
+/* Real 3D lift in light mode. The old shadows were blue-tinted and very faint
+ * (0.10–0.13 alpha), so cards read as flat stickers on the panel. Dark mode
+ * gets its depth from stronger, neutral-dark casts — so does this now: a tight
+ * contact shadow, a mid, and a wide soft cast in near-black at readable alpha,
+ * plus a 1px white top highlight for the lit top edge. */
+:root[data-theme="light"] .tr-card {
+  background: var(--card);
+  box-shadow:
+    inset 0 2px 0 var(--brand),
+    inset 0 3px 0 -1px rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(15, 23, 42, 0.14),
+    0 6px 14px rgba(15, 23, 42, 0.16),
+    0 16px 34px rgba(15, 23, 42, 0.16);
+}
+
+/* Lifts off the panel and throws a longer shadow, as if picked up toward the
+ * viewer. The shadow growing faster than the travel is what sells the height
+ * — a card that only moves reads as sliding, not rising. */
+.tr-card:hover,
+.tr-card:focus-within {
+  border-color: var(--brand);
+  transform: translateY(-8px) scale(1.015);
+  box-shadow:
+    inset 0 2px 0 var(--brand),
+    inset 0 3px 0 -1px rgba(255, 255, 255, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.32),
+    0 14px 28px rgba(0, 0, 0, 0.42),
+    0 30px 60px rgba(0, 0, 0, 0.38);
+}
+
+:root[data-theme="light"] .tr-card:hover,
+:root[data-theme="light"] .tr-card:focus-within {
+  box-shadow:
+    inset 0 2px 0 var(--brand),
+    inset 0 3px 0 -1px rgba(255, 255, 255, 0.95),
+    0 3px 6px rgba(15, 23, 42, 0.18),
+    0 18px 32px rgba(15, 23, 42, 0.22),
+    0 34px 64px rgba(15, 23, 42, 0.2);
+}
+
+/* The hover is decorative motion, so it goes away — but the border and shadow
+ * still change, which is what actually signals "this is the one". */
+@media (prefers-reduced-motion: reduce) {
+  .tr-card:hover,
+  .tr-card:focus-within {
+    transform: none;
+  }
+}
+
+.tr-card-event {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Condensed rather than the section's slab face: "Best Technical Design
+ * Report" is four words that have to hold together at display size, and a
+ * slab that wide would wrap to four cramped lines. */
+.tr-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 2.6vw, 36px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+
+/* Inline, so "5th" and "Overall" read as one phrase with the placement picked
+ * out rather than sitting on its own line. The red matches "First." in
+ * Features' headline — the page's one accent for a standout word. */
+.tr-card-place,
+.tr-card-accent {
+  color: #e5484d;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .tr-head {
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .tr-grid {
+    margin-top: 32px;
+  }
+}

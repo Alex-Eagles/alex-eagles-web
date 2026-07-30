@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import crew2026_1280 from "@/assets/team/crew-2026-1280.webp";
 import crew2026_1920 from "@/assets/team/crew-2026-1920.webp";
 import crew2026_2560 from "@/assets/team/crew-2026-2560.webp";
@@ -51,6 +51,33 @@ export default function Team({
       setYear(yearParam as RosterYear);
     }
   }, [yearParam]);
+
+  /*
+   * Deep-link scroll: arriving with a hash (e.g. /team#software or
+   * /team#leadership — the homepage org chart links here) scrolls that section
+   * into view. The roster content mounts a frame after this page does, so a
+   * single scroll can fire before the target exists; poll a few animation
+   * frames until it's in the DOM, then stop. scroll-margin-top on the section
+   * anchors keeps them clear of the fixed navbar.
+   */
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash) return;
+    const id = decodeURIComponent(hash.slice(1));
+    let frames = 0;
+    let raf = 0;
+    const tryScroll = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (frames++ < 30) raf = requestAnimationFrame(tryScroll);
+    };
+    raf = requestAnimationFrame(tryScroll);
+    return () => cancelAnimationFrame(raf);
+  }, [hash, year]);
+
   const scrollY = useScrollPosition();
 
   /*

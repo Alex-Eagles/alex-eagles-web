@@ -58,6 +58,138 @@ export const LATEST_POSTS: BlogPost[] = [
   },
 ];
 
+export interface AwardLine {
+  /** Placement, where the award has one. Named awards carry no ranking. */
+  place?: string;
+  title: string;
+  competition: string;
+}
+
+export interface AwardYear {
+  year: string;
+  awards: AwardLine[];
+}
+
+/**
+ * Every competition result, kept chronological to match the History page's
+ * source data. This is what the hero ticker scrolls through; the "What we've
+ * won" cards lead with FEATURED_AWARDS below instead. 2013 is the founding
+ * year and won nothing, so it isn't listed here.
+ */
+export const AWARD_YEARS: AwardYear[] = [
+  {
+    year: "2017",
+    awards: [
+      { place: "2nd Place", title: "Best Design", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2018",
+    awards: [
+      { place: "1st Place", title: "Best Design", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2019",
+    awards: [
+      { place: "3rd Place", title: "Best Design", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2020",
+    awards: [
+      { place: "3rd Place", title: "Overall", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2021",
+    awards: [
+      { title: "Best Design Award", competition: "UAVC" },
+      { place: "4th Place", title: "Overall", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2022",
+    awards: [
+      { place: "1st Place", title: "Best Design", competition: "SAE Aero Design" },
+      {
+        place: "1st Place",
+        title: "Best Presentation",
+        competition: "SAE Aero Design",
+      },
+    ],
+  },
+  {
+    year: "2023",
+    awards: [
+      { place: "11th Place", title: "Overall", competition: "SAE Aero Design" },
+    ],
+  },
+  {
+    year: "2024",
+    awards: [{ place: "5th Place", title: "Overall", competition: "UAVC" }],
+  },
+  {
+    year: "2025",
+    awards: [
+      { place: "5th Place", title: "Overall", competition: "UAVC" },
+      { title: "Best Technical Design Report", competition: "UAVC" },
+      { title: "Best Technical Design Report", competition: "SUAS" },
+    ],
+  },
+];
+
+/** Newest first, which is the order the ticker shows. */
+export const AWARD_YEARS_LATEST_FIRST: AwardYear[] = [...AWARD_YEARS].reverse();
+
+/**
+ * A run of title text, optionally picked out in the accent color. Titles are
+ * segmented rather than plain strings so a card can highlight the words that
+ * name the award ("Technical Design") without the component having to
+ * string-match its own copy.
+ */
+export interface AwardTitlePart {
+  text: string;
+  accent?: boolean;
+}
+
+export interface FeaturedAward extends Omit<AwardLine, "title"> {
+  title: AwardTitlePart[];
+  year: string;
+}
+
+/** The award name both 2025 report wins share, highlight and all. */
+const TECHNICAL_DESIGN_REPORT: AwardTitlePart[] = [
+  { text: "Best " },
+  { text: "Technical Design", accent: true },
+  { text: " Report" },
+];
+
+/**
+ * The three results the homepage leads with — the whole of the 2025 season.
+ * The full record lives on the History page, which the section links out to.
+ */
+export const FEATURED_AWARDS: FeaturedAward[] = [
+  {
+    place: "5th",
+    title: [{ text: "Overall" }],
+    competition: "UAVC",
+    year: "2025",
+  },
+  { title: TECHNICAL_DESIGN_REPORT, competition: "UAVC", year: "2025" },
+  { title: TECHNICAL_DESIGN_REPORT, competition: "SUAS", year: "2025" },
+];
+
+/** One flat line per award, for the hero ticker. */
+export const TICKER_RESULTS: string[] = AWARD_YEARS_LATEST_FIRST.flatMap(
+  ({ year, awards }) =>
+    awards.map((award) =>
+      [award.place, award.title, `${award.competition} ${year}`]
+        .filter(Boolean)
+        .join(" · "),
+    ),
+);
+
 export interface Sponsor {
   name: string;
   tag: string;

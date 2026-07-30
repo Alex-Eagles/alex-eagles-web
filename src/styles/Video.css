@@ -1,8 +1,8 @@
 /* "Watch Us Fly" — a giant outlined "SUAS" watermark with an overlapping
  * year, a bold 3-line headline, and a CTA to the Vehicles page. Theme-aware
  * (dark-mode default, white + light-blue for light mode, matching the team
- * logo) — unlike Hero, this section no longer carries a photo/video
- * background (moved to Hero), so there's no reason to lock it dark. */
+ * logo), including the flight photo behind the copy column — both themes get
+ * their own shot and their own wash over it. */
 :root,
 :root[data-theme="dark"] {
   --wf-bg: #0a0e1f;
@@ -10,24 +10,32 @@
   --wf-text-muted-1: rgba(255, 255, 255, 0.72);
   --wf-text-muted-2: rgba(255, 255, 255, 0.55);
   --wf-border-soft: rgba(255, 255, 255, 0.2);
-  --wf-accent: #3b82f6;
-  --wf-accent-bright: #60a5fa;
-  --wf-cta-hover: #60a5fa;
+  --wf-accent: var(--sky);
+  --wf-accent-bright: var(--brand-light);
+  --wf-cta-hover: var(--brand-light);
   --wf-watermark-year: rgba(255, 255, 255, 0.12);
   --wf-watermark-stroke: rgba(59, 130, 246, 0.4);
 }
 
 :root[data-theme="light"] {
-  --wf-bg: #ffffff;
-  --wf-text: #0b1220;
-  --wf-text-muted-1: #3b5a8a;
-  --wf-text-muted-2: #5b7bab;
-  --wf-border-soft: #dbeafe;
-  --wf-accent: #3b82f6;
-  --wf-accent-bright: #1d4ed8;
-  --wf-cta-hover: #1d4ed8;
-  --wf-watermark-year: rgba(16, 21, 43, 0.1);
-  --wf-watermark-stroke: rgba(59, 130, 246, 0.45);
+  /* Team-page light canvas (--team-bg), the "deeper" band tone — alternates
+     with the white TrackRecord section above it. This is what shows at the
+     section's edges, outside the photo, so surrounding sections still read as
+     a normal light-mode band. */
+  --wf-bg: #e4e8ee;
+  /* Light mode now mirrors the dark-mode vibe over the photo: the same moody
+     blue fog with LIGHT text on top (rather than the old near-black text over a
+     bright wash). The copy sits on the fogged photo, so it reads white/soft-blue
+     like dark mode — clear, and confined to this section. */
+  --wf-text: #f4f7ff;
+  --wf-text-muted-1: rgba(240, 245, 255, 0.82);
+  --wf-text-muted-2: rgba(240, 245, 255, 0.62);
+  --wf-border-soft: rgba(210, 224, 255, 0.28);
+  --wf-accent: #9ec2ff;
+  --wf-accent-bright: #b9d2ff;
+  --wf-cta-hover: var(--brand-light);
+  --wf-watermark-year: rgba(255, 255, 255, 0.1);
+  --wf-watermark-stroke: rgba(120, 160, 235, 0.42);
 }
 
 .video {
@@ -37,7 +45,81 @@
   display: flex;
   align-items: center;
   background: var(--wf-bg);
-  padding: 100px 6%;
+  padding: var(--space-section-y) 6%;
+}
+
+/* ─── Photo backdrop ──────────────────────────────────────────────────────── */
+
+/* A flight photo per theme, swapped in CSS so the browser only ever fetches
+ * the rule that matches. Anchored to the left half and masked to nothing well
+ * before the right column, so it sits behind the copy and never runs under
+ * the video frame. */
+.video-photo {
+  position: absolute;
+  /* Bleed the box a little past every edge so the blur below doesn't leave a
+   * soft transparent halo at the section's borders. */
+  inset: -40px;
+  width: auto;
+  z-index: 0;
+  background-image: url("/Home/flight-backdrop-dark.jpg");
+  /* `contain`-ish framing so the whole aircraft reads instead of a cropped,
+   * zoomed-in slice — sized to ~112% and centred, which shows most of the frame
+   * while still covering the wide/short section. */
+  background-size: cover;
+  background-position: center 42%;
+  /* The fog: a soft blur plus a slight darken so the shot reads as an
+   * atmospheric backdrop rather than a sharp photo competing with the copy. */
+  filter: blur(0px) brightness(0.82) saturate(0.9);
+}
+
+:root[data-theme="light"] .video-photo {
+  background-image: url("/Home/flight-backdrop-light.webp");
+  /* Light mode: don't darken — a gentle blur and a whisper of lift, kept far
+   * from the old blown-out white wash. The tint comes from the scrim below. */
+  filter: blur(0px) brightness(1) saturate(1.2);
+}
+
+/* The atmosphere layer over the photo — a deep blue "fog" that pools at the
+ * top-left where the copy sits and thins toward the aircraft, so the words have
+ * a moody bed to sit on without hiding the shot. Dark mode leans navy; light
+ * mode leans a soft cool haze (NOT the old bright white). */
+.video-photo-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(
+      120% 90% at 18% 34%,
+      rgba(10, 16, 40, 0.72) 0%,
+      rgba(10, 16, 40, 0.34) 42%,
+      rgba(10, 16, 40, 0) 78%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 12, 32, 0.5) 0%,
+      rgba(8, 12, 32, 0.28) 40%,
+      rgba(8, 12, 32, 0.42) 100%
+    );
+}
+
+:root[data-theme="light"] .video-photo-scrim {
+  /* Same moody blue fog as dark mode so the vibe matches, but a touch lighter
+   * and a hair more blue — enough to seat the light copy clearly, while reading
+   * as the airier "light-mode" take rather than a straight copy of dark. Fully
+   * inside .video (overflow:hidden), so it never touches neighbouring sections. */
+  background:
+    radial-gradient(
+      120% 90% at 18% 34%,
+      rgba(14, 22, 52, 0.66) 0%,
+      rgba(14, 22, 52, 0.3) 44%,
+      rgba(14, 22, 52, 0) 80%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(12, 18, 44, 0.44) 0%,
+      rgba(12, 18, 44, 0.22) 42%,
+      rgba(12, 18, 44, 0.36) 100%
+    );
 }
 
 /* decorative watermark — sits in normal document flow, stacked above the
@@ -68,10 +150,45 @@
   -webkit-text-stroke: 2px var(--wf-watermark-stroke);
 }
 
+/* Copy on the left, the flight video on the right. The right column is given
+ * slightly more room than the left so a 16:9 frame lands at a useful size
+ * rather than being squeezed by the headline column. */
+.video-layout {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--maxw-content);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 72px;
+}
+
 .video-content {
   position: relative;
   z-index: 2;
   max-width: 640px;
+}
+
+/* ─── Flight video ────────────────────────────────────────────────────────── */
+
+.video-embed {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--wf-border-soft);
+  border-radius: var(--radius-xl);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: var(--elevation-3);
+}
+
+.video-embed-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .video-eyebrow {
@@ -98,9 +215,12 @@
   background: var(--wf-border-soft);
 }
 
+/* Sized to keep "Built in-house." on one line: the copy column lost width when
+ * the video moved in beside it, and at the old 58px cap the longest line broke
+ * across its own hyphen ("BUILT IN- / HOUSE."). */
 .video-headline {
   font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(36px, 4.6vw, 58px);
+  font-size: clamp(30px, 3.4vw, 46px);
   line-height: 1.05;
   text-transform: uppercase;
   color: var(--wf-text);
@@ -127,7 +247,7 @@
 .video-cta {
   display: inline-block;
   padding: 14px 24px;
-  background: var(--wf-accent);
+  background: var(--brand);
   color: #ffffff;
   font-family: var(--font-sans);
   font-weight: 700;
@@ -142,9 +262,37 @@
   transform: translateY(-2px);
 }
 
+/* Stack before the two columns get too narrow to hold a headline and a 16:9
+ * frame side by side. */
+@media (max-width: 960px) {
+  .video-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+
+  .video {
+    min-height: 0;
+  }
+}
+
 @media (max-width: 720px) {
   .video {
     min-height: 0;
-    padding: 90px 8% 70px;
+    padding: 78px 6% 64px;
+  }
+
+  .video-watermark-main {
+    font-size: clamp(40px, 13vw, 60px);
+  }
+
+  .video-eyebrow {
+    margin-bottom: 20px;
+    font-size: 11px;
+  }
+
+  .video-copy {
+    margin-bottom: 26px;
+    font-size: 15px;
+    line-height: 1.65;
   }
 }
