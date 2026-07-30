@@ -1,11 +1,11 @@
-export type Category = 'SUAS' | 'UAVC' | 'Engineering' | 'Team';
+export type Category = 'SUAS' | 'UAVC' | 'Test Flight' | 'Manufacturing' | 'Team';
 
 export interface GalleryItem {
   id: string;
   title: string;
   imageUrl?: string;
   videoUrl?: string;
-  category: Category;
+  category?: Category;
 }
 
 export const galleryData: GalleryItem[] = [
@@ -17,9 +17,9 @@ export const galleryData: GalleryItem[] = [
   },
   {
     id: '2',
-    title: 'Testing',
-    imageUrl: 'gallery/IMG_8014.webp',
-    category: 'Engineering',
+    title: 'Assemble Quad',
+    imageUrl: 'gallery/assemble1stquaddroneinwarsha.webp',
+    category: 'Manufacturing',
   },
   {
     id: '3',
@@ -29,9 +29,9 @@ export const galleryData: GalleryItem[] = [
   },
   {
     id: '4',
-    title: 'First Hover Test',
-    imageUrl: 'gallery/IMG_8021.webp',
-    category: 'Engineering',
+    title: 'Quad Design',
+    imageUrl: 'gallery/Design.webp',
+    category: 'Manufacturing',
   },
   {
     id: '5',
@@ -43,19 +43,19 @@ export const galleryData: GalleryItem[] = [
     id: '6',
     title: 'Preparing for Flight',
     imageUrl: 'gallery/IMG_8415.webp',
-    category: 'SUAS',
+    category: 'Test Flight',
   },
   {
     id: '7',
     title: 'Pre-flight Checks',
     imageUrl: 'gallery/IMG_8421.webp',
-    category: 'Engineering',
+    category: 'Test Flight',
   },
   {
     id: '8',
-    title: 'Close Look',
-    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785326707/web_Vid01_lxolln.mp4',
-    category: 'Engineering',
+    title: 'EGY',
+    imageUrl: 'gallery/EGY.webp',
+    category: 'Team',
   },
   {
     id: '9',
@@ -67,7 +67,7 @@ export const galleryData: GalleryItem[] = [
     id: '10',
     title: 'Art',
     imageUrl: 'gallery/IMG02.webp',
-    category: 'Engineering',
+    category: 'Team',
   },
   {
     id: '11',
@@ -85,7 +85,7 @@ export const galleryData: GalleryItem[] = [
     id: '13',
     title: 'Gravity Defying',
     videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785327036/web_Video-02_rwyubm.mp4',
-    category: 'SUAS',
+    category: 'Test Flight',
   },
   {
     id: '14',
@@ -103,7 +103,7 @@ export const galleryData: GalleryItem[] = [
     id: '16',
     title: 'Test Drone 2025',
     videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785326777/TestDrone2025_imttd4.mp4',
-    category: 'SUAS',
+    category: 'Test Flight',
   },
   {
     id: '17',
@@ -121,7 +121,7 @@ export const galleryData: GalleryItem[] = [
     id: '19',
     title: 'Hexa Test Drone',
     imageUrl: 'gallery/Hexa_test_drone 2026.webp',
-    category: 'Engineering',
+    category: 'Test Flight',
   },
   {
     id: '20',
@@ -157,7 +157,7 @@ export const galleryData: GalleryItem[] = [
     id: '25',
     title: 'Itay Drone',
     imageUrl: 'gallery/Suas2025Drone(Itay).webp',
-    category: 'Engineering',
+    category: 'SUAS',
   },
   {
     id: '26',
@@ -167,9 +167,9 @@ export const galleryData: GalleryItem[] = [
   },
   {
     id: '27',
-    title: 'Test Drone',
+    title: 'َQuad Test Drone',
     imageUrl: 'gallery/test_drone.webp',
-    category: 'Engineering',
+    category: 'Test Flight',
   },
   {
     id: '28',
@@ -182,5 +182,77 @@ export const galleryData: GalleryItem[] = [
     title: 'After Award Best Design Report Suas 2025',
     imageUrl: 'gallery/After_Award_BesT_Design_Report_Suas 2025.webp',
     category: 'SUAS',
+  },
+  {
+    id: '30',
+    title: 'Quad Sunset',
+    imageUrl: 'gallery/onGround.webp',
+    category: 'Test Flight',
+  },
+  {
+    id: '31',
+    title: 'UAVC 2026',
+    imageUrl: 'gallery/UAVC2026Team.webp',
+    category: 'UAVC',
+  },
+  {
+    id: '32',
+    title: 'Uavc 2026',
+    imageUrl: 'gallery/UavcTeam.webp',
+    category: 'Team',
+  },
+  {
+    id: '33',
+    title: '',
+    imageUrl: 'gallery/wood.webp',
+    category: 'Manufacturing',
+  },
+  {
+    id: '34',
+    title: 'Hexa Test Flight',
+    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785376560/opt_Hexa_Test_Flight_xcjiye.mp4',
+    category: 'Test Flight',
+  },
+  {
+    id: '35',
+    title: '',
+    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785376333/opt_manufacturing_mylkui.mp4',
+    category: 'Manufacturing',
+  },
+  {
+    id: '36',
+    title: 'Quad Test Flight',
+    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785376211/opt_opt_1st_quad_in_front_of_warsha_Test_flight_pkyx5w.mp4',
+    category: 'Test Flight',
+  },
+  {
+    id: '37',
+    title: 'CNC Machining',
+    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785376015/opt_cnc_z6xacp.mp4',
+    category: 'Manufacturing',
+  },
+  {
+    id: '38',
+    title: 'Laser Cutting Drone',
+    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785376006/opt_laser_cutting_drone_nig7wi.mp4',
+    category: 'Manufacturing',
+  },
+  {
+    id: '39',
+    title: 'Quad Test',
+    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785375999/opt_team_1st_quad_in_front_of_warsha_iuemcf.mp4',
+    category: 'Test Flight',
+  },
+  {
+    id: '40',
+    title: 'Working Drone Team',
+    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785375928/opt_working_drone_team_gp6foi.mp4',
+    category: 'Manufacturing',
+  },
+  {
+    id: '41',
+    title: 'Test Flight Close-up',
+    videoUrl: 'https://res.cloudinary.com/sjdpexft/video/upload/q_auto,f_auto/v1785376614/opt_TestFlightClose_xmur5n.mp4',
+    category: 'Test Flight',
   },
 ];

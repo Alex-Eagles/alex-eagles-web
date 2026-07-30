@@ -20,7 +20,7 @@ import { galleryData } from '@/data/gallery';
 type GalleryItem = (typeof galleryData)[number];
 type ViewMode = 'grid' | 'reel';
 
-const CATEGORIES = ['All', 'SUAS', 'UAVC', 'Engineering', 'Team'] as const;
+const CATEGORIES = ['All', 'SUAS', 'UAVC','Test Flight', 'Manufacturing', 'Team'] as const;
 type Category = (typeof CATEGORIES)[number];
 
 function getCSSVar(name: string): string {
@@ -138,7 +138,10 @@ function ParticleGrid({ mouseX, mouseY }: { mouseX: MotionValue<number>; mouseY:
 function TargetCursor({ x, y, locked, label }: { x: MotionValue<number>; y: MotionValue<number>; locked: boolean; label: string | null; }) {
   const corner = (position: string) => `absolute h-3 w-3 transition-colors duration-300 ${position} ${locked ? 'border-white' : 'border-white/50'}`;
   return (
-    <m.div className="pointer-events-none fixed left-0 top-0 z-[90] mix-blend-difference text-white" style={{ x, y }}>
+    <m.div 
+      className="pointer-events-none fixed left-0 top-0 z-[90] mix-blend-difference text-white" 
+      style={{ x, y, willChange: 'transform' }}
+    >
       <m.div
         className="relative -translate-x-1/2 -translate-y-1/2"
         animate={{ width: locked ? 46 : 22, height: locked ? 46 : 22, rotate: locked ? 45 : 0 }}
@@ -197,8 +200,10 @@ function CardChrome({ item }: { item: GalleryItem }) {
 function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }) {
   const [videoReady, setVideoReady] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   
+  const [isLandscapeImg, setIsLandscapeImg] = useState(false); 
+  
+  const containerRef = useRef<HTMLDivElement>(null);
   const shouldPreload = useInView(containerRef, { once: true, margin: "800px" });
   const isInViewport = useInView(containerRef, { margin: "100px" });
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -212,13 +217,19 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
   }, [isInViewport, videoReady]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full pointer-events-none">
+    <div ref={containerRef} className="relative w-full h-full pointer-events-none bg-[#050505]">
       <img 
         src={item.imageUrl} 
         alt={item.title}
         loading={priority ? "eager" : "lazy"}
-        onLoad={() => setImgLoaded(true)}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${(!imgLoaded || (videoReady && isInViewport)) ? 'opacity-0' : 'opacity-100'}`} 
+        onLoad={(e) => {
+          const { naturalWidth, naturalHeight } = e.currentTarget;
+          if (naturalWidth / naturalHeight > 1.35) {
+            setIsLandscapeImg(true);
+          }
+          setImgLoaded(true);
+        }}
+        className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${isLandscapeImg ? 'object-contain' : 'object-cover'} ${(!imgLoaded || (videoReady && isInViewport)) ? 'opacity-0' : 'opacity-100'}`} 
       />
       
       {item.videoUrl && (shouldPreload || priority) && (
@@ -548,13 +559,38 @@ export default function Gallery() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
+  useEffect(() => {
+    if (!isFinePointer) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      cursorX.set(e.clientX);
+      cursorY.set(e.clientY);
+      globalMouseX.set(e.clientX);
+      globalMouseY.set(e.clientY);
+      setPointerInField(true);
+    };
+
+    const handleMouseLeave = () => {
+      setPointerInField(false);
+      setHoveredCardId(null);
+      setCursorLabel(null);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [isFinePointer, cursorX, cursorY, globalMouseX, globalMouseY]);
+
   const isMobile = !isFinePointer;
   const cursorActive = isFinePointer && !prefersReducedMotion && pointerInField && selectedImageIndex === null;
 
   const filteredItems = useMemo(() => {
     if (activeCategory === 'All') return items;
     return items.filter(item => {
-      // Safe fallback to 'Team' if category is missing in the data
       const itemCategory = (item as any).category || 'Team';
       return itemCategory === activeCategory;
     });
@@ -621,12 +657,16 @@ export default function Gallery() {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div
-        className={`relative min-h-screen bg-[var(--bg-primary)] pt-24 pb-12 px-6 overflow-hidden ${cursorActive ? 'cursor-none [&_*]:cursor-none' : ''}`}
-        onMouseEnter={() => setPointerInField(true)}
-        onMouseMove={(e) => { cursorX.set(e.clientX); cursorY.set(e.clientY); globalMouseX.set(e.clientX); globalMouseY.set(e.clientY); }}
-        onMouseLeave={() => { setPointerInField(false); setHoveredCardId(null); setCursorLabel(null); }}
-      >
+      <div className="relative min-h-screen bg-[var(--bg-primary)] pt-24 pb-12 px-6 overflow-hidden">
+        
+        {cursorActive && (
+          <style>{`
+            * {
+              cursor: none !important;
+            }
+          `}</style>
+        )}
+
         {!prefersReducedMotion && !isMobile && <ParticleGrid mouseX={globalMouseX} mouseY={globalMouseY} />}
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
           <div className="absolute -top-[30%] -left-[15%] h-[70vmax] w-[70vmax] rounded-full opacity-[0.04]" style={{ background: 'radial-gradient(circle, var(--brand-light) 0%, transparent 70%)' }} />
@@ -648,21 +688,24 @@ export default function Gallery() {
 
         <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }} className="relative z-10 max-w-[1600px] mx-auto mb-8 flex flex-col sm:flex-row justify-between items-center gap-6 border-b border-[var(--border-subtle)] pb-4 px-2">
           
-          <div className="w-full sm:w-1/3 flex justify-center sm:justify-start order-2 sm:order-1">
+          <div className="w-full sm:w-1/4 flex justify-center sm:justify-start order-2 sm:order-1 shrink-0">
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-fg-muted">
               <TelemetryCounter target={filteredItems.length} reduceMotion={prefersReducedMotion} /> {filteredItems.length === 1 ? 'frame' : 'frames'} captured
             </p>
           </div>
 
-          <div className="w-full sm:w-1/3 flex justify-start sm:justify-center overflow-x-auto hide-scrollbar order-1 sm:order-2">
-            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)]">
+          <div 
+            className="w-full sm:w-auto flex justify-start sm:justify-center overflow-x-auto [&::-webkit-scrollbar]:hidden order-1 sm:order-2" 
+            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
+          >
+            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] w-max sm:mx-auto">
               {CATEGORIES.map((cat) => (
                 <button 
                   key={cat} 
                   onClick={() => { setActiveCategory(cat); setSelectedImageIndex(null); }} 
                   onMouseEnter={() => setCursorLabel(`Filter: ${cat}`)} 
                   onMouseLeave={() => setCursorLabel(null)} 
-                  className={`relative flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[10px] sm:text-xs uppercase tracking-[0.1em] transition-colors duration-300 whitespace-nowrap ${activeCategory === cat ? 'text-fg' : 'text-fg-muted hover:text-fg'}`}
+                  className={`relative flex items-center gap-1.5 rounded-full px-3 sm:px-4 py-1.5 font-mono text-[10px] sm:text-xs uppercase tracking-[0.1em] transition-colors duration-300 whitespace-nowrap ${activeCategory === cat ? 'text-fg' : 'text-fg-muted hover:text-fg'}`}
                 >
                   {activeCategory === cat && <m.span layoutId="categoryPill" transition={{ type: 'spring', stiffness: 340, damping: 30 }} className="absolute inset-0 rounded-full bg-[var(--brand-glow)] border border-[var(--border-subtle)]" />}
                   <span className="relative z-10">{cat}</span>
@@ -671,7 +714,7 @@ export default function Gallery() {
             </div>
           </div>
 
-          <div className="w-full sm:w-1/3 flex justify-center sm:justify-end order-3">
+          <div className="w-full sm:w-1/4 flex justify-center sm:justify-end order-3 shrink-0">
             <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)]">
               {viewModes.map(({ key, label, icon: Icon }) => (
                 <button key={key} onClick={() => setViewMode(key)} onMouseEnter={() => setCursorLabel(label)} onMouseLeave={() => setCursorLabel(null)} aria-label={`${label} view`} className={`relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.1em] transition-colors duration-300 ${viewMode === key ? 'text-fg' : 'text-fg-muted hover:text-fg'}`}>
@@ -754,7 +797,7 @@ export default function Gallery() {
           </m.div>
         </AnimatePresence>
 
-        {cursorActive && <TargetCursor x={springX} y={springY} locked={!!cursorLabel} label={cursorLabel} />}
+        {cursorActive && <TargetCursor x={cursorX} y={cursorY} locked={!!cursorLabel} label={cursorLabel} />}
 
         <AnimatePresence>
           {activeItem && (
