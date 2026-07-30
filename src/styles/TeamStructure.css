@@ -502,9 +502,18 @@
   transition: transform 0.25s ease, background 0.25s ease;
 }
 
-.tp-box--lead:hover {
-  transform: translateY(-5px);
-  background: var(--ts-card-bg);
+/* Gated to real hover devices only: a bare `:hover` rule on a clickable
+ * element makes touch browsers eat the first tap just to trigger the hover
+ * state, requiring a second tap before `click` even fires. Stacked on top of
+ * this component's own tap-to-reveal/tap-to-navigate logic, that meant
+ * Mechanical/Autonomous Lead — the only nodes with a raw `:hover` rule —
+ * needed 3 taps instead of 2 on touch, while the plain subteam pills (no
+ * `:hover` rule) worked fine. */
+@media (hover: hover) {
+  .tp-box--lead:hover {
+    transform: translateY(-5px);
+    background: var(--ts-card-bg);
+  }
 }
 
 /* both leads flash together — the branch point is where the single bulb's
