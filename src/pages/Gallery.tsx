@@ -342,7 +342,7 @@ function SpatialGridCard({
 }
 
 function OrbitalReelCard({
-  item, index, isDimmed, reduceMotion, isMobile, containerRef, onOpen, onHover, isDragging, priority
+  item, index, isDimmed, reduceMotion, containerRef, onOpen, onHover, isDragging, priority
 }: {
   item: GalleryItem; index: number; isDimmed: boolean; reduceMotion: boolean; isMobile: boolean; containerRef: RefObject<HTMLDivElement | null>; onOpen: () => void; onHover: HoverFn; isDragging: boolean; priority: boolean;
 }) {
@@ -456,8 +456,6 @@ export default function Gallery() {
 
   const cursorX = useMotionValue(0);
   const cursorY = useMotionValue(0);
-  const springX = useSpring(cursorX, { stiffness: 300, damping: 26, mass: 0.5 });
-  const springY = useSpring(cursorY, { stiffness: 300, damping: 26, mass: 0.5 });
   const globalMouseX = useMotionValue(0);
   const globalMouseY = useMotionValue(0);
 
