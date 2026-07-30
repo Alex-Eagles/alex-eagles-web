@@ -4,7 +4,6 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import IntroSplash from "@/components/ui/IntroSplash";
 import { useSearchHighlight } from "@/hooks/useSearchHighlight";
 
 import Homepage from "@/pages/Homepage";
@@ -43,8 +42,6 @@ export default function App() {
 
   return (
     <>
-      <IntroSplash />
-
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>

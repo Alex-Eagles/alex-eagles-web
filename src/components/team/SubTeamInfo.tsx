@@ -1,8 +1,12 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { slugify, type SubTeamIconKey } from "@/data/team";
 import { SubTeamIcon } from "./SubTeamIcon";
 import styles from "./SubTeamInfo.module.css";
+
+/** Below this the card is a viewport-pinned sheet rather than anchored to the chip. */
+const MOBILE_QUERY = "(max-width: 640px)";
 
 /**
  * SubTeamInfo — the themed info chip beside a sub-team title, and the card that
@@ -29,14 +33,36 @@ export function SubTeamInfo({
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const iconKey = (icon ?? slugify(name)) as SubTeamIconKey;
 
-  // Close on outside click or Escape while open.
+  /*
+   * On phones the card is rendered through a portal to <body> so it can pin to
+   * the viewport as a bottom sheet. The Team page's .rosterContent keeps a
+   * `transform` applied (its fade-in animation uses fill-mode: both), and any
+   * transformed ancestor makes a `position: fixed` child resolve against that
+   * ancestor instead of the viewport — which is why the card landed far down
+   * the page and looked like it never opened. The portal lifts it out of that
+   * ancestor. Desktop keeps it anchored beside the chip, unportalled.
+   */
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // Close on outside click or Escape while open. The card may be portalled out
+  // of the wrap, so a click counts as "inside" if it's in either node.
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (wrapRef.current?.contains(target) || cardRef.current?.contains(target)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -49,6 +75,39 @@ export function SubTeamInfo({
     };
   }, [open]);
 
+  const card = (
+    <div
+      ref={cardRef}
+      id={panelId}
+      className={styles.card}
+      role="dialog"
+      aria-label={`${name} — what we do`}
+      data-open={open}
+      /* Carried inline so theming survives the portal, which renders the card
+         outside .wrap where the --accent custom property is set. */
+      style={{ "--accent": accent } as CSSProperties}
+      {...(open ? {} : { inert: "" })}
+    >
+      <div className={styles.cardHead}>
+        <span className={styles.cardIcon} aria-hidden>
+          <SubTeamIcon name={iconKey} size={22} />
+        </span>
+        <span className={styles.cardTitle}>{name}</span>
+        <button
+          type="button"
+          className={styles.close}
+          onClick={() => setOpen(false)}
+          aria-label="Close"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <p className={styles.cardBody}>{blurb}</p>
+    </div>
+  );
+
   return (
     <div className={styles.wrap} ref={wrapRef} style={{ "--accent": accent } as CSSProperties}>
       <button
@@ -60,35 +119,13 @@ export function SubTeamInfo({
         aria-label={`What the ${name} team does`}
         data-open={open}
       >
-        <SubTeamIcon name={iconKey} size={20} />
+        <span className={styles.chipIcon} aria-hidden>
+          <SubTeamIcon name={iconKey} size={18} />
+        </span>
+        <span className={styles.chipLabel}>What we do</span>
       </button>
 
-      <div
-        id={panelId}
-        className={styles.card}
-        role="dialog"
-        aria-label={`${name} — what we do`}
-        data-open={open}
-        {...(open ? {} : { inert: "" })}
-      >
-        <div className={styles.cardHead}>
-          <span className={styles.cardIcon} aria-hidden>
-            <SubTeamIcon name={iconKey} size={22} />
-          </span>
-          <span className={styles.cardTitle}>{name}</span>
-          <button
-            type="button"
-            className={styles.close}
-            onClick={() => setOpen(false)}
-            aria-label="Close"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <p className={styles.cardBody}>{blurb}</p>
-      </div>
+      {isMobile ? createPortal(card, document.body) : card}
     </div>
   );
 }
