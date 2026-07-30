@@ -353,7 +353,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Primary Structural Design & CAD",
     excerpt:
       "The wing's internal structure was laid out spar by spar and rib by rib, with lightening holes cut into each rib to save weight without giving up bending or torsional stiffness. Preliminary CAD models tied the layout together, checking that the structure could actually be built and assembled the way it was designed.",
-    image: "/images/blog/aerodesign-stability-empennage.jpg",
+    image: "/images/blog/aerodesign-structural-cad.jpg",
     category: "aerodesign",
     date: "Mar – Early Apr 2026",
     author: "Aerodesign Team",
@@ -364,7 +364,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     title: "Airfoil Selection & Wing Optimization",
     excerpt:
       "Candidate airfoils, including the FX 76-MP-120, LNV109A, and MH 113, were compared against a refined NACA 6313 profile across lift, drag, and moment polars to find the best balance of stall behavior and efficiency. The winning section was then carried into the aspect ratio and taper ratio study, locking in the wing geometry used for the rest of the aerodynamic analysis.",
-    image: "/images/blog/aerodesign-structural-cad.jpg",
+    image: "/images/blog/aerodesign-stability-empennage.jpg",
     category: "aerodesign",
     date: "Feb – Early Mar 2026",
     author: "Aerodesign Team",
