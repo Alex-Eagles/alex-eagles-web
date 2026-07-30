@@ -71,6 +71,41 @@
   @media (max-width:460px) {
     .vpg-page { grid-template-columns:1fr !important; grid-auto-rows:64vw !important; }
   }
+  /* ---- GALLERY focus (expanded) view: on desktop it's a big stage beside a
+     128px vertical thumbnail rail. On phones that side-by-side leaves the stage
+     a narrow sliver, so stack it: a full-width, taller stage on top, and turn
+     the rail into a horizontal scrolling strip of thumbnails underneath. The
+     stage/rail carry inline flex styles, so these need !important. */
+  @media (max-width:760px) {
+    #vpg-focus > div {
+      flex-direction:column !important;
+      height:auto !important;
+      gap:12px !important;
+    }
+    #vpg-stage {
+      flex:0 0 auto !important;
+      width:100% !important;
+      height:min(64vh,60vw + 220px) !important;
+      min-height:300px !important;
+    }
+    /* Give the caption room and shrink the big title so it doesn't overrun. */
+    #vpg-title { font-size:22px !important; }
+    #vpg-desc { font-size:12.5px !important; }
+    #vpg-rail {
+      flex:0 0 auto !important;
+      flex-direction:row !important;
+      width:100% !important;
+      overflow-x:auto !important;
+      overflow-y:hidden !important;
+      padding-right:0 !important;
+      padding-bottom:4px !important;
+      -webkit-overflow-scrolling:touch;
+    }
+    #vpg-rail .vpg-railitem {
+      width:112px !important;
+      height:72px !important;
+    }
+  }
   /* ---- DEVELOPMENT PROCESS timeline ---- */
   #vpt-scroller { scrollbar-width:none; scroll-padding-left:max(32px,calc((100vw - 1180px) / 2 + 32px)); }
   #vpt-scroller::-webkit-scrollbar { display:none; }

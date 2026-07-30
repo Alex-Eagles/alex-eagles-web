@@ -7,7 +7,6 @@ import {
   BRAND,
   CONTACT,
   NAV_LINKS,
-  NEWSLETTER_EMAIL,
   SOCIALS,
   VEHICLE_NAMES,
 } from "@/data/site";
@@ -140,25 +139,11 @@ export default function Footer() {
               </a>
             </div>
 
-            {/* Newsletter — opens the visitor's mail client with a pre-written
-                "I'm interested" message addressed to the team (see NEWSLETTER_EMAIL
-                in site.ts). No backend needed. */}
+            {/* Newsletter — sends the signup through EmailJS (see
+                handleNewsletterSubmit) and reflects sending/sent/error state. */}
             <form
               className="bg-elevated border border-border rounded-[10px] p-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const input = e.currentTarget.elements.namedItem(
-                  "footer-email",
-                ) as HTMLInputElement | null;
-                const email = input?.value.trim();
-                if (!email) return;
-                const subject = encodeURIComponent(NEWSLETTER_EMAIL.subject);
-                const body = encodeURIComponent(
-                  NEWSLETTER_EMAIL.body.replace("{email}", email),
-                );
-                window.location.href = `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
-                e.currentTarget.reset();
-              }}
+              onSubmit={handleNewsletterSubmit}
             >
               <label
                 htmlFor="footer-email"
