@@ -61,11 +61,13 @@
   color: #c7d4ee;
 }
 
+/* Same red as "First." in the Features headline and the award cards, rather
+ * than --spark's orange — one accent for the whole page. */
 .hero-eyebrow-rule {
   flex: none;
   width: 34px;
   height: 3px;
-  background: var(--spark);
+  background: #e5484d;
 }
 
 /* ─── Headline + lede ─────────────────────────────────────────────────────── */
