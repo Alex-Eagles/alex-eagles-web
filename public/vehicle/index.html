@@ -182,6 +182,10 @@
     #vpt-track { padding-left:20px; padding-right:20px; }
     #vpt-scroller { scroll-padding-left:20px; }
     #vp-process > div:nth-of-type(3) { padding-left:20px; padding-right:20px; }
+    /* No scroll-scrub on phones: hide the prev/next arrows and the travelling
+       head dot; the rail shows fully filled and cards scroll natively. */
+    #vpt-prev, #vpt-next, #vpt-head { display:none !important; }
+    #vpt-fill { transition:none !important; }
   }
   @media (prefers-reduced-motion: reduce) {
     .vpt-item { opacity:1; transform:none; transition:none; }
@@ -866,6 +870,11 @@ class Component extends DCLogic {
       const panel = document.getElementById('vpt-panel');
       const scrim = document.getElementById('vpt-scrim');
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      // Mobile: the scroll-scrub timeline (gesture advances a rail light one stop
+      // at a time, JS drives the fill/head) is heavy and unintuitive on a phone.
+      // There, the rail is shown fully filled and the cards just scroll natively;
+      // the prev/next arrows are removed. Desktop keeps the full behaviour.
+      const isMobileTL = window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
 
       const DATA = [
         { badge: 'Design', title: 'Concept & design.', date: 'November 2025',
@@ -994,38 +1003,43 @@ class Component extends DCLogic {
       // always drives the light. Vertical input only does so for what looks like a
       // wheel mouse, which has no other way to reach the timeline, so trackpad users
       // keep ordinary page scrolling and use the horizontal axis instead.
-      let sawDeltaX = false;
-      sc.addEventListener('wheel', (e) => {
-        if (e.deltaX !== 0) sawDeltaX = true;
-        const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-        if (horiz || e.shiftKey) {
-          const d = horiz ? e.deltaX : e.deltaY;
-          if (!d) return;
+      // Scroll-scrub takeover (wheel + horizontal swipe advancing the rail light)
+      // is desktop-only. On phones these are skipped entirely so the scroller
+      // scrolls natively with no interception or per-frame JS.
+      if (!isMobileTL) {
+        let sawDeltaX = false;
+        sc.addEventListener('wheel', (e) => {
+          if (e.deltaX !== 0) sawDeltaX = true;
+          const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+          if (horiz || e.shiftKey) {
+            const d = horiz ? e.deltaX : e.deltaY;
+            if (!d) return;
+            e.preventDefault();
+            if (Math.abs(d) > 4) fire(d > 0 ? 1 : -1);
+            return;
+          }
+          if (!e.deltaY) return;
+          const wheelMouse = !sawDeltaX && (e.deltaMode !== 0 || Math.abs(e.deltaY) >= 100);
+          if (!wheelMouse) return;
+          const dir = e.deltaY > 0 ? 1 : -1;
+          // At either end of the rail the wheel is handed back so the page can scroll on.
+          if ((dir > 0 && li >= LAST) || (dir < 0 && li <= 0)) return;
           e.preventDefault();
-          if (Math.abs(d) > 4) fire(d > 0 ? 1 : -1);
-          return;
-        }
-        if (!e.deltaY) return;
-        const wheelMouse = !sawDeltaX && (e.deltaMode !== 0 || Math.abs(e.deltaY) >= 100);
-        if (!wheelMouse) return;
-        const dir = e.deltaY > 0 ? 1 : -1;
-        // At either end of the rail the wheel is handed back so the page can scroll on.
-        if ((dir > 0 && li >= LAST) || (dir < 0 && li <= 0)) return;
-        e.preventDefault();
-        fire(dir);
-      }, { passive: false });
+          fire(dir);
+        }, { passive: false });
 
-      let tx = 0, ty = 0, taken = false;
-      sc.addEventListener('touchstart', (e) => {
-        const t = e.touches[0]; tx = t.clientX; ty = t.clientY; taken = false;
-      }, { passive: true });
-      sc.addEventListener('touchmove', (e) => {
-        const t = e.touches[0], dx = t.clientX - tx, dy = t.clientY - ty;
-        if (taken || Math.abs(dx) < 24 || Math.abs(dx) <= Math.abs(dy)) return;
-        e.preventDefault();
-        taken = true;
-        fire(dx < 0 ? 1 : -1);
-      }, { passive: false });
+        let tx = 0, ty = 0, taken = false;
+        sc.addEventListener('touchstart', (e) => {
+          const t = e.touches[0]; tx = t.clientX; ty = t.clientY; taken = false;
+        }, { passive: true });
+        sc.addEventListener('touchmove', (e) => {
+          const t = e.touches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+          if (taken || Math.abs(dx) < 24 || Math.abs(dx) <= Math.abs(dy)) return;
+          e.preventDefault();
+          taken = true;
+          fire(dx < 0 ? 1 : -1);
+        }, { passive: false });
+      }
 
       window.addEventListener('resize', () => { measure(); paint(); settle(); }, { passive: true });
       if (prev) prev.addEventListener('click', () => nudge(-1));
@@ -1159,6 +1173,10 @@ class Component extends DCLogic {
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex') close(); });
 
       measure();
+      // On mobile the rail is shown permanently full: park the light at the end
+      // so paint() fills it to scaleX(1) and lights every stop. Nothing moves it
+      // afterward (the scroll handlers are desktop-only), so it just stays full.
+      if (isMobileTL) li = LAST;
       paint();
       settle();
 

@@ -125,6 +125,39 @@ export interface BlogPostFull {
 /** Posts are kept newest-first (matching each `date`'s end-of-range), oldest at the bottom. */
 export const BLOG_POSTS: BlogPostFull[] = [
   {
+    id: 50,
+    title: "Tuning Day: Getting From \"It Flies\" to \"It Flies Well\"",
+    excerpt:
+      "A drone that hovers isn't the same as one ready to fly a mission, and our tuning process earns its way there one stage at a time. We don't touch autonomous modes until manual flight looks right: first flights are flown in Stabilize with light inputs, backing off the PID gains and retrying if the response is wrong, then Altitude Hold, then a notch filter tuned from the early vibration signature to cut motor-frequency noise before it reaches the controller. After every stage we pull the logs — vibration, magnetometer interference, GPS quality, every sensor reading gets checked before we advance, so a small problem is caught while it's still small instead of surfacing three stages later. Loiter is where AutoTune comes in, with a log review after each pass to decide if it's good enough, and only then do we verify Takeoff, Return-to-Launch, and Guided before any full mission is attempted. The proof is in a post-tune log: commanded 4.18° roll, got 4.14°; commanded −5.04° pitch, got −4.96° — under 0.1° of tracking error on both axes, which is the whole point of everything above.",
+    image: "/images/blog/fw-tuning-pitch.png",
+    category: "firmware",
+    date: "2026",
+    author: "Firmware Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 51,
+    title: "How Far Can We Push the Link Before It Breaks?",
+    excerpt:
+      "An autonomous aircraft still needs a working link to the ground — for telemetry, for control authority if a human has to step in, and for the video and image data our whole detection pipeline depends on — so we test that link long before competition day. We walked it out the simplest way possible: physically increasing the distance between the aircraft and the Herelink ground unit while watching link quality, and it held telemetry, control, and video out to roughly 1.5 km — comfortably past anything the mission requires, exactly the margin you want between \"should work\" and \"does work.\" Range isn't the only way a link degrades, so we also deliberately obstructed the antennas mid-flight; control authority and video held with no loss, a good sign it degrades gracefully rather than dropping the moment line-of-sight isn't perfect. RF is exactly where subtle problems hide until the one day they don't — a link that's never been pushed past its comfortable range is one you're trusting on faith. Ours has already been pushed, on purpose, before it ever had to matter.",
+    image: "/images/blog/fw-herelink-range.jpeg",
+    category: "firmware",
+    date: "2026",
+    author: "Firmware Team",
+    readTime: "2 min read",
+  },
+  {
+    id: 52,
+    title: "From Five Meters to Three Centimeters",
+    excerpt:
+      "Standard GPS is good enough to get an aircraft to roughly the right place, but \"roughly\" isn't good enough when the mission is dropping a payload on a specific target. We measured it directly — hovering over a marked ground target and over known surveyed coordinates with no correction, positioning error came out to 3–5 meters. Fine for most navigation; for a delivery mission scored on precision, it's the difference between hitting the target and missing by enough to matter. Turning on RTK corrections brought that same error down to as low as 3 centimeters — roughly a hundred-fold improvement, measured the same way on the same aircraft. That's not incremental; it's the difference between \"approximately there\" and \"exactly there.\" Sub-meter accuracy isn't a nice-to-have for payload delivery, it's the actual requirement the mission is scored against, and standard GPS simply can't get there on its own no matter how good the rest of the system is — RTK was the one piece that made the required accuracy possible at all.",
+    image: "/images/blog/fw-rtk-gps.jpeg",
+    category: "firmware",
+    date: "2026",
+    author: "Firmware Team",
+    readTime: "2 min read",
+  },
+  {
     id: 45,
     title: "Building Our Custom Ground Control Station",
     excerpt:

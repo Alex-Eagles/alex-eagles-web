@@ -114,21 +114,30 @@
   background: linear-gradient(180deg, #0d1529 0%, #090f1e 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
+  /* Inner shelf recess (so cards read as sitting on it) PLUS a strong layered
+     outer drop shadow that lifts the whole panel off the section as one solid
+     3D slab. */
   box-shadow:
     inset 0 2px 6px rgba(0, 0, 0, 0.35),
     inset 0 -1px 0 rgba(255, 255, 255, 0.05),
-    var(--elevation-3);
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 18px 36px rgba(0, 0, 0, 0.42),
+    0 40px 80px rgba(0, 0, 0, 0.4);
 }
 
 /* Light mode can't use black for the recess — it turns the panel grey. A blue
  * -tinted inset over a faintly cooler surface keeps the same "pressed in"
- * read while the panel stays white-ish. */
+ * read while the panel stays white-ish. The outer cast is neutral near-black at
+ * readable strength (blue-tinted faint shadows barely register on light), so
+ * the panel lifts off the section as a real 3D slab like dark mode. */
 :root[data-theme="light"] .tr-panel {
   background: #f4f8ff;
   box-shadow:
     inset 0 2px 6px rgba(37, 99, 235, 0.12),
     inset 0 -1px 0 rgba(255, 255, 255, 0.9),
-    var(--elevation-2);
+    0 2px 6px rgba(15, 23, 42, 0.14),
+    0 18px 36px rgba(15, 23, 42, 0.18),
+    0 40px 80px rgba(15, 23, 42, 0.17);
 }
 
 /* ─── Cards ───────────────────────────────────────────────────────────────── */
@@ -175,13 +184,19 @@
     transform var(--transition-base);
 }
 
+/* Real 3D lift in light mode. The old shadows were blue-tinted and very faint
+ * (0.10–0.13 alpha), so cards read as flat stickers on the panel. Dark mode
+ * gets its depth from stronger, neutral-dark casts — so does this now: a tight
+ * contact shadow, a mid, and a wide soft cast in near-black at readable alpha,
+ * plus a 1px white top highlight for the lit top edge. */
 :root[data-theme="light"] .tr-card {
   background: var(--card);
   box-shadow:
     inset 0 2px 0 var(--brand),
-    0 1px 2px rgba(37, 99, 235, 0.1),
-    0 6px 14px rgba(37, 99, 235, 0.13),
-    0 14px 34px rgba(37, 99, 235, 0.12);
+    inset 0 3px 0 -1px rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(15, 23, 42, 0.14),
+    0 6px 14px rgba(15, 23, 42, 0.16),
+    0 16px 34px rgba(15, 23, 42, 0.16);
 }
 
 /* Lifts off the panel and throws a longer shadow, as if picked up toward the
@@ -203,9 +218,10 @@
 :root[data-theme="light"] .tr-card:focus-within {
   box-shadow:
     inset 0 2px 0 var(--brand),
-    0 2px 4px rgba(37, 99, 235, 0.12),
-    0 14px 28px rgba(37, 99, 235, 0.18),
-    0 30px 60px rgba(37, 99, 235, 0.16);
+    inset 0 3px 0 -1px rgba(255, 255, 255, 0.95),
+    0 3px 6px rgba(15, 23, 42, 0.18),
+    0 18px 32px rgba(15, 23, 42, 0.22),
+    0 34px 64px rgba(15, 23, 42, 0.2);
 }
 
 /* The hover is decorative motion, so it goes away — but the border and shadow

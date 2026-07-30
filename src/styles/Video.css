@@ -18,17 +18,24 @@
 }
 
 :root[data-theme="light"] {
-  --wf-bg: #ffffff;
-  --wf-text: #0b1220;
-  /* Deepened from #3b5a8a: this copy now sits over a photo, not flat white. */
-  --wf-text-muted-1: #2b4670;
-  --wf-text-muted-2: #4a6a99; /* was #5b7bab: 4.32:1, under AA at 13px */
-  --wf-border-soft: #dbeafe;
-  --wf-accent: var(--sky);
-  --wf-accent-bright: var(--brand-light);
+  /* Team-page light canvas (--team-bg), the "deeper" band tone — alternates
+     with the white TrackRecord section above it. This is what shows at the
+     section's edges, outside the photo, so surrounding sections still read as
+     a normal light-mode band. */
+  --wf-bg: #e4e8ee;
+  /* Light mode now mirrors the dark-mode vibe over the photo: the same moody
+     blue fog with LIGHT text on top (rather than the old near-black text over a
+     bright wash). The copy sits on the fogged photo, so it reads white/soft-blue
+     like dark mode — clear, and confined to this section. */
+  --wf-text: #f4f7ff;
+  --wf-text-muted-1: rgba(240, 245, 255, 0.82);
+  --wf-text-muted-2: rgba(240, 245, 255, 0.62);
+  --wf-border-soft: rgba(210, 224, 255, 0.28);
+  --wf-accent: #9ec2ff;
+  --wf-accent-bright: #b9d2ff;
   --wf-cta-hover: var(--brand-light);
-  --wf-watermark-year: rgba(16, 21, 43, 0.1);
-  --wf-watermark-stroke: rgba(59, 130, 246, 0.45);
+  --wf-watermark-year: rgba(255, 255, 255, 0.1);
+  --wf-watermark-stroke: rgba(120, 160, 235, 0.42);
 }
 
 .video {
@@ -49,55 +56,70 @@
  * the video frame. */
 .video-photo {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 62%;
+  /* Bleed the box a little past every edge so the blur below doesn't leave a
+   * soft transparent halo at the section's borders. */
+  inset: -40px;
+  width: auto;
   z-index: 0;
   background-image: url("/Home/flight-backdrop-dark.jpg");
+  /* `contain`-ish framing so the whole aircraft reads instead of a cropped,
+   * zoomed-in slice — sized to ~112% and centred, which shows most of the frame
+   * while still covering the wide/short section. */
   background-size: cover;
-  background-position: left center;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    #000 0%,
-    #000 38%,
-    transparent 80%
-  );
-  mask-image: linear-gradient(90deg, #000 0%, #000 38%, transparent 80%);
+  background-position: center 42%;
+  /* The fog: a soft blur plus a slight darken so the shot reads as an
+   * atmospheric backdrop rather than a sharp photo competing with the copy. */
+  filter: blur(0px) brightness(0.82) saturate(0.9);
 }
 
 :root[data-theme="light"] .video-photo {
-  background-image: url("/Home/flight-backdrop-light.jpg");
+  background-image: url("/Home/flight-backdrop-light.webp");
+  /* Light mode: don't darken — a gentle blur and a whisper of lift, kept far
+   * from the old blown-out white wash. The tint comes from the scrim below. */
+  filter: blur(0px) brightness(1) saturate(1.2);
 }
 
-/* Top-weighted only: enough shade under the watermark and eyebrow to lift them
- * off the photo, fully clear by 55% so the shot still reads at full strength.
- * Light mode veils white rather than dark, since its copy is near-black. */
+/* The atmosphere layer over the photo — a deep blue "fog" that pools at the
+ * top-left where the copy sits and thins toward the aircraft, so the words have
+ * a moody bed to sit on without hiding the shot. Dark mode leans navy; light
+ * mode leans a soft cool haze (NOT the old bright white). */
 .video-photo-scrim {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(6, 10, 20, 0.72) 0%,
-    rgba(6, 10, 20, 0.34) 28%,
-    transparent 55%
-  );
+  background:
+    radial-gradient(
+      120% 90% at 18% 34%,
+      rgba(10, 16, 40, 0.72) 0%,
+      rgba(10, 16, 40, 0.34) 42%,
+      rgba(10, 16, 40, 0) 78%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 12, 32, 0.5) 0%,
+      rgba(8, 12, 32, 0.28) 40%,
+      rgba(8, 12, 32, 0.42) 100%
+    );
 }
 
-/* Runs further down than the dark one. Dark mode's copy is white and reads
- * over the photo unaided, so its shade can stop at the eyebrow; light mode
- * sets the same copy in near-black, which vanishes into the airframe without
- * cover. Reframing the shot was tried first and made it worse: the drone
- * spans the whole frame, so no crop puts the text on open grass. */
 :root[data-theme="light"] .video-photo-scrim {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.86) 0%,
-    rgba(255, 255, 255, 0.66) 34%,
-    rgba(255, 255, 255, 0.52) 62%,
-    transparent 88%
-  );
+  /* Same moody blue fog as dark mode so the vibe matches, but a touch lighter
+   * and a hair more blue — enough to seat the light copy clearly, while reading
+   * as the airier "light-mode" take rather than a straight copy of dark. Fully
+   * inside .video (overflow:hidden), so it never touches neighbouring sections. */
+  background:
+    radial-gradient(
+      120% 90% at 18% 34%,
+      rgba(14, 22, 52, 0.66) 0%,
+      rgba(14, 22, 52, 0.3) 44%,
+      rgba(14, 22, 52, 0) 80%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(12, 18, 44, 0.44) 0%,
+      rgba(12, 18, 44, 0.22) 42%,
+      rgba(12, 18, 44, 0.36) 100%
+    );
 }
 
 /* decorative watermark — sits in normal document flow, stacked above the
@@ -250,17 +272,6 @@
 
   .video {
     min-height: 0;
-  }
-}
-
-@media (max-width: 960px) {
-  /* One column now, so a photo masked to the left 62% just cuts off mid-page.
-     Full width with a vertical fade instead. */
-  .video-photo {
-    width: 100%;
-    background-position: center;
-    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 46%, transparent 88%);
-    mask-image: linear-gradient(180deg, #000 0%, #000 46%, transparent 88%);
   }
 }
 

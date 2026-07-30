@@ -1,7 +1,12 @@
 import { Fragment, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Wrench, Cpu } from "lucide-react";
 import "../styles/TeamStructure.css";
+
+/* Slugify matches src/data/team.ts: section anchor ids on /team are
+ * slugify(sectionName), and the leadership block is #leadership. Keep this in
+ * step with that file if a section is renamed. */
+const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 /**
  * The two roles above the split. `lit` picks up the existing traveling-light
@@ -70,14 +75,32 @@ const LEADS = [
 export default function TeamStructure() {
   /** Which role is being hovered or focused. `null` = nothing, chart at rest. */
   const [activeId, setActiveId] = useState(null);
+  const navigate = useNavigate();
 
   /* Props shared by every hoverable node. Descriptions stay in the DOM at all
    * times (only visually collapsed), so assistive tech can read what a
-   * subsystem owns without needing to trigger the hover at all. */
-  const nodeProps = (id) => ({
+   * subsystem owns without needing to trigger the hover at all.
+   *
+   * `to` (optional) makes the node navigate to a /team anchor on click or
+   * Enter/Space — the top roles go to #leadership, each subteam pill to its own
+   * section. Nodes with a target get button semantics + a pointer cursor. */
+  const nodeProps = (id, to) => ({
     tabIndex: 0,
     onMouseEnter: () => setActiveId(id),
     onFocus: () => setActiveId(id),
+    ...(to
+      ? {
+          role: "link",
+          style: { cursor: "pointer" },
+          onClick: () => navigate(to),
+          onKeyDown: (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              navigate(to);
+            }
+          },
+        }
+      : {}),
   });
 
   const nodeClass = (base, id) =>
@@ -127,7 +150,7 @@ export default function TeamStructure() {
                     `tp-box tp-box--top tp-box--lit-${role.lit}`,
                     role.id,
                   )}
-                  {...nodeProps(role.id)}
+                  {...nodeProps(role.id, "/team#leadership")}
                 >
                   <span className="tp-node-head">{role.title}</span>
                   <span className="tp-node-desc">
@@ -192,7 +215,7 @@ export default function TeamStructure() {
                           <div
                             className={nodeClass("tp-owns-item", childId)}
                             key={child.name}
-                            {...nodeProps(childId)}
+                            {...nodeProps(childId, `/team#${slugify(child.name)}`)}
                           >
                             <span className="tp-node-head">{child.name}</span>
                             <span className="tp-node-desc">

@@ -28,7 +28,9 @@
  * barely-there) borders/grid/glow, so it still reads as a technical
  * diagram rather than washing out flat. */
 :root[data-theme="light"] {
-  --ts-bg: #ffffff;
+  /* Team-page light canvas (--team-bg), the "deeper" band tone — alternates
+     with the white sections above/below so the section reads as separated. */
+  --ts-bg: #e4e8ee;
   --ts-text: #0b1220;
   --ts-text-muted-1: #3b5a8a;
   --ts-text-muted-2: #4a6a99; /* was #5b7bab: 4.32:1, under AA at 11-13px */
