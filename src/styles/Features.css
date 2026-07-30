@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   background: #0a0e1f;
-  padding: 100px 6%;
+  padding: var(--space-section-y) 6%;
 }
 
 .features-bg {
@@ -36,6 +36,26 @@
     rgba(10, 14, 31, 0.4) 68%,
     rgba(10, 14, 31, 0.65) 100%
   );
+}
+
+/* Bottom fade — blurs/fades the photo into the same fixed dark navy the rest
+ * of this section uses (#0a0e1f, matching .features' own background), not
+ * Team Overview's background color. This section is a fixed-dark look
+ * regardless of theme (see file header) — the fade needs to match that, or
+ * light mode gets a jarring dark-photo-into-white-stripe seam. */
+.features-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 110px;
+  z-index: 1;
+  background: linear-gradient(to bottom, transparent 0%, #0a0e1f 100%);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 100%);
+  pointer-events: none;
 }
 
 /* giant faint year, top-right */

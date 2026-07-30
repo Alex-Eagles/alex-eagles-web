@@ -1,8 +1,8 @@
 /* "Watch Us Fly" — a giant outlined "SUAS" watermark with an overlapping
  * year, a bold 3-line headline, and a CTA to the Vehicles page. Theme-aware
  * (dark-mode default, white + light-blue for light mode, matching the team
- * logo) — unlike Hero, this section no longer carries a photo/video
- * background (moved to Hero), so there's no reason to lock it dark. */
+ * logo), including the flight photo behind the copy column — both themes get
+ * their own shot and their own wash over it. */
 :root,
 :root[data-theme="dark"] {
   --wf-bg: #0a0e1f;
@@ -10,9 +10,9 @@
   --wf-text-muted-1: rgba(255, 255, 255, 0.72);
   --wf-text-muted-2: rgba(255, 255, 255, 0.55);
   --wf-border-soft: rgba(255, 255, 255, 0.2);
-  --wf-accent: #3b82f6;
-  --wf-accent-bright: #60a5fa;
-  --wf-cta-hover: #60a5fa;
+  --wf-accent: var(--sky);
+  --wf-accent-bright: var(--brand-light);
+  --wf-cta-hover: var(--brand-light);
   --wf-watermark-year: rgba(255, 255, 255, 0.12);
   --wf-watermark-stroke: rgba(59, 130, 246, 0.4);
 }
@@ -20,12 +20,13 @@
 :root[data-theme="light"] {
   --wf-bg: #ffffff;
   --wf-text: #0b1220;
-  --wf-text-muted-1: #3b5a8a;
-  --wf-text-muted-2: #5b7bab;
+  /* Deepened from #3b5a8a: this copy now sits over a photo, not flat white. */
+  --wf-text-muted-1: #2b4670;
+  --wf-text-muted-2: #4a6a99; /* was #5b7bab: 4.32:1, under AA at 13px */
   --wf-border-soft: #dbeafe;
-  --wf-accent: #3b82f6;
-  --wf-accent-bright: #1d4ed8;
-  --wf-cta-hover: #1d4ed8;
+  --wf-accent: var(--sky);
+  --wf-accent-bright: var(--brand-light);
+  --wf-cta-hover: var(--brand-light);
   --wf-watermark-year: rgba(16, 21, 43, 0.1);
   --wf-watermark-stroke: rgba(59, 130, 246, 0.45);
 }
@@ -37,7 +38,66 @@
   display: flex;
   align-items: center;
   background: var(--wf-bg);
-  padding: 100px 6%;
+  padding: var(--space-section-y) 6%;
+}
+
+/* ─── Photo backdrop ──────────────────────────────────────────────────────── */
+
+/* A flight photo per theme, swapped in CSS so the browser only ever fetches
+ * the rule that matches. Anchored to the left half and masked to nothing well
+ * before the right column, so it sits behind the copy and never runs under
+ * the video frame. */
+.video-photo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 62%;
+  z-index: 0;
+  background-image: url("/Home/flight-backdrop-dark.jpg");
+  background-size: cover;
+  background-position: left center;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 0%,
+    #000 38%,
+    transparent 80%
+  );
+  mask-image: linear-gradient(90deg, #000 0%, #000 38%, transparent 80%);
+}
+
+:root[data-theme="light"] .video-photo {
+  background-image: url("/Home/flight-backdrop-light.jpg");
+}
+
+/* Top-weighted only: enough shade under the watermark and eyebrow to lift them
+ * off the photo, fully clear by 55% so the shot still reads at full strength.
+ * Light mode veils white rather than dark, since its copy is near-black. */
+.video-photo-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 10, 20, 0.72) 0%,
+    rgba(6, 10, 20, 0.34) 28%,
+    transparent 55%
+  );
+}
+
+/* Runs further down than the dark one. Dark mode's copy is white and reads
+ * over the photo unaided, so its shade can stop at the eyebrow; light mode
+ * sets the same copy in near-black, which vanishes into the airframe without
+ * cover. Reframing the shot was tried first and made it worse: the drone
+ * spans the whole frame, so no crop puts the text on open grass. */
+:root[data-theme="light"] .video-photo-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.86) 0%,
+    rgba(255, 255, 255, 0.66) 34%,
+    rgba(255, 255, 255, 0.52) 62%,
+    transparent 88%
+  );
 }
 
 /* decorative watermark — sits in normal document flow, stacked above the
@@ -68,10 +128,45 @@
   -webkit-text-stroke: 2px var(--wf-watermark-stroke);
 }
 
+/* Copy on the left, the flight video on the right. The right column is given
+ * slightly more room than the left so a 16:9 frame lands at a useful size
+ * rather than being squeezed by the headline column. */
+.video-layout {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--maxw-content);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 72px;
+}
+
 .video-content {
   position: relative;
   z-index: 2;
   max-width: 640px;
+}
+
+/* ─── Flight video ────────────────────────────────────────────────────────── */
+
+.video-embed {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--wf-border-soft);
+  border-radius: var(--radius-xl);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: var(--elevation-3);
+}
+
+.video-embed-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .video-eyebrow {
@@ -98,9 +193,12 @@
   background: var(--wf-border-soft);
 }
 
+/* Sized to keep "Built in-house." on one line: the copy column lost width when
+ * the video moved in beside it, and at the old 58px cap the longest line broke
+ * across its own hyphen ("BUILT IN- / HOUSE."). */
 .video-headline {
   font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(36px, 4.6vw, 58px);
+  font-size: clamp(30px, 3.4vw, 46px);
   line-height: 1.05;
   text-transform: uppercase;
   color: var(--wf-text);
@@ -127,7 +225,7 @@
 .video-cta {
   display: inline-block;
   padding: 14px 24px;
-  background: var(--wf-accent);
+  background: var(--brand);
   color: #ffffff;
   font-family: var(--font-sans);
   font-weight: 700;
@@ -142,9 +240,48 @@
   transform: translateY(-2px);
 }
 
+/* Stack before the two columns get too narrow to hold a headline and a 16:9
+ * frame side by side. */
+@media (max-width: 960px) {
+  .video-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 44px;
+  }
+
+  .video {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 960px) {
+  /* One column now, so a photo masked to the left 62% just cuts off mid-page.
+     Full width with a vertical fade instead. */
+  .video-photo {
+    width: 100%;
+    background-position: center;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 46%, transparent 88%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 46%, transparent 88%);
+  }
+}
+
 @media (max-width: 720px) {
   .video {
     min-height: 0;
-    padding: 90px 8% 70px;
+    padding: 78px 6% 64px;
+  }
+
+  .video-watermark-main {
+    font-size: clamp(40px, 13vw, 60px);
+  }
+
+  .video-eyebrow {
+    margin-bottom: 20px;
+    font-size: 11px;
+  }
+
+  .video-copy {
+    margin-bottom: 26px;
+    font-size: 15px;
+    line-height: 1.65;
   }
 }
