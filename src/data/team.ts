@@ -586,11 +586,10 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Mechatronics",
           }),
-          // No portrait yet — hidden rather than shown as an empty slot.
-          // Add a `photo` and drop `hidden` to bring the card back.
           slot("Member", "Hossam Eldin Elshazly", {
-            hidden: true,
-            linkedIn: "https://www.linkedin.com/in/hossam-eldeen-2158a4284/",
+            photo: "hossam-eldin-2026",
+            linkedIn:
+              "https://www.linkedin.com/in/hossam-eldeen-2158a4284?utm_source=share_via&utm_content=profile&utm_medium=member_ios",
             gradYear: "2027",
             major: "Computer and communication",
           }),

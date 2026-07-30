@@ -48,6 +48,7 @@ const MEMBERS = {
   "mira-barsoum-2026": { headroom: 0.30, headY: 2600, centerX: 1548, cropWidth: 1149 },
   "nour-walid": { headroom: 0.18, headY: 2591, centerX: 1572, cropWidth: 1149 },
   "jana-hani": { headroom: 0.3, headY: 2354, centerX: 1440, cropWidth: 1284 },
+  "hossam-eldin-2026": { headroom: 0.18, headY: 1924, centerX: 1490, cropWidth: 1500 },
 };
 // ────────────────────────────────────────────────────────────────────────────
 
