@@ -50,6 +50,9 @@
   position: relative;
   overflow: hidden;
   background: var(--ts-bg);
+  /* Matches .ae-band's crossfade (global.css) so this section swaps theme
+   * together with the rest of the page instead of snapping instantly. */
+  transition: background-color var(--transition-slow);
   /* top padding uses the tight variant — this section follows Features'
    * fade-to-bg transition, so the full section gap would stack on top of
    * that and read as an oversized blank gap before the content starts. */

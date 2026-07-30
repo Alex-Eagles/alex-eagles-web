@@ -8,6 +8,9 @@
   background: #0a0e1f;
   text-align: center;
   font-family: var(--font-sans);
+  /* Matches .ae-band's crossfade (global.css) so this section swaps theme
+   * together with the rest of the page instead of snapping instantly. */
+  transition: background-color var(--transition-slow);
 }
 
 :root[data-theme="light"] .sponsors {

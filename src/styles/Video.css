@@ -46,6 +46,9 @@
   align-items: center;
   background: var(--wf-bg);
   padding: var(--space-section-y) 6%;
+  /* Matches .ae-band's crossfade (global.css) so this section swaps theme
+   * together with the rest of the page instead of snapping instantly. */
+  transition: background-color var(--transition-slow);
 }
 
 /* ─── Photo backdrop ──────────────────────────────────────────────────────── */
