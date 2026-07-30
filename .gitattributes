@@ -1,13 +1,8 @@
-# Git LFS — large binary media for the /vehicles Neith experience.
+# The /vehicles "Neith" experience media (build-sequence frames, gallery
+# videos, 3D models, component photos) is committed as normal git objects
+# under public/vehicle/, the same way the gallery and blog media are stored.
 #
-# The vehicle page ships ~99 MB of media (build-sequence frames, gallery videos,
-# 3D models, component photos). Storing these through Git LFS keeps the main repo
-# lean: git tracks small text pointers while the binaries live in LFS storage.
-#
-# Scoped to public/vehicle/ so the rest of the repo's assets (favicon, small UI
-# images) stay as normal git objects.
-public/vehicle/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
-public/vehicle/**/*.glb filter=lfs diff=lfs merge=lfs -text
-public/vehicle/**/*.png filter=lfs diff=lfs merge=lfs -text
-public/vehicle/**/*.jpg filter=lfs diff=lfs merge=lfs -text
-public/vehicle/**/*.webp filter=lfs diff=lfs merge=lfs -text
+# It used to be tracked through Git LFS, but the deploy host (Vercel) serves
+# the LFS pointer files rather than the binaries unless LFS is explicitly
+# enabled, which left the vehicle page with no media. Committing the real
+# bytes makes it deploy anywhere, exactly like every other page's media.
