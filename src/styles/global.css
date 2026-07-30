@@ -283,6 +283,30 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * GALLERY-SPECIFIC KEYFRAMES — 3D spatial gallery HUD animations.
+ * --------------------------------------------------------------------------*/
+@keyframes gallery-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    filter: drop-shadow(0 0 2px var(--brand-light));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px var(--brand-light));
+  }
+}
+
+@keyframes gallery-grid-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ----------------------------------------------------------------------------
  * SMALL REUSABLE HELPERS (kept as plain classes; used by several components).
  * --------------------------------------------------------------------------*/
 @layer components {
@@ -608,4 +632,31 @@
   outline: 3px solid #fde047;
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+/* ----------------------------------------------------------------------------
+ * MOBILE THEME TOGGLE — the pill's geometry lives in inline styles on the
+ * component, which outrank any selector, so the phone-sized variant has to
+ * force its way past them. Collapses to an icon-only circle: at full width it
+ * covered a third of a 390px viewport and sat on top of section content.
+ * --------------------------------------------------------------------------*/
+@media (max-width: 767px) {
+  .ae-toggle {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  /* The word labels have nowhere to go once the pill is round. */
+  .ae-toggle > span:not(:last-child) {
+    opacity: 0 !important;
+  }
+
+  /* Knob fills the circle and stops sliding — there is no track left. */
+  .ae-toggle > span:last-child {
+    top: 2px !important;
+    left: 2px !important;
+    width: 38px !important;
+    height: 38px !important;
+    transform: none !important;
+  }
 }

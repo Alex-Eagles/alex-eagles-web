@@ -129,6 +129,39 @@ export interface BlogPostFull {
  */
 const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
   {
+    id: 45,
+    title: "Building Our Custom Ground Control Station",
+    excerpt:
+      "Off-the-shelf stations like Mission Planner and QGroundControl aren't built around the SUAS flow — fly laps, map an area, detect and verify two objects, and drop the right payload on each inside a 45-minute clock — so we built our own. Ours is a web app: a React front end over a Python backend split into separate services (MAVLink, camera, detection, payload) behind an API gateway, so a bug in one can't take down telemetry. We optimized for what actually moves the score: fast setup, with search boundaries pre-loaded and the lawnmower survey path auto-generated in under three seconds; operator verification, where each detection is queued for a one-click accept/reject instead of auto-dropping; and a judge-safe, always-on panel showing boundaries, position, speed, and altitude. We test the whole mission against an ArduPilot SITL simulated vehicle on the ground before it ever touches the real aircraft.",
+    image: "/images/blog/sw-gcs.jpeg",
+    category: "software",
+    date: "2026",
+    author: "Software Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 46,
+    title: "The Camera System: One Camera, Three Jobs",
+    excerpt:
+      "Our SIYI A8 Mini isn't just \"the camera\" — it feeds live video to the pilots, captures geotagged stills for object detection, and collects the imagery we later turn into a map, and making one camera serve all three reliably shaped a surprising amount of our design. For a detection to be useful, the image has to know exactly where it was taken, so rather than add a companion computer just to tag photos, we connected the camera over UART directly to the flight controller — which holds the GPS solution and stamps each image with its position at the instant of capture — keeping it lighter, simpler, and tightly timed. Every image is also saved to the camera's SD card, so we keep a full mission record even if the radio link drops. The camera bridges to our Herelink air unit over Ethernet, which puts its video on the same downlink the ground station already uses, giving the pilots a low-latency feed without a second video system to wire, power, and fail. Before it ever went on the aircraft, we built a dedicated test interface to exercise it in isolation — gimbal control, the video stream, and the capture-and-geotag pipeline — and tested how images move to the ground: batching beat pulling them one-by-one, and it's what the mission pipeline uses.",
+    image: "/images/blog/sw-mapping-camera.png",
+    category: "software",
+    date: "2026",
+    author: "Software Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 47,
+    title: "Building the Map: When 4K Was the Problem",
+    excerpt:
+      "One of our mission jobs is to fly a search area and hand the judges a single stitched map that's actually useful — full coverage, correct geometry, clean stitching. We fly a lawnmower pattern capturing overlapping images and reconstruct them into a georeferenced orthomosaic with OpenDroneMap, which anchors each photo by its GPS geotag rather than guessing position from overlap, so the map stays globally consistent across a large area instead of bending. Our first plan — 10 m/s, a photo every 0.3 s, full 4K — looked clean on the ground but wouldn't build in the air: the camera couldn't finish writing one 4K image before the next trigger, so we'd command 50 photos and get about 10, far too few for enough overlap. The fix was to slow to 6 m/s and drop to 1080p; faster writes kept the camera in pace and the slower pass packed in more overlap. Same camera, same software — but now the map built cleanly.",
+    image: "/images/blog/sw-mapping.jpeg",
+    category: "software",
+    date: "2026",
+    author: "Software Team",
+    readTime: "3 min read",
+  },
+  {
     id: 16,
     title: "Flight Controller v2: Revising the Design",
     excerpt:
@@ -337,6 +370,7 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
+<<<<<<< HEAD
     id: 7,
     title: "Real-Time Flight Controller Firmware",
     excerpt:
@@ -348,6 +382,8 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "Youssef Adel",
   },
   {
+=======
+>>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 33,
     title: "SUAS/UAVC: Aerial AI Model Selection (RF-DETR)",
     excerpt:
@@ -368,6 +404,7 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
+<<<<<<< HEAD
     id: 9,
     title: "Auditing the Team Website",
     excerpt:
@@ -378,6 +415,8 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "Software Team",
   },
   {
+=======
+>>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 44,
     title: "Fixed-Wing Stability & Propulsion Design",
     excerpt:
@@ -452,6 +491,7 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
+<<<<<<< HEAD
     id: 10,
     title: "Sprint 3: Front End Structure, Live Tracking & MAVLink",
     excerpt:
@@ -462,6 +502,8 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "Software Team",
   },
   {
+=======
+>>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 21,
     title: "Onboarding the Hardware Team on Altium Designer",
     excerpt:
@@ -473,6 +515,7 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "Hardware Team",
   },
   {
+<<<<<<< HEAD
     id: 11,
     title: "Sprint 2: Ground Station UI, Satellite Maps & the Drone Class",
     excerpt:
@@ -483,6 +526,8 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "Software Team",
   },
   {
+=======
+>>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 14,
     title: "Sprint 2: Diffusion Models, Gimbal Control & Camera Streaming",
     excerpt:
@@ -493,6 +538,7 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
+<<<<<<< HEAD
     id: 12,
     title: "Sprint 1: GCS Architecture & Simulation",
     excerpt:
@@ -515,6 +561,8 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "Software Team",
   },
   {
+=======
+>>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 15,
     title: "Sprint 1: Dataset Generation with Blender",
     excerpt:

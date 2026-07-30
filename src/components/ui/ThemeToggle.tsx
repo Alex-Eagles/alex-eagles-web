@@ -17,8 +17,9 @@ export default function ThemeToggle({
   // Fixed to the top-right with comfortable edge padding (a little tighter on
   // small screens, roomier on desktop) so it's always easy to reach.
   // `ui-blur` lets global.css drop the backdrop blur on touch devices, where a
-  // fixed blurred element is re-rasterised on every scroll frame.
-  className = "ui-blur fixed top-5 right-5 md:top-6 md:right-8 z-40",
+  // fixed blurred element is re-rasterised on every scroll frame. `ae-toggle`
+  // is the hook for the phone-sized icon-only variant, also in global.css.
+  className = "ui-blur ae-toggle fixed top-5 right-5 md:top-6 md:right-8 z-40",
 }: ThemeToggleProps) {
   const { isDark, toggle } = useTheme();
 

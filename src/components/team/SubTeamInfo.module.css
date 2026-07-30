@@ -15,12 +15,15 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border-radius: 50%;
+  gap: 7px;
+  height: 32px;
+  padding: 0 13px 0 9px;
+  border-radius: 999px;
   cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   color: var(--accent, var(--team-accent));
   background: color-mix(in srgb, var(--accent, var(--team-accent)) 14%, transparent);
   border: 1.5px solid color-mix(in srgb, var(--accent, var(--team-accent)) 55%, transparent);
@@ -29,9 +32,21 @@
   transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
+.chipIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.chipLabel {
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .chip:hover,
 .chip:focus-visible {
-  transform: scale(1.1);
+  transform: translateY(-1px);
   background: color-mix(in srgb, var(--accent, var(--team-accent)) 26%, transparent);
   border-color: var(--accent, var(--team-accent));
   outline: none;
@@ -162,4 +177,37 @@
   line-height: 1.55;
   color: var(--team-pop-ink-dim);
   font-weight: 400;
+}
+
+/* --- mobile -------------------------------------------------------------- */
+
+/*
+ * On phones the card can't hang off the chip's corner: the chip sits wherever
+ * the title leaves it, so an absolutely-positioned card overflows the screen —
+ * you only saw half of it. Instead it becomes a centred bottom sheet, pinned to
+ * the viewport rather than the chip, so it's always fully on screen and legible
+ * no matter where its chip is. The pointer nub is dropped since it no longer
+ * lines up with the chip.
+ */
+@media (max-width: 640px) {
+  .card {
+    position: fixed;
+    top: auto;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-height: 70vh;
+    overflow-y: auto;
+    transform-origin: center bottom;
+    transform: scale(0.94) translateY(12px);
+  }
+
+  .card[data-open="true"] {
+    transform: scale(1) translateY(0);
+  }
+
+  .card::before {
+    display: none;
+  }
 }
