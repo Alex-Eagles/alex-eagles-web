@@ -137,7 +137,6 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     category: "software",
     date: "2026",
     author: "Software Team",
-    readTime: "3 min read",
   },
   {
     id: 46,
@@ -148,7 +147,6 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     category: "software",
     date: "2026",
     author: "Software Team",
-    readTime: "3 min read",
   },
   {
     id: 47,
@@ -159,7 +157,6 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     category: "software",
     date: "2026",
     author: "Software Team",
-    readTime: "3 min read",
   },
   {
     id: 16,
@@ -370,20 +367,6 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
-<<<<<<< HEAD
-    id: 7,
-    title: "Real-Time Flight Controller Firmware",
-    excerpt:
-      "Rewriting our flight controller's real-time loop for a deterministic 1kHz update rate. Why we moved off the RTOS scheduler and what it took to keep every control cycle on time.",
-    image:
-      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "firmware",
-    date: "Mar 12, 2026",
-    author: "Youssef Adel",
-  },
-  {
-=======
->>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 33,
     title: "SUAS/UAVC: Aerial AI Model Selection (RF-DETR)",
     excerpt:
@@ -404,19 +387,6 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
-<<<<<<< HEAD
-    id: 9,
-    title: "Auditing the Team Website",
-    excerpt:
-      "We started editing the team website itself — auditing what was already in place, identifying what was missing, and mapping out the requirements it still needed to meet.",
-    image: "/images/blog/website-audit.jpg",
-    category: "software",
-    date: "Feb 15, 2026",
-    author: "Software Team",
-  },
-  {
-=======
->>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 44,
     title: "Fixed-Wing Stability & Propulsion Design",
     excerpt:
@@ -427,7 +397,7 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "Propulsion Team",
   },
   {
-    id: 45,
+    id: 48,
     title: "Test Drone Propulsion System Design & Validation",
     excerpt:
       "The propulsion system was designed based on the required thrust for takeoff, cruise, and landing, together with the target flight endurance and overall aircraft weight. Propulsion calculations were performed to determine the appropriate motor, propeller, ESC, and battery configuration capable of meeting the performance requirements of the 4 kg prototype platform. Following the preliminary calculations, the selected configuration was analysed and validated using eCalc simulations to verify thrust output, power consumption, efficiency, and expected flight time. Based on this analysis, MN5008-400KV brushless motors paired with 15×5 propellers and Air 40A ESCs were selected to provide the required thrust while maintaining efficient operation. A Quad-X configuration was adopted due to its structural simplicity, balanced load distribution, stable flight characteristics, and ease of control. This propulsion system was integrated into a 4 kg wooden test drone, which served as a development platform for validating the autonomous navigation system, flight controller integration, and other onboard subsystems before manufacturing the final carbon-fiber competition UAV with its upgraded propulsion configuration.",
@@ -491,19 +461,6 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
-<<<<<<< HEAD
-    id: 10,
-    title: "Sprint 3: Front End Structure, Live Tracking & MAVLink",
-    excerpt:
-      "This sprint tied the front end's main structure together, connected the endpoints to our Drone class, improved live drone tracking on the map, and simulated our MavlinkController class against PX4 firmware.",
-    image: "/images/blog/mavlink.png",
-    category: "software",
-    date: "Dec 5, 2025",
-    author: "Software Team",
-  },
-  {
-=======
->>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 21,
     title: "Onboarding the Hardware Team on Altium Designer",
     excerpt:
@@ -515,19 +472,6 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "Hardware Team",
   },
   {
-<<<<<<< HEAD
-    id: 11,
-    title: "Sprint 2: Ground Station UI, Satellite Maps & the Drone Class",
-    excerpt:
-      "Sprint 2 covered a lot of ground: building the ground station's UI and layout, researching satellite map integration, implementing our core Drone class, and standing up the API gateway.",
-    image: "/images/blog/ground-station.jpg",
-    category: "software",
-    date: "Nov 23, 2025",
-    author: "Software Team",
-  },
-  {
-=======
->>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 14,
     title: "Sprint 2: Diffusion Models, Gimbal Control & Camera Streaming",
     excerpt:
@@ -538,31 +482,6 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
-<<<<<<< HEAD
-    id: 12,
-    title: "Sprint 1: GCS Architecture & Simulation",
-    excerpt:
-      "Kicked off our first sprint by reviewing the ground control station's overall architecture and running early simulations to validate our approach before writing production code.",
-    image:
-      "https://images.unsplash.com/photo-1625459201773-9b2386f53ca2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2Z0d2FyZSUyMGNvZGUlMjBwcm9ncmFtbWluZ3xlbnwxfHx8fDE3NzM2ODM4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "software",
-    date: "Oct 24, 2025",
-    author: "Software Team",
-  },
-  {
-    id: 13,
-    title: "Getting Up to Speed with React",
-    excerpt:
-      "Before sprint work began, the team spent the week studying React fundamentals — components, hooks, and state management — to build a shared foundation for the ground station front end.",
-    image: "/images/blog/react.png",
-    imageFit: "contain",
-    category: "software",
-    date: "Oct 21, 2025",
-    author: "Software Team",
-  },
-  {
-=======
->>>>>>> 18ec6133ff9e6de2f7c5182d5400aa62a896a958
     id: 15,
     title: "Sprint 1: Dataset Generation with Blender",
     excerpt:
@@ -573,7 +492,7 @@ const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
     author: "AI Team",
   },
   {
-    id: 46,
+    id: 49,
     title: "Static Thrust Rig Testing for Fixed-Wing Propulsion System",
     excerpt:
       "To validate the selected propulsion system before integration into the fixed-wing aircraft, a dedicated static thrust test rig was designed and manufactured. The test rig enabled controlled evaluation of the selected motor, propeller, and ESC combination by measuring the generated static thrust and current draw at different throttle settings. These experimental measurements were compared with the propulsion calculations and eCalc simulation results to verify the accuracy of the design and ensure that the selected propulsion system could satisfy the required takeoff, climb, and cruise performance while operating within the specified electrical and thermal limits. The results confirmed the suitability of the selected propulsion configuration and provided confidence before its integration into the final fixed-wing aircraft.",
