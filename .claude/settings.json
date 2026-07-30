@@ -37,5 +37,8 @@
       "Bash(grep -n \"top: 100%\\\\|top: 0%\\\\|left: 50%;\\\\s*$\" e:/alex-eagles-web/src/styles/team-structure-options/pyramid-option.css)",
       "Bash(git commit *)"
     ]
+  },
+  "worktree": {
+    "bgIsolation": "none"
   }
 }

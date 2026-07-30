@@ -75,7 +75,7 @@ export const CATEGORY_STYLE: Record<BlogCategory, CategoryStyle> = {
     badgeText: "#26215C",
   },
   computerVision: {
-    bg: { light: "#F6D9E5", dark: "#260F1A" },
+    bg: { light: "#e7caca", dark: "#260F1A" },
     accent: "#F4C0D1",
     text: { light: "#4B1528", dark: "#F4C7DA" },
     label: { light: "#812D49", dark: "#DD79A0" },
@@ -122,19 +122,22 @@ export interface BlogPostFull {
   readTime: string;
 }
 
-/** Posts are kept newest-first (matching each `date`'s end-of-range), oldest at the bottom. */
-export const BLOG_POSTS: BlogPostFull[] = [
+/**
+ * Raw post content. `readTime` and final ordering are derived below —
+ * `readTime` from the excerpt's word count, and the list is sorted by each
+ * post's date (newest first) instead of relying on manual placement.
+ */
+const RAW_POSTS: Omit<BlogPostFull, "readTime">[] = [
   {
     id: 16,
-    title: "Flight Controller v3: Revising the Design",
+    title: "Flight Controller v2: Revising the Design",
     excerpt:
-      "Back into the flight controller design, working through a new iteration based on lessons from the PCBWay contest board. Testing is planned in the coming weeks.",
-    image: "/images/blog/flight-controller-v3.png",
+      "Following a full review of our first flight controller, the team is now developing a second-generation design built to match the performance of industry benchmarks like Pixhawk and CUAV — at a fraction of the cost. This project has been a valuable opportunity to advance our skills in microcontroller configuration, signal integrity layout, digital and analog communication, and EMI-preventive design strategies",
+    image: "/images/blog/comingsoon.jpg",
     imageFit: "contain",
     category: "hardware",
     date: "Jul 2026 – Present",
     author: "Hardware Team",
-    readTime: "2 min read",
   },
   {
     id: 42,
@@ -145,7 +148,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "aerodesign",
     date: "May – Jul 2026",
     author: "Aerodesign Team",
-    readTime: "2 min read",
   },
   {
     id: 28,
@@ -156,7 +158,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "Jul 5, 2026",
     author: "Structure Team",
-    readTime: "2 min read",
   },
   {
     id: 27,
@@ -168,30 +169,27 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "Jul 1, 2026",
     author: "Structure Team",
-    readTime: "2 min read",
   },
   {
     id: 17,
     title: "Manufacturing a UGV for ICMTC",
     excerpt:
-      "Applied our hardware design expertise to a new platform, manufacturing a ground vehicle for the ICMTC competition.",
+      "The UAVC competition required an unmanned ground vehicle capable of covering the maximum distance possible within a set mission time. Our team designed a limit switch-activated UGV powered by four DC motors that drove the vehicle straight forward, requiring no control loops or microcontroller — a simple yet highly effective solution to the challenge.",
     image: "/images/blog/ugv-icmtc.jpg",
     category: "hardware",
     date: "May – Jun 2026",
     author: "Hardware Team",
-    readTime: "1 min read",
   },
   {
     id: 18,
     title: "PDB Design Review: What We'd Change Next",
     excerpt:
-      "Reviewed our power distribution board's first revision, identified key improvement areas, and kicked off development of a next-generation version.",
-    image: "/images/blog/pdb-design-review.webp",
+      "Building on lessons from the first design, we developed an improved power distribution board and subjected it to harsher validation criteria. Thermal simulations confirmed no significant risk of failure due to layout, validating the design's reliability under real-world load conditions.",
+    image: "/images/blog/PDB_v2.png",
     imageFit: "contain",
     category: "hardware",
     date: "Apr – Jun 2026",
     author: "Hardware Team",
-    readTime: "1 min read",
   },
   {
     id: 26,
@@ -202,7 +200,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "Jun 3, 2026",
     author: "Structure Team",
-    readTime: "2 min read",
   },
   {
     id: 25,
@@ -213,7 +210,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "Jun 2, 2026",
     author: "Structure Team",
-    readTime: "2 min read",
   },
   {
     id: 24,
@@ -224,7 +220,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "May 31, 2026",
     author: "Structure Team",
-    readTime: "2 min read",
   },
   {
     id: 23,
@@ -236,7 +231,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "structure",
     date: "May 15, 2026",
     author: "Structure Team",
-    readTime: "2 min read",
   },
   {
     id: 40,
@@ -247,7 +241,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "aerodesign",
     date: "Mid – Late Apr 2026",
     author: "Aerodesign Team",
-    readTime: "3 min read",
   },
   {
     id: 41,
@@ -255,10 +248,10 @@ export const BLOG_POSTS: BlogPostFull[] = [
     excerpt:
       "All of the sizing calculations, airfoil trade studies, structural CAD, and validation results were compiled into the team's formal design review package. Writing the review forced a second pass over every earlier decision, from wing loading to tail volume, to make sure the documented methodology matched what was actually built.",
     image: "/images/blog/aerodesign-design-review.png",
+    imageFit: "contain",
     category: "aerodesign",
     date: "Mar – Apr 2026",
     author: "Aerodesign Team",
-    readTime: "3 min read",
   },
   {
     id: 39,
@@ -269,7 +262,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "aerodesign",
     date: "Late Mar – Mid Apr 2026",
     author: "Aerodesign Team",
-    readTime: "2 min read",
   },
   {
     id: 38,
@@ -280,7 +272,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "aerodesign",
     date: "Mid Mar – Early Apr 2026",
     author: "Aerodesign Team",
-    readTime: "2 min read",
   },
   {
     id: 37,
@@ -291,7 +282,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "aerodesign",
     date: "Mar – Early Apr 2026",
     author: "Aerodesign Team",
-    readTime: "2 min read",
   },
   {
     id: 36,
@@ -299,10 +289,10 @@ export const BLOG_POSTS: BlogPostFull[] = [
     excerpt:
       "Candidate airfoils, including the FX 76-MP-120, LNV109A, and MH 113, were compared against a refined NACA 6313 profile across lift, drag, and moment polars to find the best balance of stall behavior and efficiency. The winning section was then carried into the aspect ratio and taper ratio study, locking in the wing geometry used for the rest of the aerodynamic analysis.",
     image: "/images/blog/aerodesign-structural-cad.jpg",
+    imageFit: "cover",
     category: "aerodesign",
     date: "Feb – Early Mar 2026",
     author: "Aerodesign Team",
-    readTime: "2 min read",
   },
   {
     id: 35,
@@ -313,7 +303,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "aerodesign",
     date: "Late Jan – Mid Feb 2026",
     author: "Aerodesign Team",
-    readTime: "2 min read",
   },
   {
     id: 43,
@@ -321,22 +310,21 @@ export const BLOG_POSTS: BlogPostFull[] = [
     excerpt:
       "Before any technical design began, the team laid out its project objectives, worked through the competition's requirements and design constraints, and turned all of it into an overall development roadmap. That roadmap became the backbone for every design decision that followed.",
     image: "/images/blog/aerodesign-wing-concept-render.png",
+    imageFit: "contain",
     category: "aerodesign",
     date: "Dec 2025 – Jan 2026",
     author: "Aerodesign Team",
-    readTime: "2 min read",
   },
   {
     id: 19,
     title: "Designing Our Custom Power Distribution Board",
     excerpt:
-      "Designed, built, and tested a custom power distribution board to power every onboard electronic system on the team's UAV.",
-    image: "/images/blog/power-distribution-board.png",
+      "Designed, built, and tested a custom power distribution board to power all onboard electronics for the team's UAV. The design focused on thermal management and strict layout constraints, given the high current load required relative to the board's compact size. Testing revealed substantial room for improvement, informing the next design iteration.",
+    image: "/images/blog/PDB_v1.png",
     imageFit: "contain",
     category: "hardware",
     date: "Feb – Mar 2026",
     author: "Hardware Team",
-    readTime: "1 min read",
   },
   {
     id: 34,
@@ -347,7 +335,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Mar 16, 2026",
     author: "AI Team",
-    readTime: "3 min read",
   },
   {
     id: 7,
@@ -359,7 +346,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "firmware",
     date: "Mar 12, 2026",
     author: "Youssef Adel",
-    readTime: "2 min read",
   },
   {
     id: 33,
@@ -370,7 +356,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Mar 2, 2026",
     author: "AI Team",
-    readTime: "2 min read",
   },
   {
     id: 32,
@@ -381,7 +366,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Feb 16, 2026",
     author: "AI Team",
-    readTime: "3 min read",
   },
   {
     id: 9,
@@ -392,18 +376,27 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Feb 15, 2026",
     author: "Software Team",
-    readTime: "2 min read",
   },
   {
     id: 44,
-    title: "Aircraft Stability & Propulsion Design",
+    title: "Fixed-Wing Stability & Propulsion Design",
     excerpt:
       "Completed the aircraft stability and control analysis alongside propulsion system optimization. Sized the empennage, selected the AT4130-450KV motor with an 18×8 APC-E propeller through trade-off analysis, and verified performance using eCalc, thrust, climb, take-off, and cruise analyses.",
     image: "/images/blog/aerodesign-stability-propulsion.png",
     category: "propulsion",
-    date: "Mar – Apr 2026",
+    date: "Mar 20, 2026",
     author: "Propulsion Team",
-    readTime: "3 min read",
+  },
+  {
+    id: 45,
+    title: "Test Drone Propulsion System Design & Validation",
+    excerpt:
+      "The propulsion system was designed based on the required thrust for takeoff, cruise, and landing, together with the target flight endurance and overall aircraft weight. Propulsion calculations were performed to determine the appropriate motor, propeller, ESC, and battery configuration capable of meeting the performance requirements of the 4 kg prototype platform. Following the preliminary calculations, the selected configuration was analysed and validated using eCalc simulations to verify thrust output, power consumption, efficiency, and expected flight time. Based on this analysis, MN5008-400KV brushless motors paired with 15×5 propellers and Air 40A ESCs were selected to provide the required thrust while maintaining efficient operation. A Quad-X configuration was adopted due to its structural simplicity, balanced load distribution, stable flight characteristics, and ease of control. This propulsion system was integrated into a 4 kg wooden test drone, which served as a development platform for validating the autonomous navigation system, flight controller integration, and other onboard subsystems before manufacturing the final carbon-fiber competition UAV with its upgraded propulsion configuration.",
+    image: "/images/blog/test_drone.png",
+    imageFit: "cover",
+    category: "propulsion",
+    date: "Jan 28, 2026",
+    author: "Propulsion Team",
   },
   {
     id: 22,
@@ -415,7 +408,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "propulsion",
     date: "Feb 13, 2026",
     author: "Propulsion Team",
-    readTime: "3 min read",
   },
   {
     id: 31,
@@ -426,18 +418,16 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Feb 2, 2026",
     author: "AI Team",
-    readTime: "3 min read",
   },
   {
     id: 20,
-    title: "Entering the PCBWay Design Contest",
+    title: "PCBWay Design Contest",
     excerpt:
-      "Entered the PCBWay Design Contest with an original flight controller module, engineered entirely in-house from schematic to layout.",
-    image: "/images/blog/pcbway-contest-board.webp",
+      "Entered the PCBWay design contest with an original flight controller module engineered entirely in-house. The project deepened our expertise in embedded systems and microcontroller engineering, strengthening our digital communication design skills and laying the groundwork for a more advanced flight controller, one built for commercial release to hobbyists and industrial UAV manufacturers worldwide.",
+    image: "/images/blog/FC_V1.png",
     category: "hardware",
     date: "Nov 2025 – Jan 2026",
     author: "Hardware Team",
-    readTime: "1 min read",
   },
   {
     id: 30,
@@ -449,7 +439,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Jan 19, 2026",
     author: "AI Team",
-    readTime: "3 min read",
   },
   {
     id: 29,
@@ -461,7 +450,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Jan 5, 2026",
     author: "AI Team",
-    readTime: "2 min read",
   },
   {
     id: 10,
@@ -472,19 +460,17 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Dec 5, 2025",
     author: "Software Team",
-    readTime: "2 min read",
   },
   {
     id: 21,
     title: "Onboarding the Hardware Team on Altium Designer",
     excerpt:
-      "Trained new members to proficiency in Altium Designer, building the team's core PCB design capability from the ground up.",
-    image: "/images/blog/altium-designer.png",
+      "Trained new members to build proficiency in Altium Designer, strengthening the team's core PCB design capabilities. Members first learned foundational skills through small practice projects, then completed the FEDEVEL course, designing an Arduino Uno PCB from scratch to solidify their understanding of electronic circuit design.",
+    image: "/images/blog/Course_Arduino.png",
     imageFit: "contain",
     category: "hardware",
     date: "Sep – Nov 2025",
     author: "Hardware Team",
-    readTime: "1 min read",
   },
   {
     id: 11,
@@ -495,7 +481,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Nov 23, 2025",
     author: "Software Team",
-    readTime: "2 min read",
   },
   {
     id: 14,
@@ -506,7 +491,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Nov 17, 2025",
     author: "AI Team",
-    readTime: "1 min read",
   },
   {
     id: 12,
@@ -518,7 +502,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Oct 24, 2025",
     author: "Software Team",
-    readTime: "1 min read",
   },
   {
     id: 13,
@@ -530,7 +513,6 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "software",
     date: "Oct 21, 2025",
     author: "Software Team",
-    readTime: "2 min read",
   },
   {
     id: 15,
@@ -541,9 +523,73 @@ export const BLOG_POSTS: BlogPostFull[] = [
     category: "computerVision",
     date: "Oct 21, 2025",
     author: "AI Team",
-    readTime: "1 min read",
+  },
+  {
+    id: 46,
+    title: "Static Thrust Rig Testing for Fixed-Wing Propulsion System",
+    excerpt:
+      "To validate the selected propulsion system before integration into the fixed-wing aircraft, a dedicated static thrust test rig was designed and manufactured. The test rig enabled controlled evaluation of the selected motor, propeller, and ESC combination by measuring the generated static thrust and current draw at different throttle settings. These experimental measurements were compared with the propulsion calculations and eCalc simulation results to verify the accuracy of the design and ensure that the selected propulsion system could satisfy the required takeoff, climb, and cruise performance while operating within the specified electrical and thermal limits. The results confirmed the suitability of the selected propulsion configuration and provided confidence before its integration into the final fixed-wing aircraft.",
+    image: "/images/blog/Thrust_testing.png",
+    imageFit: "cover",
+    category: "propulsion",
+    date: "May 2, 2026",
+    author: "Propulsion Team",
   },
 ];
+
+/**
+ * These are excerpt-length build-log posts, not full articles — every one of
+ * them reads in under a minute at the standard 200wpm silent-reading rate,
+ * which would make every "read time" badge identical and useless. 40wpm
+ * instead approximates the slower pace of a technical/jargon-dense post, so
+ * the badge still tracks each post's actual length rather than being a
+ * hand-picked (and previously inconsistent) number.
+ */
+const WORDS_PER_MINUTE = 40;
+const MAX_READ_MINUTES = 3;
+
+/** Estimates reading time from the post's excerpt (the only body copy shown
+ *  in the card, modal, and detail page), capped at MAX_READ_MINUTES. */
+function estimateReadTime(excerpt: string): string {
+  const words = excerpt.trim().split(/\s+/).length;
+  const minutes = Math.min(MAX_READ_MINUTES, Math.max(1, Math.ceil(words / WORDS_PER_MINUTE)));
+  return `${minutes} min read`;
+}
+
+const MONTH_INDEX: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+};
+/** "Early/Mid/Late Month" ranges (used for multi-week efforts) approximate
+ *  to a day-of-month so they still sort sensibly against exact dates. */
+const QUALIFIER_DAY: Record<string, number> = { early: 5, mid: 15, late: 25 };
+
+/**
+ * Resolves a post's `date` string to the end of its range (or the exact day,
+ * for single-day posts) so the list can be sorted newest-first. Dates are
+ * free-text ("Jul 2026 – Present", "Mid – Late Apr 2026", "Jul 5, 2026"), so
+ * this only needs to parse the trailing segment — every format in use states
+ * the year on the end of the range (or on the only date, if not a range).
+ */
+function parseDateEnd(date: string): number {
+  if (/present/i.test(date)) return Infinity;
+
+  const endSegment = date.split(/\s+–\s+/).pop()!.trim();
+  const match = endSegment.match(/^(?:(early|mid|late)\s+)?([a-z]+)\s+(\d{1,2})?,?\s*(\d{4})$/i);
+  if (!match) return 0;
+
+  const [, qualifier, monthName, day, year] = match;
+  const month = MONTH_INDEX[monthName.slice(0, 3).toLowerCase()];
+  const dayOfMonth = day ? Number(day) : qualifier ? QUALIFIER_DAY[qualifier.toLowerCase()] : 28;
+  return new Date(Number(year), month, dayOfMonth).getTime();
+}
+
+/** Newest-first, derived automatically so every category (and "all") stays
+ *  in date order without needing the raw list kept in manual order. */
+export const BLOG_POSTS: BlogPostFull[] = RAW_POSTS.map((post) => ({
+  ...post,
+  readTime: estimateReadTime(post.excerpt),
+})).sort((a, b) => parseDateEnd(b.date) - parseDateEnd(a.date));
 
 export interface BlogFilter {
   id: "all" | BlogCategory;

@@ -336,7 +336,7 @@
         <button data-exp="cube" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">1 · FC</button>
         <button data-exp="gnss" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">2 · GNSS</button>
         <button data-exp="cam" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">3 · Camera</button>
-        <button data-exp="link" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">4 · Link</button>
+        <button data-exp="link" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">4 · COMMS</button>
         <button data-exp="pdb" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">5 · PDB</button>
         <button data-exp="bec" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">6 · BEC</button>
         <button data-exp="custom" style="cursor:pointer; font-family:'JetBrains Mono'; font-size:11px; padding:8px 13px; border-radius:9999px; border:1px solid rgba(60,64,181,0.4); background:transparent; color:#c3c6ea;">7 · Our PCB</button>
@@ -371,45 +371,45 @@
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> DroneCAN-native and raised 9–15 cm above the frame, clear of propulsion EMI.</p>
           </div>
           <div data-exp-panel="cam" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">03 · PAYLOAD — GIMBAL CAMERA</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">03 · GIMBAL CAMERA</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">SIYI A8 Mini</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Eyes that stay level while the aircraft doesn't. A 4K 8MP Sony sensor rides a 3-axis FOC-stabilised gimbal with 6× digital zoom, feeding imagery down the ground link over HDMI and Ethernet.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
           </div>
           <div data-exp-panel="link" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · COMMS — DATA LINK</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · TELEMETRY</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Herelink</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Three links collapsed into one. A single 2.4 GHz digital pipe carries RC control, MAVLink telemetry and 1080p video together — up to 20 km at roughly 110 ms latency.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> pilot, operator and observer all work from one link; the handheld becomes a full ground station.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> pilot, operator and observer all work from one link; the handheld device becomes a fully mobile ground station.</p>
           </div>
           <div data-exp-panel="pdb" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">05 · POWER — DISTRIBUTION</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Matek PDB HEX</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every amp passes through here. Heavy copper carries 2–12S / 6–60 V to the ESCs while an onboard sensor reads current to 264 A and streams voltage and current back to the Cube, alongside PWM routing and BLHeli32 telemetry.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every amp passes through here. Heavy copper carries 2–12S / 6–60 V to the ESCs while an onboard sensor reads current up to 264 A and streams voltage and current back to the Cube.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> the six-output variant on a quad leaves distribution headroom for payload growth — one board instead of a harness.</p>
           </div>
           <div data-exp-panel="bec" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">06 · POWER — REGULATION</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">MAUCH BEC</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Clean power, guarded from the noise of flight. It converts raw LiPo voltage into stable rails for the flight controller, GPS and LiDAR, absorbing ripple, transients and motor/ESC interference before they reach a sensor.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> removes the separate receiver battery while isolating noise-sensitive systems from the high-current bus.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> stable and redundant power supply isolating noise-sensitive systems from high-current bus.</p>
           </div>
           <div data-exp-panel="custom" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Alex Eagles Power Board</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The only board on this aircraft we designed ourselves — drawn, routed, fabricated and flown by the team. It splits the MAUCH feed into dedicated rails: input decoupling, two buck converters for 12 V and 5 V, and an LDO for a low-noise 5 V rail for the most sensitive electronics.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> a modular power stage tailored to this airframe — less wiring, cleaner separation, revisable in-house.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Designed, routed, and fabricated from scratch by us- splits HV battery rail into dedicated power supplies for all onboard electronics.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> all in 1 system power supply for all our aircrafts. </p>
           </div>
           <div data-exp-panel="prop" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">08 · PROPULSION — ×4</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">T-Motor 6007 II System</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF22 props — one factory-tuned system per arm across the quad.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF2211 props — one factory-tuned system per arm across the quad.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
           </div>
           <div data-exp-panel="batt" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER — MAIN BATTERY</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Tattu 28 000 mAh 6S</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission — a 28 000 mAh 6S LiPo feeding the entire platform through the distribution stage.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission — a 28 000 mAh 6S LiPo feeding the entire platform through the power distribution network.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> high capacity for long-endurance autonomous flights without swapping packs mid-mission.</p>
           </div>
         </div>
