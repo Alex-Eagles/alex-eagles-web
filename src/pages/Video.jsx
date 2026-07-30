@@ -13,7 +13,6 @@ export default function Video() {
       {/* Flight photo behind the copy column only (one per theme, picked in
           CSS), fading out before it reaches the embed on the right. */}
       <div className="video-photo" aria-hidden="true" />
-      <div className="video-photo-scrim" aria-hidden="true" />
 
       <div className="video-layout">
         <div className="video-content">

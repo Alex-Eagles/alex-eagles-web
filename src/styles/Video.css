@@ -70,34 +70,6 @@
   background-image: url("/Home/flight-backdrop-light.jpg");
 }
 
-/* Full-bleed on purpose: the wash is the same hue as --wf-bg, so it's
- * invisible everywhere the photo isn't and there's no edge to line up. Top
- * and bottom stops are the strongest, keeping the section's seams clean. */
-.video-photo-scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(10, 14, 31, 0.92) 0%,
-    rgba(10, 14, 31, 0.58) 45%,
-    rgba(10, 14, 31, 0.94) 100%
-  );
-}
-
-/* Lighter than the dark wash and lighter than this photo used to carry
- * elsewhere on the page — the light-mode shot is bright enough that a heavy
- * white veil erased it, so this leans on the mask's horizontal falloff to
- * protect the copy instead of flooding the whole frame. */
-:root[data-theme="light"] .video-photo-scrim {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.82) 0%,
-    rgba(255, 255, 255, 0.55) 45%,
-    rgba(255, 255, 255, 0.86) 100%
-  );
-}
-
 /* decorative watermark — sits in normal document flow, stacked above the
  * eyebrow/headline on the left, so it can never overlap the real text
  * regardless of viewport size (no absolute-position math to get wrong). */

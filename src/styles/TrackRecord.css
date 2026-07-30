@@ -147,17 +147,14 @@
  * shadow, mid, and a wide soft cast) so each card reads as a solid object
  * standing on the panel, plus a 1px inner top highlight for the lit edge.
  *
- * The competition sits at the top and the award title is pushed to the
- * bottom, so titles of very different lengths ("Overall" vs "Best Technical
- * Design Report") still share a baseline across the row instead of each
- * floating at its own height. */
+ * Competition and title are top-anchored and tightly coupled. They used to be
+ * pushed apart to bottom-align titles across the row, but with a min-height
+ * above the tallest card's content that left a void in every card. */
 .tr-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 32px;
-  min-height: 210px;
-  padding: 26px 24px 28px;
+  gap: 10px;
+  padding: 20px 22px 22px;
   background: linear-gradient(180deg, #1a2544 0%, #121b34 100%);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
