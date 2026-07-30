@@ -15,7 +15,10 @@ import SearchBox from "@/components/search/SearchBox";
  *     border + shadow once scrolled past 80px (matches the design spec).
  *   - The active route link is filled with the brand color.
  *   - Below `md`, the link pill is replaced by a hamburger that opens a
- *     full-screen overlay menu (mobile requirement from the spec).
+ *     full-screen overlay menu (mobile requirement from the spec). Search lives
+ *     inside that overlay rather than as a second fixed button — the hamburger
+ *     is the only chrome on the left, the ThemeToggle the only chrome on the
+ *     right.
  *
  * The theme toggle is a separate fixed control (see <ThemeToggle/> in App).
  */
@@ -116,13 +119,17 @@ export default function Navbar() {
         <Menu size={22} />
       </button>
 
-      {/* ---------- Mobile: search (top-right) ---------- */}
-      <SearchBox variant="floating" wrapperClassName="fixed top-5 right-5 z-40 md:hidden" />
-
-      {/* ---------- Mobile: full-screen overlay menu ---------- */}
+      {/* ---------- Mobile: full-screen overlay menu ----------
+           Search lives in here rather than as its own top-right button: that
+           button sat at the same fixed corner as the ThemeToggle and overlapped
+           it. One hamburger now reveals both the search field and the links. */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-50 md:hidden flex flex-col items-center justify-center gap-2"
+          // Scrollable, because the search results list can grow taller than the
+          // viewport once the keyboard is up. `m-auto` on the inner column keeps
+          // everything vertically centred while it still fits (plain
+          // `justify-center` would clip the top once it overflows).
+          className="fixed inset-0 z-50 md:hidden flex flex-col overflow-y-auto overscroll-contain"
           role="dialog"
           aria-modal="true"
           aria-label="Site navigation"
@@ -137,7 +144,7 @@ export default function Navbar() {
             type="button"
             onClick={() => setMenuOpen(false)}
             aria-label="Close menu"
-            className="absolute top-5 right-5 flex items-center justify-center w-11 h-11 rounded-full cursor-pointer"
+            className="fixed top-5 right-5 z-10 flex items-center justify-center w-11 h-11 rounded-full cursor-pointer"
             style={{
               background: "var(--bg-elevated)",
               border: "1px solid var(--border-subtle)",
@@ -147,23 +154,31 @@ export default function Navbar() {
             <X size={22} />
           </button>
 
-          <AeLogo size={56} className="text-fg mb-4" title="" />
+          <div className="m-auto w-full max-w-sm flex flex-col items-center gap-2 px-6 py-20">
+            <AeLogo size={56} className="text-fg mb-4" title="" />
 
-          {NAV_LINKS.map((link) => {
-            const active = isActive(link.path);
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setMenuOpen(false)}
-                aria-current={active ? "page" : undefined}
-                className="font-display font-semibold text-3xl px-6 py-2 rounded-lg transition-colors"
-                style={{ color: active ? "var(--brand-light)" : "var(--text-primary)" }}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+            <SearchBox
+              variant="inline"
+              wrapperClassName="mb-4"
+              onNavigate={() => setMenuOpen(false)}
+            />
+
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.path);
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMenuOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className="font-display font-semibold text-3xl px-6 py-2 rounded-lg transition-colors"
+                  style={{ color: active ? "var(--brand-light)" : "var(--text-primary)" }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       )}
     </>

@@ -1,67 +1,280 @@
+/* ============================================================================
+ * Hero — full-bleed flight imagery with the copy anchored bottom-left and a
+ * results ticker pinned along the bottom edge.
+ *
+ * Text in here is deliberately light in BOTH themes: it sits on top of a dark
+ * scrim over photography, not on the page surface, so it does not follow the
+ * light/dark tokens the way the rest of the site does.
+ * ==========================================================================*/
+
 .hero {
-  height: 100vh;
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  /* 100dvh follows the real viewport as mobile browser chrome hides and shows,
+   * so the section doesn't jump mid-scroll the way 100vh does. The 660px floor
+   * keeps the composition from collapsing on short landscape phones. */
+  min-height: max(660px, 100dvh);
+  overflow: hidden;
 }
 
-.hero::before {
-  content: "";
+.hero-media {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.hero-overlay {
+/* Dark at the top so the fixed nav stays legible, lightest at 42% to let the
+ * subject through, darkest at the bottom where the copy and ticker live. */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 10, 20, 0.7) 0%,
+    rgba(6, 10, 20, 0.25) 42%,
+    rgba(6, 10, 20, 0.92) 100%
+  );
+}
+
+.hero-body {
   position: relative;
-  text-align: center;
-  color: white;
+  width: 100%;
+  padding: 0 5% 96px;
 }
-/* MAIN TITLE */
-.hero h1 {
-  font-family: "Orbitron", ui-sans-serif, system-ui, sans-serif;
-  font-size: 90px;
-  font-weight: 800;
-  letter-spacing: 4px;
-  margin-bottom: 20px;
+
+/* ─── Eyebrow ─────────────────────────────────────────────────────────────── */
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 20px;
+  /* Same mono/size/tracking the Team Overview and Watch Us Fly eyebrows use,
+   * so all three section labels read as one system. */
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
+  color: #c7d4ee;
+}
+
+/* Same red as "First." in the Features headline and the award cards, rather
+ * than --spark's orange — one accent for the whole page. */
+.hero-eyebrow-rule {
+  flex: none;
+  width: 34px;
+  height: 3px;
+  background: #e5484d;
+}
+
+/* ─── Headline + lede ─────────────────────────────────────────────────────── */
+
+.hero-title {
+  margin: 0;
+  font-family: "Orbitron", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(46px, 6.4vw, 92px);
+  font-weight: 800;
   line-height: 1;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #fff;
 }
 
-/* DESCRIPTION TEXT */
-.hero p {
-  font-size: 18px;
-  opacity: 0.85;
-  margin-bottom: 30px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
+/* ─── Calls to action ─────────────────────────────────────────────────────── */
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
 }
 
-/* BUTTON */
-.hero button {
-  padding: 14px 28px;
-  border-radius: 30px;
-  border: none;
-  background: #2f6df6;
-  color: white;
+/* Matches the buttons used everywhere else on the site (Contact, Sponsors):
+ * Inter, 16px, 10px radius, brand fill, brand-light on hover. */
+.hero-cta {
+  padding: 14px 26px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
-  transition: 0.3s ease;
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-fast);
 }
 
-.hero button:hover {
-  transform: scale(1.05);
+.hero-cta--solid {
+  background: var(--brand);
+  color: #fff;
 }
 
-/* RESPONSIVE */
+.hero-cta--solid:hover {
+  background: var(--brand-light);
+  color: #fff;
+}
+
+.hero-cta--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #e8eefc;
+}
+
+.hero-cta--ghost:hover {
+  border-color: var(--brand);
+  color: #fff;
+}
+
+/* Physical press feedback — the button settles a pixel under the cursor. */
+.hero-cta:active {
+  transform: translateY(1px);
+}
+
+/* ─── Scroll cue ──────────────────────────────────────────────────────────── */
+
+.hero-scroll {
+  position: absolute;
+  right: 5%;
+  bottom: 100px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(207, 219, 245, 0.7);
+}
+
+.hero-scroll-track {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 40px;
+  overflow: hidden;
+  background: rgba(207, 219, 245, 0.25);
+}
+
+.hero-scroll-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 14px;
+  background: var(--brand);
+  animation: hero-cue 1.9s ease-in-out infinite;
+}
+
+@keyframes hero-cue {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+}
+
+/* ─── Results ticker ──────────────────────────────────────────────────────── */
+
+.hero-ticker {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(6, 10, 20, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* ae-marquee (global.css) translates -50%, which lands exactly on the start of
+ * the duplicated second row — hence the two identical rows in the markup. */
+.hero-ticker-rail {
+  display: flex;
+  width: max-content;
+  animation: ae-marquee 32s linear infinite;
+}
+
+.hero-ticker-row {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.hero-ticker-item {
+  padding: 13px 26px;
+  border-right: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #c7d4ee;
+}
+
+/* Hold the rail still while someone is actually trying to read it. */
+.hero-ticker:hover .hero-ticker-rail {
+  animation-play-state: paused;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
 @media (max-width: 768px) {
-  .hero h1 {
-    font-size: 48px;
+  .hero-body {
+    /* Clears the 44px ticker plus breathing room, so the CTAs are never
+       crowded against it. */
+    padding: 0 6% 92px;
   }
 
-  .hero p {
-    font-size: 16px;
+  .hero-title {
+    letter-spacing: 2px;
+  }
+
+  /* The eyebrow wraps to two lines at this width. Aligning to the start keeps
+     the orange rule on the first line instead of floating against the middle
+     of a two-line block, and the tighter size buys back most of the wrap. */
+  .hero-eyebrow {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-eyebrow-rule {
+    width: 24px;
+    margin-top: 7px;
+  }
+
+  .hero-actions {
+    margin-top: 26px;
+  }
+
+  .hero-cta {
+    padding: 13px 20px;
+    font-size: 15px;
+  }
+
+  .hero-ticker-item {
+    padding: 11px 18px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+  }
+
+  /* The cue would sit on top of the ticker once the viewport gets short. */
+  .hero-scroll {
+    display: none;
   }
 }

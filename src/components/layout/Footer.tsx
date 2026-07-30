@@ -1,21 +1,17 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, ChevronRight, Mail, MapPin } from "lucide-react";
-import emailjs from "@emailjs/browser";
 import AeLogo from "@/components/ui/AeLogo";
 import {
   BRAND,
   CONTACT,
   NAV_LINKS,
+  NEWSLETTER_EMAIL,
   SOCIALS,
   VEHICLE_NAMES,
 } from "@/data/site";
 
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-type NewsletterStatus = "idle" | "sending" | "sent" | "error";
 
 /**
  * Footer — 4-column site footer (translated from Home.dc.html): brand + socials,
@@ -24,36 +20,6 @@ type NewsletterStatus = "idle" | "sending" | "sent" | "error";
  */
 export default function Footer() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterStatus, setNewsletterStatus] =
-    useState<NewsletterStatus>("idle");
-
-  const handleNewsletterSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
-      setNewsletterStatus("error");
-      return;
-    }
-
-    setNewsletterStatus("sending");
-    try {
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          name: "Newsletter signup",
-          email: newsletterEmail,
-          subject: "Newsletter signup",
-          message: `${newsletterEmail} subscribed via the footer "Stay informed" form.`,
-        },
-        { publicKey: EMAILJS_PUBLIC_KEY },
-      );
-      setNewsletterStatus("sent");
-      setNewsletterEmail("");
-    } catch {
-      setNewsletterStatus("error");
-    }
-  };
 
   return (
     <footer className="bg-canvas border-t border-border-strong relative overflow-hidden">
@@ -139,11 +105,22 @@ export default function Footer() {
               </a>
             </div>
 
-            {/* Newsletter — sends the signup through EmailJS (see
-                handleNewsletterSubmit) and reflects sending/sent/error state. */}
+            {/* Newsletter — opens the visitor's mail client with a pre-written
+                "I'm interested" message addressed to the team (see
+                NEWSLETTER_EMAIL in site.ts). No backend needed. */}
             <form
               className="bg-elevated border border-border rounded-[10px] p-4"
-              onSubmit={handleNewsletterSubmit}
+              onSubmit={(e) => {
+                e.preventDefault();
+                const email = newsletterEmail.trim();
+                if (!email) return;
+                const subject = encodeURIComponent(NEWSLETTER_EMAIL.subject);
+                const body = encodeURIComponent(
+                  NEWSLETTER_EMAIL.body.replace("{email}", email),
+                );
+                window.location.href = `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
+                setNewsletterEmail("");
+              }}
             >
               <label
                 htmlFor="footer-email"
@@ -164,22 +141,11 @@ export default function Footer() {
                 <button
                   type="submit"
                   aria-label="Subscribe"
-                  disabled={newsletterStatus === "sending"}
                   className="flex-none w-11 h-11 rounded-md bg-gold text-canvas cursor-pointer flex items-center justify-center hover:bg-gold-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <ArrowUpRight size={18} strokeWidth={2.4} />
                 </button>
               </div>
-              {newsletterStatus === "sent" && (
-                <p className="mt-2 font-sans text-xs text-[#16a34a]">
-                  Thanks — you're on the list.
-                </p>
-              )}
-              {newsletterStatus === "error" && (
-                <p className="mt-2 font-sans text-xs text-[#dc2626]">
-                  Something went wrong. Please try again.
-                </p>
-              )}
             </form>
           </div>
         </div>
