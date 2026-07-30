@@ -16,7 +16,7 @@ interface ThemeToggleProps {
 export default function ThemeToggle({
   // Fixed to the top-right with comfortable edge padding (a little tighter on
   // small screens, roomier on desktop) so it's always easy to reach.
-  className = "fixed top-5 right-5 md:top-6 md:right-8 z-40",
+  className = "ae-toggle fixed top-5 right-5 md:top-6 md:right-8 z-40",
 }: ThemeToggleProps) {
   const { isDark, toggle } = useTheme();
 

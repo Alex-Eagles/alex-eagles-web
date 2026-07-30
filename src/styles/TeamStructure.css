@@ -31,7 +31,7 @@
   --ts-bg: #ffffff;
   --ts-text: #0b1220;
   --ts-text-muted-1: #3b5a8a;
-  --ts-text-muted-2: #5b7bab;
+  --ts-text-muted-2: #4a6a99; /* was #5b7bab: 4.32:1, under AA at 11-13px */
   --ts-text-muted-3: #8aa4c9;
   --ts-border: #bfdbfe;
   --ts-border-soft: #dbeafe;
@@ -101,8 +101,10 @@
   color: var(--ts-text-muted-2);
 }
 
+/* var(--brand) rather than a hardcoded #3b82f6: at 13px this needs 4.5:1, and
+ * the light theme's darker brand blue is what clears it against white. */
 .tp-eyebrow-index {
-  color: #3b82f6;
+  color: var(--brand);
   font-weight: 700;
 }
 
@@ -782,24 +784,88 @@
   }
 }
 
-@media (max-width: 560px) {
+/* Phones keep BOTH lead columns side by side. Stacking them turned the chart
+ * into a 1300px vertical list that read as a long menu, not an org chart, and
+ * the whole point of the diagram is that the two branches are parallel. Type
+ * and padding shrink instead. */
+@media (max-width: 640px) {
+  .tp-chart {
+    max-width: 100%;
+  }
+
+  .tp-leads {
+    gap: 10px;
+  }
+
+  .tp-box {
+    padding: 10px 12px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .tp-tier--single .tp-box {
+    width: 100%;
+  }
+
+  .tp-box--lead {
+    padding: 12px 8px;
+    font-size: 11px;
+  }
+
+  .tp-lead-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tp-lead-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .tp-owns {
+    gap: 6px;
+  }
+
+  .tp-owns-item {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .tp-connector {
+    height: 20px;
+    --tp-travel: 20px;
+  }
+
+  .tp-connector--split {
+    top: -22px;
+    height: 22px;
+    --tp-travel: 22px;
+  }
+
+  .tp-tier3 {
+    padding-top: 22px;
+  }
+
+  /* The hover descriptions are unreachable on touch and would double the
+     chart's height if they opened, so the chart stays a chart here. */
+  .tp-node-desc {
+    display: none;
+  }
+
+  .tp-hint {
+    display: none;
+  }
+}
+
+/* Below ~380px two columns of pills stop being readable. */
+@media (max-width: 379px) {
   .tp-leads {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 26px;
   }
 
   .tp-tier3::before {
     display: none;
-  }
-
-  .tp-connector--split {
-    top: -28px;
-    height: 28px;
-    --tp-travel: 28px;
-  }
-
-  .tp-tier3 {
-    padding-top: 28px;
   }
 }
 
@@ -944,7 +1010,7 @@
   margin-top: 28px;
   padding: 14px 26px;
   border-radius: 10px;
-  background: var(--brand);
+  background: var(--brand-solid);
   font-family: var(--font-sans);
   font-size: 16px;
   font-weight: 600;
@@ -958,7 +1024,7 @@
 }
 
 .tp-cta:hover {
-  background: var(--brand-light);
+  background: var(--brand-solid-hover);
   color: #ffffff;
 }
 

@@ -110,12 +110,12 @@
 }
 
 .hero-cta--solid {
-  background: var(--brand);
+  background: var(--brand-solid);
   color: #fff;
 }
 
 .hero-cta--solid:hover {
-  background: var(--brand-light);
+  background: var(--brand-solid-hover);
   color: #fff;
 }
 
@@ -231,11 +231,44 @@
 
 @media (max-width: 768px) {
   .hero-body {
-    padding: 0 6% 84px;
+    /* Clears the 44px ticker plus breathing room, so the CTAs are never
+       crowded against it. */
+    padding: 0 6% 92px;
   }
 
   .hero-title {
     letter-spacing: 2px;
+  }
+
+  /* The eyebrow wraps to two lines at this width. Aligning to the start keeps
+     the orange rule on the first line instead of floating against the middle
+     of a two-line block, and the tighter size buys back most of the wrap. */
+  .hero-eyebrow {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-eyebrow-rule {
+    width: 24px;
+    margin-top: 7px;
+  }
+
+  .hero-actions {
+    margin-top: 26px;
+  }
+
+  .hero-cta {
+    padding: 13px 20px;
+    font-size: 15px;
+  }
+
+  .hero-ticker-item {
+    padding: 11px 18px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
   }
 
   /* The cue would sit on top of the ticker once the viewport gets short. */

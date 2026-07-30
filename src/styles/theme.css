@@ -95,6 +95,16 @@
   --space-section-y-tight: 64px;
 }
 
+/* On a phone the desktop rhythm reads as dead space rather than breathing
+ * room: 100px top and bottom costs a quarter of the viewport before any
+ * content shows. Every section that uses these tokens scales down together. */
+@media (max-width: 720px) {
+  :root {
+    --space-section-y: 64px;
+    --space-section-y-tight: 44px;
+  }
+}
+
 /* ----------------------------------------------------------------------------
  * 3. COLOR TOKENS — DARK MODE (default)
  * --------------------------------------------------------------------------*/
@@ -111,6 +121,12 @@
   /* Brand + accents */
   --brand: #3b82f6; /* Alex Eagles sky blue (matches logo)  */
   --brand-light: #60a5fa; /* hover / active                      */
+  /* Fill color for solid buttons. --brand is tuned to read as bright blue
+   * TEXT on a dark surface; as a BACKGROUND under white text it only reaches
+   * 3.68:1, under the 4.5 AA needs. This is a notch darker (4.87:1) and is
+   * near-indistinguishable at button size. Light mode inherits it. */
+  --brand-solid: #2563eb;
+  --brand-solid-hover: #1d4ed8;
   --brand-glow: rgba(59, 130, 246, 0.25); /* glow behind brand elements          */
   --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
   --gold-hover: #fbbf24;
@@ -122,7 +138,7 @@
   /* Text (cool blue-white, per brand) */
   --text-primary: #f5f9ff;
   --text-secondary: #a9c2e8;
-  --text-muted: #63769c;
+  --text-muted: #8093ba; /* lightened: #63769c only reached 4.09:1 */
 
   /* Borders */
   --border-subtle: rgba(59, 130, 246, 0.18);
@@ -159,7 +175,7 @@
 
   --text-primary: #0b1220; /* deep cool navy text                  */
   --text-secondary: #35507a;
-  --text-muted: #6b84ac;
+  --text-muted: #566e97; /* deepened: #6b84ac only reached 3.8:1 */
 
   --border-subtle: #d7e6fb;
   --border-solid: #aecbf2;

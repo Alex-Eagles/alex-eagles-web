@@ -195,7 +195,7 @@
     left: 12px;
     z-index: 60;
     transform: translateY(-150%);
-    background: var(--brand);
+    background: var(--brand-solid);
     color: #fff;
     font-family: var(--font-sans);
     font-size: 14px;
@@ -245,5 +245,32 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * MOBILE THEME TOGGLE — the pill's geometry lives in inline styles on the
+ * component, which outrank any selector, so the phone-sized variant has to
+ * force its way past them. Collapses to an icon-only circle: at full width it
+ * covered a third of a 390px viewport and sat on top of section content.
+ * --------------------------------------------------------------------------*/
+@media (max-width: 767px) {
+  .ae-toggle {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  /* The word labels have nowhere to go once the pill is round. */
+  .ae-toggle > span:not(:last-child) {
+    opacity: 0 !important;
+  }
+
+  /* Knob fills the circle and stops sliding — there is no track left. */
+  .ae-toggle > span:last-child {
+    top: 2px !important;
+    left: 2px !important;
+    width: 38px !important;
+    height: 38px !important;
+    transform: none !important;
   }
 }

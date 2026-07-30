@@ -73,7 +73,9 @@ export default function Navbar() {
                 aria-current={active ? "page" : undefined}
                 className="font-sans text-sm font-medium tracking-[0.01em] px-4 py-2 rounded-full transition-colors duration-200"
                 style={{
-                  background: active ? "var(--brand)" : "transparent",
+                  // --brand-solid, not --brand: white label on the lighter
+                  // blue only reaches 3.68:1.
+                  background: active ? "var(--brand-solid)" : "transparent",
                   color: active ? "#ffffff" : "var(--text-secondary)",
                 }}
                 onMouseEnter={(e) => {

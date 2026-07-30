@@ -104,7 +104,7 @@
 .sponsors-footer-cta {
   display: inline-block;
   padding: 12px 25px;
-  background: var(--brand);
+  background: var(--brand-solid);
   color: #fff;
   border: none;
   border-radius: 10px;
