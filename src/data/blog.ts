@@ -411,7 +411,19 @@ export const BLOG_POSTS: BlogPostFull[] = [
       "Completed the aircraft stability and control analysis alongside propulsion system optimization. Sized the empennage, selected the AT4130-450KV motor with an 18×8 APC-E propeller through trade-off analysis, and verified performance using eCalc, thrust, climb, take-off, and cruise analyses.",
     image: "/images/blog/aerodesign-stability-propulsion.png",
     category: "propulsion",
-    date: "Mar – Apr 2026",
+    date: "Mar 20, 2026",
+    author: "Propulsion Team",
+    readTime: "3 min read",
+  },
+  {
+    id: 48,
+    title: "Test Drone Propulsion System Design & Validation",
+    excerpt:
+      "The propulsion system was designed based on the required thrust for takeoff, cruise, and landing, together with the target flight endurance and overall aircraft weight. Propulsion calculations were performed to determine the appropriate motor, propeller, ESC, and battery configuration capable of meeting the performance requirements of the 4 kg prototype platform. Following the preliminary calculations, the selected configuration was analysed and validated using eCalc simulations to verify thrust output, power consumption, efficiency, and expected flight time. Based on this analysis, MN5008-400KV brushless motors paired with 15×5 propellers and Air 40A ESCs were selected to provide the required thrust while maintaining efficient operation. A Quad-X configuration was adopted due to its structural simplicity, balanced load distribution, stable flight characteristics, and ease of control. This propulsion system was integrated into a 4 kg wooden test drone, which served as a development platform for validating the autonomous navigation system, flight controller integration, and other onboard subsystems before manufacturing the final carbon-fiber competition UAV with its upgraded propulsion configuration.",
+    image: "/images/blog/test_drone.png",
+    imageFit: "cover",
+    category: "propulsion",
+    date: "Jan 28, 2026",
     author: "Propulsion Team",
     readTime: "3 min read",
   },
@@ -506,6 +518,18 @@ export const BLOG_POSTS: BlogPostFull[] = [
     date: "Oct 21, 2025",
     author: "AI Team",
     readTime: "1 min read",
+  },
+  {
+    id: 49,
+    title: "Static Thrust Rig Testing for Fixed-Wing Propulsion System",
+    excerpt:
+      "To validate the selected propulsion system before integration into the fixed-wing aircraft, a dedicated static thrust test rig was designed and manufactured. The test rig enabled controlled evaluation of the selected motor, propeller, and ESC combination by measuring the generated static thrust and current draw at different throttle settings. These experimental measurements were compared with the propulsion calculations and eCalc simulation results to verify the accuracy of the design and ensure that the selected propulsion system could satisfy the required takeoff, climb, and cruise performance while operating within the specified electrical and thermal limits. The results confirmed the suitability of the selected propulsion configuration and provided confidence before its integration into the final fixed-wing aircraft.",
+    image: "/images/blog/Thrust_testing.png",
+    imageFit: "cover",
+    category: "propulsion",
+    date: "May 2, 2026",
+    author: "Propulsion Team",
+    readTime: "3 min read",
   },
 ];
 
