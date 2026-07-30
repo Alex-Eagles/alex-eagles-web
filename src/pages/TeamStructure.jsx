@@ -33,6 +33,9 @@ const LEADS = [
     lead: "Mechanical Lead",
     icon: Wrench,
     color: "#8b5cf6",
+    // Matches Team.tsx's division heading id (`division-${division.num}`) —
+    // team.ts's Mechanical division is num "01".
+    to: "/team#division-01",
     desc: "Keeps aerodesign, structures and propulsion working to the same set of numbers, so the airframe comes together as one aircraft.",
     children: [
       {
@@ -54,6 +57,8 @@ const LEADS = [
     lead: "Autonomous Lead",
     icon: Cpu,
     color: "#3b82f6",
+    // team.ts's Autonomous division is num "02".
+    to: "/team#division-02",
     desc: "Manages the integration between the autonomous subsystems, so software, hardware and AI arrive as one working stack rather than three separate ones.",
     children: [
       {
@@ -75,7 +80,31 @@ const LEADS = [
 export default function TeamStructure() {
   /** Which role is being hovered or focused. `null` = nothing, chart at rest. */
   const [activeId, setActiveId] = useState(null);
+  /* Second-tap arming for touch devices — see handleActivate. Unused on
+   * hover-capable devices, where a single click still navigates. */
+  const [tappedId, setTappedId] = useState(null);
   const navigate = useNavigate();
+
+  /* True on mice/trackpads, false on touch — computed once, since it tracks
+   * the device, not anything that changes mid-session. */
+  const [prefersHover] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches,
+  );
+
+  /* On a hover-capable device the role's info is already showing (hover got
+   * there first), so a click/Enter navigates immediately — unchanged from
+   * before. On touch there's no hover, so the first tap only reveals the
+   * info (arms `tappedId`); a second tap on the same node navigates. Tapping
+   * a different node re-arms for that node instead of navigating. */
+  const handleActivate = (id, to) => {
+    setActiveId(id);
+    if (prefersHover || tappedId === id) {
+      setTappedId(null);
+      navigate(to);
+    } else {
+      setTappedId(id);
+    }
+  };
 
   /* Props shared by every hoverable node. Descriptions stay in the DOM at all
    * times (only visually collapsed), so assistive tech can read what a
@@ -92,11 +121,11 @@ export default function TeamStructure() {
       ? {
           role: "link",
           style: { cursor: "pointer" },
-          onClick: () => navigate(to),
+          onClick: () => handleActivate(id, to),
           onKeyDown: (e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              navigate(to);
+              handleActivate(id, to);
             }
           },
         }
@@ -130,7 +159,10 @@ export default function TeamStructure() {
             parallel and the leads keep them in sync.
           </p>
 
-          <p className="tp-hint">Hover a role to see what it does</p>
+          <p className="tp-hint tp-hint--desktop">Hover a role to see what it does</p>
+          <p className="tp-hint tp-hint--mobile">
+            Tap a role to see what it does, tap again to open its team page
+          </p>
 
           <Link to="/team" className="tp-cta">
             Meet the team
@@ -139,8 +171,14 @@ export default function TeamStructure() {
 
         <div
           className={`tp-chart${activeId ? " has-active" : ""}`}
-          onMouseLeave={() => setActiveId(null)}
-          onBlur={() => setActiveId(null)}
+          onMouseLeave={() => {
+            setActiveId(null);
+            setTappedId(null);
+          }}
+          onBlur={() => {
+            setActiveId(null);
+            setTappedId(null);
+          }}
         >
           {TOP_ROLES.map((role, i) => (
             <Fragment key={role.id}>
@@ -193,7 +231,7 @@ export default function TeamStructure() {
                         "tp-box tp-box--lead tp-box--lit-2",
                         item.id,
                       )}
-                      {...nodeProps(item.id)}
+                      {...nodeProps(item.id, item.to)}
                     >
                       <span className="tp-node-head">
                         <span className="tp-lead-icon">

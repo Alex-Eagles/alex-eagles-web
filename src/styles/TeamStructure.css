@@ -851,14 +851,21 @@
     padding-top: 22px;
   }
 
-  /* The hover descriptions are unreachable on touch and would double the
-     chart's height if they opened, so the chart stays a chart here. */
-  .tp-node-desc {
+  /* Descriptions now open on tap (see TeamStructure.jsx's handleActivate),
+     so unlike before they're no longer force-collapsed here — only the
+     tapped role's .is-active state expands one at a time. */
+
+  .tp-hint.tp-hint--desktop {
     display: none;
   }
 
-  .tp-hint {
-    display: none;
+  /* Doubled selector, not just .tp-hint--mobile: the plain-class default
+   * (display: none, set later in the file next to .tp-hint) has equal
+   * specificity, so source order alone would let it win over this media
+   * query regardless of viewport. The extra .tp-hint bumps specificity so
+   * this override always wins under 640px. */
+  .tp-hint.tp-hint--mobile {
+    display: block;
   }
 }
 
@@ -996,7 +1003,9 @@
   opacity: 1;
 }
 
-/* Affordance for the hover — without it the interaction is undiscoverable. */
+/* Affordance for the hover/tap — without it the interaction is undiscoverable.
+ * Two variants share this styling; only one shows at a time (mobile's swap
+ * happens in the 640px breakpoint below). */
 .tp-hint {
   margin: 18px 0 0;
   font-family: var(--font-mono);
@@ -1004,6 +1013,10 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ts-text-muted-2);
+}
+
+.tp-hint--mobile {
+  display: none;
 }
 
 /* The chart names the subsystems; this is the way through to the people in
