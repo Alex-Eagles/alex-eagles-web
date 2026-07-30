@@ -79,4 +79,4 @@ export const SOCIALS: SocialLink[] = [
 ];
 
 /** Vehicle names surfaced in the footer (full data lives with the Vehicles page). */
-export const VEHICLE_NAMES: string[] = ["Clover","Harpy", "Itay", "Taco" ];
+export const VEHICLE_NAMES: string[] = ["Neith","Harpy", "Itay", "Taco" ];

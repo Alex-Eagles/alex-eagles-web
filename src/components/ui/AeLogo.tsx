@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { useTheme } from "@/context/ThemeContext";
-import logoWhite from "@/assets/logo-white.png";
-import logoBlue from "@/assets/logo-blue.png";
+import logoWhite from "@/assets/logo-white.webp";
+import logoBlue from "@/assets/logo-blue.webp";
 
 /**
  * AeLogo — the official Alex Eagles emblem, rendered from the brand PNGs.
@@ -12,7 +12,7 @@ import logoBlue from "@/assets/logo-blue.png";
  *   - `variant="white"` / `"blue"`: force one, regardless of theme. The hero
  *     forces "white" because its backdrop stays dark in both themes.
  *
- * The source images live in `src/assets/` (logo-white.png, logo-blue.png) so
+ * The source images live in `src/assets/` (logo-white.webp, logo-blue.webp) so
  * they're versioned in the repo and bundled by Vite — teammates get them on pull.
  *
  * Size is a square box (width = height); the emblem is `object-contain` inside it.

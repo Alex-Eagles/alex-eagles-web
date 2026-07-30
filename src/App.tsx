@@ -3,12 +3,13 @@ import { Route, Routes, useLocation } from "react-router-dom";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import ConstructionBanner from "@/components/layout/ConstructionBanner";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { useSearchHighlight } from "@/hooks/useSearchHighlight";
 
-import Home from "@/pages/Home";
+import Homepage from "@/pages/Homepage";
 import Team from "@/pages/Team";
 import Blog from "@/pages/Blog";
+import BlogPost from "@/pages/BlogPost";
 import Vehicles from "@/pages/Vehicles";
 import Gallery from "@/pages/Gallery";
 import History from "@/pages/History";
@@ -30,15 +31,11 @@ function ScrollToTop() {
 
 /**
  * App — the layout shell shared by every page: skip link, fixed theme toggle,
- * navbar, the routed page in <main>, the footer, and the site-wide
- * under-construction notice.
- *
- * No page is finished yet. Home and Blog have their own holding-page designs;
- * the other four routes render a polished "coming soon" placeholder so
- * navigation works end-to-end today. Swap each import for the real page as it's
- * designed — nothing else here changes.
+ * navbar, the routed page in <main>, and the footer.
  */
 export default function App() {
+  useSearchHighlight();
+
   return (
     <>
       <a href="#main-content" className="skip-link">
@@ -51,9 +48,10 @@ export default function App() {
 
       <main id="main-content">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Homepage />} />
           <Route path="/team" element={<Team />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPost />} />
           <Route path="/vehicles" element={<Vehicles />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/history" element={<History />} />
@@ -62,7 +60,6 @@ export default function App() {
       </main>
 
       <Footer />
-      <ConstructionBanner />
     </>
   );
 }

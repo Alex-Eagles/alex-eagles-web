@@ -97,34 +97,20 @@ import Button from "@/components/ui/Button";
 
 Client-side routing via React Router. Routes are declared in `src/App.tsx`:
 
-| Route       | Page       | Status        |
-| ----------- | ---------- | ------------- |
-| `/`         | Home       | 🚧 Holding page |
-| `/team`     | Team       | 🚧 Coming soon |
-| `/blog`     | Blog       | 🚧 Holding page |
-| `/vehicles` | Vehicles   | 🚧 Coming soon |
-| `/gallery`  | Gallery    | 🚧 Coming soon |
-| `/history`  | History    | 🚧 Coming soon |
-| `*`         | NotFound   | 404 fallback  |
-
-No page is finished. **Home** and **Blog** have their own holding-page designs;
-Team, Vehicles, Gallery, and History render the shared, on-brand `ComingSoon`
-placeholder.
+| Route       | Page       |
+| ----------- | ---------- |
+| `/`         | Home       |
+| `/team`     | Team       |
+| `/blog`     | Blog       |
+| `/blog/:id` | BlogPost   |
+| `/vehicles` | Vehicles   |
+| `/gallery`  | Gallery    |
+| `/history`  | History    |
+| `*`         | NotFound (404 fallback) |
 
 The layout shell (`App.tsx`) provides a skip link, a fixed theme toggle, the
-navbar, the routed `<main>`, the footer, and `ConstructionBanner`. A
-`ScrollToTop` helper resets scroll on every route change.
-
-### Media policy
-
-The site ships **no photography and no footage** while it is under
-construction. Every backdrop is drawn in CSS (brand gradients plus the grid
-texture). The only bitmaps in the repo are the favicons in `public/` and the
-brand emblem in `src/assets/`, which `AeLogo` renders.
-
-`scripts/media-assets.test.mjs` enforces this: it fails if a video or a stray
-image lands in `public/`, if any component renders a `<video>` or a non-logo
-`<img>`, or if `ConstructionBanner` stops being mounted in the shell.
+navbar, the routed `<main>`, and the footer. A `ScrollToTop` helper resets
+scroll on every route change.
 
 ---
 

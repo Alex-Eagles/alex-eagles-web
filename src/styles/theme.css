@@ -81,8 +81,323 @@
   --transition-base: 250ms ease-out; /* hovers, cards             */
   --transition-slow: 400ms ease-out; /* theme swap, big reveals   */
 
+  /* A stronger ease-out than the CSS keyword. `ease-out` is a gentle curve;
+   * this one leaves hard and settles late, which is what makes a hover read as
+   * an immediate response rather than a slow drift. Use it for anything the
+   * pointer triggers — the moment right after the cursor lands is exactly when
+   * the user is watching most closely. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* ── Scroll-cue "breathe" ─────────────────────────────────────────────────
+   * How far the scroll-cue LABEL fades at the bottom of its pulse (see
+   * @keyframes ae-cue-pulse in global.css).
+   *
+   * ⚠ This is a floor, not a free dial. The label is real text, and WCAG AA
+   * wants 4.5:1 for the whole time it's on screen — not just at the bright end
+   * of a loop. At 0.82 the label bottoms out at 5.7:1 on the dark page and
+   * 5.4:1 on the light one, measured against the page it sits on. Push it DOWN
+   * only if you re-check the contrast, or raise it freely.
+   *
+   * The dark figure used to be ~4.6:1, i.e. the floor was set right at the
+   * edge. It has headroom now only because --text-secondary itself was
+   * brightened (see the note on the text ramp below); this dial did not move,
+   * and it is still the thing standing between a decorative pulse and text
+   * that dips under the bar once per cycle.
+   *
+   * The ARROW is the loud half of the gesture on purpose: it's decorative and
+   * aria-hidden, so it carries no contrast obligation and swings much further
+   * (see ae-cue-arrow). That split is what lets the cue read as a strong pulse
+   * without the words ever going faint. */
+  --cue-fade-floor: 0.82;
+  /* One cycle of the pulse. Both the label and the arrow share it, so they
+   * read as a single gesture rather than two things blinking near each other. */
+  --cue-cycle: 2.8s;
+
   --maxw-content: 1180px; /* standard page content width      */
   --maxw-prose: 65ch; /* readable body-text line length   */
+
+  /* Layout anchors used by the CSS-module components (Team roster et al.).
+   * `--page-max` / `--page-gutter` keep those modules aligned with the
+   * Tailwind `--maxw-content` wrapper the rest of the site uses.            */
+  --page-max: var(--maxw-content);
+  --page-gutter: 48px;
+  --page-gutter-sm: 20px;
+
+  /* Height the fixed navbar occupies (35px offset + ~42px pill). Anything
+   * that must not slide under the bar anchors to this — notably
+   * `scroll-margin-top` on anchor targets. Update it here, once.            */
+  --nav-height: 88px;
+
+  /* ------------------------------------------------------------------------
+   * SUB-TEAM ACCENT COLORS (Team page)
+   * One accent per sub-team, tuned to read on the dark team cards. Change a
+   * hue here, once, and every section heading + card badge for that sub-team
+   * updates. Slug must match slugify(subTeamName): "Tail & Stability" →
+   * `--team-tail-stability`, "Computer Vision" → `--team-computer-vision`.
+   *
+   * ⚠ MERGE NOTE: this block is a verbatim copy of the one on the team-page
+   * branch, names and values identical, so the two reconcile without anyone
+   * having to decide which palette wins. If you edit a hue, edit it there too
+   * — or the History page and the Team page will disagree about what colour a
+   * discipline is, which is the one thing an accent palette exists to prevent.
+   *
+   * ⚠ THEME-INDEPENDENT, AND THEREFORE NOT SAFE AS TEXT. These are pastels
+   * picked against a dark card: on the light theme they land around 2.1:1 on
+   * white, well under half the AA floor. Use them as FILLS — a dot, a bar, a
+   * solid chip with --ink-on-accent on top — never as a text colour. See the
+   * publication tags for the chip pattern.
+   * --------------------------------------------------------------------- */
+  /* The page's own accent — eyebrows, the active year tab, the jump-nav tab,
+   * and the fallback for a card rendered outside a sub-team. Brand blue in
+   * both themes, so it lives here rather than in the per-theme blocks. */
+  /* --team-accent: #3d3ecc; */
+  --team-accent: #2727a3;
+
+  --team-management: #3d3ecc; /* brand blue (accent)    */
+  --team-aerodesign: #85b7eb; /* sky blue               */
+  --team-wing: #6ad1d8; /* cyan                   */
+  --team-tail-stability: #f0a07a; /* coral                  */
+  --team-structure: #c2c0b4; /* warm gray              */
+  --team-propulsion: #97c459; /* green                  */
+  --team-software: #5dcaa5; /* teal                   */
+  --team-hardware: #f0b24a; /* gold                   */
+  --team-computer-vision: #d01925de; /* pink                   */
+  --team-ai: #d5323cde; /* pink — same discipline as Computer Vision */
+  --team-firmware: #afa9ec; /* lavender               */
+
+  /* The ink that goes ON one of those accents.
+   *
+   * Fixed in both themes, which is the whole point: the chip underneath it is
+   * the same pastel in dark and light, so its label cannot follow
+   * --text-primary — that would turn near-white in dark mode and put pale text
+   * on a pale chip. This is the light theme's ink, used unconditionally.
+   *
+   * Measured against every accent above: 8.3:1 on Computer Vision's pink,
+   * 8.8:1 on Aerodesign's blue, and 8.5–10.3:1 on the rest.
+   *
+   * ⚠ ONE EXCEPTION. --team-management (#3d3ecc) is a saturated brand blue,
+   * not a pastel like the other ten, and dark ink on it measures 2.43:1 — a
+   * clear fail. A Management chip needs WHITE ink instead. Nothing uses one
+   * today; this is here so that whoever adds the first one does not have to
+   * rediscover it. */
+  --ink-on-accent: #0d1030;
+
+  /* ── Chapter-band edge ────────────────────────────────────────────────────
+   * The hairline drawn where one background band meets the next.
+   *
+   * ─── THERE USED TO BE A CROSSFADE HERE INSTEAD, AND IT WAS THE BUG ────────
+   * Each band faded into the next over 96-176px. On the dark theme that reads
+   * as a soft chapter change, because the two dark tones also differ in
+   * CHROMA — one is near-neutral, the other saturated indigo — so the eye has
+   * a second cue and finds the join anyway.
+   *
+   * The light pair has no such cue: two pale indigo-tinted neutrals differing
+   * only in lightness. Dissolved over 150px there was no edge to find at all,
+   * and the page read as one continuous sheet. The measurements are the joke
+   * of it — the light step is ΔL* 4.4 and the dark step people describe as
+   * obvious is ΔL* 3.5. The light bands were ALREADY the stronger contrast.
+   * What they lacked was an edge.
+   *
+   * So the bands butt up hard now, in both themes, and the light theme gets
+   * this hairline on top. Dark leaves it transparent: it was never the theme
+   * with the problem, and a rule across every section boundary there would be
+   * solving something that isn't broken.
+   *
+   * ◀── DIAL. Push toward --border-solid (#b0b3e0) for a more editorial rule,
+   * or toward --border-subtle (#d4d6f0) to make it a whisper. */
+  --band-edge: transparent;
+}
+
+/* ----------------------------------------------------------------------------
+ * TEAM PAGE PALETTE
+ *
+ * The roster was built dark-only: every colour in Team.module.css and the four
+ * team components was a literal hex. This block is those literals, lifted out
+ * verbatim under semantic names, so the page can be re-coloured per theme from
+ * one place. The dark values below are byte-for-byte what those files used
+ * before, so dark mode renders identically.
+ *
+ * The light block is at the foot of the light theme (section 4).
+ *
+ * ─── The two zones, and why they don't both flip ────────────────────────────
+ * A card is two different surfaces and they need opposite treatment:
+ *
+ *   1. The IMAGERY zone — the portrait, the cut-out backdrop wallpaper, and
+ *      the scrims and names that sit on top of them. Text here is over a
+ *      photograph in *both* themes, so it stays light-on-dark-scrim in both.
+ *      Flipping it to dark ink would put near-black type over a mid-tone
+ *      photo, which is unreadable at any brightness.
+ *   2. The SURFACE zone — the flat card fill, the hover panel, the role tag.
+ *      This is chrome, not photography, so it follows the theme: near-black
+ *      with light ink in dark mode, light grey with dark ink in light mode.
+ *
+ * `--team-card-ink-photo` is zone 1's ink and is deliberately identical in
+ * both themes. `--team-card-ink` is zone 2's and flips. Don't merge them.
+ * ------------------------------------------------------------------------- */
+:root,
+:root[data-theme="dark"] {
+  /* Page chrome */
+  --team-bg: #141a26;
+  /* Bare channels — the hero scrim needs them inside rgb(… / a) stops. */
+  --team-bg-rgb: 20 26 38;
+  --team-ink: #f2f2f2;
+  --team-ink-soft: #9aa3b2; /* hero stat line            */
+  --team-ink-dim: #aaaaaa; /* hero hint, year tab rest  */
+  --team-ink-muted: #666666; /* headcount, footer         */
+  --team-ink-faint: #4d5769; /* stat separators           */
+  --team-accent-ink: #ffffff; /* ink on a filled accent    */
+  --team-numeral: rgb(61 62 204 / 0.18); /* ghosted division number */
+
+  /* Rules. Three weights: the division rule, the heavier sub-team rule, and
+     the lead/member divider (plus its brighter phone variant). */
+  --team-rule: rgb(68 68 68 / 0.4);
+  --team-rule-strong: rgb(46 46 46 / 0.9);
+  --team-rule-divider: rgb(68 68 68 / 0.5);
+  --team-rule-divider-mobile: rgb(96 96 96 / 0.75);
+
+  /* Year tabs */
+  --team-chip-bg: rgb(255 255 255 / 0.06);
+  --team-chip-border: rgb(68 68 68 / 0.6);
+
+  /* ------------------------------------------------------------------------
+   * HERO SCRIM
+   *
+   * On desktop the hero copy sits *on* the crew photo. Two stacked layers do
+   * the work (see .heroScrim in Team.module.css):
+   *
+   *   --team-hero-shade  a dark veil, painted on top. Its whole job is to keep
+   *                      light copy legible over a photograph. `none` in dark
+   *                      mode, where the page fade below is already near-black
+   *                      and does that job by itself.
+   *   --team-hero-wash   the page fade's opacity in the copy band, and
+   *                      --team-hero-resolve-at where it starts easing the rest
+   *                      of the way into the page colour so the photo dissolves
+   *                      rather than ending on a line. The curve of that ease
+   *                      lives in .heroScrim; this only says where it begins.
+   *
+   * The -sm variants are the phone layout, where the photo is a band at the
+   * top and the copy sits on the page *below* it, not on the picture.
+   * --------------------------------------------------------------------- */
+  --team-hero-shade: none;
+  --team-hero-shade-sm: none;
+  --team-hero-wash: 0.55;
+  --team-hero-wash-sm: 0.72;
+  --team-hero-resolve-at: 88%;
+  --team-hero-title-shadow: rgb(0 0 0 / 0.55);
+  --team-hero-hint-shadow: rgb(0 0 0 / 0.5);
+  /* Transparent, i.e. no halo: dark mode's eyebrow sits on the near-black page
+     where a dark glow would do nothing. Light mode gives it one. */
+  --team-hero-eyebrow-shadow: transparent;
+
+  /* Hero copy inks. Aliases in dark — the hero uses the page inks, exactly as
+     it always has. Light mode overrides them, because there the copy is on a
+     darkened photograph rather than on the page. Kept separate from the page
+     inks so overriding them can't leak into the section headings below. */
+  --team-hero-ink: var(--team-ink);
+  --team-hero-ink-soft: var(--team-ink-soft);
+  --team-hero-ink-dim: var(--team-ink-dim);
+  --team-hero-ink-faint: var(--team-ink-faint);
+  --team-hero-eyebrow: var(--team-accent);
+  --team-hero-chip-bg: var(--team-chip-bg);
+  --team-hero-chip-border: var(--team-chip-border);
+  /* The scroll hint sits in the very bottom hem, where the page fade has
+     already resolved, so it follows the page ink in both themes. */
+  --team-hero-hint-ink: var(--team-ink-dim);
+
+  /* --- card: imagery zone (does NOT flip — see the note above) ------------ */
+  /* Resolved by Vite from this file's own location. Swapping the theme swaps
+     the texture behind every cut-out card, with no work in the components. */
+  --team-card-backdrop: url("../assets/team/card-backdrop.webp");
+  /* Extra treatment on the wallpaper itself, on top of whatever is baked into
+     the file. `none` in dark — the dark texture is used exactly as authored. */
+  --team-backdrop-filter: none;
+
+  /* ======================================================================
+   * REST-STATE PORTRAIT GRADE — the five knobs on .photoLayer's filter.
+   * They apply in this order: grayscale → saturate → contrast → brightness
+   * → sepia. Hover replaces the whole filter with the untouched photo, so
+   * these only describe the resting grid.
+   *
+   * Dark mode is fully desaturated (grayscale 1), which is what the card has
+   * always done; the other four are identity values, so dark renders exactly
+   * as it did before they existed. Light mode uses them as a consistency
+   * grade — see the light block.
+   * ==================================================================== */
+  --team-photo-grayscale: 1;
+  --team-photo-saturate: 1;
+  --team-photo-contrast: 1.02;
+  --team-photo-brightness: 0.9;
+  --team-photo-sepia: 0;
+  --team-card-ink-photo: #f2f2f2;
+  --team-card-scrim-from: rgb(15 15 15 / 0.55);
+  --team-card-scrim-to: rgb(15 15 15 / 0.35);
+  --team-card-topscrim-from: rgb(15 15 15 / 0.86);
+  --team-card-topscrim-mid: rgb(15 15 15 / 0.35);
+  --team-card-topscrim-to: rgb(15 15 15 / 0);
+  --team-name-shadow: rgb(0 0 0 / 0.6);
+
+  /* --- card: surface zone (flips) ----------------------------------------- */
+  --team-card-surface: #242424;
+  --team-card-surface-from: #2e2e2e;
+  --team-card-surface-to: #242424;
+  /* The 2025 card's fill is its own pair — a touch deeper than the 2026 one.
+     It's almost entirely covered by the backdrop texture, so this only shows
+     at the very edges; keep the two distinct anyway. */
+  --team-card-solid-from: #242424;
+  --team-card-solid-to: #1a1a1a;
+  --team-card-ink: #f2f2f2;
+  --team-card-ink-dim: #aaaaaa;
+  --team-card-ink-soft: #999999;
+  --team-card-ink-muted: #666666;
+  --team-card-ink-ghost: rgb(255 255 255 / 0.55); /* unfilled roster slot */
+  --team-card-rule: rgb(255 255 255 / 0.12);
+  --team-card-pill-border: rgb(68 68 68 / 0.6);
+  /* The card's own drop shadow. Near-black at 0.6 in dark; a light page can't
+     take that much black, so light mode uses the ink hue at a third the alpha. */
+  --team-card-shadow: rgb(0 0 0 / 0.6);
+  --team-card-shadow-strong: rgb(0 0 0 / 0.7);
+  --team-card-panel-from: rgb(26 26 26 / 0);
+  --team-card-panel-mid: rgb(26 26 26 / 0.85);
+  --team-card-panel-to: rgb(26 26 26 / 0.98);
+
+  /* The role tag on a resting card. Its text is the sub-team accent, set per
+     card, so only the plate is themed here. The -solid variant is the touch
+     fallback used where the backdrop blur is dropped. */
+  --team-tag-bg: rgb(26 26 26 / 0.55);
+  --team-tag-bg-solid: rgb(20 20 20 / 0.78);
+
+  /* --- sub-team info popover ---------------------------------------------- */
+  /* Mixed with the sub-team accent by the component, so it must stay a plain
+     opaque colour — color-mix needs a real base, not a translucent one. */
+  --team-pop-surface: #1a1a1a;
+  --team-pop-ink: #ffffff;
+  --team-pop-ink-dim: #aaaaaa;
+  --team-pop-close: #999999;
+  --team-pop-close-hover-ink: #ffffff;
+  --team-pop-close-hover-bg: rgb(255 255 255 / 0.08);
+  --team-pop-shadow: rgb(0 0 0 / 0.75);
+
+  /* --- jump nav ------------------------------------------------------------ */
+  --team-nav-surface: rgb(26 26 26 / 0.9);
+  --team-nav-surface-solid: rgb(22 22 22 / 0.98); /* touch: no backdrop blur */
+  --team-nav-border: rgb(68 68 68 / 0.35);
+  --team-nav-shadow: rgb(0 0 0 / 0.75);
+  /* The nav panel's own inks. Close to the popover's but not the same — its
+     title and links sit a step quieter than the popover's body copy. */
+  --team-nav-ink: #f2f2f2;
+  --team-nav-ink-dim: #aaaaaa;
+  --team-nav-close: #666666;
+  /* The PULL tab floats over the cards at partial opacity so they read through
+     it. Brand indigo at 25% has plenty of body against a dark page; against a
+     near-white one it washes out to pale lavender and the white label on it
+     stops being legible, hence the much higher resting value in light mode. */
+  --team-tab-opacity: 0.25;
+  --team-tab-focus-ring: #ffffff;
+}
+
+/* Anchor targets clear the fixed navbar instead of landing beneath it. */
+:target {
+  scroll-margin-top: calc(var(--nav-height) + 16px);
 }
 
 /* ----------------------------------------------------------------------------
@@ -90,36 +405,147 @@
  * --------------------------------------------------------------------------*/
 :root,
 :root[data-theme="dark"] {
+  /*
+   * Tells the browser this really is a dark page. Without it the UA assumes
+   * light and renders its *own* surfaces that way — form controls, scrollbars,
+   * and on iOS the material behind the toolbars, which is where the pale band
+   * at the bottom of the screen came from. `data-theme` only ever swapped our
+   * variables; nothing had told the browser itself.
+   */
+  color-scheme: dark;
+
+  /* ------------------------------------------------------------------------
+   * THEME TOGGLE OPACITY — tune here. 1 = solid, 0 = invisible.
+   * The pill floats over page content, so this is how much of that content
+   * reads through it. It's a plain rgb(... / a) fill on a single element, so
+   * the cost is the same as a solid colour. (The pill also carries a 14px
+   * backdrop blur, which is the expensive part; see ThemeToggle.tsx if you
+   * want that off on phones.)
+   * --------------------------------------------------------------------- */
+  --toggle-opacity: 0.52;
+
   /* Surfaces (back → front) */
-  --bg-primary: #07091c; /* deep-space navy — page background   */
-  --bg-surface: #0d1035; /* section backgrounds                 */
-  --bg-elevated: #161a50; /* cards, modals, elevated elements    */
-  --bg-glass: rgba(22, 26, 80, 0.6); /* glassmorphic overlays (navbar etc.) */
-  --canvas: #0d1035; /* alias: section canvas behind cards   */
-  --card: #161a50; /* the card surface itself             */
+  --bg-primary: #060a14; /* near-black aerospace-night blue — page background */
+  --bg-surface: #0b1224; /* section backgrounds                 */
+  --bg-elevated: #121b34; /* cards, modals, elevated elements    */
+  --bg-glass: rgba(18, 27, 52, 0.65); /* glassmorphic overlays (navbar etc.) */
+  --canvas: #0b1224; /* alias: section canvas behind cards   */
+  --card: #121b34; /* the card surface itself             */
+
+  /* ── Chapter bands ────────────────────────────────────────────────────────
+   * The two — and only two — background tones a long page alternates between
+   * so consecutive sections read as separate chapters. Used by .ae-band in
+   * global.css; the History page is what composes them.
+   *
+   * These are deliberately the SAME values as --bg-primary / --bg-surface
+   * above, not new colours: dark mode already had a legible alternation and
+   * this refactor must not move a single pixel of it. They exist as their own
+   * names because LIGHT mode needs a different step size (see the light block)
+   * and because a band is a page-composition decision, not a surface level —
+   * a section on --band-lift still puts --card and --bg-elevated on top of it.
+   *
+   * The step between them is ~1.07:1 in luminance, or ΔL* ≈ 3.5. That is the
+   * number the light pair is tuned against, so the two themes alternate with
+   * the same perceived strength rather than one shouting and one whispering. */
+  --band-deep: #07091c;
+  --band-lift: #0d1035;
+  /* Portrait "stage" — the backdrop behind cut-out member photos. Deliberately
+     dark in BOTH themes: the name is knocked out of it in white, so it cannot
+     follow the surface tokens without losing all contrast in light mode. */
+  --stage-from: #1e2467;
+  --stage-to: #0b0e2c;
 
   /* Brand + accents */
   --brand: #3c40b5; /* Alex Eagles royal indigo            */
   --brand-light: #5458cc; /* hover / active                      */
+  --brand-dark: #2b2f9e; /* deepest brand — pressed / gradients */
   --brand-glow: rgba(60, 64, 181, 0.25); /* glow behind brand elements          */
-  --gold: #f59e0b; /* CTAs, achievements, eagle gold      */
-  --gold-hover: #fbbf24;
+  --eyebrow: var(--brand-light); /* section kicker label above headings */
+  /* --gold: #f59e0b; CTAs, achievements, eagle gold      */
+  --gold:  #d9302a; /* CTAs, achievements, eagle gold      */
+  /* --gold-hover: #fbbf24; */
+  --gold-hover:  #d9302a;
   --sky: #60a5fa; /* technical links / data accent       */
+  /* Halo behind --sky elements (timeline markers). On the near-black page a
+   * real glow is what sells the marker as lit; see the light block for why the
+   * same value cannot survive the swap. */
+  --sky-glow: rgba(96, 165, 250, 0.45);
 
-  /* Text (indigo-tinted, per brand) */
+  /* ── The History journey's travelling light, as DOM colours ───────────────
+   * MIRRORS `PALETTE.lightGlow` in src/components/history/sceneConfig.ts —
+   * the same duplication that file already documents (three.js cannot read CSS
+   * variables, so the scene keeps raw numbers and the DOM keeps these). Change
+   * one, change the other.
+   *
+   * The scene's light is a near-white core inside a cyan halo, and the halo is
+   * what you actually perceive its colour to BE — it covers far more area. So
+   * the halo value is the honest "colour of the ball" here, not the core. */
+  --journey-light: #39c6ff;
+  /* The ball glows in the scene, so its progress readout does too. */
+  --journey-glow: 0 0 10px rgba(57, 198, 255, 0.45);
+  /* Unfilled progress segments: light grey, translucent so the glass reads
+   * through them rather than sitting behind an opaque chip. */
+  --journey-track: rgba(240, 242, 255, 0.14);
+  /* Jump-list rows. These live here (rather than with the rail's own local
+   * glass) because :hover and [data-active] are pseudo/attribute states, and
+   * inline styles can't express those — they have to be real CSS rules. */
+  --jump-row-hover: rgba(255, 255, 255, 0.09);
+  --jump-row-active: rgba(57, 198, 255, 0.16);
+
+  /* ── Text (indigo-tinted, per brand) ──────────────────────────────────────
+   * ⚠ A DARK SURFACE HAS A NARROW ACCESSIBLE BAND, and these three levels have
+   * to live inside it. Anything under about L* 55 fails AA on --bg-elevated,
+   * which is the lightest surface any of this text lands on — so the "dim"
+   * end of a dark ramp is far shallower than instinct suggests.
+   *
+   * --text-muted was #565a94 and measured 2.53:1 on a card: barely half the
+   * floor, on text as small as 11px (the Footer's legal line, the Competitions
+   * stat labels, the Publications year). Raising it to clear 4.5:1 necessarily
+   * pulls it up toward --text-secondary, so --text-secondary was lifted too,
+   * keeping an 11 L* gap between them — comfortably above the ~2 L* just-
+   * noticeable difference, so the two still read as different levels.
+   *
+   * The three now sit at L* 96 / 68 / 57, and 14.5:1 / 6.7:1 / 4.7:1 against
+   * the worst surface each appears on. Hue and saturation are untouched; only
+   * lightness moved. Do not push any of them back down without re-measuring —
+   * the muted one has under half a stop of headroom.
+   *
+   * The LIGHT theme is unchanged: it was already passing at 4.6-9.6:1. */
   --text-primary: #f0f2ff;
-  --text-secondary: #8b8fc8;
-  --text-muted: #565a94;
+  --text-secondary: #a0a3d2;
+  --text-muted: #8286b7;
 
   /* Borders */
-  --border-subtle: rgba(60, 64, 181, 0.18);
-  --border-solid: #1e2258;
+  --border-subtle: rgba(59, 130, 246, 0.18);
+  --border-solid: #1b2846;
 
   /* 4-level elevation system */
   --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4);
   --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.5);
   --elevation-3: 0 10px 30px rgba(0, 0, 0, 0.6);
   --elevation-4: 0 20px 50px rgba(0, 0, 0, 0.7);
+
+  /* ── Card shadows, at rest and lifted ─────────────────────────────────────
+   * Layered rather than single, because one big soft blur reads as fog while
+   * a tight contact shadow under a wide ambient one reads as an object with a
+   * definite bottom edge sitting above a surface.
+   *
+   * These are the DARK values, and they are deliberately close to the levels
+   * above: on a near-black page a shadow has almost nothing to darken, so
+   * depth here comes mostly from the card's own lighter surface. The light
+   * theme is where these earn their keep — see the pair further down. */
+  --elevation-card: 0 10px 30px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+  --elevation-card-hover: 0 22px 48px rgba(0, 0, 0, 0.68),
+    0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* A tray holding cards, rather than a card itself — bigger, so it sits
+   * further off the page and casts further. The `inset` line is the important
+   * part: a 1px lighter edge along the top reads as the light source catching
+   * the panel's near edge, which is what makes it a surface with a thickness
+   * instead of a rectangle of different colour. */
+  --elevation-panel: inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 14px rgba(0, 0, 0, 0.45), 0 28px 64px rgba(0, 0, 0, 0.6);
 }
 
 /* ----------------------------------------------------------------------------
@@ -128,36 +554,497 @@
  *    only ever reference the names, light mode "just works".
  * --------------------------------------------------------------------------*/
 :root[data-theme="light"] {
-  /* Surfaces (back → front) — brand #242599 color map */
-  --bg-primary: #e8e8f9; /* page background (map bg-tertiary)     */
-  --bg-surface: #ffffff; /* section / content bg (map bg-primary) */
-  --bg-elevated: #f3f3fd; /* cards, modals (map bg-secondary)     */
-  --bg-glass: rgba(255, 255, 255, 0.75); /* glass navbar / toggle overlay */
-  --canvas: #f3f3fd; /* section canvas behind cards          */
+  /* See the dark block — the browser's own surfaces follow this, not
+     `data-theme`. */
+  color-scheme: light;
+
+  /* Slightly more opaque than dark: a pale pill over pale content needs more
+     body to stay legible. Same knob, see the dark block for what it does. */
+  --toggle-opacity: 0.22;
+
+  --bg-primary: #f7f8ff; /* faintly indigo-tinted white          */
+  --bg-surface: #ffffff;
+  --bg-elevated: #eaf2ff;
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --canvas: #eaf2ff; /* section canvas behind cards          */
   --card: #ffffff; /* white cards for light-mode contrast   */
 
-  --brand: #242599; /* brand indigo — map primary            */
-  --brand-light: #3d3ecc; /* lighter brand — hover / accents      */
-  --brand-glow: rgba(36, 37, 153, 0.12);
-  --gold: #b45309; /* accent kept gold in light mode        */
-  --gold-hover: #92400e;
+  /* ── Chapter bands (LIGHT) ────────────────────────────────────────────────
+   * The light theme was already alternating in the right DIRECTION — the
+   * deeper tone first, the lifted one second, exactly as dark does — but at
+   * --bg-primary #f7f8ff against --bg-surface #ffffff the step was ΔL* ≈ 2.4
+   * with essentially no chroma difference. On a screen that is not a rhythm,
+   * it is one flat white sheet, which is why the page read as unbanded in
+   * light mode while the identical structure read clearly in dark.
+   *
+   * #f0f2fb restores the step: ΔL* ≈ 4.4 against white, so it lands just past
+   * the dark theme's own 3.5 — near-white bands need slightly more separation
+   * than near-black ones because there is no glow or halo helping the eye — and
+   * it carries a real indigo tint, which is the second cue dark mode gets for
+   * free from --bg-surface being the more saturated of its pair.
+   *
+   * ⚠ This is the DARKEST surface the light theme puts body copy on, so it is
+   * the binding constraint for every muted text token. Verified at this value:
+   *   --text-muted     #6366a8 → 4.70:1  (AA, with margin)
+   *   --text-secondary #3b3f7a → 9.6:1
+   *   --sky            #1d4ed8 → 6.0:1
+   *   --gold           #b45309 → 5.2:1
+   * Push --band-deep any darker and --text-muted is the first thing to fail —
+   * it is already the tightest of the four. Re-measure before you do.
+   *
+   * NB: PALETTE_LIGHT_OVERRIDES.background in sceneConfig.ts mirrors this
+   * value, so the 3D canvas and the band it sits in have no visible seam.
+   * Change one, change the other.
+   *
+   * ⚠ #eceef9 IS THE FLOOR — this cannot go darker without breaking text.
+   * --text-muted (#6366a8) is the binding constraint: it lands at 4.55:1 here,
+   * and the next step down the ramp (#e8ebf7) puts it at 4.42:1, under AA, on
+   * 11px labels. Deepening the band any further means darkening --text-muted
+   * first, and that compresses the light theme's text ramp the same way the
+   * dark one is already compressed. Measure before you touch it. */
+  --band-deep: #eceef9;
+  --band-lift: #ffffff;
+  /* A real hairline, because two pale neutrals butting together need one.
+   * Same value as --border-solid, at ~2:1 against the tone on either side —
+   * a definite rule rather than a hint. A first pass at #c9cde8 measured
+   * 1.36:1 and read as a smudge, which is the failure mode this whole change
+   * exists to fix. */
+  --band-edge: #b0b3e0;
+  /* Intentionally identical to dark mode — see the note above. */
+  --stage-from: #1e2467;
+  --stage-to: #0b0e2c;
+
+  --brand: #3c40b5; /* brand indigo stays constant          */
+  --brand-light: #2b2f9e; /* darker on hover against light bg     */
+  --brand-dark: #1e2258; /* deep indigo — pressed / gradients    */
+  --brand-glow: rgba(60, 64, 181, 0.12);
+  --eyebrow: var(--brand-light); /* label; brand-light is darker in light mode */
+  /* --gold: #b45309; /* darker amber for AA contrast on light */
+  /* --gold-hover: #92400e; */ 
+  --gold: #fe0800; /* darker amber for AA contrast on light */
+  --gold-hover:  #fc0800;
   --sky: #1d4ed8;
+  /* Deliberately NOT a glow on light. A luminous halo only reads as "lit" when
+   * it is brighter than what surrounds it — on a near-white page it just smears
+   * the marker's edge into a fuzzy blue bruise, which is the single most
+   * eye-tiring artefact a light theme can inherit from a dark one. This is a
+   * faint tint of the marker's own hue instead: it softens the edge without
+   * emitting anything. */
+  --sky-glow: rgba(29, 78, 216, 0.16);
 
-  --text-primary: #111128; /* near-black indigo text (map)          */
-  --text-secondary: #4a4a7a; /* body copy (map)                     */
-  --text-muted: #616191; /* captions — darkened from map #9090ba to clear WCAG AA (was ~3:1) */
+  /* Mirrors `PALETTE_LIGHT_OVERRIDES.lightCore` in sceneConfig.ts. In light
+   * mode the ball's intensity is carried by DEPTH rather than brightness, so
+   * the deepest, most saturated part — the core — is what reads as its colour,
+   * and the halo is the incidental part. Exactly inverted from dark mode, for
+   * the reasons written up in that file. */
+  --journey-light: #1436a8;
+  /* No glow. A luminous halo needs somewhere brighter to go, and on a pale
+   * surface there isn't one — it would only smear the segment's edge. */
+  --journey-glow: none;
+  /* Light grey on the pale glass, from the page's own ink rather than pure
+   * black, so it stays in the indigo family the rest of the theme uses. */
+  --journey-track: rgba(13, 16, 48, 0.12);
+  --jump-row-hover: rgba(60, 64, 181, 0.10);
+  --jump-row-active: rgba(20, 54, 168, 0.13);
 
-  --border-subtle: #d0d0ed; /* dividers / card borders (map border-default) */
-  --border-solid: #b0b0d8; /* emphasized borders (map border-strong)  */
+  --text-primary: #0b1220; /* deep cool navy text                  */
+  --text-secondary: #35507a;
+  --text-muted: #6b84ac;
 
-  /* Status & feedback — from the brand color map (soft tinted bg, deep text) */
-  --success-bg: #c8ffe8; --success-text: #0a5c34; --success-border: #80ffcc;
-  --warning-bg: #fff3cc; --warning-text: #7a5500; --warning-border: #ffe080;
-  --danger-bg: #ffe5e5;  --danger-text: #7a1a1a;  --danger-border: #ffaaaa;
-  --info-bg: #e5f0ff;    --info-text: #1a3f7a;    --info-border: #aaccff;
+  --border-subtle: #d7e6fb;
+  --border-solid: #aecbf2;
 
-  --elevation-1: 0 1px 3px rgba(36, 37, 153, 0.08);
-  --elevation-2: 0 4px 12px rgba(36, 37, 153, 0.12);
-  --elevation-3: 0 10px 30px rgba(36, 37, 153, 0.15);
-  --elevation-4: 0 20px 50px rgba(36, 37, 153, 0.18);
+  --elevation-1: 0 1px 3px rgba(60, 64, 181, 0.08);
+  --elevation-2: 0 4px 12px rgba(60, 64, 181, 0.12);
+  --elevation-3: 0 10px 30px rgba(60, 64, 181, 0.15);
+  --elevation-4: 0 20px 50px rgba(60, 64, 181, 0.18);
+
+  /* ── Card shadows, at rest and lifted (LIGHT) ─────────────────────────────
+   * Much heavier than the levels above, and deliberately so. A white card on a
+   * near-white page has no surface contrast to separate it, so the shadow is
+   * the ONLY thing telling the eye the card sits above the page — at
+   * `--elevation-3`'s 0.15 alpha it was reading as a flat panel painted on.
+   *
+   * Three layers, each doing a different job:
+   *   · a tight 1px contact edge, which gives the card a definite bottom
+   *   · a short mid shadow for the near-surface falloff
+   *   · a wide, offset ambient shadow for the sense of height
+   * Tinted with the brand indigo instead of neutral grey: a grey shadow on a
+   * faintly indigo page reads as dirt, a same-hue shadow reads as light. */
+  --elevation-card: 0 1px 2px rgba(30, 34, 88, 0.09),
+    0 4px 10px -3px rgba(30, 34, 88, 0.13),
+    0 14px 32px -12px rgba(30, 34, 88, 0.26);
+  --elevation-card-hover: 0 1px 2px rgba(30, 34, 88, 0.1),
+    0 8px 18px -6px rgba(30, 34, 88, 0.18),
+    0 28px 56px -18px rgba(30, 34, 88, 0.34);
+
+  /* The tray, in light mode — where it does the most work. A pale panel on a
+   * white page has no colour contrast to separate the two, so without a real
+   * shadow the section reads as one flat sheet. The inset highlight is nearly
+   * pure white here rather than the faint 6% used on the dark theme, because
+   * on a light surface the catch-light IS the brightest thing available. */
+  --elevation-panel: inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(30, 34, 88, 0.1), 0 12px 26px -8px rgba(30, 34, 88, 0.2),
+    0 40px 80px -28px rgba(30, 34, 88, 0.4);
+  /* --------------------------------------------------------------------------
+   * TEAM PAGE — light.
+   *
+   * Direction comes from the Claude Design project ("Team Grey Cards" /
+   * "Team Light Mode", turn 8a): a calm desaturated ground with the existing
+   * dark cards left alone as the figure. The design's own note on that option
+   * reads "cards unchanged (dark = figure)", and it is the reason almost every
+   * --team-card-* token below is identical to its dark counterpart.
+   *
+   * That is deliberate, not an oversight. An earlier pass flipped the card to a
+   * pale surface with dark ink, which put a near-white gradient over the bottom
+   * of every portrait — the hover panel washed out the person's shoulders and
+   * the name with them. The panel has to stay dark because it sits ON the
+   * photograph; only the page behind the cards becomes light.
+   *
+   * Ground is #DEE3E9, the design's default pageBg. Deliberately a grey and not
+   * a white: the cards' hover glow is a coloured drop shadow, and on a
+   * near-white page there is no room below the background for a shadow to
+   * register, so the lift disappears entirely.
+   * ------------------------------------------------------------------------ */
+  --team-bg: #e4e8ee;
+  --team-bg-rgb: 228 232 238;
+  /* Page inks, straight from the design's headings and body copy. */
+  --team-ink: #1a1f2e;
+  --team-ink-soft: #5a6377;
+  --team-ink-dim: #4a5164;
+  --team-ink-muted: #5a6377;
+  --team-ink-faint: #8b93a5;
+  --team-accent-ink: #ffffff;
+  --team-numeral: rgb(61 62 204 / 0.22);
+
+  /* The design rules its sections off in a tint of the brand rather than a
+     neutral grey. */
+  --team-rule: rgb(61 62 204 / 0.18);
+  --team-rule-strong: rgb(61 62 204 / 0.24);
+  --team-rule-divider: rgb(61 62 204 / 0.2);
+  --team-rule-divider-mobile: rgb(61 62 204 / 0.32);
+
+  --team-chip-bg: rgb(26 31 46 / 0.06);
+  --team-chip-border: rgb(26 31 46 / 0.18);
+
+  /* ==========================================================================
+   * HERO SCRIM — light. See the dark block for what each token is.
+   *
+   * This used to wash the photo 82% of the way to the page colour so that
+   * near-black copy could sit on it. That is what the white haze over the
+   * crew's lower half was: at 82% the bottom third of the photograph was
+   * essentially painted out.
+   *
+   * Inverted instead. The wash drops to almost nothing, so the photograph
+   * survives, and a gentle dark veil (--team-hero-shade) carries the copy —
+   * which is why the hero inks below flip to light here. Deliberately kept
+   * shallow: 0.38 behind the title, 0.52 at its darkest. It should read as
+   * shading on a photo, not as a dark band on a light page.
+   *
+   * TO TUNE: the alpha values in --team-hero-shade are the knob. Lower them
+   * all for a lighter hero (the title needs ~0.34 to hold 3:1 against the
+   * palest part of the photo behind it); raise them for more contrast. The
+   * percentages are where each step lands vertically — 0% is the top of the
+   * photo, 100% its bottom edge.
+   * ======================================================================== */
+  --team-hero-shade: linear-gradient(
+    180deg,
+    rgb(10 14 24 / 0) 38%,
+    rgb(10 14 24 / 0.2) 54%,
+    rgb(10 14 24 / 0.46) 70%,
+    rgb(10 14 24 / 0.58) 86%,
+    rgb(10 14 24 / 0.58) 96%,
+    rgb(10 14 24 / 0) 100%
+  );
+  /* The phone layout puts the copy on the page *below* the photo band, so
+     nothing sits on the picture and it needs no veil at all. */
+  --team-hero-shade-sm: none;
+  --team-hero-wash: 0.05;
+  --team-hero-wash-sm: 0.1;
+  /* Where the photo starts resolving into the page colour. Later than dark's
+     88% on purpose: the veil above has to have somewhere to end, and bringing
+     the resolve up under it overlaps the two into a grey band across the bottom
+     of the picture. It is also the band the hero copy sits in — start the
+     resolve much earlier than this and the light copy loses the dark backing it
+     is legible against. The ease in .heroScrim is what removed the seam here;
+     this value did not need to move to fix it. */
+  --team-hero-resolve-at: 92%;
+  /* Dark halos now, to match the veil rather than the old white wash. */
+  --team-hero-title-shadow: rgb(0 0 0 / 0.5);
+  --team-hero-hint-shadow: rgb(0 0 0 / 0.5);
+  --team-hero-eyebrow-shadow: rgb(0 0 0 / 0.55);
+
+  /* Light copy, because it is on a darkened photograph — the same rule the
+     cards already follow (see the two-zone note above). The page inks are
+     untouched, so every heading below the hero stays dark.
+     Measured against the veil above: title 4.3:1 (needs 3 at that size),
+     tabs 5.0:1, stats 5.1:1, hint 5.8:1 — all over the *palest* thing in
+     either crew photo, so the real numbers are better. */
+  --team-hero-ink: #f7f8fb;
+  --team-hero-ink-soft: #e3e8f1;
+  --team-hero-ink-dim: #e8ecf3;
+  --team-hero-ink-faint: #b6bbc4;
+  --team-hero-hint-ink: #f7f8fb;
+  /* Brand indigo lifted until it reads on the veil; #3d3ecc drops to ~1.9:1
+     there. Same hue, same family, just brought up in lightness.
+     This is the one bit of hero copy whose contrast depends on what is behind
+     it: it sits high, where the veil is only ~0.35, so it measures 9:1 over
+     the crowd but would fall to ~2:1 over bare pavement. Both crew photos put
+     people there, and it carries a halo, so it holds — but if a future photo
+     puts sky or ground behind it, raise the 0.2/0.46 steps in the veil above,
+     or take the eyebrow to white. */
+  --team-hero-eyebrow: #b9baff;
+  --team-hero-chip-bg: rgb(255 255 255 / 0.12);
+  --team-hero-chip-border: rgb(255 255 255 / 0.34);
+
+  /* --- card ----------------------------------------------------------------
+   * Unchanged from dark, on purpose — see the note at the top of this block.
+   * The single exception is the backdrop texture, which swaps to the
+   * light-mode hieroglyph wallpaper. It is a mid-tone blue-grey, so it still
+   * sits under light ink exactly the way the dark texture does.
+   * ---------------------------------------------------------------------- */
+  /* Wallpaper 3, recoloured and softened. The source sat at hue 201 with 26%
+     saturation against the dark texture's hue 216 at 74%, which is why it read
+     as grey rather than blue; it is pushed into the dark texture's hue family
+     so the two themes are the same material under different light.
+
+     The grade is baked into the asset rather than done with a CSS filter,
+     which would cost a repaint on every card. Regenerate it with:
+
+         node -e "require('sharp')('src/assets/team/lightmode_card3.png')
+           .resize({width:720,kernel:'lanczos3'})
+           .modulate({hue:15,saturation:1.75,brightness:0.96})
+           .webp({quality:72})
+           .toFile('src/assets/team/card-backdrop-light.webp')"
+
+     SATURATION is the knob: 1 leaves the source alone, below 1 drains colour,
+     above 1 adds it. It went 2.6 → 1.75; drop it toward ~1.2 for a quieter
+     ground still. No blur — the relief is meant to stay crisp.
+
+     That rebuilds the asset. To try a value without rebuilding, use
+     --team-backdrop-filter just below, which does the same job live. */
+  --team-card-backdrop: url("../assets/team/card-backdrop-light.webp");
+  /* ------------------------------------------------------------------------
+   * WALLPAPER SATURATION — the live knob. Multiplies whatever is baked into
+   * the file above, so `saturate(0.8)` gives you the asset at 80% of its
+   * colour without touching it. Reload and look; when you like a number,
+   * either leave it here or fold it into the rebuild command above
+   * (baked 1.75 x live 0.8 = rerun with saturation 1.4) and set this back to
+   * `none`. Baking is very slightly cheaper to render; at one filtered layer
+   * per card the difference is not worth worrying about either way.
+   *
+   * Chain other colour functions here too, e.g.
+   *     saturate(0.8) contrast(0.95) brightness(1.05)
+   * Do NOT put blur() here: on a background-image it bleeds the card's edges
+   * transparent. Softness, if you ever want it, has to be baked in.
+   * --------------------------------------------------------------------- */
+  --team-backdrop-filter: none;
+  --team-card-ink-photo: #f2f2f2;
+  /* Lighter than dark's 0.55/0.35. That scrim was tuned to sit over a deep
+     navy texture; over the light wallpaper it crushed a mid-blue to near-slate
+     and was most of why the light card read as a grey box. Pulled back until
+     the hieroglyph relief survives and no further, since the big name and the
+     rest-state name are white on top of this. */
+  --team-card-scrim-from: rgb(15 15 15 / 0.4);
+  --team-card-scrim-to: rgb(15 15 15 / 0.26);
+
+  /* ==========================================================================
+   * PORTRAIT CONSISTENCY GRADE — tune the four values below.
+   *
+   * The portraits run in full colour here (no grayscale), which looks better
+   * but exposes how differently they were shot. Measured across the 71 files
+   * in assets/members/photos: mean luminance ranges 56 → 206 out of 255, and
+   * warmth (R−B) ranges −53 → +78. That is an enormous spread — one portrait
+   * is nearly black, another nearly blown out.
+   *
+   * Be clear about what this can and cannot do. A CSS filter is uniform: it
+   * applies the same maths to every image, so it can compress the differences
+   * but never erase them. Only a per-image pass (measure each file, correct
+   * each file) would truly equalise them, and that would mean shipping a
+   * second, light-only copy of all 71 portraits, since dark mode renders the
+   * same files at grayscale(1) and must not change.
+   *
+   * So this is the honest compression:
+   *
+   *   contrast (< 1)  the one that actually pulls images together. contrast()
+   *                   moves every pixel toward mid-grey, so a dark portrait
+   *                   lifts and a bright one drops — at 0.9 the 150-point
+   *                   luminance gap closes by ~10%. Lower it for more
+   *                   consistency, at the cost of flatter photographs.
+   *   saturate (< 1)  levels how loud the colour is between a saturated shot
+   *                   and a washed-out one, and keeps the portraits from
+   *                   fighting the sub-team accent on the tag beside them.
+   *   sepia           the white-balance leveller. It blends every image toward
+   *                   one common warm tone, which is what collapses that ±60
+   *                   warmth spread. Keep it small — past ~0.2 it stops
+   *                   reading as grading and starts reading as a filter.
+   *   brightness      overall exposure against the pale ground.
+   *
+   * Hover replaces the filter outright, so the untouched photograph is still
+   * the payoff. Dark mode does not use these (see the dark block).
+   * ======================================================================== */
+  --team-photo-grayscale: 0;
+  --team-photo-saturate: 0.88;
+  --team-photo-contrast: 1.0;
+  --team-photo-brightness: 1.0;
+  --team-photo-sepia: 0.12;
+  --team-card-topscrim-from: rgb(15 15 15 / 0.86);
+  --team-card-topscrim-mid: rgb(15 15 15 / 0.35);
+  --team-card-topscrim-to: rgb(15 15 15 / 0);
+  --team-name-shadow: rgb(0 0 0 / 0.6);
+
+  --team-card-surface: #242424;
+  --team-card-surface-from: #2e2e2e;
+  --team-card-surface-to: #242424;
+  --team-card-solid-from: #242424;
+  --team-card-solid-to: #1a1a1a;
+  --team-card-ink: #f2f2f2;
+  --team-card-ink-dim: #aaaaaa;
+  --team-card-ink-soft: #999999;
+  --team-card-ink-muted: #666666;
+  --team-card-ink-ghost: rgb(255 255 255 / 0.55);
+  --team-card-rule: rgb(255 255 255 / 0.12);
+  --team-card-pill-border: rgb(68 68 68 / 0.6);
+  --team-card-panel-from: rgb(26 26 26 / 0);
+  --team-card-panel-mid: rgb(26 26 26 / 0.85);
+  --team-card-panel-to: rgb(26 26 26 / 0.98);
+  /* ==========================================================================
+   * ROLE TAG (MEMBER / LEADER / …) — white plate, light mode only.
+   * Tune with --team-tag-alpha. 1 = solid white, 0 = invisible.
+   *
+   * An earlier note here claimed a white plate could never work because the
+   * sub-team accents are pale pastels. That was wrong about which accent the
+   * tag actually gets: `memberAccent()` goes through `subTeamAccent()`, which
+   * resolves `--team-<slug>-page` first, so in light mode the tag text is the
+   * DARKENED accent, not the pastel. On white those land at 5.8–7.6:1 — Wing's
+   * #1e6e73, AI's #bf2055 and the brand #3d3ecc all clear AA comfortably.
+   *
+   * Alpha matters for that, though: the plate is translucent over a portrait,
+   * so the real backdrop is white mixed with whatever is under it. 0.86 is the
+   * floor at which the worst case — the darkest portrait on the roster, under
+   * the tightest accent (AI/Computer Vision #bf2055) — still measures 4.61:1.
+   * At 0.82 that case drops to 4.27:1 and at 0.78 to 3.95:1, i.e. below AA.
+   * Raise it freely; lower it knowing what it costs.
+   *
+   * -solid is the touch fallback, used where the backdrop blur is dropped for
+   * scroll performance; it compensates with a little more opacity.
+   * ======================================================================== */
+  --team-tag-alpha: 0.5;
+  --team-tag-alpha-solid: 0.94;
+  --team-tag-bg: rgb(255 255 255 / var(--team-tag-alpha));
+  --team-tag-bg-solid: rgb(255 255 255 / var(--team-tag-alpha-solid));
+
+  /* The one card value that does change. A near-black drop shadow vanishes
+     into a dark page but has somewhere to go on a grey one, so the hover lift
+     reads here at the design's own weight (0 16px 38px -18px rgba(30,38,54,.5)
+     at rest, heavier on hover). */
+  --team-card-shadow: rgb(30 38 54 / 0.5);
+  --team-card-shadow-strong: rgb(30 38 54 / 0.6);
+
+  /* --- sub-team info popover ----------------------------------------------- */
+  --team-pop-surface: #ffffff;
+  --team-pop-ink: #1a1f2e;
+  --team-pop-ink-dim: #5a6377;
+  --team-pop-close: #667089;
+  --team-pop-close-hover-ink: #1a1f2e;
+  --team-pop-close-hover-bg: rgb(26 31 46 / 0.06);
+  --team-pop-shadow: rgb(20 28 56 / 0.28);
+
+  /* --- jump nav ------------------------------------------------------------- */
+  /* The design's floating pills are rgba(255,255,255,.94) over the photo. */
+  --team-nav-surface: rgb(255 255 255 / 0.94);
+  --team-nav-surface-solid: rgb(255 255 255 / 0.98);
+  --team-nav-border: rgb(255 255 255 / 0.7);
+  --team-nav-shadow: rgb(20 28 56 / 0.5);
+  --team-nav-ink: #1a1f2e;
+  --team-nav-ink-dim: #4a5164;
+  --team-nav-close: #667089;
+  --team-tab-opacity: 0.6;
+  --team-tab-focus-ring: #1a1f2e;
+
+  /* --------------------------------------------------------------------------
+   * SUB-TEAM ACCENTS — page-level, light only
+   *
+   * The base --team-<slug> values in section 1 are pastels chosen to read on
+   * the near-black cards. They title each sub-team's *section* too, and on the
+   * pale ground those pastels collapse to between 1.4:1 and 1.7:1.
+   *
+   * So light mode gets its own set. `subTeamAccent()` in data/team.ts emits
+   * `var(--team-<slug>-page, var(--team-<slug>, #3d3ecc))`, which resolves to
+   * these in light mode and falls straight back to the pastel in dark, where
+   * this block does not apply. `memberAccent()` delegates to `subTeamAccent()`,
+   * so the CARD accents follow the same rule: pastel in dark, darkened here.
+   * That is what lets the role tag sit on a white plate in light mode.
+   *
+   * Same hue, same saturation, darkened by lightness alone until each clears
+   * 4.5:1 on the ground — Wing is still the cyan one, Hardware still the gold.
+   * Retune a colour in section 1 and you must retune its partner here.
+   *
+   * AI and Computer Vision are two SEPARATE tokens that happen to hold the same
+   * value (they're one discipline). Editing one does not move the other — edit
+   * both, in both places, if you want them to stay in step.
+   * ------------------------------------------------------------------------ */
+  --team-aerodesign-page: #1d65b0;
+  --team-wing-page: #1e6e73;
+  --team-tail-stability-page: #aa4413;
+  --team-structure-page: #676454;
+  --team-propulsion-page: #4f6d27;
+  --team-software-page: #257057;
+  --team-hardware-page: #895a0b;
+  --team-computer-vision-page: #d01925de;
+  --team-ai-page: #d01925de;
+  --team-firmware-page: #5b4ed8;
+  /* --team-management / --team-accent are brand blue and already clear 5.9:1. */
+
+}
+
+/* ----------------------------------------------------------------------------
+ * TOUCH DEVICES — compensate for the dropped backdrop blur
+ *
+ * global.css turns `backdrop-filter` off on `(hover: none)`, because a fixed
+ * blurred element is re-rasterised on every scroll frame and that is the most
+ * expensive thing on a phone. A blur also does half the work of making a
+ * translucent surface readable, so without it these need more body of their
+ * own or they read as washed out over busy content.
+ *
+ * Tune the same way as the base values — these are just the touch variants.
+ * --------------------------------------------------------------------------*/
+@media (hover: none) {
+  :root,
+  :root[data-theme="dark"] {
+    --toggle-opacity: 0.52;
+    --bg-glass: rgba(22, 26, 80, 0.86);
+  }
+
+  :root[data-theme="light"] {
+    --toggle-opacity: 0.52;
+    --bg-glass: rgba(255, 255, 255, 0.92);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * PHONE — hero copy is not on the photo
+ *
+ * Below 640px Team.module.css reshapes the hero: the crew photo becomes a band
+ * across the top and the copy is pinned to the bottom of the viewport, on the
+ * page itself. Light mode's light-on-veil hero ink is exactly wrong there —
+ * near-white type on a near-white page — so the copy goes back to the page
+ * inks. Must match the 640px breakpoint in Team.module.css.
+ *
+ * Dark mode needs nothing here: its hero inks are the page inks either way.
+ * --------------------------------------------------------------------------*/
+@media (max-width: 640px) {
+  :root[data-theme="light"] {
+    --team-hero-ink: var(--team-ink);
+    --team-hero-ink-soft: var(--team-ink-soft);
+    --team-hero-ink-dim: var(--team-ink-dim);
+    --team-hero-ink-faint: var(--team-ink-faint);
+    --team-hero-eyebrow: var(--team-accent);
+    --team-hero-chip-bg: var(--team-chip-bg);
+    --team-hero-chip-border: var(--team-chip-border);
+    --team-hero-hint-ink: var(--team-ink-dim);
+    --team-hero-title-shadow: rgb(255 255 255 / 0.7);
+    --team-hero-hint-shadow: rgb(255 255 255 / 0.65);
+    --team-hero-eyebrow-shadow: transparent;
+  }
 }

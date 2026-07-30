@@ -1,15 +1,21 @@
-import type { ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, ChevronRight, Mail, MapPin } from "lucide-react";
+import emailjs from "@emailjs/browser";
 import AeLogo from "@/components/ui/AeLogo";
 import {
   BRAND,
   CONTACT,
   NAV_LINKS,
-  NEWSLETTER_EMAIL,
   SOCIALS,
   VEHICLE_NAMES,
 } from "@/data/site";
+
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+type NewsletterStatus = "idle" | "sending" | "sent" | "error";
 
 /**
  * Footer — 4-column site footer (translated from Home.dc.html): brand + socials,
@@ -17,6 +23,38 @@ import {
  * page via the layout in App.tsx.
  */
 export default function Footer() {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] =
+    useState<NewsletterStatus>("idle");
+
+  const handleNewsletterSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
+      setNewsletterStatus("error");
+      return;
+    }
+
+    setNewsletterStatus("sending");
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name: "Newsletter signup",
+          email: newsletterEmail,
+          subject: "Newsletter signup",
+          message: `${newsletterEmail} subscribed via the footer "Stay informed" form.`,
+        },
+        { publicKey: EMAILJS_PUBLIC_KEY },
+      );
+      setNewsletterStatus("sent");
+      setNewsletterEmail("");
+    } catch {
+      setNewsletterStatus("error");
+    }
+  };
+
   return (
     <footer className="bg-canvas border-t border-border-strong relative overflow-hidden">
       <div className="max-w-[var(--maxw-content)] mx-auto px-6 pt-[72px] pb-7 relative z-10">
@@ -30,7 +68,7 @@ export default function Footer() {
             <div className="font-sans text-xs tracking-[0.18em] uppercase text-brand-light mb-4">
               {BRAND.unit}
             </div>
-            <p className="font-sans text-sm leading-[1.7] text-fg-muted max-w-[34ch] mb-5">
+            <p className="font-sans text-sm leading-[1.7] text-fg-secondary max-w-[34ch] mb-5">
               {BRAND.mission}
             </p>
             <div className="flex gap-2.5">
@@ -38,8 +76,10 @@ export default function Footer() {
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-11 h-11 rounded-lg flex items-center justify-center bg-elevated border border-border text-fg-muted transition-colors duration-200 hover:text-fg hover:border-brand"
+                  className="w-11 h-11 rounded-lg flex items-center justify-center bg-elevated border border-border text-fg-secondary transition-colors duration-200 hover:text-fg hover:border-brand"
                 >
                   <Icon size={18} />
                 </a>
@@ -53,7 +93,7 @@ export default function Footer() {
               <li key={link.path}>
                 <Link
                   to={link.path}
-                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
+                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-secondary transition-colors hover:text-fg py-1 -my-1"
                 >
                   <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
                   {link.label}
@@ -68,7 +108,7 @@ export default function Footer() {
               <li key={name}>
                 <Link
                   to="/vehicles"
-                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-muted transition-colors hover:text-fg"
+                  className="font-sans text-sm inline-flex items-center gap-2 text-fg-secondary transition-colors hover:text-fg py-1 -my-1"
                 >
                   <ChevronRight size={14} className="text-gold" strokeWidth={2.5} />
                   {name}
@@ -83,7 +123,7 @@ export default function Footer() {
             <div className="flex flex-col gap-3.5 mb-[22px]">
               <a
                 href={`mailto:${CONTACT.email}`}
-                className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted transition-colors hover:text-fg"
+                className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-secondary transition-colors hover:text-fg"
               >
                 <Mail size={17} className="text-gold" />
                 {CONTACT.email}
@@ -92,36 +132,22 @@ export default function Footer() {
                 href={CONTACT.mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-muted transition-colors hover:text-fg"
+                className="inline-flex items-center gap-2.5 font-sans text-sm text-fg-secondary transition-colors hover:text-fg"
               >
                 <MapPin size={17} className="text-gold" />
                 {CONTACT.location}
               </a>
             </div>
 
-            {/* Newsletter — opens the visitor's mail client with a pre-written
-                "I'm interested" message addressed to the team (see NEWSLETTER_EMAIL
-                in site.ts). No backend needed. */}
+            {/* Newsletter — sends the signup through EmailJS (see
+                handleNewsletterSubmit) and reflects sending/sent/error state. */}
             <form
               className="bg-elevated border border-border rounded-[10px] p-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const input = e.currentTarget.elements.namedItem(
-                  "footer-email",
-                ) as HTMLInputElement | null;
-                const email = input?.value.trim();
-                if (!email) return;
-                const subject = encodeURIComponent(NEWSLETTER_EMAIL.subject);
-                const body = encodeURIComponent(
-                  NEWSLETTER_EMAIL.body.replace("{email}", email),
-                );
-                window.location.href = `mailto:${CONTACT.email}?subject=${subject}&body=${body}`;
-                e.currentTarget.reset();
-              }}
+              onSubmit={handleNewsletterSubmit}
             >
               <label
                 htmlFor="footer-email"
-                className="block font-sans text-[13px] text-fg-muted mb-2.5"
+                className="block font-sans text-[13px] text-fg-secondary mb-2.5"
               >
                 Stay informed about developments.
               </label>
@@ -129,25 +155,37 @@ export default function Footer() {
                 <input
                   id="footer-email"
                   name="footer-email"
-                  type="email"
-                  required
                   placeholder="Email"
+                  required
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                   className="flex-1 min-w-0 h-11 bg-surface border border-border rounded-md px-3 font-sans text-sm text-fg outline-none"
                 />
                 <button
                   type="submit"
                   aria-label="Subscribe"
-                  className="flex-none w-11 h-11 rounded-md bg-gold text-canvas cursor-pointer flex items-center justify-center hover:bg-gold-hover transition-colors"
+                  disabled={newsletterStatus === "sending"}
+                  className="flex-none w-11 h-11 rounded-md bg-gold text-canvas cursor-pointer flex items-center justify-center hover:bg-gold-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <ArrowUpRight size={18} strokeWidth={2.4} />
                 </button>
               </div>
+              {newsletterStatus === "sent" && (
+                <p className="mt-2 font-sans text-xs text-[#16a34a]">
+                  Thanks — you're on the list.
+                </p>
+              )}
+              {newsletterStatus === "error" && (
+                <p className="mt-2 font-sans text-xs text-[#dc2626]">
+                  Something went wrong. Please try again.
+                </p>
+              )}
             </form>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-[22px] border-t border-border text-center font-sans text-[13px] text-fg-subtle">
+        <div className="mt-12 pt-[22px] border-t border-border text-center font-sans text-[13px] text-fg-muted">
           © 2026 Alex Eagles · Alexandria University · All rights reserved
         </div>
       </div>

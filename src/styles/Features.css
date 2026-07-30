@@ -1,0 +1,131 @@
+/* "Who We Are" v8 — full-bleed team photo background with a dark scrim,
+ * headline + copy overlaid top-left, giant year watermark top-right.
+ * Fixed dark look — like Hero/Video, doesn't follow the site's light/dark
+ * toggle, since a photo backdrop needs a consistent scrim either way. */
+.features {
+  position: relative;
+  overflow: hidden;
+  min-height: 720px;
+  display: flex;
+  align-items: center;
+  background: #0a0e1f;
+  padding: 100px 6%;
+}
+
+.features-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.features-bg img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.features-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    100deg,
+    rgba(10, 14, 31, 0.92) 0%,
+    rgba(10, 14, 31, 0.72) 42%,
+    rgba(10, 14, 31, 0.4) 68%,
+    rgba(10, 14, 31, 0.65) 100%
+  );
+}
+
+/* giant faint year, top-right */
+.features-watermark {
+  position: absolute;
+  top: 24px;
+  right: 4%;
+  z-index: 1;
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(90px, 12vw, 180px);
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+  user-select: none;
+}
+
+.features-content {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+}
+
+.features-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.features-eyebrow-index {
+  color: #e5484d;
+  font-weight: 700;
+}
+
+.features-eyebrow-line {
+  flex: 0 0 60px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.features-headline {
+  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0 0 28px;
+}
+
+.features-headline-line {
+  display: block;
+}
+
+.features-headline-accent {
+  color: #e5484d;
+}
+
+.features-copy-text {
+  max-width: 46ch;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0 0 36px;
+}
+
+.features-credential {
+  max-width: 420px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 900px) {
+  .features {
+    padding: 90px 8% 60px;
+    min-height: 0;
+  }
+
+  .features-watermark {
+    font-size: clamp(70px, 22vw, 120px);
+    top: 16px;
+  }
+}

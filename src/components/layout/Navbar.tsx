@@ -3,7 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/data/site";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
+import { useTheme } from "@/context/ThemeContext";
 import AeLogo from "@/components/ui/AeLogo";
+import SearchBox from "@/components/search/SearchBox";
 
 /**
  * Navbar — a thin, centered pill of page links (translated from Home.dc.html).
@@ -21,6 +23,7 @@ export default function Navbar() {
   const scrollY = useScrollPosition();
   const scrolled = scrollY > 80;
   const { pathname } = useLocation();
+  const { isDark } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -57,9 +60,14 @@ export default function Navbar() {
         <div
           className="pointer-events-auto flex items-center gap-1.5 px-3 py-[7px] rounded-full transition-[background,border-color,box-shadow] duration-300"
           style={{
-            background: scrolled ? "var(--bg-glass)" : "transparent",
-            border: `1px solid ${scrolled ? "var(--border-subtle)" : "transparent"}`,
-            boxShadow: scrolled ? "var(--elevation-2)" : "none",
+            // Fully transparent-at-top only works in dark mode, where hero
+            // photos/video are dark enough for light link text to read on
+            // their own. In light mode the pill still blurs whatever photo
+            // sits behind it (e.g. the Blog hero), so it keeps a light glass
+            // tint even before the scrolled state kicks in.
+            background: scrolled ? "var(--bg-glass)" : isDark ? "transparent" : "rgba(255,255,255,0.55)",
+            border: `1px solid ${scrolled || !isDark ? "var(--border-subtle)" : "transparent"}`,
+            boxShadow: scrolled ? "var(--elevation-2)" : isDark ? "none" : "0 4px 20px rgba(13,16,48,0.08)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
           }}
@@ -87,6 +95,7 @@ export default function Navbar() {
               </Link>
             );
           })}
+          <SearchBox variant="pill" />
         </div>
       </nav>
 
@@ -96,17 +105,19 @@ export default function Navbar() {
         onClick={() => setMenuOpen(true)}
         aria-label="Open menu"
         aria-expanded={menuOpen}
-        className="fixed top-5 left-5 z-40 md:hidden flex items-center justify-center w-11 h-11 rounded-full cursor-pointer"
+        className="ui-blur fixed top-5 left-5 z-40 md:hidden flex items-center justify-center w-11 h-11 rounded-full cursor-pointer"
         style={{
           background: "var(--bg-glass)",
           border: "1px solid var(--border-subtle)",
           color: "var(--text-primary)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
+          /* Blur comes from `.ui-blur` — pointer devices only. */
         }}
       >
         <Menu size={22} />
       </button>
+
+      {/* ---------- Mobile: search (top-right) ---------- */}
+      <SearchBox variant="floating" wrapperClassName="fixed top-5 right-5 z-40 md:hidden" />
 
       {/* ---------- Mobile: full-screen overlay menu ---------- */}
       {menuOpen && (

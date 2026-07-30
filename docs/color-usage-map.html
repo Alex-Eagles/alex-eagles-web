@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Color Usage Map — Brand #242599</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    [data-theme="light"] {
+      --brand-primary: #242599;
+      --brand-dark: #1A1B72;
+      --brand-light: #3D3ECC;
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F3F3FD;
+      --bg-tertiary: #E8E8F9;
+      --text-primary: #111128;
+      --text-secondary: #4A4A7A;
+      --text-muted: #9090BA;
+      --border-default: #D0D0ED;
+      --border-strong: #B0B0D8;
+      --block-bg: #FFFFFF;
+      --block-border: #D0D0ED;
+      --token-bg: #F3F3FD;
+      --token-color: #242599;
+      --token-border: #D0D0ED;
+      --sub-color: #4A4A7A;
+      --label-color: #111128;
+      --success-bg: #C8FFE8; --success-text: #0A5C34; --success-token-bg: #A0FFCC; --success-border: #80FFCC;
+      --warning-bg: #FFF3CC; --warning-text: #7A5500; --warning-token-bg: #FFE888; --warning-border: #FFE080;
+      --danger-bg: #FFE5E5;  --danger-text: #7A1A1A;  --danger-token-bg: #FFBBBB;  --danger-border: #FFAAAA;
+      --info-bg: #E5F0FF;    --info-text: #1A3F7A;    --info-token-bg: #BBD6FF;    --info-border: #AACCFF;
+      --footer-bg: #111111;
+      --footer-text: #AAAAAA;
+      --footer-muted: #666666;
+    }
+
+    [data-theme="dark"] {
+      --brand-primary: #3D3ECC;
+      --brand-dark: #242599;
+      --brand-light: #5A5BDD;
+      --bg-primary: #0F0F0F;
+      --bg-secondary: #1A1A1A;
+      --bg-tertiary: #252525;
+      --text-primary: #F2F2F2;
+      --text-secondary: #AAAAAA;
+      --text-muted: #666666;
+      --border-default: #2E2E2E;
+      --border-strong: #444444;
+      --block-bg: #1A1A1A;
+      --block-border: #2E2E2E;
+      --token-bg: rgba(255,255,255,0.06);
+      --token-color: #7A7BF0;
+      --token-border: #333333;
+      --sub-color: #AAAAAA;
+      --label-color: #F2F2F2;
+      --success-bg: #0A2E1A; --success-text: #4AE883; --success-token-bg: rgba(74,232,131,0.1); --success-border: #1A5C34;
+      --warning-bg: #2A1E00; --warning-text: #F5C842; --warning-token-bg: rgba(245,200,66,0.1); --warning-border: #5C4400;
+      --danger-bg: #2A0A0A;  --danger-text: #F07070;  --danger-token-bg: rgba(240,112,112,0.1);  --danger-border: #5C1A1A;
+      --info-bg: #081828;    --info-text: #60A8F0;    --info-token-bg: rgba(96,168,240,0.1);    --info-border: #1A3A5C;
+      --footer-bg: #080808;
+      --footer-text: #888888;
+      --footer-muted: #555555;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 2rem;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--brand-primary);
+      margin-bottom: 4px;
+      transition: color 0.3s;
+    }
+
+    .page-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-strong);
+      border-radius: 40px;
+      padding: 6px 6px 6px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+      flex-shrink: 0;
+    }
+
+    .toggle-btn:hover { border-color: var(--brand-primary); }
+
+    .toggle-pill {
+      width: 44px;
+      height: 26px;
+      background: var(--brand-primary);
+      border-radius: 13px;
+      position: relative;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+
+    .toggle-pill::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.25s;
+    }
+
+    [data-theme="dark"] .toggle-pill::after { transform: translateX(18px); }
+
+    .toggle-icon { font-size: 15px; width: 20px; text-align: center; }
+
+    .section { margin-bottom: 24px; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      transition: color 0.3s;
+    }
+
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .block {
+      border-radius: 10px;
+      padding: 14px 16px;
+      flex: 1;
+      min-width: 180px;
+      border: 0.5px solid var(--block-border);
+      background: var(--block-bg);
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      gap: 8px;
+      color: var(--label-color);
+      transition: color 0.3s;
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+    .sub {
+      font-size: 12px;
+      color: var(--sub-color);
+      line-height: 1.5;
+      margin-bottom: 6px;
+      transition: color 0.3s;
+    }
+
+    .token {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: inline-block;
+      background: var(--token-bg);
+      color: var(--token-color);
+      border: 0.5px solid var(--token-border);
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .b-bg-primary   { background: var(--bg-primary)   !important; }
+    .b-bg-secondary { background: var(--bg-secondary) !important; }
+    .b-bg-tertiary  { background: var(--bg-tertiary)  !important; }
+    .b-brand        { background: var(--brand-primary) !important; border-color: var(--brand-light) !important; }
+    .b-brand-dark   { background: var(--brand-dark)   !important; border-color: var(--brand-primary) !important; }
+    .b-input-focus  { border: 1.5px solid var(--brand-light) !important; }
+    .b-footer       { background: var(--footer-bg) !important; border-color: #333 !important; }
+    .b-secondary-btn { border: 1.5px solid var(--brand-primary) !important; background: transparent !important; }
+
+    .t-white        { color: #fff !important; }
+    .t-primary      { color: var(--label-color) !important; }
+    .t-brandl       { color: var(--brand-light) !important; }
+    .t-brand        { color: var(--brand-primary) !important; }
+    .t-footer       { color: var(--footer-text) !important; }
+    .t-footer-muted { color: var(--footer-muted) !important; }
+
+    .tk-inv { background: rgba(255,255,255,0.12) !important; color: #fff !important; border-color: rgba(255,255,255,0.22) !important; }
+
+    .b-success { background: var(--success-bg) !important; border-color: var(--success-border) !important; }
+    .b-warning { background: var(--warning-bg) !important; border-color: var(--warning-border) !important; }
+    .b-danger  { background: var(--danger-bg)  !important; border-color: var(--danger-border)  !important; }
+    .b-info    { background: var(--info-bg)    !important; border-color: var(--info-border)    !important; }
+    .t-success { color: var(--success-text) !important; }
+    .t-warning { color: var(--warning-text) !important; }
+    .t-danger  { color: var(--danger-text)  !important; }
+    .t-info    { color: var(--info-text)    !important; }
+    .tk-success { background: var(--success-token-bg) !important; color: var(--success-text) !important; border-color: var(--success-border) !important; }
+    .tk-warning { background: var(--warning-token-bg) !important; color: var(--warning-text) !important; border-color: var(--warning-border) !important; }
+    .tk-danger  { background: var(--danger-token-bg)  !important; color: var(--danger-text)  !important; border-color: var(--danger-border)  !important; }
+    .tk-info    { background: var(--info-token-bg)    !important; color: var(--info-text)    !important; border-color: var(--info-border)    !important; }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div>
+      <h1>Color Usage Map</h1>
+      <p class="page-sub">Where to apply each token — brand color #242599</p>
+    </div>
+    <button class="toggle-btn" onclick="toggleTheme()">
+      <span class="toggle-icon" id="toggle-icon">🌙</span>
+      <span id="toggle-label">Light mode</span>
+      <div class="toggle-pill"></div>
+    </button>
+  </div>
+
+  <!-- Page Structure -->
+  <div class="section">
+    <div class="section-label">Page structure</div>
+    <div class="row">
+      <div class="block b-bg-tertiary">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--bg-tertiary);border:1.5px solid var(--border-strong);"></span>Page background</div>
+        <div class="sub">The outermost canvas behind everything.</div>
+        <span class="token">--bg-tertiary</span>
+      </div>
+      <div class="block b-bg-primary">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--bg-primary);border:1.5px solid var(--border-default);"></span>Content background</div>
+        <div class="sub">Main body, article area, content panels.</div>
+        <span class="token">--bg-primary</span>
+      </div>
+      <div class="block b-bg-secondary">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--bg-secondary);border:1.5px solid var(--border-default);"></span>Card / sidebar bg</div>
+        <div class="sub">Cards, sidebars, input fields, modals.</div>
+        <span class="token">--bg-secondary</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header & Navbar -->
+  <div class="section">
+    <div class="section-label">Header &amp; navbar</div>
+    <div class="row">
+      <div class="block b-brand">
+        <div class="label-row t-white"><span class="dot" style="background:var(--brand-light);"></span>Navbar background</div>
+        <div class="sub" style="color:rgba(255,255,255,0.6);">Brand color for a bold, on-brand header.</div>
+        <span class="token tk-inv">--brand-primary</span>
+      </div>
+      <div class="block b-brand-dark">
+        <div class="label-row t-white"><span class="dot" style="background:var(--brand-primary);"></span>Navbar (scrolled)</div>
+        <div class="sub" style="color:rgba(255,255,255,0.6);">Slightly darker on scroll for depth.</div>
+        <span class="token tk-inv">--brand-dark</span>
+      </div>
+      <div class="block">
+        <div class="label-row t-primary"><span class="dot" style="background:#fff;border:1.5px solid var(--border-default);"></span>Nav links</div>
+        <div class="sub">White text on brand navbar. Brand color on light navbars.</div>
+        <span class="token">#FFFFFF on brand nav</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <div class="section">
+    <div class="section-label">Typography</div>
+    <div class="row">
+      <div class="block">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--text-primary);"></span>Headings / H1–H3</div>
+        <div class="sub">Maximum contrast for titles.</div>
+        <span class="token">--text-primary</span>
+      </div>
+      <div class="block">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--text-secondary);"></span>Body text / paragraphs</div>
+        <div class="sub">Softened — easier on the eyes for long reads.</div>
+        <span class="token">--text-secondary</span>
+      </div>
+      <div class="block">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--text-muted);"></span>Captions / metadata</div>
+        <div class="sub">Timestamps, labels, placeholders, helper text.</div>
+        <span class="token">--text-muted</span>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px;">
+      <div class="block">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--brand-primary);"></span>Links</div>
+        <div class="sub">Always brand color. Underline on hover.</div>
+        <span class="token">--brand-primary</span>
+      </div>
+      <div class="block">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--brand-light);"></span>Link hover</div>
+        <div class="sub">Lighter brand shade on hover.</div>
+        <span class="token">--brand-light</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="section">
+    <div class="section-label">Buttons</div>
+    <div class="row">
+      <div class="block b-brand">
+        <div class="label-row t-white"><span class="dot" style="background:#fff;opacity:0.85;"></span>Primary button</div>
+        <div class="sub" style="color:rgba(255,255,255,0.6);">Main CTA — "Sign up", "Submit", "Buy now".</div>
+        <span class="token tk-inv">bg: --brand-primary · text: #fff</span>
+      </div>
+      <div class="block b-secondary-btn">
+        <div class="label-row t-brand"><span class="dot" style="background:transparent;border:1.5px solid var(--brand-primary);"></span>Secondary button</div>
+        <div class="sub">Outline style — "Learn more", "Cancel".</div>
+        <span class="token">border + text: --brand-primary</span>
+      </div>
+      <div class="block b-bg-secondary">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--bg-secondary);border:1.5px solid var(--border-default);"></span>Ghost / tertiary</div>
+        <div class="sub">Low-emphasis actions like "Skip" or "Dismiss".</div>
+        <span class="token">bg: --bg-secondary · text: --text-secondary</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forms -->
+  <div class="section">
+    <div class="section-label">Forms &amp; inputs</div>
+    <div class="row">
+      <div class="block b-bg-primary">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--bg-primary);border:1.5px solid var(--border-default);"></span>Input default</div>
+        <div class="sub">Neutral bg, subtle border.</div>
+        <span class="token">bg: --bg-primary · border: --border-default</span>
+      </div>
+      <div class="block b-bg-primary b-input-focus">
+        <div class="label-row t-brandl"><span class="dot" style="background:var(--bg-primary);border:1.5px solid var(--brand-light);"></span>Input focused</div>
+        <div class="sub">Brand color border on focus.</div>
+        <span class="token">border: --brand-light</span>
+      </div>
+      <div class="block b-danger">
+        <div class="label-row t-danger"><span class="dot" style="background:var(--danger-text);opacity:0.7;"></span>Input error</div>
+        <div class="sub t-danger">Danger tint bg + red border for validation errors.</div>
+        <span class="token tk-danger">bg: --danger · border: danger</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="section">
+    <div class="section-label">Status &amp; feedback</div>
+    <div class="row">
+      <div class="block b-success">
+        <div class="label-row t-success"><span class="dot" style="background:var(--success-text);"></span>Success</div>
+        <div class="sub t-success">Confirmations, saved, completed.</div>
+        <span class="token tk-success">--success</span>
+      </div>
+      <div class="block b-warning">
+        <div class="label-row t-warning"><span class="dot" style="background:var(--warning-text);"></span>Warning</div>
+        <div class="sub t-warning">Alerts, pending actions, low stock.</div>
+        <span class="token tk-warning">--warning</span>
+      </div>
+      <div class="block b-danger">
+        <div class="label-row t-danger"><span class="dot" style="background:var(--danger-text);"></span>Danger / error</div>
+        <div class="sub t-danger">Errors, destructive actions, failed states.</div>
+        <span class="token tk-danger">--danger</span>
+      </div>
+      <div class="block b-info">
+        <div class="label-row t-info"><span class="dot" style="background:var(--info-text);"></span>Info</div>
+        <div class="sub t-info">Tips, notices, informational banners.</div>
+        <span class="token tk-info">--info</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="section">
+    <div class="section-label">Footer</div>
+    <div class="row">
+      <div class="block b-footer">
+        <div class="label-row t-footer"><span class="dot" style="background:var(--brand-primary);"></span>Footer background</div>
+        <div class="sub t-footer-muted">Near-black — neutral and clean, brand pops as accent.</div>
+        <span class="token" style="background:rgba(255,255,255,0.06);color:var(--footer-text);border-color:#333;">--footer-bg</span>
+      </div>
+      <div class="block b-footer">
+        <div class="label-row t-footer"><span class="dot" style="background:var(--footer-text);"></span>Footer text / links</div>
+        <div class="sub t-footer-muted">Muted gray. Brand color on hover.</div>
+        <span class="token" style="background:rgba(255,255,255,0.06);color:var(--footer-text);border-color:#333;">--footer-text · hover: --brand-primary</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dividers -->
+  <div class="section">
+    <div class="section-label">Dividers &amp; borders</div>
+    <div class="row">
+      <div class="block">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--border-default);border:1px solid var(--border-strong);"></span>Dividers between sections</div>
+        <div class="sub">Horizontal rules, card borders, table rows.</div>
+        <span class="token">--border-default</span>
+      </div>
+      <div class="block">
+        <div class="label-row t-primary"><span class="dot" style="background:var(--border-strong);"></span>Emphasized borders</div>
+        <div class="sub">Active tabs, selected items, focused cards.</div>
+        <span class="token">--border-strong</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subteam Cards -->
+  <div class="section">
+    <div class="section-label">Subteam blog cards</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;">
+
+      <div class="subteam-card" style="border-radius:12px;overflow:hidden;border:0.5px solid #FAC775;background:#FAEEDA;">
+        <div class="card-bar" style="height:72px;background:#FAC775;display:flex;align-items:center;justify-content:center;font-size:22px;color:#633806;">🔧</div>
+        <div class="card-body" style="padding:10px 12px 12px;">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#854F0B;margin-bottom:5px;">Hardware</div>
+          <div style="font-size:12px;color:#5F3A0A;line-height:1.5;">"We designed the sensor array that keeps our drone flying true in turbulent conditions."</div>
+          <div style="width:26px;height:26px;border-radius:50%;background:#EF9F27;color:#412402;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:10px;">HW</div>
+        </div>
+      </div>
+
+      <div class="subteam-card" style="border-radius:12px;overflow:hidden;border:0.5px solid #9FE1CB;background:#E1F5EE;">
+        <div class="card-bar" style="height:72px;background:#9FE1CB;display:flex;align-items:center;justify-content:center;font-size:22px;color:#085041;">💻</div>
+        <div class="card-body" style="padding:10px 12px 12px;">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#0F6E56;margin-bottom:5px;">Software</div>
+          <div style="font-size:12px;color:#085041;line-height:1.5;">"Our GCS gives the pilot full telemetry in real time with a clean, intuitive interface."</div>
+          <div style="width:26px;height:26px;border-radius:50%;background:#5DCAA5;color:#04342C;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:10px;">SW</div>
+        </div>
+      </div>
+
+      <div class="subteam-card" style="border-radius:12px;overflow:hidden;border:0.5px solid #C5C6F5;background:#EEEDFE;">
+        <div class="card-bar" style="height:72px;background:#C5C6F5;display:flex;align-items:center;justify-content:center;font-size:22px;color:#26215C;">📟</div>
+        <div class="card-body" style="padding:10px 12px 12px;">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#3C3489;margin-bottom:5px;">Firmware</div>
+          <div style="font-size:12px;color:#26215C;line-height:1.5;">"Every microsecond of flight loop timing is tuned for stability and responsiveness."</div>
+          <div style="width:26px;height:26px;border-radius:50%;background:#AFA9EC;color:#26215C;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:10px;">FW</div>
+        </div>
+      </div>
+
+      <div class="subteam-card" style="border-radius:12px;overflow:hidden;border:0.5px solid #F4C0D1;background:#FBEAF0;">
+        <div class="card-bar" style="height:72px;background:#F4C0D1;display:flex;align-items:center;justify-content:center;font-size:22px;color:#4B1528;">👁️</div>
+        <div class="card-body" style="padding:10px 12px 12px;">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#993556;margin-bottom:5px;">Computer vision</div>
+          <div style="font-size:12px;color:#4B1528;line-height:1.5;">"Real-time target detection at altitude — our model runs at 30fps on embedded hardware."</div>
+          <div style="width:26px;height:26px;border-radius:50%;background:#ED93B1;color:#4B1528;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:10px;">CV</div>
+        </div>
+      </div>
+
+      <div class="subteam-card" style="border-radius:12px;overflow:hidden;border:0.5px solid #D3D1C7;background:#F1EFE8;">
+        <div class="card-bar" style="height:72px;background:#D3D1C7;display:flex;align-items:center;justify-content:center;font-size:22px;color:#2C2C2A;">🧩</div>
+        <div class="card-body" style="padding:10px 12px 12px;">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#5F5E5A;margin-bottom:5px;">Structure</div>
+          <div style="font-size:12px;color:#2C2C2A;line-height:1.5;">"Lightweight yet rigid — we hit our weight target without compromising on strength."</div>
+          <div style="width:26px;height:26px;border-radius:50%;background:#B4B2A9;color:#2C2C2A;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:10px;">ST</div>
+        </div>
+      </div>
+
+      <div class="subteam-card" style="border-radius:12px;overflow:hidden;border:0.5px solid #B5D4F4;background:#E6F1FB;">
+        <div class="card-bar" style="height:72px;background:#B5D4F4;display:flex;align-items:center;justify-content:center;font-size:22px;color:#042C53;">✈️</div>
+        <div class="card-body" style="padding:10px 12px 12px;">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#185FA5;margin-bottom:5px;">Aerodesign</div>
+          <div style="font-size:12px;color:#042C53;line-height:1.5;">"Our wing profile was optimized in simulation for maximum lift-to-drag at cruise speed."</div>
+          <div style="width:26px;height:26px;border-radius:50%;background:#85B7EB;color:#042C53;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:10px;">AD</div>
+        </div>
+      </div>
+
+      <div class="subteam-card" style="border-radius:12px;overflow:hidden;border:0.5px solid #C0DD97;background:#EAF3DE;">
+        <div class="card-bar" style="height:72px;background:#C0DD97;display:flex;align-items:center;justify-content:center;font-size:22px;color:#173404;">🚀</div>
+        <div class="card-body" style="padding:10px 12px 12px;">
+          <div style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#3B6D11;margin-bottom:5px;">Propulsion</div>
+          <div style="font-size:12px;color:#173404;line-height:1.5;">"We benchmarked six motor-prop combos before locking in our final drive system."</div>
+          <div style="width:26px;height:26px;border-radius:50%;background:#97C459;color:#173404;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:10px;">PR</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast" style="position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);background:#242599;color:#fff;font-size:13px;padding:8px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:99;white-space:nowrap;"></div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('toggle-icon').textContent = isDark ? '🌙' : '☀️';
+      document.getElementById('toggle-label').textContent = isDark ? 'Light mode' : 'Dark mode';
+      refreshAllChips();
+    }
+
+    function showToast(hex) {
+      navigator.clipboard.writeText(hex).catch(() => {});
+      const t = document.getElementById('toast');
+      t.textContent = hex + ' copied';
+      t.style.opacity = '1';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.style.opacity = '0', 1600);
+    }
+
+    function rgbToHex(rgb) {
+      if (!rgb || rgb === 'transparent') return null;
+      const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!m) return null;
+      return '#' + [m[1],m[2],m[3]].map(x => parseInt(x).toString(16).padStart(2,'0').toUpperCase()).join('');
+    }
+
+    function isColorDark(hex) {
+      if (!hex) return false;
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+      return (0.299*r + 0.587*g + 0.114*b) < 128;
+    }
+
+    function chipStyle(dark) {
+      return dark
+        ? 'display:inline-block;font-family:monospace;font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer;letter-spacing:0.03em;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.85);border:0.5px solid rgba(255,255,255,0.2);'
+        : 'display:inline-block;font-family:monospace;font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer;letter-spacing:0.03em;background:rgba(0,0,0,0.06);color:rgba(0,0,0,0.6);border:0.5px solid rgba(0,0,0,0.12);';
+    }
+
+    function refreshAllChips() {
+      document.querySelectorAll('.block').forEach(block => {
+        const chip = block.querySelector('.hex-chip');
+        if (!chip) return;
+        const hex = rgbToHex(window.getComputedStyle(block).backgroundColor);
+        if (!hex) return;
+        chip.textContent = hex;
+        chip.style.cssText = chipStyle(isColorDark(hex));
+        chip.onclick = () => showToast(hex);
+      });
+
+      document.querySelectorAll('.subteam-card').forEach(card => {
+        const cardHex = rgbToHex(window.getComputedStyle(card).backgroundColor);
+        const bar = card.querySelector('.card-bar');
+        const barHex = bar ? rgbToHex(window.getComputedStyle(bar).backgroundColor) : null;
+
+        const chips = card.querySelectorAll('.hex-chip');
+        if (chips[0] && cardHex) {
+          chips[0].textContent = cardHex;
+          chips[0].style.cssText = chipStyle(isColorDark(cardHex));
+          chips[0].onclick = () => showToast(cardHex);
+        }
+        if (chips[1] && barHex) {
+          chips[1].textContent = barHex;
+          chips[1].style.cssText = chipStyle(isColorDark(barHex));
+          chips[1].onclick = () => showToast(barHex);
+        }
+      });
+    }
+
+    function addHexChips() {
+      document.querySelectorAll('.block').forEach(block => {
+        const hex = rgbToHex(window.getComputedStyle(block).backgroundColor);
+        if (!hex) return;
+        const chip = document.createElement('span');
+        chip.className = 'hex-chip';
+        chip.textContent = hex;
+        chip.title = 'Click to copy';
+        chip.style.cssText = chipStyle(isColorDark(hex));
+        chip.addEventListener('click', () => showToast(hex));
+        block.appendChild(chip);
+      });
+
+      document.querySelectorAll('.subteam-card').forEach(card => {
+        const cardHex = rgbToHex(window.getComputedStyle(card).backgroundColor);
+        const bar = card.querySelector('.card-bar');
+        const barHex = bar ? rgbToHex(window.getComputedStyle(bar).backgroundColor) : null;
+        const body = card.querySelector('.card-body');
+        if (!body) return;
+
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;';
+
+        if (cardHex) {
+          const c = document.createElement('span');
+          c.className = 'hex-chip';
+          c.textContent = cardHex;
+          c.title = 'Card bg · click to copy';
+          c.style.cssText = chipStyle(isColorDark(cardHex));
+          c.addEventListener('click', () => showToast(cardHex));
+          wrap.appendChild(c);
+        }
+        if (barHex && barHex !== cardHex) {
+          const c = document.createElement('span');
+          c.className = 'hex-chip';
+          c.textContent = barHex;
+          c.title = 'Header bar · click to copy';
+          c.style.cssText = chipStyle(isColorDark(barHex));
+          c.addEventListener('click', () => showToast(barHex));
+          wrap.appendChild(c);
+        }
+        body.appendChild(wrap);
+      });
+    }
+
+    window.addEventListener('load', addHexChips);
+  </script>
+</body>
+</html>

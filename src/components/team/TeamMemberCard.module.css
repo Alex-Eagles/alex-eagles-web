@@ -1,0 +1,596 @@
+/* ---------------------------------------------------------------------------
+ * Team member card. Values come from the design handoff and are final —
+ * see design_handoff_team_card/README.md ("Fidelity: high").
+ *
+ * Hover is CSS-only so the component never re-renders on pointer movement,
+ * which matters with ~30 cards on screen.
+ *
+ * The reveal is keyed off :hover and :focus-visible — deliberately NOT
+ * :focus-within. The card is tabbable (tabIndex=0), and clicking a tabbable
+ * element focuses it, so :focus-within left the card stuck in its revealed
+ * state after the pointer had already left. :focus-visible only matches
+ * keyboard focus, so a click now does nothing at all and the reveal follows
+ * the pointer, matching the 2025 card. :has(:focus-visible) keeps the panel
+ * open while the LinkedIn link inside it is tabbed to — that link is only
+ * reachable once the panel is revealed.
+ * -------------------------------------------------------------------------*/
+
+.card {
+  /* tokens — override on a wrapper if a page needs a variant.
+   *
+   * `--card-accent` is set inline by the component to the sub-team's colour
+   * (brand blue for the three team-wide roles). Deliberately *not* named
+   * `--accent`: that name is a shadcn theme token defined on :root, so a card
+   * outside a section would inherit shadcn's near-white instead of falling
+   * back to the brand. The fallback below only covers a card rendered without
+   * the component, e.g. in isolation. */
+  --card-accent: var(--team-accent);
+  /* Two inks, deliberately. `--ink` is the card's *surface* ink (hover panel,
+     empty-slot copy) and flips with the theme; `--ink-photo` is the ink that
+     sits on the portrait and the textured backdrop, which are dark in both
+     themes, so it does not flip. See the two-zone note in theme.css. */
+  --ink: var(--team-card-ink);
+  --ink-photo: var(--team-card-ink-photo);
+  --periwinkle: var(--team-card-ink-dim);
+  --periwinkle-dim: var(--team-card-ink-soft);
+  --muted: var(--team-card-ink-muted);
+  /* The oversized first name behind the portrait — the card's largest block of
+     colour, so it tracks the sub-team accent too. Lifted towards white the way
+     the old hand-picked #6b6fc7 sat above the brand blue, which keeps it
+     legible over the dark backdrop whatever the section colour is. */
+  --name-behind: color-mix(in srgb, var(--card-accent) 78%, #ffffff);
+  --ease-move: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-img: cubic-bezier(0.16, 0.84, 0.34, 1);
+  /*
+   * Hover timings, in one place. Everything the pointer drives stays under
+   * 300ms: scanning a roster crosses dozens of these, and past ~300ms a
+   * reveal you trigger that often reads as lag rather than as elegance. The
+   * portrait swap gets the longest budget because it's the largest change on
+   * screen; the small tags get the shortest. Previously 350-700ms.
+   */
+  --t-lift: 200ms;
+  --t-panel: 220ms;
+  --t-fade: 240ms;
+  --t-img: 280ms;
+  --t-tags: 180ms;
+
+  position: relative;
+  display: block;
+  width: 100%;
+  /* Establish a container so the panel can compact to the card's own width. */
+  container-type: inline-size;
+  border-radius: 16px;
+  overflow: hidden;
+  /* Nothing happens on click on a pointer device — the reveal is hover. */
+  cursor: default;
+  background: var(--team-card-surface);
+  box-shadow: 0 8px 24px -14px var(--team-card-shadow);
+  transition: transform var(--t-lift) var(--ease-move), box-shadow var(--t-lift) ease;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: 3px;
+}
+
+.inner {
+  position: relative;
+  width: 100%;
+  /* Taller than the original 0.8 — the member grid is pinned at three across so
+     a card can only gain size in height, and the extra room lets the portrait,
+     the stretched first name and the hover panel share the box less tightly.
+     Nothing stretches: portraits are object-fit: cover and cut-outs
+     object-fit: contain, so a shape change re-crops or letterboxes, never
+     distorts. Kept close to 0.75 on purpose — that is the cut-outs' own
+     aspect, so they still land in the box with almost nothing trimmed. */
+  aspect-ratio: 0.74;
+  overflow: hidden;
+  background: linear-gradient(
+    165deg,
+    var(--team-card-surface-from),
+    var(--team-card-surface-to)
+  );
+  /* Rounds this box itself instead of relying on .card's overflow clip. That
+     is what kills the white anti-alias fringe on the corners when the photo
+     scales on hover — the clip now happens on the same box that paints the
+     content, so there is no seam between a square child and a rounded parent.
+
+     This replaces an older `-webkit-mask-image` + `transform: translateZ(0)`
+     pair that did the same job by force-promoting the card to its own GPU
+     layer. That promotion is what made the portraits look pixelated: Chromium
+     rasterises such a layer at a fixed scale that can ignore the display's
+     device pixel ratio, so on a HiDPI screen the card was drawn at ~1x and
+     scaled up. The giveaway was that browser-zooming *sharpened* the image —
+     a genuinely low-res file only gets worse as you zoom in, but a stale
+     layer raster gets regenerated at the new scale. Don't reintroduce
+     translateZ(0) / will-change here to "help" compositing. */
+  border-radius: inherit;
+  isolation: isolate;
+}
+
+/* --- portrait ------------------------------------------------------------ */
+
+.photoLayer {
+  position: absolute;
+  inset: 0;
+  /* The resting grade. Every value is a token so it can be tuned per theme
+     from theme.css — dark passes identity values for everything but
+     grayscale, so it renders exactly as it always has. In light mode this is
+     the consistency pass that levels 71 differently-lit portraits; see the
+     long note by --team-photo-saturate in theme.css. */
+  filter: grayscale(var(--team-photo-grayscale)) saturate(var(--team-photo-saturate))
+    contrast(var(--team-photo-contrast)) brightness(var(--team-photo-brightness))
+    sepia(var(--team-photo-sepia));
+  transform: scale(1);
+  transition: filter var(--t-img) ease, opacity var(--t-fade) ease, transform var(--t-img) var(--ease-img);
+}
+
+.photoLayer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* mode A — no cutout: grayscale → colour, slight zoom */
+/* mode B — cutout present: the flat portrait gets out of the way */
+/* --- empty portrait slot -------------------------------------------------- */
+/*
+ * Shown when a roster slot has no photo file yet. Deliberately reads as an
+ * unfilled slot rather than a broken image — see team.ts for how to fill it.
+ */
+
+.emptyPortrait {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 16px;
+  text-align: center;
+}
+
+.emptyPortrait svg {
+  color: var(--periwinkle-dim);
+  opacity: 0.55;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--periwinkle);
+}
+
+.emptyHint {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+/* --- mode B backdrop + cut-out ------------------------------------------- */
+
+.backdrop,
+.backdropScrim {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--t-fade) ease;
+}
+
+.backdrop {
+  /* Set here rather than inline on the element: the light theme swaps this for
+     a different texture, and an inline style would always win over it. */
+  background-image: var(--team-card-backdrop);
+  background-size: cover;
+  background-position: center;
+  /* `none` in dark. Light mode can dial the wallpaper further back without
+     rebuilding the asset — see --team-backdrop-filter in theme.css. */
+  filter: var(--team-backdrop-filter);
+}
+
+.backdropScrim {
+  background: linear-gradient(
+    180deg,
+    var(--team-card-scrim-from),
+    var(--team-card-scrim-to)
+  );
+}
+
+.cutoutLayer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.72) translateY(3%);
+  transform-origin: bottom center;
+  transition: opacity var(--t-fade) ease, transform var(--t-img) var(--ease-img);
+}
+
+.cutoutLayer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  display: block;
+}
+
+/* --- stretched first name ------------------------------------------------ */
+
+.bigName {
+  position: absolute;
+  top: 6px;
+  /* Roughly matches the cutout photo's own width (object-fit: contain
+     letterboxes it inside the card) instead of running full-bleed. */
+  left: 6%;
+  right: 6%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-fade) ease;
+}
+
+/* The actual text — sized naturally, then squeezed/stretched horizontally by
+   FitName's measured `scaleX` so any name (5 letters or 12) fills the same
+   box width without overflowing it. */
+.bigNameText {
+  display: inline-block;
+  font-size: 52px;
+  line-height: 0.78;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  transform-origin: center top;
+}
+
+.bigNameBack {
+  color: var(--name-behind);
+}
+
+.bigNameFront {
+  color: var(--ink-photo);
+  text-shadow: 0 3px 24px var(--team-name-shadow);
+}
+
+.topScrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 58%;
+  background: linear-gradient(
+    180deg,
+    var(--team-card-topscrim-from),
+    var(--team-card-topscrim-mid) 52%,
+    var(--team-card-topscrim-to)
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-fade) ease;
+}
+
+/* --- rest state tags ------------------------------------------------------ */
+
+.restRole,
+.restName {
+  position: absolute;
+  left: 14px;
+  margin: 0;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity var(--t-tags) ease;
+}
+
+.restRole {
+  top: 14px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--team-tag-bg);
+  backdrop-filter: blur(6px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--card-accent);
+}
+
+.restName {
+  bottom: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  /* Over the portrait, not the card surface — see --ink-photo above. */
+  color: var(--ink-photo);
+  text-shadow: 0 1px 12px var(--team-name-shadow);
+}
+
+/* An unfilled slot's name reads dimmer than a real one. Split by zone: the
+   rest-state name is over the portrait, the panel name is over the panel. */
+.restName[data-placeholder="true"] {
+  color: rgb(255 255 255 / 0.55);
+}
+
+.panelName[data-placeholder="true"] {
+  color: var(--team-card-ink-ghost);
+}
+
+/* --- hover panel ---------------------------------------------------------- */
+
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 52px 18px 18px;
+  background: linear-gradient(
+    180deg,
+    var(--team-card-panel-from),
+    var(--team-card-panel-mid) 44%,
+    var(--team-card-panel-to)
+  );
+  opacity: 0;
+  transform: translateY(30%);
+  transition: opacity var(--t-panel) ease, transform var(--t-panel) var(--ease-move);
+}
+
+.panelRole {
+  margin: 0 0 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--card-accent);
+}
+
+.panelName {
+  margin: 0 0 2px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.panelDepartment {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--periwinkle-dim);
+}
+
+.panelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px solid var(--team-card-rule);
+  padding-top: 11px;
+}
+
+.panelYear {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.linkedIn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 5px 10px;
+  border: 1px solid var(--team-card-pill-border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--periwinkle);
+  text-decoration: none;
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.linkedIn:is(:hover, :focus-visible) {
+  color: var(--ink);
+  border-color: var(--card-accent);
+}
+
+/* --- pointer reveal -------------------------------------------------------
+ *
+ * Gated to devices that actually have a pointer. iOS keeps :hover stuck on a
+ * tapped element until you tap somewhere else, so ungated these fired on touch
+ * too — a tapped card stayed revealed after data-open had already closed it,
+ * and a second tapped card could be revealed at the same time. On touch the
+ * (hover: none) block below is the only thing that reveals a card, which is
+ * what makes data-open the single source of truth there.
+ * -------------------------------------------------------------------------*/
+@media (hover: hover) {
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) {
+    transform: translateY(-6px);
+    /* Lift glow carries the sub-team colour rather than a fixed blue, so hovering
+       a Structure card no longer throws blue light under a warm-grey section. */
+    box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
+  }
+
+  .card[data-mode="photo"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
+    filter: grayscale(0) contrast(1) brightness(1);
+    transform: scale(1.05);
+  }
+
+  .card[data-mode="cutout"]:is(:hover, :focus-visible, :has(:focus-visible)) .photoLayer {
+    opacity: 0;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) :is(.backdrop, .backdropScrim) {
+    opacity: 1;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .cutoutLayer {
+    opacity: 1;
+    transform: scale(0.9);
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .bigNameBack {
+    opacity: 1;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .bigNameFront {
+    opacity: 0.9;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .topScrim {
+    opacity: 0.9;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) :is(.restRole, .restName) {
+    opacity: 0;
+  }
+
+  .card:is(:hover, :focus-visible, :has(:focus-visible)) .panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- narrow cards ---------------------------------------------------------
+ *
+ * Keyed off the card's own width rather than the viewport: on a phone a lead
+ * card is ~230px and a member card ~153px, so a media query would compact both
+ * or neither. Below 190px the panel's default type no longer fits — "CLASS OF
+ * 2026" beside the LinkedIn pill needs ~185px on its own and was overflowing —
+ * so the footer stacks and the scale steps down.
+ * -------------------------------------------------------------------------*/
+@container (max-width: 190px) {
+  .panel {
+    padding: 32px 11px 11px;
+  }
+  .panelRole {
+    margin-bottom: 5px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+  .panelName {
+    font-size: 15px;
+  }
+  .panelDepartment {
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+  /* Stacked, so the year and the pill each get the full width instead of
+     fighting over it. */
+  .panelFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    padding-top: 8px;
+  }
+  .panelYear {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+  .linkedIn {
+    margin-left: 0;
+    padding: 4px 9px;
+    font-size: 10px;
+  }
+  .restRole {
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .restName {
+    left: 10px;
+    bottom: 10px;
+    font-size: 13px;
+  }
+}
+
+/* --- touch + accessibility ------------------------------------------------ */
+
+/*
+ * Touch: tap is the hover.
+ *
+ * The card rests on its first face — portrait, role, name — and a tap plays
+ * the same reveal a pointer gets, driven by data-open from the component. Tap
+ * again to go back. Previously this breakpoint forced the panel permanently
+ * open, so a phone only ever saw the second face and the first was
+ * unreachable; now both are, and the transitions are the same ones the
+ * pointer path uses, so the two input models look identical in motion.
+ *
+ * Scoped to (hover: none) on purpose: it's what keeps a mouse click inert.
+ * The component toggles data-open unconditionally, and on a pointer device
+ * nothing below matches, so the flag has no effect on screen.
+ */
+@media (hover: none) {
+  .card[data-open="true"] {
+    transform: translateY(-6px);
+    box-shadow: 0 34px 60px -30px color-mix(in srgb, var(--card-accent) 32%, transparent);
+  }
+  .card[data-mode="photo"][data-open="true"] .photoLayer {
+    filter: grayscale(0) contrast(1) brightness(1);
+    transform: scale(1.05);
+  }
+  .card[data-mode="cutout"][data-open="true"] .photoLayer {
+    opacity: 0;
+  }
+  .card[data-open="true"] :is(.backdrop, .backdropScrim) {
+    opacity: 1;
+  }
+  .card[data-open="true"] .cutoutLayer {
+    opacity: 1;
+    transform: scale(0.9);
+  }
+  .card[data-open="true"] .bigNameBack {
+    opacity: 1;
+  }
+  .card[data-open="true"] .bigNameFront {
+    opacity: 0.9;
+  }
+  .card[data-open="true"] .topScrim {
+    opacity: 0.9;
+  }
+  .card[data-open="true"] :is(.restRole, .restName) {
+    opacity: 0;
+  }
+  .card[data-open="true"] .panel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* A tap target the size of a fingertip. The pill was ~23px tall, which is
+     half of the ~44px a thumb actually needs to hit reliably. */
+  .linkedIn {
+    min-height: 40px;
+    padding: 9px 14px;
+  }
+
+  /* One live blur per card, ~50 on the page, all of them re-rasterised while
+     the page scrolls. That is a real part of why a long jump goes blank on
+     iOS. A solid fill reads the same at this size and costs nothing. */
+  .restRole {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--team-tag-bg-solid);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card * {
+    transition-duration: 0.01ms !important;
+  }
+  /* [data-open] too, so the touch path drops its motion as well — the reveal
+     still happens, it just doesn't lift or push in. */
+  .card:is(:hover, :focus-visible, :has(:focus-visible), [data-open="true"]) {
+    transform: none;
+  }
+  .card[data-mode="photo"]:is(:hover, :focus-visible, :has(:focus-visible), [data-open="true"])
+    .photoLayer {
+    transform: none;
+  }
+}
+

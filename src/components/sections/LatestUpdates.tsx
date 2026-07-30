@@ -55,12 +55,12 @@ export default function LatestUpdates() {
                     <Meta label="Author" value={post.author} />
                   </div>
 
-                  <p className="font-sans text-[15px] leading-[1.65] text-fg-muted m-0 flex-1 line-clamp-4">
+                  <p className="font-sans text-[15px] leading-[1.65] text-fg-secondary m-0 flex-1 line-clamp-4">
                     {post.excerpt}
                   </p>
 
                   <div className="flex items-center justify-between mt-[22px] pt-[18px] border-t border-border">
-                    <span className="font-mono text-[13px] tracking-[0.04em] uppercase text-fg-subtle font-medium">
+                    <span className="font-mono text-[13px] tracking-[0.04em] uppercase text-fg-muted font-medium">
                       {post.date}
                     </span>
                     <span aria-hidden="true" className="inline-flex items-center gap-1.5">
@@ -83,7 +83,7 @@ export default function LatestUpdates() {
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <span className="font-sans text-sm text-fg-muted">
+    <span className="font-sans text-sm text-fg-secondary">
       {label}: <span className="text-fg font-semibold">{value}</span>
     </span>
   );

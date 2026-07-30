@@ -10,17 +10,32 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon-logo.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      Tints the browser's own chrome — on iOS this is what stops Safari drawing
+      its default toolbar material over the page, which showed up as a pale band
+      fading in at the bottom of the screen.
+
+      It has to be here, in the served HTML, not added by JS on mount: Safari
+      decides how to draw that chrome on the first paint, and a meta tag that
+      arrives after React has mounted is already too late. Matches the dark
+      --bg-primary, the same default `data-theme` above commits to;
+      ThemeContext keeps it in sync when the user toggles.
+    -->
+    <meta name="theme-color" content="#07091c" />
     <meta
       name="description"
       content="Alex Eagles — Alexandria University"
     />
     <title>Alex Eagles</title>
 
-    <!-- Fonts: Barlow Condensed (display), Barlow (headings), Inter (body/UI), JetBrains Mono (specs). -->
+    <!-- Fonts: Barlow Condensed (display), Barlow (headings), Inter (body/UI),
+         JetBrains Mono (specs), Archivo (Team page), Alfa Slab One (Homepage
+         titles), Orbitron (Hero "ALEX EAGLES"). -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@700;800;900&display=swap"
       rel="stylesheet"
     />
   </head>

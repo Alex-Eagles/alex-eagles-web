@@ -10,6 +10,11 @@
 
 @import "tailwindcss";
 @import "./theme.css";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+/* ---break---*/
+@custom-variant dark (&:is(.dark *));
 
 /* ----------------------------------------------------------------------------
  * BRIDGE: expose design tokens as Tailwind utilities.
@@ -20,6 +25,13 @@
  *
  *   --color-canvas   → bg-canvas / text-canvas / border-canvas
  *   --color-fg       → text-fg
+ *
+ * NB the text ramp reads primary → secondary → muted, and the utility names
+ * now say so: `text-fg` / `text-fg-secondary` / `text-fg-muted`. They used to
+ * be `fg-muted` and `fg-subtle`, which mapped to --text-secondary and
+ * --text-muted respectively — i.e. `text-fg-muted` did NOT give you
+ * --text-muted. Reaching for the wrong one of those is how the dark theme
+ * shipped 11px labels at 2.53:1.
  *   --color-brand    → text-brand / bg-brand / border-brand
  *   --font-display   → font-display
  *   --text-hero      → text-hero
@@ -45,8 +57,8 @@
 
   /* Text */
   --color-fg: var(--text-primary);
-  --color-fg-muted: var(--text-secondary);
-  --color-fg-subtle: var(--text-muted);
+  --color-fg-secondary: var(--text-secondary);
+  --color-fg-muted: var(--text-muted);
 
   /* Borders */
   --color-border: var(--border-subtle);
@@ -68,6 +80,39 @@
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 /* ----------------------------------------------------------------------------
@@ -76,13 +121,29 @@
 @layer base {
   * {
     box-sizing: border-box;
+    @apply border-border outline-ring/50;
   }
 
   html,
   body {
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* never allow horizontal scroll (responsive rule) */
+
+    /* Never allow horizontal scroll (responsive rule).
+     *
+     * MUST be `clip`, not `hidden`. They look equivalent but are not:
+     * per spec, when one axis is `hidden` the other computes to `auto`, which
+     * makes html/body a SCROLL CONTAINER. Any `position: sticky` descendant
+     * then tries to stick inside that container instead of the viewport, and
+     * silently fails — it just scrolls away like static content.
+     *
+     * That broke the pinned 3D scene on the History page (the scene scrolled
+     * off while the journey kept advancing, unseen). `clip` suppresses
+     * horizontal scrolling exactly the same way WITHOUT creating a scroll
+     * container, so sticky keeps working.
+     *
+     * If you ever change this back to `hidden`, /history breaks. */
+    overflow-x: clip;
   }
 
   body {
@@ -95,12 +156,44 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Smooth cross-fade when the theme flips. */
-    transition: background var(--transition-slow), color var(--transition-slow);
+    transition:
+      background var(--transition-slow),
+      color var(--transition-slow);
+
+    & section {
+      @apply px-6 pt-[72px] pb-7;
+    }
+    @apply bg-background text-foreground;
+  }
+
+  /* ── Line breaking ────────────────────────────────────────────────────────
+   * `balance` evens out the lines of a heading instead of letting the last one
+   * hold a single orphaned word — the browser tries every break point and
+   * picks the set with the least ragged result. Capped at a few lines by the
+   * spec, which is why it is for headings only.
+   *
+   * `pretty` is the long-copy version: it does not balance, it just refuses to
+   * leave one word alone on the final line. Cheaper, and correct for
+   * paragraphs, where balancing every line would fight the reader's rhythm.
+   *
+   * Both degrade to normal wrapping where unsupported, so there is nothing to
+   * guard. Applied to the ELEMENTS rather than to utility classes so it covers
+   * headings the design system has not met yet. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
   }
 
   /* Native smooth scrolling for in-page anchor links (#team, #vehicles …). */
   html {
     scroll-behavior: smooth;
+    @apply font-sans;
   }
 
   /* Brand selection color. */
@@ -159,6 +252,60 @@
   }
 }
 
+/* ── Scroll cues (History) ──────────────────────────────────────────────────
+ * A slow two-part "breathe" that keeps a standing instruction noticeable
+ * without it ever becoming the loudest thing on screen. The label and the
+ * arrow run the SAME duration so they rise and fall together as one gesture.
+ *
+ * They differ only in depth, and that difference is deliberate: the label is
+ * real text and has to hold 4.5:1 at the bottom of every cycle, so it only
+ * dips to --cue-fade-floor. The arrow is decorative and aria-hidden, so it can
+ * swing to 0.45 and travel, which is where the visible energy comes from. */
+@keyframes ae-cue-pulse {
+  0%,
+  100% {
+    opacity: var(--cue-fade-floor);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes ae-cue-arrow {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(5px);
+    opacity: 1;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * GALLERY-SPECIFIC KEYFRAMES — 3D spatial gallery HUD animations.
+ * --------------------------------------------------------------------------*/
+@keyframes gallery-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    filter: drop-shadow(0 0 2px var(--brand-light));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px var(--brand-light));
+  }
+}
+
+@keyframes gallery-grid-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* ----------------------------------------------------------------------------
  * SMALL REUSABLE HELPERS (kept as plain classes; used by several components).
  * --------------------------------------------------------------------------*/
@@ -180,12 +327,107 @@
   }
 
   /* ------------------------------------------------------------------------
+   * CHAPTER BANDS
+   *
+   * A long page alternates its background between exactly TWO tones so that
+   * consecutive sections read as separate chapters rather than one endless
+   * scroll. Wrap each run of sections in `.ae-band .ae-band--deep` or
+   * `.ae-band .ae-band--lift` and alternate; the tones themselves are
+   * --band-deep / --band-lift in theme.css, one pair per theme.
+   *
+   * ─── THE SEAM IS A CUT, NOT A CROSSFADE ─────────────────────────────────
+   * Each band is one flat tone, and where two meet there is a hard edge plus
+   * a hairline in --band-edge.
+   *
+   * It was a 150px dissolve at first, on the theory that chapters should flow
+   * into each other. That works on the dark theme, where the two tones differ
+   * in CHROMA as well as lightness — one near-neutral, one saturated indigo —
+   * so the eye has a second cue and finds the join regardless. The light pair
+   * has no such cue: two pale indigo neutrals separated only by lightness.
+   * Dissolved, there was no edge anywhere and the page read as one sheet.
+   *
+   * The numbers are the punchline: the light step is ΔL* 4.4 and the dark step
+   * everyone reads as obvious is ΔL* 3.5. Light was already the STRONGER
+   * contrast. It was the gradient hiding it, not the colours.
+   *
+   * ─── NO BACKGROUND-IMAGE, WHICH ALSO KEEPS THE PIN SAFE ─────────────────
+   * A flat background-color is all this needs. Whatever replaces it must not
+   * introduce `transform`, `filter`, `contain` or `overflow` on the band
+   * element: any of those creates a containing block and breaks the
+   * `position: sticky` pin the History page's 3D journey scrolls on.
+   * ----------------------------------------------------------------------*/
+  .ae-band {
+    /* The hairline sits on the TOP edge, so it belongs to the band that starts
+     * — which means each boundary is drawn exactly once, by the band below it,
+     * and no pair can double up. */
+    border-top: 1px solid var(--band-edge);
+    /* Matches the body's own theme crossfade so a band and the page behind it
+     * swap together rather than a beat apart. */
+    transition: background-color var(--transition-slow);
+  }
+
+  .ae-band--deep {
+    background-color: var(--band-deep);
+  }
+
+  .ae-band--lift {
+    background-color: var(--band-lift);
+  }
+
+  /* The FIRST band on a page has no band above it — only the navbar and the
+   * top of the document. A rule there would read as a stray line under the
+   * site chrome rather than as a boundary between two things. */
+  .ae-band--flush {
+    border-top: 0;
+  }
+
+  /* Sections on this site render nothing when their data file is empty, which
+   * leaves their band wrapper childless. A childless band still has a seam
+   * gradient, and a seam with no chapter under it is a stray stripe across the
+   * page — so it removes itself, and the two chapters either side of the gap
+   * simply run together as one. Declarative on purpose: the page composing the
+   * bands does not have to import and re-check every section's data to know
+   * whether that section decided to exist. */
+  .ae-band:empty {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------------------
+   * History jump-list rows (see JourneyProgressRail).
+   *
+   * These are CSS rather than inline styles because :hover and [data-active]
+   * are states the style attribute cannot express. `data-active` is written
+   * imperatively on scroll — never through React — so the "you are here"
+   * marker costs no renders.
+   *
+   * The active row is marked TWICE over, by background AND by weight. Colour
+   * alone would be the only signal otherwise, which fails anyone who can't
+   * separate these two tints. Bolding the year is free of layout shift because
+   * the year is set in a monospace face, where every weight shares an advance.
+   * ----------------------------------------------------------------------*/
+  .ae-jump-row {
+    transition: background-color var(--transition-fast);
+  }
+  .ae-jump-row:hover {
+    background-color: var(--jump-row-hover);
+  }
+  .ae-jump-row[data-active] {
+    background-color: var(--jump-row-active);
+  }
+  .ae-jump-row[data-active] .ae-jump-year {
+    font-weight: 700;
+  }
+
+  /* ------------------------------------------------------------------------
    * Z-INDEX SCALE (documented so layers never fight):
    *   10  in-flow content raised above decorative backdrops (hero copy, etc.)
+   *   30  scene-local HUD: the History journey's progress rail. Above the
+   *       scene's own DOM overlays (drei <Html> tops out at 20 there) and
+   *       below the site chrome, which must always win.
    *   40  fixed chrome: navbar, theme toggle, mobile hamburger
    *   50  overlays: full-screen mobile menu
    *   60  skip link (must sit above everything, incl. the open menu)
-   * Use Tailwind `z-10` / `z-40` / `z-50`; the skip link uses 60 below.
+   * Use Tailwind `z-10` / `z-30` / `z-40` / `z-50`; the skip link uses 60 below.
    * ----------------------------------------------------------------------*/
 
   /* Skip-to-content link: hidden until focused (keyboard accessibility). */
@@ -208,6 +450,86 @@
   .skip-link:focus-visible {
     transform: translateY(0);
   }
+
+  .marquee {
+    --marquee-duration: 15s;
+
+    ul {
+      animation: marqueeAnimation calc(var(--marquee-duration) / 2) linear
+        infinite;
+    }
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, max-content);
+  }
+
+  .problem-grid--textless {
+    grid-template-rows: auto auto minmax(0, max-content);
+  }
+
+  .counter {
+    counter-reset: count;
+
+    .counter__superscript {
+      position: relative;
+      width: max-content;
+
+      &::after {
+        counter-increment: count;
+        content: counter(count);
+        position: absolute;
+        top: 0em;
+        right: -1em;
+        font-size: 0.6em;
+      }
+    }
+  }
+
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+ * BACKDROP BLUR — POINTER DEVICES ONLY
+ *
+ * backdrop-filter is the most expensive property on the page: the browser has
+ * to re-blur whatever sits behind the element, and on a *fixed* element that
+ * means every scroll frame, for the whole life of the page. On a phone that's
+ * real battery and real dropped frames, and at these sizes the effect is close
+ * to invisible anyway.
+ *
+ * So the blur is granted here rather than taken away: elements that want it
+ * carry `.ui-blur` and set no blur of their own, and only hover-capable devices
+ * get the rule. (It was briefly an `!important` override of an inline style —
+ * but the minifier drops an unprefixed `!important` backdrop-filter next to its
+ * -webkit- twin, which left the standard property un-overridden. Not needing
+ * `!important` at all avoids the whole question.)
+ *
+ * Touch devices compensate with more opaque surfaces — see the (hover: none)
+ * block at the foot of theme.css.
+ * --------------------------------------------------------------------------*/
+@media (hover: hover) {
+  .ui-blur {
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /*
+   * The unprefixed property lives in its own @supports block because the
+   * minifier collapses a prefixed/unprefixed pair down to the -webkit- form
+   * alone, which would leave Firefox (unprefixed only) without the blur.
+   * Wrapping it stops the merge.
+   */
+  @supports (backdrop-filter: blur(1px)) {
+    .ui-blur {
+      backdrop-filter: blur(14px);
+    }
+  }
 }
 
 /* ----------------------------------------------------------------------------
@@ -223,4 +545,91 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+/* ---break---*/
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+/* ---break---*/
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Search result highlighting (see useSearchHighlight). */
+::highlight(ae-search) {
+  background-color: #fde047;
+  color: #1a1a1a;
+}
+
+.ae-search-fallback {
+  background-color: #fde047;
+  color: #1a1a1a;
+  border-radius: 3px;
+}
+
+.ae-search-target {
+  outline: 3px solid #fde047;
+  outline-offset: 3px;
+  border-radius: 4px;
 }

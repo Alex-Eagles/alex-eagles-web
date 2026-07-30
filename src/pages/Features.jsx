@@ -1,0 +1,43 @@
+import "../styles/Features.css";
+
+function Features() {
+  return (
+    <section className="features">
+      <div className="features-bg" aria-hidden="true">
+        <img src="/who%20we%20are.JPG" alt="" />
+      </div>
+      <div className="features-scrim" aria-hidden="true" />
+
+      <span className="features-watermark" aria-hidden="true">
+        2013
+      </span>
+
+      <div className="features-content">
+        <div className="features-eyebrow">
+          <span className="features-eyebrow-index">01</span>
+          <span className="features-eyebrow-line" />
+          <span className="features-eyebrow-label">Who We Are</span>
+        </div>
+
+        <h2 className="features-headline">
+          <span className="features-headline-line">
+            Engineers <span className="features-headline-accent">First.</span>
+          </span>
+          <span className="features-headline-line">Aviators Second.</span>
+        </h2>
+
+        <p className="features-copy-text">
+          Established in 2013 at Alexandria University — a multidisciplinary
+          team of aerospace, mechatronics, electrical, and software engineers
+          who design, build, and fly autonomous aircraft end to end.
+        </p>
+
+        <div className="features-credential">
+          Alexandria University · SUAS Team
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default Features;

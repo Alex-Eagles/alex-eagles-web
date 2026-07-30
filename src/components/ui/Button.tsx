@@ -1,18 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-/**
- * Button — the site's one button component, in three variants from the spec.
- *
- * It renders the right element automatically:
- *   - `to`   → react-router <Link>   (internal SPA navigation, e.g. "/team")
- *   - `href` → <a>                   (in-page anchors like "#vehicles", or external)
- *   - neither → <button>             (actions with onClick)
- *
- * Example:
- *   <Button variant="primary" href="#vehicles">Explore our vehicle</Button>
- *   <Button variant="secondary" to="/team">Meet the team</Button>
- */
 
 type Variant = "primary" | "secondary" | "ghost";
 
@@ -37,7 +25,7 @@ const VARIANTS: Record<Variant, string> = {
     "bg-transparent border border-brand text-brand-light hover:bg-brand hover:text-white",
   // Text-only — tertiary / inline action.
   ghost:
-    "bg-transparent text-fg-muted hover:text-fg px-4 py-2",
+    "bg-transparent text-fg-secondary hover:text-fg px-4 py-2",
 };
 
 const BASE =

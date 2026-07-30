@@ -1,0 +1,918 @@
+/**
+ * team.ts — the roster behind the Team page.
+ *
+ * Shape follows the design handoff: a page is one *year*, a year has a
+ * small leadership row (two or three cards) plus a list of *divisions*, and
+ * each division has *sections* whose members are the card grid.
+ *
+ *   year → leadership[] (2–3)
+ *        → divisions[] → sections[] → members[]
+ *
+ * ---------------------------------------------------------------------------
+ * FILLING IN A SLOT
+ * ---------------------------------------------------------------------------
+ * Every slot below ships blank on purpose — a slot with no `name` renders the
+ * "Name Surname" placeholder, and one with no `photo` renders the drop-portrait
+ * empty state. To fill one in:
+ *
+ *   1. name:  set `name: "Ziad Essam"`
+ *   2. photo: drop a kebab-case file into src/assets/members/photos/<slug>.<ext>
+ *             then set `photo: "ziad-essam"`
+ *   3. hover reveal (optional): drop a background-removed WebP into
+ *             src/assets/members/cutouts/<slug>.webp — same slug as the photo.
+ *             That alone switches the card from the grayscale→colour hover to
+ *             the blue-backdrop cut-out reveal. No code change. Delete the file
+ *             and the card reverts.
+ *
+ *             If the background-removal tool hands you an SVG, run it through
+ *             `node scripts/cutout-svg-to-webp.mjs src/assets/members/cutouts`
+ *             first — those exports embed the photo twice at full resolution
+ *             (~2.5 MB each) and browsers rasterise their mask at the SVG's
+ *             declared size, so the portrait looks pixelated on the card.
+ *
+ * Add or remove slots by editing the arrays — the grid and the jump nav both
+ * follow whatever is here.
+ */
+
+/* ---------------------------------------------------------------------------
+ * 1. TYPES
+ * -------------------------------------------------------------------------*/
+
+/** Card role label. Shown in the rest-state pill and again in the hover panel. */
+export type Role =
+  | "Team Leader"
+  | "Vice Lead"
+  | "Head of Autonomous"
+  | "Vice Lead of Autonomous"
+  | "EM Integration Lead"
+  | "Section Lead"
+  | "Vice Section Lead"
+  | "Member"
+  | "Autonomous Lead";
+
+/**
+ * Rank tier — the *visual* weight of a card, derived from its role. This is what
+ * makes the hierarchy legible at a glance: execs and division heads get the
+ * biggest cards, section leads a raised lead-row card, vices a lighter lead
+ * treatment, and members the standard grid card.
+ */
+export type Tier = "exec" | "head" | "lead" | "vice" | "member";
+
+/** Map a role onto its visual tier. One place, so the card never guesses. */
+export function roleTier(role: Role): Tier {
+  switch (role) {
+    case "Team Leader":
+    case "Vice Lead":
+    case "EM Integration Lead":
+      return "exec";
+    case "Head of Autonomous":
+      return "head";
+    case "Vice Lead of Autonomous":
+    case "Vice Section Lead":
+      return "vice";
+    case "Section Lead":
+      return "lead";
+    default:
+      return "member";
+  }
+}
+
+/** True for any card that should sit in the raised "lead row" above members. */
+export const isLeadTier = (tier: Tier): boolean =>
+  tier === "lead" || tier === "vice" || tier === "head";
+
+export interface TeamMember {
+  id: string;
+  /** Blank renders the "Name Surname" placeholder. */
+  name: string;
+  /** Overrides the big name behind the portrait. Defaults to the first word of `name`. */
+  firstName?: string;
+  role: Role;
+  /**
+   * Overrides the visual weight derived from `role`. Only needed when a card's
+   * rank and its placement disagree — 2025's Wing and Tail leads are folded into
+   * Aerodesign, so they keep the "Section Lead" role but sit in the vice row
+   * beside the members rather than in the lead column next to Hattan.
+   */
+  tier?: Tier;
+  /**
+   * Overrides the role text on the card. `memberRoleLabel` otherwise builds a
+   * Section Lead's title from `department`, which is wrong for someone whose
+   * section was merged into another — Abdelrahman Arafat led Wing, not
+   * Aerodesign, even though his card now wears Aerodesign's colour.
+   */
+  roleLabel?: string;
+  /** Section the card sits in — stamped on by the builder, shown in the hover panel. */
+  department: string;
+  /** Defaults to the roster year. Set only to override one person. */
+  gradYear?: string;
+  /** Slug of the photo in src/assets/members/photos/ */
+  photo?: string;
+  /**
+   * Slug of the background-removed cut-out in src/assets/members/cutouts/.
+   * Omit it and we look for a cutout under the `photo` slug, so matching
+   * filenames pair up automatically. Set it only to point at a different file.
+   */
+  cutout?: string;
+  linkedIn?: string;
+  /**
+   * Start a new row of the member grid at this card. The grid is three across,
+   * so a four-person section otherwise breaks 3 + 1; this lets a section ask
+   * for a different split without reordering anyone. Setting it also opts the
+   * section out of the "short rosters go on one row" collapse — an explicit
+   * break is an instruction, not a hint.
+   */
+  breakBefore?: boolean;
+  /**
+   * Academic major, from the roster intake form — e.g. "Mechatronics",
+   * "Computer and Communication Engineering". Not the same thing as
+   * `department` (that's the sub-team, e.g. "Hardware"). Captured for
+   * completeness; no card shows it yet — nowhere on the design has a slot
+   * for it currently.
+   */
+  major?: string;
+  /**
+   * Keep the slot in this file but off the page. For someone who's on the
+   * roster but has no portrait yet: the card would otherwise render as a
+   * "Drop portrait" placeholder in the middle of a finished grid.
+   *
+   * `section()` strips these when it builds, so nothing downstream — the grid,
+   * the headcounts, the hero totals — has to know about them. Delete the flag
+   * (and add a `photo`) to bring one back.
+   */
+  hidden?: boolean;
+}
+
+/**
+ * The visual tier a card actually renders at — its per-member override, else
+ * the one its role implies. The single place tier is resolved, so the cards and
+ * the row-splitting agree on where a person sits and how heavy they look.
+ */
+export const memberTier = (member: TeamMember): Tier =>
+  member.tier ?? roleTier(member.role);
+
+/**
+ * The icon shown on a sub-team's info chip. Keys map to an SVG in the
+ * SubTeamIcon component; the section name's slug is the default, so most
+ * sections never set this.
+ */
+export type SubTeamIconKey =
+  | "software"
+  | "hardware"
+  | "computer-vision"
+  | "structure"
+  | "aerodesign"
+  | "wing"
+  | "tail-stability"
+  | "propulsion";
+
+export interface Section {
+  name: string;
+  /** Slug used as the anchor id and the jump-nav target. */
+  id: string;
+  members: TeamMember[];
+  /**
+   * One or two sentences on what this sub-team does — revealed from the info
+   * chip beside the title. Omit and no chip renders.
+   */
+  blurb?: string;
+  /** Overrides the info-chip icon. Defaults to the section's slug. */
+  icon?: SubTeamIconKey;
+  /**
+   * Stack this section's leads down the left column instead of side by side.
+   * Only matters for a section with co-leads; opt-in per section because the
+   * two co-led sections want different shapes — Software reads better stacked,
+   * Propulsion side by side.
+   */
+  stackLeads?: boolean;
+}
+
+export interface Division {
+  /** The oversized "01" / "02" behind the division heading. */
+  num: string;
+  name: string;
+  /**
+   * The people who run the division — Head / Vice — rendered as a raised lead
+   * row directly under the division title, above the working sections. Empty
+   * for a division with no dedicated heads.
+   */
+  heads?: TeamMember[];
+  sections: Section[];
+}
+
+export interface YearRoster {
+  year: string;
+  /**
+   * The leadership row. Two cards render side by side (left, right); three
+   * render with the middle card raised (left, centre, right).
+   */
+  leadership: TeamMember[];
+  divisions: Division[];
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. IMAGE RESOLUTION
+ * -------------------------------------------------------------------------*/
+/*
+ * Eagerly import every member image so Vite fingerprints and bundles them.
+ * Keys come back as full relative paths; we re-key them by bare slug.
+ * Note `*` does not cross a `/`, so the two globs never overlap.
+ */
+
+const bySlug = (mods: Record<string, { default: string }>): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(mods).map(([path, mod]) => [
+      // "../assets/members/ziad-essam.jpeg" → "ziad-essam"
+      path.split("/").pop()!.replace(/\.[^.]+$/, ""),
+      mod.default,
+    ]),
+  );
+
+const PHOTOS = bySlug(
+  import.meta.glob<{ default: string }>("../assets/members/photos/*.{jpg,jpeg,png,webp}", {
+    eager: true,
+  }),
+);
+
+const CUTOUTS = bySlug(
+  import.meta.glob<{ default: string }>("../assets/members/cutouts/*.{png,webp}", {
+    eager: true,
+  }),
+);
+
+/** Resolved photo URL for a member, or undefined if no file matches. */
+export function memberPhoto(member: TeamMember): string | undefined {
+  return member.photo ? PHOTOS[member.photo] : undefined;
+}
+
+/**
+ * Resolved background-removed portrait, or undefined if there isn't one.
+ * Presence of this is what puts a card into the blue-backdrop hover mode.
+ */
+export function memberCutout(member: TeamMember): string | undefined {
+  const slug = member.cutout ?? member.photo;
+  return slug ? CUTOUTS[slug] : undefined;
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. DISPLAY HELPERS  (the only place card copy is assembled)
+ * -------------------------------------------------------------------------*/
+
+/** Shown when a slot has no name yet. */
+export const NAME_PLACEHOLDER = "Name Surname";
+
+export const hasName = (member: TeamMember): boolean => member.name.trim().length > 0;
+
+/** The name on the card — the real one, or the placeholder for an empty slot. */
+export function memberName(member: TeamMember): string {
+  return hasName(member) ? member.name : NAME_PLACEHOLDER;
+}
+
+/**
+ * The stretched name behind the portrait. Empty for an unfilled slot — a giant
+ * "NAME" behind a placeholder card reads as a bug rather than as a design.
+ */
+export function memberFirstName(member: TeamMember): string {
+  if (!hasName(member)) return "";
+  return (member.firstName ?? member.name.split(" ")[0]).toUpperCase();
+}
+
+/** "Class of 2026" — per-member override, else the roster year. */
+export function memberYearLabel(member: TeamMember, rosterYear: string): string {
+  return `Class of ${member.gradYear ?? rosterYear}`;
+}
+
+/**
+ * The role text shown on the card. A generic "Section Lead" doesn't say which
+ * section, so it's swapped for the sub-team-specific title — "Structure Lead",
+ * "Aerodesign Lead" — using the section name already stamped onto `department`.
+ * Every other role (Vice Section Lead, Member, the exec titles) shows as-is.
+ */
+export function memberRoleLabel(member: TeamMember): string {
+  if (member.roleLabel) return member.roleLabel;
+  if (member.role === "Section Lead") return `${member.department} Lead`;
+  return member.role;
+}
+
+/* ---------------------------------------------------------------------------
+ * 4. THE ROSTER
+ * -------------------------------------------------------------------------*/
+
+export const slugify = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+/**
+ * Per-sub-team accent color, resolved through the centralized `--team-*` tokens
+ * in theme.css (so the whole palette is edited in one place). Falls back to the
+ * brand accent for anything without its own token (e.g. "Team Leadership").
+ */
+export function subTeamAccent(name: string): string {
+  /*
+   * Two-step lookup, and the order matters. `--team-<slug>-page` only exists in
+   * the light theme. The base accents are pastels tuned for the near-black
+   * cards; on the pale ground a pastel drops to ~1.5:1, so light mode gets its
+   * own darkened variant. In dark mode `-page` is undefined and this falls
+   * straight through to the pastel, so nothing changes there.
+   *
+   * `memberAccent` delegates here, so cards get the darkened accent in light
+   * mode too — which is what lets the role tag sit on a white plate there.
+   */
+  const slug = slugify(name);
+  return `var(--team-${slug}-page, var(--team-${slug}, #3d3ecc))`;
+}
+
+/** Brand blue. The fallback, and what the three team-wide roles always use. */
+export const BRAND_ACCENT = "#3d3ecc";
+
+/**
+ * Roles that sit above any single sub-team, so they keep the brand colour
+ * rather than borrowing a section's.
+ */
+const TEAM_WIDE_ROLES: ReadonlySet<Role> = new Set<Role>([
+  "Team Leader",
+  "Vice Lead",
+  "EM Integration Lead",
+]);
+
+/**
+ * The colour a card should wear: its sub-team's, or the brand for the three
+ * team-wide roles. Lives here so both card designs (2025's MemberCardSolid and
+ * 2026's TeamMemberCard) resolve rank-vs-sub-team identically instead of each
+ * keeping its own copy of the rule.
+ */
+export function memberAccent(member: TeamMember): string {
+  return TEAM_WIDE_ROLES.has(member.role) ? BRAND_ACCENT : subTeamAccent(member.department);
+}
+
+/** Ids must be unique across years, since both rosters are built at once. */
+let slotCounter = 0;
+
+/**
+ * One card slot. `name` comes second so the common edit — typing a name in —
+ * is a one-word change near the start of the line.
+ */
+const slot = (
+  role: Role,
+  name = "",
+  extra: Partial<Omit<TeamMember, "id" | "role" | "name" | "department">> = {},
+): Omit<TeamMember, "department"> => ({
+  id: `slot-${++slotCounter}`,
+  role,
+  name,
+  ...extra,
+});
+
+const section = (
+  name: string,
+  members: Omit<TeamMember, "department">[],
+  opts: {
+    blurb?: string;
+    icon?: SubTeamIconKey;
+    stackLeads?: boolean;
+  } = {},
+): Section => ({
+  name,
+  id: slugify(name),
+  // `department` is always the section name, so it's stamped on here rather
+  // than repeated on every row. Hidden slots are dropped at this point, so
+  // they exist in the source above but nowhere downstream — no card, no
+  // headcount, no hero total.
+  members: members.filter((m) => !m.hidden).map((m) => ({ ...m, department: name })),
+  ...(opts.blurb ? { blurb: opts.blurb } : {}),
+  ...(opts.icon ? { icon: opts.icon } : {}),
+  ...(opts.stackLeads ? { stackLeads: true } : {}),
+});
+
+/**
+ * Cut a member list into explicit rows at every card flagged `breakBefore`.
+ * Order is untouched — this only decides where the grid wraps, for sections
+ * whose natural three-across split reads badly.
+ */
+export function splitRows(members: TeamMember[]): TeamMember[][] {
+  const rows: TeamMember[][] = [];
+  for (const m of members) {
+    if (rows.length === 0 || m.breakBefore) rows.push([]);
+    rows[rows.length - 1].push(m);
+  }
+  return rows;
+}
+
+/**
+ * Split a member list into the raised lead row and the member grid, in one
+ * pass, so page code never re-derives the rule. Leads/vices/heads float up;
+ * everyone else stays in the grid — original order preserved within each.
+ */
+export function splitByTier(members: TeamMember[]): {
+  leads: TeamMember[];
+  vices: TeamMember[];
+  grid: TeamMember[];
+} {
+  const leads: TeamMember[] = [];
+  const vices: TeamMember[] = [];
+  const grid: TeamMember[] = [];
+  for (const m of members) {
+    const tier = memberTier(m);
+    if (tier === "lead" || tier === "head") leads.push(m);
+    else if (tier === "vice") vices.push(m);
+    else grid.push(m);
+  }
+  return { leads, vices, grid };
+}
+
+/** A division-head card (Head / Vice), stamped with the division name. */
+const head = (
+  role: Role,
+  name: string,
+  division: string,
+  extra: Partial<Omit<TeamMember, "id" | "role" | "name" | "department">> = {},
+): TeamMember => ({ ...slot(role, name, extra), department: division });
+
+const ROSTER_2026: YearRoster = {
+  year: "2026",
+  leadership: [
+    {
+      ...slot("Team Leader", "Farah Harfoush", {
+        photo: "farah-harfoush-2026",
+        linkedIn: "https://www.linkedin.com/in/farah-harfoush-9297ab280",
+        gradYear: "2026",
+        major: "Mechatronics and Robotics",
+      }),
+      department: "Team Leadership",
+    },
+    {
+      ...slot("Vice Lead", "Youssef Hozayen", {
+        photo: "youssef-hozayen-2026",
+        linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
+        gradYear: "2027",
+        major: "Mechatronics and robotics engineering",
+      }),
+      department: "Team Leadership",
+    },
+  ],
+  divisions: [
+    {
+      num: "01",
+      name: "Mechanical",
+      sections: [
+        section("Aerodesign", [
+          slot("Section Lead", "Mohamed Elbarbary", {
+            photo: "mohamed-barbary",
+            linkedIn: "https://www.linkedin.com/in/muhammed-barbary",
+            gradYear: "2026",
+            major: "Mechanical",
+          }),
+          slot("Member", "Dani Georges", {
+            photo: "dani-georges",
+            linkedIn: "https://www.linkedin.com/in/dani-georges-813989276",
+            gradYear: "2027",
+            major: "Electromechanical",
+          }),
+          slot("Member", "Yahia Haitham", {
+            photo: "yahia-haitham",
+            linkedIn: "https://www.linkedin.com/in/yahia-haitham-377202292/",
+            gradYear: "2028",
+            major: "Mechatronics & Robotics",
+          }),
+        ], {
+          blurb:
+            "We shape how the aircraft flies — the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+        }),
+        section("Structure", [
+          slot("Section Lead", "Mira Barsoum", {
+            photo: "mira-barsoum-2026",
+            linkedIn: "https://www.linkedin.com/in/mira-barsoum-457531297/",
+            gradYear: "2026",
+            major: "Mechatronics and Robotics",
+          }),
+          slot("Vice Section Lead", "Momen Ashraf", {
+            photo: "momen-ahraf",
+            linkedIn: "https://www.linkedin.com/in/mo-men-ashraf-b73647423/",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
+          // Also promoted to vice, per the intake form.
+          slot("Vice Section Lead", "Youssef Ibrahim", {
+            photo: "youssef-ibrahim-2026",
+            linkedIn: "https://www.linkedin.com/in/youssef-ibrahim-ba6761354/",
+            gradYear: "2027",
+            major: "Electromechanical",
+          }),
+          slot("Member", "Amr Hosny", {
+            photo: "amr-hosny",
+            linkedIn: "https://www.linkedin.com/in/amr-monib-4740361b7",
+            gradYear: "2028",
+            major: "Electromechanical",
+          }),
+        ], {
+          blurb:
+            "We design and build the airframe that holds everything together — sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
+        }),
+        // Co-leads — Hana and Rodyna run Propulsion together, no vice.
+        section("Propulsion", [
+          slot("Section Lead", "Hana Waleed", {
+            photo: "hana-waleed-2026",
+            linkedIn: "https://www.linkedin.com/in/hana-waleed-4688b1379/",
+            gradYear: "2028",
+            major: "Mechatronics",
+          }),
+          slot("Section Lead", "Rodyna Amr", {
+            photo: "rodyna-amr-2026",
+            linkedIn: "https://www.linkedin.com/in/rodyna-amr-5843772b0",
+            gradYear: "2028",
+            major: "Mechatronics",
+          }),
+        ], {
+          blurb:
+            "We power the aircraft — selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
+        }),
+      ],
+    },
+    {
+      num: "02",
+      name: "Autonomous",
+      // Ziad Essam also heads Autonomous, on top of his top-level EM Integration Lead card.
+      heads: [
+        head("Head of Autonomous", "Ziad Essam", "Autonomous", {
+          photo: "ziad-essam",
+          linkedIn: "https://www.linkedin.com/in/ziad-essam-a202b3244",
+        }),
+        head("Vice Lead of Autonomous", "Mazen Asser", "Autonomous", {
+          photo: "mazen-asser-2026",
+          linkedIn: "https://www.linkedin.com/in/mazen-asser-8751a3244/",
+          gradYear: "2026",
+          major: "Computer and communication",
+        }),
+      ],
+      sections: [
+        section("AI", [
+          slot("Section Lead", "Mohamed Bassem", {
+            photo: "mohamed-bassem-2026",
+            linkedIn: "https://www.linkedin.com/in/mohamed-bassem-abbas/",
+            gradYear: "2026",
+            major: "Computer & Communication Engineering",
+          }),
+          slot("Member", "Abdelrahman Aboelwafa", {
+            photo: "abdelrahman-yasser",
+            linkedIn: "https://www.linkedin.com/in/abdelrahmanaboelwafa",
+            gradYear: "2028+",
+            major: "CCE",
+          }),
+          slot("Member", "Ahmed ElMetwalli", {
+            photo: "ahmed-elmetwalli",
+            linkedIn: "https://www.linkedin.com/in/ahmed-el-mitwally-71385433b/",
+            gradYear: "2028",
+            major: "Computer and Communications",
+          }),
+          slot("Member", "Dina Shiha", {
+            photo: "dina-shiha",
+            linkedIn: "https://www.linkedin.com/in/dina-shiha-822b43203",
+            gradYear: "2026",
+            major: "Electromechanical Engineering",
+          }),
+          slot("Member", "Fai Raafat", {
+            photo: "fai-raafat",
+            linkedIn: "https://linkedin.com/in/fai-rotan-6832b835a",
+            gradYear: "2027",
+            major: "CCE",
+          }),
+          slot("Member", "Jana Hani", {
+            photo: "jana-hani",
+            linkedIn: "https://www.linkedin.com/in/jana-elmenoufi-644319256/",
+            gradYear: "2026",
+            major: "Mechatronics",
+          }),
+          slot("Member", "Reem Eldalil", {
+            photo: "reem-eldalil-2026",
+            linkedIn: "https://eg.linkedin.com/in/reem-eldalil-645127223",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
+          // No portrait yet — hidden rather than shown as an empty slot.
+          // Add a `photo` and drop `hidden` to bring the card back.
+          slot("Member", "Hossam Eldin Elshazly", {
+            hidden: true,
+            linkedIn: "https://www.linkedin.com/in/hossam-eldeen-2158a4284/",
+            gradYear: "2027",
+            major: "Computer and communication",
+          }),
+        ], {
+          blurb:
+            "We give the aircraft its eyes — detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
+          icon: "computer-vision",
+        }),
+        // Youssef Hozayen also runs Hardware, on top of his top-level Vice Lead card.
+        section("Hardware", [
+          slot("Section Lead", "Youssef Hozayen", {
+            photo: "youssef-hozayen-2026",
+            linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
+            gradYear: "2027",
+            major: "Mechatronics and robotics engineering",
+          }),
+          slot("Vice Section Lead", "Menna Ezzat", {
+            photo: "menna-ezzat-2026",
+            linkedIn: "https://www.linkedin.com/in/menna-ezzat-bba468267/",
+            gradYear: "2026",
+            major: "Mechatronics",
+          }),
+          // No portrait yet — hidden rather than shown as an empty slot.
+          // Add a `photo` and drop `hidden` to bring the card back.
+          slot("Vice Section Lead", "Lina Tarek", {
+            hidden: true,
+            linkedIn: "https://www.linkedin.com/in/lina-ahmed-baa06a232",
+            gradYear: "2027",
+            major: "Mechatronics and Robotics",
+          }),
+          slot("Member", "Rewan Gomaa", {
+            photo: "rewan-gomaa",
+            linkedIn: "https://www.linkedin.com/in/rewan-mohamed-b5549624a/",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
+          slot("Member", "Youssef Fawzy", {
+            photo: "youssef-fawzy",
+            linkedIn: "https://www.linkedin.com/in/youssef-fawzy-1b93242a6/",
+            gradYear: "2027",
+            major: "Mechatronics and robotics",
+          }),
+          slot("Member", "Youssef Morgan", {
+            photo: "youssef-morgan",
+            linkedIn: "https://www.linkedin.com/in/youssefadell11",
+            gradYear: "2027",
+            major: "Mechatronics and Robotics Engineering",
+          }),
+        ], {
+          blurb:
+            "We build the electronics that make the aircraft think — the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
+        }),
+        // Co-leads — Mazen and Sara run Software together, no vice.
+        section("Software", [
+          slot("Section Lead", "Mazen Nazeih", {
+            photo: "mazen-nazieh",
+            linkedIn: "https://www.linkedin.com/in/mazen-nazeih-85a3b4277/",
+            gradYear: "2026",
+            major: "Computer and Communication",
+          }),
+          slot("Section Lead", "Sara Yasser Gharib", {
+            photo: "sara-gharib-2026",
+            linkedIn: "https://www.linkedin.com/in/sara-gharib-93a742322",
+            gradYear: "2027",
+            major: "Biomedical",
+          }),
+          slot("Member", "Ahmed EL Tantawy", {
+            photo: "ahmed-tantawy",
+            linkedIn: "https://www.linkedin.com/in/ahmed-tantawy-154025318/",
+            gradYear: "2027",
+            major: "Electromechanics",
+          }),
+          slot("Member", "Mariyam Ramadan", {
+            photo: "mariyam-ramdan",
+            linkedIn: "https://www.linkedin.com/in/mariyam-ramadan",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
+          // No portrait yet — hidden rather than shown as an empty slot.
+          // Add a `photo` and drop `hidden` to bring the card back.
+          slot("Member", "Ahmed Ibrahim", { hidden: true }),
+          // Onto a second row, below the other two — Nour sits beside Tarek.
+          slot("Member", "Tarek Mohamed", {
+            breakBefore: true,
+            photo: "tarek-mohamed",
+            linkedIn: "https://www.linkedin.com/in/tarek-mohamed-elsayed-08b120403",
+            gradYear: "2027",
+            major: "Computer and Communication",
+          }),
+          slot("Member", "Nour Walid", {
+            photo: "nour-walid",
+            linkedIn: "https://www.linkedin.com/in/nour-walid-6b2b8b262/",
+            gradYear: "2026",
+            major: "Mechatronics",
+          }),
+        ], {
+          blurb:
+            "We write the software that flies the aircraft on its own — the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
+          // Mazen above Sara down the left column. Propulsion's co-leads stay
+          // side by side, so this is opt-in rather than a rule for co-leads.
+          stackLeads: true,
+        }),
+      ],
+    },
+  ],
+};
+
+/**
+ * The real 2025 roster. Leadership titles for the trio are a best-guess mapping
+ * of last year's three executives onto the design's three leadership slots —
+ * confirm the names/titles before this goes public.
+ */
+const ROSTER_2025: YearRoster = {
+  year: "2025",
+  leadership: [
+    { ...slot("Vice Lead", "Norhan Mohammed", { photo: "norhan-mohammed" }), department: "Team Leadership" },
+    { ...slot("Team Leader", "Ahmed Baheyeldin", { photo: "ahmed-baheyeldin" }), department: "Team Leadership" },
+    { ...slot("EM Integration Lead", "Peter Ayoub", { photo: "peter-ayoub" }), department: "Team Leadership" },
+  ],
+  divisions: [
+    {
+      num: "01",
+      name: "Mechanical",
+      sections: [
+        section(
+          "Structure",
+          [
+            slot("Section Lead", "Mohamed Fathallah", { photo: "mohamed-fathallah" }),
+            slot("Vice Section Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
+            slot("Member", "Hana Waleed", { photo: "hana-waleed" }),
+            slot("Member", "Hossam Eldeen", { photo: "hossam-eldeen" }),
+            slot("Member", "Reem Eldalil", { photo: "reem-eldalil" }),
+          ],
+          {
+            blurb:
+              "We design and build the airframe that holds everything together — sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
+          },
+        ),
+        /*
+         * One flat Aerodesign section. Wing and Tail & Stability used to hang
+         * off it as nested subsections; they're folded in here instead, so the
+         * whole aero group wears Aerodesign's colour and reads as a single
+         * sub-team. Layout, top to bottom:
+         *
+         *   lead column   Hattan
+         *   row 1 (right) the three sub-team leads — vice tier so they sit
+         *                 beside the members rather than under Hattan
+         *   row 2         the aero core members
+         *   row 3         Wing's remaining members     (breakBefore)
+         *   row 4         Tail's remaining members     (breakBefore)
+         *
+         * Their `roleLabel`s still say Wing / Tail — the sections are gone from
+         * the page, but these people did lead them.
+         */
+        section(
+          "Aerodesign",
+          [
+            slot("Section Lead", "Hattan Yosry", { photo: "hattan-yosry" }),
+
+            slot("Section Lead", "Abdelrahman Arafat", {
+              photo: "abdelrahman-arafat",
+              tier: "vice",
+              roleLabel: "Wing Lead",
+            }),
+            slot("Vice Section Lead", "Abdelghfour Alaa", {
+              photo: "abdelghfour-alaa",
+              roleLabel: "Wing Vice Lead",
+            }),
+            slot("Section Lead", "Osama Mohamed", {
+              photo: "osama-mohamed",
+              tier: "vice",
+              roleLabel: "Tail & Stability Lead",
+            }),
+
+            slot("Member", "Esraa Ahmed", { photo: "esraa-ahmed" }),
+            slot("Member", "Farah Harfoush", { photo: "farah-harfoush" }),
+            slot("Member", "Rodyna Amr", { photo: "rodyna-amr" }),
+
+            slot("Member", "Lina Tarek", { photo: "lina-tarek", breakBefore: true }),
+            slot("Member", "Mira Barsoum", { photo: "mira-barsoum" }),
+            slot("Member", "Youssef Ibrahim", { photo: "youssef-ibrahim" }),
+
+            slot("Member", "Mo'men Ashraf", { photo: "momen-ashraf", breakBefore: true }),
+            slot("Member", "Moamen Nawara", { photo: "moamen-nawara" }),
+          ],
+          {
+            blurb:
+              "We shape how the aircraft flies — the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+          },
+        ),
+        section(
+          "Propulsion",
+          [
+            slot("Section Lead", "Adham Amr", { photo: "adham" }),
+            slot("Vice Section Lead", "Youssef Hozayen", { photo: "youssef-hozayen" }),
+            slot("Member", "Mohamed Brbry", { photo: "mohamed-brbry" }),
+            slot("Member", "Rana", { photo: "rana" }),
+          ],
+          {
+            blurb:
+              "We power the aircraft — selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
+          },
+        ),
+      ],
+    },
+    {
+      num: "02",
+      name: "Autonomous",
+      // Ahmed Saleh heads Autonomous; Ibrahim Mohamed is his vice (and also CV lead).
+      heads: [
+        head("Head of Autonomous", "Ahmed Saleh", "Autonomous", { photo: "ahmed-saleh" }),
+        head("Vice Lead of Autonomous", "Ibrahim Mohamed", "Autonomous", { photo: "ibrahim-mohamed" }),
+      ],
+      sections: [
+        section(
+          "Software",
+          [
+            slot("Section Lead", "Maram Wael", { photo: "maram-wael" }),
+            slot("Vice Section Lead", "Ann Tarek", { photo: "ann-tarek" }),
+            slot("Member", "Mazen Nazeih", { photo: "mazen-amr" }),
+            slot("Member", "Sara Gharib", { photo: "sara-gharib" }),
+            // Four members wrap 3 + 1 on their own, leaving John alone on the
+            // last line. Splitting 2 + 2 puts Ziad beside him instead.
+            // Spelled to match his 2026 cards. The photo slug keeps the older
+            // spelling — that's the filename on disk, not a display name.
+            slot("Member", "Ziad Essam", { photo: "zeyad-essam", breakBefore: true }),
+            slot("Member", "John Ayman", { photo: "john-ayman" }),
+          ],
+          {
+            blurb:
+              "We write the software that flies the aircraft on its own — the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
+          },
+        ),
+        section(
+          "Hardware",
+          [
+            slot("Section Lead", "Ahmed Anan", { photo: "ahmed-ibrahim-anan" }),
+            slot("Member", "Ahmed Saber", { photo: "ahmed-saber" }),
+            slot("Member", "Ahmed Saeed", { photo: "ahmed-saeed" }),
+            slot("Member", "Menna Ezzat", { photo: "menna-ezzat" }),
+          ],
+          {
+            blurb:
+              "We build the electronics that make the aircraft think — the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
+          },
+        ),
+        section(
+          "Computer Vision",
+          [
+            slot("Section Lead", "Ibrahim Mohamed", { photo: "ibrahim-mohamed" }),
+            slot("Member", "Mazen Asser", { photo: "mazen-asser" }),
+            slot("Member", "Eyad Ashraf", { photo: "eyad-ashraf" }),
+            slot("Member", "Mohamed Bassem", { photo: "mohamed-bassem" }),
+            slot("Member", "Peter Mina", { photo: "peter-mina" }),
+            slot("Member", "Mohamed Elzayat", { photo: "mohamed-elzayat" }),
+          ],
+          {
+            blurb:
+              "We give the aircraft its eyes — detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
+          },
+        ),
+      ],
+    },
+  ],
+};
+
+/** Display order of the year tabs in the hero. The first one is the default. */
+export const ROSTER_YEARS = ["2026", "2025"] as const;
+export type RosterYear = (typeof ROSTER_YEARS)[number];
+
+export const ROSTERS: Record<RosterYear, YearRoster> = {
+  "2026": ROSTER_2026,
+  "2025": ROSTER_2025,
+};
+
+/* ---------------------------------------------------------------------------
+ * 5. JUMP NAV
+ * -------------------------------------------------------------------------*/
+
+/**
+ * Headline counts for a roster year — what the hero states under the year tabs.
+ *
+ * `members` counts distinct individuals, not filled slots: someone who holds
+ * two posts (Youssef Hozayen is Vice Lead *and* runs Hardware) is counted once,
+ * so the headline reflects how many people are actually on the team. Unfilled
+ * slots are skipped — an empty placeholder isn't a member.
+ */
+export function rosterStats(roster: YearRoster): {
+  members: number;
+  divisions: number;
+  subTeams: number;
+} {
+  const names = new Set<string>();
+  const add = (list: TeamMember[]) => {
+    for (const m of list) if (hasName(m)) names.add(m.name.trim().toLowerCase());
+  };
+
+  add(roster.leadership);
+  let subTeams = 0;
+  for (const division of roster.divisions) {
+    add(division.heads ?? []);
+    for (const section of division.sections) {
+      subTeams++;
+      add(section.members);
+    }
+  }
+
+  return { members: names.size, divisions: roster.divisions.length, subTeams };
+}
+
+export interface NavGroup {
+  label: string;
+  items: { name: string; href: string }[];
+}
+
+/** Leadership, then one group per division — drives the PULL side nav. */
+export function navGroups(roster: YearRoster): NavGroup[] {
+  return [
+    { label: "Leadership", items: [{ name: "Leadership", href: "#leadership" }] },
+    ...roster.divisions.map((division) => ({
+      label: division.name,
+      items: division.sections.map((s) => ({ name: s.name, href: `#${s.id}` })),
+    })),
+  ];
+}

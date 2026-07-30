@@ -16,7 +16,9 @@ interface ThemeToggleProps {
 export default function ThemeToggle({
   // Fixed to the top-right with comfortable edge padding (a little tighter on
   // small screens, roomier on desktop) so it's always easy to reach.
-  className = "fixed top-5 right-5 md:top-6 md:right-8 z-40",
+  // `ui-blur` lets global.css drop the backdrop blur on touch devices, where a
+  // fixed blurred element is re-rasterised on every scroll frame.
+  className = "ui-blur fixed top-5 right-5 md:top-6 md:right-8 z-40",
 }: ThemeToggleProps) {
   const { isDark, toggle } = useTheme();
 
@@ -29,17 +31,20 @@ export default function ThemeToggle({
       style={{
         width: 136,
         height: 51,
-        border: isDark
-          ? "1px solid rgba(60,64,181,0.5)"
-          : "1px solid rgba(60,64,181,0.22)",
+        border: `1px solid ${isDark ? "var(--border-solid)" : "var(--border-subtle)"}`,
         borderRadius: 9999,
         cursor: "pointer",
-        background: isDark ? "rgba(13,16,53,0.82)" : "rgba(255,255,255,0.9)",
+        /* Opacity comes from --toggle-opacity in theme.css, per theme — the
+           one place to tune how much of the page reads through the pill. */
+        background: isDark
+          ? "rgb(13 16 53 / var(--toggle-opacity, 0.42))"
+          : "rgb(255 255 255 / var(--toggle-opacity, 0.62))",
         boxShadow: isDark
           ? "0 10px 28px rgba(0,0,0,0.55)"
           : "0 10px 28px rgba(60,64,181,0.18)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
+        /* No blur here — `.ui-blur` in the className grants it on pointer
+           devices only, so phones don't pay for a fixed element being re-blurred
+           on every scroll frame. */
         padding: 0,
         // NOTE: no `position` here — placement comes from the `fixed …` class in
         // className. An inline position would override it and break the layout.
@@ -59,7 +64,7 @@ export default function ThemeToggle({
           fontFamily: "var(--font-heading)",
           fontWeight: 600,
           fontSize: 16,
-          color: isDark ? "#C7CAF0" : "#3B3F7A",
+          color: "var(--text-secondary)",
           opacity: isDark ? 1 : 0,
           transition: "opacity .3s ease",
         }}
@@ -77,7 +82,7 @@ export default function ThemeToggle({
           fontFamily: "var(--font-heading)",
           fontWeight: 600,
           fontSize: 16,
-          color: isDark ? "#C7CAF0" : "#3B3F7A",
+          color: "var(--text-secondary)",
           opacity: isDark ? 0 : 1,
           transition: "opacity .3s ease",
         }}
@@ -98,20 +103,20 @@ export default function ThemeToggle({
           alignItems: "center",
           justifyContent: "center",
           background: isDark
-            ? "radial-gradient(circle at 35% 30%, #2a2f6e, #11143a)"
-            : "radial-gradient(circle at 35% 30%, #ffffff, #e7e9ff)",
+            ? "radial-gradient(circle at 35% 30%, var(--bg-elevated), var(--bg-primary))"
+            : "radial-gradient(circle at 35% 30%, var(--bg-surface), var(--bg-elevated))",
           boxShadow: isDark
             ? "0 3px 10px rgba(0,0,0,0.6)"
-            : "0 3px 12px rgba(96,120,255,0.45)",
+            : "0 3px 12px var(--brand-glow)",
           transform: isDark ? "translateX(86px)" : "translateX(0px)",
           transition:
             "transform .42s cubic-bezier(.34,1.56,.64,1), background .4s ease, box-shadow .4s ease",
         }}
       >
         {isDark ? (
-          <Moon size={20} color="#F0F2FF" strokeWidth={2} />
+          <Moon size={20} color="var(--text-primary)" strokeWidth={2} />
         ) : (
-          <Sun size={20} color="#B45309" strokeWidth={2} />
+          <Sun size={20} color="var(--brand)" strokeWidth={2} />
         )}
       </span>
     </button>
