@@ -23,7 +23,7 @@ export default function Video() {
           </div>
 
           <div className="video-eyebrow">
-            <span className="video-eyebrow-index">03</span>
+            <span className="video-eyebrow-index">04</span>
             <span className="video-eyebrow-line" />
             <span className="video-eyebrow-label">Watch Us Fly</span>
           </div>
