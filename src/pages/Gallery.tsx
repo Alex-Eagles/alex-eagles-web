@@ -278,9 +278,31 @@ function CardChrome({ item }: { item: GalleryItem }) {
  * the same frame as the still, so swapping between them is invisible without a
  * fade and obvious with one.
  */
-function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }) {
+function SmartMedia({
+  item,
+  priority,
+  onRatio,
+  fill = false,
+}: {
+  item: GalleryItem;
+  priority: boolean;
+  /**
+   * Reports the media's true width/height ratio once known, so a parent can
+   * shape its own box to match. The reel uses this; the grid, whose rows are a
+   * fixed height, ignores it.
+   */
+  onRatio?: (ratio: number) => void;
+  /**
+   * Skip the letterboxing below. Set by a parent that has already sized itself
+   * to the media, where `contain` would have nothing to letterbox anyway and
+   * `cover` avoids a hairline gap from rounding.
+   */
+  fill?: boolean;
+}) {
   const [videoReady, setVideoReady] = useState(false);
 
+  /* Landscape media in a portrait box is letterboxed rather than cropped in
+     half. Only consulted when the parent hasn't sized itself to the media. */
   const [isLandscapeImg, setIsLandscapeImg] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -335,15 +357,17 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
         decoding="async"
         onLoad={(e) => {
           const { naturalWidth, naturalHeight } = e.currentTarget;
+          if (!naturalWidth || !naturalHeight) return;
           if (naturalWidth / naturalHeight > 1.35) {
             setIsLandscapeImg(true);
           }
+          onRatio?.(naturalWidth / naturalHeight);
         }}
         /* No opacity gate and no transition: an image that hasn't decoded yet
            paints nothing regardless, so fading it in only delays it. It also
            stays put once the clip is up — it's covered by an opaque video, not
            faded out under one, which is what used to let the tile dip. */
-        className={`absolute inset-0 w-full h-full ${isLandscapeImg ? 'object-contain' : 'object-cover'}`}
+        className={`absolute inset-0 w-full h-full ${!fill && isLandscapeImg ? 'object-contain' : 'object-cover'}`}
       />
       )}
 
@@ -391,6 +415,12 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
            * and looping, so it keeps up from there.
            */
           onCanPlay={() => setVideoReady(true)}
+          /* Video-only entries have no still to measure, so the clip's own
+             dimensions are the only way the parent can learn its shape. */
+          onLoadedMetadata={(e) => {
+            const { videoWidth, videoHeight } = e.currentTarget;
+            if (videoWidth && videoHeight) onRatio?.(videoWidth / videoHeight);
+          }}
           /* Revealed the instant it can play, with no transition. The clip's
              poster is the same frame as the still underneath it, so there is
              nothing to crossfade between — a fade here only announced a swap
@@ -525,6 +555,24 @@ function OrbitalReelCard({
   const still = reduceMotion || isMobile;
   const canAnimate = !still;
 
+  /*
+   * The card takes its shape from whatever it holds.
+   *
+   * It used to be a hard `aspect-[4/5]` portrait frame for everything, and the
+   * collection is an even split — 13 landscape, 13 portrait, plus 15 video-only
+   * entries. So half of it was a landscape photo letterboxed into a portrait
+   * box: black bars top and bottom, and the picture itself shrunk to a band in
+   * the middle. Matching the box to the media shows each one at its own
+   * proportions and leaves nothing to letterbox.
+   *
+   * Clamped because the source material runs to extremes (a 0.54 phone portrait,
+   * a 1.89 crop) and an unclamped strip would lurch between a sliver and a
+   * billboard. Null until the media reports back, so the default is the portrait
+   * shape the reel had before.
+   */
+  const [ratio, setRatio] = useState<number | null>(null);
+  const aspectRatio = ratio ? Math.min(Math.max(ratio, 0.7), 1.5) : 4 / 5;
+
   const scale = useTransform(scrollXProgress, [0, 0.5, 1], [0.75, 1, 0.75]);
   const rotY = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [35, 0, -35] : [0, 0, 0]);
   const opacity = useTransform(scrollXProgress, [0, 0.5, 1], [0.3, 1, 0.3]);
@@ -544,7 +592,11 @@ function OrbitalReelCard({
         ref={ref}
         /* No scroll-driven transform at all when still — the previous fallback
            still applied `scale` and `opacity`, which is the fade-per-swipe. */
-        style={canAnimate ? { scale, rotateY: rotY, opacity, z: zTrans, transformStyle: 'preserve-3d' as const } : undefined}
+        style={
+          canAnimate
+            ? { aspectRatio, scale, rotateY: rotY, opacity, z: zTrans, transformStyle: 'preserve-3d' as const }
+            : { aspectRatio }
+        }
         onClick={() => {
           if (isDragging) return;
           const card = ref.current;
@@ -567,7 +619,9 @@ function OrbitalReelCard({
         }}
         onMouseEnter={() => onHover(item.id, 'VIEW')}
         onMouseLeave={() => onHover(null, null)}
-        className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-black/10 select-none shadow-[var(--elevation-2)] hover:shadow-[var(--elevation-3)] transition-shadow duration-500 cursor-pointer"
+        /* No aspect-[4/5] here — the shape comes from `aspectRatio` in the
+           style above, which follows the media. */
+        className="relative w-full overflow-hidden rounded-2xl bg-black/10 select-none shadow-[var(--elevation-2)] hover:shadow-[var(--elevation-3)] transition-shadow duration-500 cursor-pointer"
         onDragStart={(e) => e.preventDefault()}
       >
         {canAnimate && (
@@ -581,7 +635,7 @@ function OrbitalReelCard({
           />
         )}
         
-        <SmartMedia item={item} priority={priority} />
+        <SmartMedia item={item} priority={priority} onRatio={setRatio} fill />
 
         <CardChrome item={item} />
       </m.div>
@@ -934,7 +988,13 @@ export default function Gallery() {
                   onMouseLeave={handleMouseLeaveOrUp} 
                   onMouseUp={handleMouseLeaveOrUp} 
                   onMouseMove={handleReelMouseMove} 
-                  className="relative flex gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 px-[14vw] sm:px-[calc(50vw-210px)] [&::-webkit-scrollbar]:hidden" 
+                  /* items-center: cards no longer share one height now that each
+                     takes the shape of its own media, so without this they'd
+                     hang from the top of the tallest one.
+                     The padding is what centres a card horizontally, and it has
+                     to stay the complement of the card width — 14 + 72 + 14 on
+                     phones, and (50vw-210) + 420 + (50vw-210) from sm up. */
+                  className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 px-[14vw] sm:px-[calc(50vw-210px)] [&::-webkit-scrollbar]:hidden"
                   style={{ scrollbarWidth: 'none', perspective: 1200 }}
                 >
                   <AnimatePresence>
