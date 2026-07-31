@@ -259,6 +259,7 @@
     <div style="pointer-events:auto; display:flex; gap:6px; overflow-x:auto; max-width:100%; padding:7px 12px; border-radius:9999px; background:rgba(18,27,52,0.65); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(59,130,246,0.18); box-shadow:0 14px 40px rgba(0,0,0,0.35); scrollbar-width:none;">
       <a href="#vp-stats" class="vp-secnav-link" data-nav="vp-stats" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Stats</a>
       <a href="#vp-build-scroll" class="vp-secnav-link" data-nav="vp-build-scroll" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Build</a>
+      <a href="#vp-payload" class="vp-secnav-link" data-nav="vp-payload" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Payload</a>
       <a href="#vp-explorer" class="vp-secnav-link" data-nav="vp-explorer" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Avionics</a>
       <a href="#vp-process" class="vp-secnav-link" data-nav="vp-process" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Process</a>
       <a href="#vp-software" class="vp-secnav-link" data-nav="vp-software" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Software</a>
@@ -357,6 +358,68 @@
             </button>
             <span id="vp-build-time" style="margin-left:auto; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.06em; color:#565a94;">0:00 / 0:14</span>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= PAYLOAD DELIVERY ========================= -->
+  <section id="vp-payload" style="position:relative; background:#0d1035; padding:clamp(88px,12vh,140px) 32px;">
+    <div style="max-width:1120px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Payload delivery</div>
+        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Three ways to get the payload down.</h2>
+        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:640px; line-height:1.6;">Every deployment mechanism was sized, calculated, and evaluated on paper before build &mdash; from drag-parachute canopy area to release sequencing.</p>
+      </div>
+
+      <!-- 01 · Drag parachute recovery -->
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">01 &middot; IN DEVELOPMENT</div>
+          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">Drag parachute recovery.</h3>
+          <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c; margin-bottom:12px;">Flat hexagonal canopy, sized per payload</div>
+          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">Two purpose-sized flat-hexagon drag parachutes slow the Beacon (155&nbsp;g) and Bottle (250&nbsp;g) payloads to a safe 4.0&nbsp;m/s and 3.5&nbsp;m/s terminal velocity, derived directly from the drag equation (C<sub>d</sub>&nbsp;=&nbsp;0.80). Cut as a single 6-panel sheet with a 10% apex spill vent to kill pendulum sway, built from polyester taffeta with braided PE shroud lines.</p>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#d9302a;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Beacon canopy: 0.194&nbsp;m&sup2; &middot; 6 lines &middot; 59&nbsp;cm each. Bottle canopy: 0.409&nbsp;m&sup2; &middot; 6 lines &middot; 86&nbsp;cm each.</p></div>
+            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#d9302a;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Drop-test validated: 3.64&nbsp;m/s (Beacon) and 3.22&nbsp;m/s (Bottle) measured descent rates.</p></div>
+          </div>
+        </div>
+        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
+          <video src="/images/payload/parachute.mp4" muted loop playsinline controls preload="auto" style="display:block; width:100%; height:auto;"></video>
+        </div>
+      </div>
+
+      <!-- 02 · Retarded payload deployment -->
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:64px;">
+        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
+          <img src="/images/payload/screw-nut-mechanism.jpeg" alt="Retarded payload deployment CAD: lead-screw spool-nut assembly with rotary damper" style="display:block; width:100%; height:auto;">
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">02 &middot; CONCEPT</div>
+          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">Retarded payload deployment.</h3>
+          <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c; margin-bottom:12px;">Lead-screw spool with rotary damper</div>
+          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">A passive two-stage descent: a servo release drops the payload into free-fall while its rope unwinds from a custom spool-nut riding a stationary lead screw. Once the spool-nut hits the end stop, translation converts to rotation &mdash; the screw and spool spin together against a rotary damper, braking the remaining descent at a controlled rate.</p>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">No active electronics needed after release.</p></div>
+            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Bearings carry all structural load, so the damper only ever sees torsion.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 · DC motor magazine dispenser -->
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">03 &middot; CONCEPT</div>
+          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">DC motor magazine dispenser.</h3>
+          <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c; margin-bottom:12px;">Dual-tower silo with synchronized trapdoors</div>
+          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">Two stacked-plate magazine towers &mdash; one for discs, one for the water bottle &mdash; release payloads in two coordinated stages. A single servo drives a double slider-crank linkage that opens both base trapdoors simultaneously; a DC motor with a cone-shaped horn then nudges the lowest item off its resting plate so it drops straight through.</p>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Single servo + double slider-crank opens both towers' doors in sync.</p></div>
+            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Door-then-drop sequencing keeps the payload from jamming against a closed door.</p></div>
+          </div>
+        </div>
+        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
+          <img src="/images/payload/dc-winch-dispenser.png" alt="DC motor magazine dispenser CAD: dual-tower silo with servo-actuated trapdoors" style="display:block; width:100%; height:auto;">
         </div>
       </div>
     </div>

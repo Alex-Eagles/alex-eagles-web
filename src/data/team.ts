@@ -428,7 +428,18 @@ const head = (
 
 const ROSTER_2026: YearRoster = {
   year: "2026",
+  // Three leadership cards render left, centre, right with the middle card
+  // raised — Farah sits in the centre, flanked by Youssef and Ziad.
   leadership: [
+    {
+      ...slot("Vice Lead", "Youssef Hozayen", {
+        photo: "youssef-hozayen-2026",
+        linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
+        gradYear: "2027",
+        major: "Mechatronics and robotics engineering",
+      }),
+      department: "Team Leadership",
+    },
     {
       ...slot("Team Leader", "Farah Harfoush", {
         photo: "farah-harfoush-2026",
@@ -439,11 +450,9 @@ const ROSTER_2026: YearRoster = {
       department: "Team Leadership",
     },
     {
-      ...slot("Vice Lead", "Youssef Hozayen", {
-        photo: "youssef-hozayen-2026",
-        linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
-        gradYear: "2027",
-        major: "Mechatronics and robotics engineering",
+      ...slot("EM Integration Lead", "Ziad Essam", {
+        photo: "ziad-essam",
+        linkedIn: "https://www.linkedin.com/in/ziad-essam-a202b3244",
       }),
       department: "Team Leadership",
     },
@@ -478,7 +487,7 @@ const ROSTER_2026: YearRoster = {
         }),
         section("Structure", [
           slot("Section Lead", "Mira Barsoum", {
-            photo: "mira-barsoum-2026",
+            photo: "mira-barsoum-2026-2",
             linkedIn: "https://www.linkedin.com/in/mira-barsoum-457531297/",
             gradYear: "2026",
             major: "Mechatronics and Robotics",
@@ -575,7 +584,7 @@ const ROSTER_2026: YearRoster = {
             major: "CCE",
           }),
           slot("Member", "Jana Hani", {
-            photo: "jana-hani",
+            photo: "jana-hani2",
             linkedIn: "https://www.linkedin.com/in/jana-elmenoufi-644319256/",
             gradYear: "2026",
             major: "Mechatronics",
@@ -681,7 +690,7 @@ const ROSTER_2026: YearRoster = {
             major: "Computer and Communication",
           }),
           slot("Member", "Nour Walid", {
-            photo: "nour-walid",
+            photo: "nour-walid2",
             linkedIn: "https://www.linkedin.com/in/nour-walid-6b2b8b262/",
             gradYear: "2026",
             major: "Mechatronics",
