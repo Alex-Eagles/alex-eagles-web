@@ -410,6 +410,56 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * ANIMATABLE GRADIENT STOPS
+ *
+ * A plain `background: linear-gradient(...)` does not crossfade on theme
+ * toggle even with `transition: background` set — browsers only interpolate
+ * background-color/background-image between values reached by transitioning
+ * an *animatable* property, and an unregistered custom property swap (the
+ * usual `var(--x)` pattern used everywhere else in this file) recomputes the
+ * gradient instantly rather than frame-by-frame.
+ *
+ * `@property` fixes this: registering a custom property with `syntax:
+ * '<color>'` makes the browser treat IT as the animatable value, so
+ * `transition: --my-stop var(--transition-slow)` (naming the custom property,
+ * not `background`) genuinely tweens it — and any gradient built from
+ * `var(--my-stop)` recomputes every frame with the interpolated colour.
+ *
+ * `initial-value` can't contain var() (spec restriction on @property), so it
+ * repeats the dark-mode literal that's set immediately below anyway.
+ * -------------------------------------------------------------------------*/
+@property --blog-bg-stop1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #121b34;
+}
+@property --blog-bg-stop2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #121b34;
+}
+@property --tr-panel-stop1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0d1529;
+}
+@property --tr-panel-stop2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #090f1e;
+}
+@property --tr-card-stop1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1a2544;
+}
+@property --tr-card-stop2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #121b34;
+}
+
+/* ----------------------------------------------------------------------------
  * 3. COLOR TOKENS — DARK MODE (default)
  * --------------------------------------------------------------------------*/
 :root,
@@ -555,6 +605,16 @@
    * instead of a rectangle of different colour. */
   --elevation-panel: inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 4px 14px rgba(0, 0, 0, 0.45), 0 28px 64px rgba(0, 0, 0, 0.6);
+
+  /* See "ANIMATABLE GRADIENT STOPS" above. Blog/BlogPost's root wrapper reads
+     flat here (both stops the same) since dark mode's version of that
+     backdrop was always a flat fill, not a real gradient. */
+  --blog-bg-stop1: #121b34;
+  --blog-bg-stop2: #121b34;
+  --tr-panel-stop1: #0d1529;
+  --tr-panel-stop2: #090f1e;
+  --tr-card-stop1: #1a2544;
+  --tr-card-stop2: #121b34;
 }
 
 /* ----------------------------------------------------------------------------
@@ -1009,6 +1069,13 @@
   --team-firmware-page: #5b4ed8;
   /* --team-management / --team-accent are brand blue and already clear 5.9:1. */
 
+  /* See "ANIMATABLE GRADIENT STOPS" near the dark block. */
+  --blog-bg-stop1: var(--bg-elevated);
+  --blog-bg-stop2: var(--bg-primary);
+  --tr-panel-stop1: #f4f8ff;
+  --tr-panel-stop2: #f4f8ff;
+  --tr-card-stop1: var(--card);
+  --tr-card-stop2: var(--card);
 }
 
 /* ----------------------------------------------------------------------------

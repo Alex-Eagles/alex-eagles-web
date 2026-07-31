@@ -16,7 +16,7 @@ export default function TrackRecord() {
     <section className="tr-section" ref={rootRef}>
       <div className="tr-layout">
         <div className="tr-eyebrow" data-reveal="">
-          <span className="tr-eyebrow-index">04</span>
+          <span className="tr-eyebrow-index">03</span>
           <span className="tr-eyebrow-line" />
           <span className="tr-eyebrow-label">Track record</span>
         </div>

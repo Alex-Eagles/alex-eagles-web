@@ -22,6 +22,23 @@ import SearchBox from "@/components/search/SearchBox";
  *
  * The theme toggle is a separate fixed control (see <ThemeToggle/> in App).
  */
+// Fired on hover over the "Vehicles" link, well before the click: warms the
+// browser cache for the inline vehicle bundle (see Vehicles.tsx) and its
+// hero video so the page doesn't stall on those fetches after navigation.
+let vehiclePrefetched = false;
+function prefetchVehiclePage() {
+  if (vehiclePrefetched) return;
+  vehiclePrefetched = true;
+  fetch("/vehicle/index.html", { credentials: "same-origin" }).catch(() => {});
+  fetch("/vehicle/support.js", { credentials: "same-origin" }).catch(() => {});
+  // Prefetch hint (not a forced full download) for the large hero video.
+  const link = document.createElement("link");
+  link.rel = "prefetch";
+  link.as = "video";
+  link.href = "/vehicle/assets/landing.mp4";
+  document.head.appendChild(link);
+}
+
 export default function Navbar() {
   const scrollY = useScrollPosition();
   const scrolled = scrollY > 80;
@@ -89,6 +106,7 @@ export default function Navbar() {
                 }}
                 onMouseEnter={(e) => {
                   if (!active) e.currentTarget.style.color = "var(--text-primary)";
+                  if (link.path === "/vehicles") prefetchVehiclePage();
                 }}
                 onMouseLeave={(e) => {
                   if (!active) e.currentTarget.style.color = "var(--text-secondary)";
@@ -113,6 +131,7 @@ export default function Navbar() {
           background: "var(--bg-glass)",
           border: "1px solid var(--border-subtle)",
           color: "var(--text-primary)",
+          transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
           /* Blur comes from `.ui-blur` — pointer devices only. */
         }}
       >
@@ -137,6 +156,7 @@ export default function Navbar() {
             background: "var(--bg-glass)",
             backdropFilter: "blur(22px)",
             WebkitBackdropFilter: "blur(22px)",
+            transition: "background-color var(--transition-slow)",
           }}
         >
           <button
@@ -149,6 +169,7 @@ export default function Navbar() {
               background: "var(--bg-elevated)",
               border: "1px solid var(--border-subtle)",
               color: "var(--text-primary)",
+              transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
             }}
           >
             <X size={22} />

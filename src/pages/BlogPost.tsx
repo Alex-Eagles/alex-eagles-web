@@ -25,9 +25,12 @@ export default function BlogPost() {
     <div
       className="min-h-dvh"
       style={{
-        background: isDark
-          ? "#121B34"
-          : "linear-gradient(to bottom, var(--bg-elevated) 0%, var(--bg-primary) 60%)",
+        // --blog-bg-stop1/2 are registered via @property in theme.css so
+        // this gradient can crossfade on theme toggle. Matches Blog.tsx's
+        // root wrapper — see its comment for why a plain isDark-ternary
+        // background doesn't transition smoothly.
+        background: "linear-gradient(to bottom, var(--blog-bg-stop1) 0%, var(--blog-bg-stop2) 60%)",
+        transition: "--blog-bg-stop1 var(--transition-slow), --blog-bg-stop2 var(--transition-slow)",
       }}
     >
       <div className="max-w-[820px] mx-auto px-6 pt-32 pb-24">
@@ -41,7 +44,11 @@ export default function BlogPost() {
 
         <div
           className="rounded-2xl border p-8 md:p-10"
-          style={{ backgroundColor: cardBg, borderColor: style.accent }}
+          style={{
+            backgroundColor: cardBg,
+            borderColor: style.accent,
+            transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
+          }}
         >
           <span
             className="inline-flex items-center rounded-full px-3 py-0.5 font-sans text-caption font-semibold mb-5"

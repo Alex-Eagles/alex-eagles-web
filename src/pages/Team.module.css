@@ -8,6 +8,9 @@
   color: var(--team-ink);
   font-family: "Archivo", system-ui, sans-serif;
   overflow-x: hidden;
+  /* Matches .ae-band's crossfade (global.css) so the page swaps theme
+   * together with the rest of the site instead of snapping instantly. */
+  transition: background-color var(--transition-slow), color var(--transition-slow);
 }
 
 /* --- hero ---------------------------------------------------------------- */
@@ -86,6 +89,15 @@
   inset: 0;
   /* How far there is still to go once the wash has had its say. */
   --resolve: calc(1 - var(--team-hero-wash));
+  /* No transition here (deliberately): this gradient's stops are each
+   * computed from --team-bg-rgb/--team-hero-wash via rgb()/calc(), not held
+   * as their own registered colour values, so there's nothing a `transition`
+   * could smoothly interpolate — an unregistered custom-property swap
+   * recomputes the whole gradient instantly regardless. Making this one
+   * crossfade for real would mean registering each of its ~7 stops as its
+   * own @property colour (see theme.css's "ANIMATABLE GRADIENT STOPS"),
+   * which isn't worth it for a secondary atmospheric overlay sitting on top
+   * of .page's own background, which already crossfades correctly. */
   background:
     var(--team-hero-shade),
     linear-gradient(
@@ -333,6 +345,9 @@
 .leaderCentre {
   width: 340px;
   max-width: 100%;
+  /* Each carries its own #team-leader / #vice-lead anchor (Team.tsx) so a
+     deep link lands on that specific card, not just the section top. */
+  scroll-margin-top: calc(var(--nav-height, 72px) + 16px);
 }
 
 /* --- divisions ----------------------------------------------------------- */

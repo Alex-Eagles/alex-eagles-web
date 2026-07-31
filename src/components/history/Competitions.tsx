@@ -188,7 +188,7 @@ function CompetitionRow({
                   // The visible text is an acronym on two of the three rows.
                   // This is where a screen reader gets the expansion and the
                   // warning that the link leaves the site.
-                  aria-label={`${entry.fullName ?? entry.name} — official website (opens in a new tab)`}
+                  aria-label={`${entry.fullName ?? entry.name}, official website (opens in a new tab)`}
                   className={
                     "inline-flex items-baseline gap-1.5 no-underline text-fg " +
                     "hover:text-[var(--sky)] focus-visible:text-[var(--sky)] " +

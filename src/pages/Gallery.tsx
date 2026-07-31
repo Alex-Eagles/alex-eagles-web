@@ -23,6 +23,76 @@ type ViewMode = 'grid' | 'reel';
 const CATEGORIES = ['All', 'SUAS', 'UAVC','Test Flight', 'Manufacturing', 'Team'] as const;
 type Category = (typeof CATEGORIES)[number];
 
+// Ask Cloudinary for an appropriately-sized image instead of shipping full-res
+// originals to small thumbnail cards.
+/**
+ * Widths at or below this get the pre-built grid-sized copy; anything larger
+ * (the lightbox) gets the original. Kept just above the 640px the tiles are
+ * generated at, so `sizedImage(url, 600)` lands on the small file.
+ */
+const TILE_MAX_WIDTH = 800;
+
+function sizedImage(url: string | undefined, width: number): string | undefined {
+  if (!url) return url;
+
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/w_${width},c_limit,dpr_auto/`);
+  }
+
+  /*
+   * Local photos, which is what every entry in src/data/gallery.ts actually is.
+   * The Cloudinary branch above never matched them, so this helper used to hand
+   * the grid the full-size original — camera files up to 5712px wide — and
+   * that, more than anything else, is why the page was slow to fill in.
+   *
+   * There's no on-the-fly resize for a static file, so the small copy is built
+   * ahead of time by scripts/build-gallery-tiles.mjs into a `tiles/` subfolder
+   * under the same name. Swap the directory in and keep the filename.
+   */
+  if (width <= TILE_MAX_WIDTH) {
+    const local = /^(.*\/)?([^/]+)\.(?:jpe?g|png|webp)$/i.exec(url);
+    if (local && !url.includes('//')) {
+      return `${local[1] ?? ''}tiles/${local[2]}.webp`;
+    }
+  }
+
+  return url;
+}
+
+/*
+ * Same idea for the clips. Cloudinary serves a video at its source resolution
+ * unless a transform says otherwise, and these URLs only carry `q_auto,f_auto`
+ * — so a full-size clip was being downloaded into a grid tile a few hundred
+ * pixels wide. Chaining a width cap in front of the existing transform is the
+ * single biggest win on this page.
+ *
+ * Tiles only; the lightbox keeps the untouched URL so opening one still plays
+ * at full quality.
+ */
+function sizedVideo(url: string | undefined, width: number): string | undefined {
+  if (!url || !url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', `/upload/w_${width},c_limit/`);
+}
+
+/*
+ * A still pulled from the clip itself, for the entries that are video-only.
+ *
+ * Several items in src/data/gallery.ts carry a videoUrl and no imageUrl, so
+ * they had no poster and no fallback image — nothing at all to show until the
+ * video painted its first frame. On a tile with a near-black backdrop that read
+ * as a black square, and on mobile, where the clip wasn't loading, it stayed
+ * that way. Cloudinary can hand back a frame from the video (`so_0`, asked for
+ * as .jpg), so the poster costs no new asset and no upload.
+ */
+function videoPoster(url: string | undefined, width: number): string | undefined {
+  if (!url || !url.includes('res.cloudinary.com') || !url.includes('/video/upload/')) {
+    return undefined;
+  }
+  return url
+    .replace('/video/upload/', `/video/upload/so_0,w_${width},c_limit,q_auto/`)
+    .replace(/\.(mp4|webm|mov)$/i, '.jpg');
+}
+
 function getCSSVar(name: string): string {
   if (typeof window === 'undefined') return '';
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -197,51 +267,170 @@ function CardChrome({ item }: { item: GalleryItem }) {
   );
 }
 
-function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }) {
+/*
+ * Media paints the moment it's usable, with no fade — on every viewport.
+ *
+ * There used to be two independent opacity transitions in here: the still faded
+ * up over 0.5s on load, then the clip faded up over it on its own 1s timing.
+ * Two fades over the same tile, at different speeds, is the blink — the tile
+ * arrives, dips, and arrives again. Nothing is gained by them: the browser only
+ * paints an image once it has decoded it either way, and the clip's poster is
+ * the same frame as the still, so swapping between them is invisible without a
+ * fade and obvious with one.
+ */
+function SmartMedia({
+  item,
+  priority,
+  onRatio,
+  fill = false,
+}: {
+  item: GalleryItem;
+  priority: boolean;
+  /**
+   * Reports the media's true width/height ratio once known, so a parent can
+   * shape its own box to match. The reel uses this; the grid, whose rows are a
+   * fixed height, ignores it.
+   */
+  onRatio?: (ratio: number) => void;
+  /**
+   * Skip the letterboxing below. Set by a parent that has already sized itself
+   * to the media, where `contain` would have nothing to letterbox anyway and
+   * `cover` avoids a hairline gap from rounding.
+   */
+  fill?: boolean;
+}) {
   const [videoReady, setVideoReady] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  
-  const [isLandscapeImg, setIsLandscapeImg] = useState(false); 
+
+  /* Landscape media in a portrait box is letterboxed rather than cropped in
+     half. Only consulted when the parent hasn't sized itself to the media. */
+  const [isLandscapeImg, setIsLandscapeImg] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldPreload = useInView(containerRef, { once: true, margin: "800px" });
   const isInViewport = useInView(containerRef, { margin: "100px" });
   const videoRef = useRef<HTMLVideoElement>(null);
+  /* One retry only — see the video's onError below. */
+  const retriedRef = useRef(false);
 
+  /*
+   * Start playback as soon as the tile is near the viewport — not once the clip
+   * has reported itself ready.
+   *
+   * Gating this on `videoReady` deadlocked on phones. `videoReady` is set from
+   * `canplay`, `canplay` can't fire until the browser actually fetches the
+   * clip, and mobile browsers routinely ignore `preload` until something asks
+   * for playback. So: nothing loaded, `canplay` never fired, play() was never
+   * called, nothing loaded. The tile sat on its poster forever, and the clip
+   * only ever appeared in the lightbox — whose <video> carries `controls` and
+   * `autoPlay` and so loads on its own.
+   *
+   * Calling play() is what kicks the fetch off; the browser starts playing once
+   * it has enough buffered, and a rejected promise (autoplay refused, no data
+   * yet) just leaves the poster up, which is the same thing it showed before.
+   */
   useEffect(() => {
-    if (isInViewport && videoReady && videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    } else if (!isInViewport && videoRef.current) {
-      videoRef.current.pause();
+    const el = videoRef.current;
+    if (!el) return;
+    if (!isInViewport) {
+      el.pause();
+      return;
     }
-  }, [isInViewport, videoReady]);
+    const playing = el.play();
+    if (playing && playing.catch) playing.catch(() => {});
+    // shouldPreload is a dependency because it is what mounts the <video>:
+    // without it this runs before there's an element to play.
+  }, [isInViewport, shouldPreload]);
+
+  /* A clip with no still of its own falls back to a frame from itself. */
+  const poster = sizedImage(item.imageUrl, 600) ?? videoPoster(item.videoUrl, 640);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full pointer-events-none bg-[#050505]">
-      <img 
-        src={item.imageUrl} 
+    <div ref={containerRef} className="relative w-full h-full pointer-events-none">
+      {/* Video-only entries have no imageUrl, and an <img> with no src is an
+          empty box that can surface its alt text — the clip's own poster covers
+          those instead. */}
+      {item.imageUrl && (
+      <img
+        src={sizedImage(item.imageUrl, 600)}
         alt={item.title}
         loading={priority ? "eager" : "lazy"}
+        decoding="async"
         onLoad={(e) => {
           const { naturalWidth, naturalHeight } = e.currentTarget;
+          if (!naturalWidth || !naturalHeight) return;
           if (naturalWidth / naturalHeight > 1.35) {
             setIsLandscapeImg(true);
           }
-          setImgLoaded(true);
+          onRatio?.(naturalWidth / naturalHeight);
         }}
-        className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${isLandscapeImg ? 'object-contain' : 'object-cover'} ${(!imgLoaded || (videoReady && isInViewport)) ? 'opacity-0' : 'opacity-100'}`} 
+        /* No opacity gate and no transition: an image that hasn't decoded yet
+           paints nothing regardless, so fading it in only delays it. It also
+           stays put once the clip is up — it's covered by an opaque video, not
+           faded out under one, which is what used to let the tile dip. */
+        className={`absolute inset-0 w-full h-full ${!fill && isLandscapeImg ? 'object-contain' : 'object-cover'}`}
       />
-      
+      )}
+
       {item.videoUrl && (shouldPreload || priority) && (
-        <video 
-          ref={videoRef} 
-          src={`${item.videoUrl}#t=0.001`} 
-          muted 
-          loop 
-          playsInline 
-          preload={priority ? "auto" : "metadata"}
-          onCanPlayThrough={() => setVideoReady(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoReady && isInViewport ? 'opacity-100' : 'opacity-0'}`} 
+        <video
+          ref={videoRef}
+          src={`${sizedVideo(item.videoUrl, 640)}#t=0.001`}
+          poster={poster}
+          muted
+          loop
+          playsInline
+          /* "auto" for anything mounted at all, not just the first tile. The
+             element is only mounted once it's within 800px of the viewport
+             (shouldPreload), so this buffers the next card or two ahead rather
+             than starting the fetch as you arrive — which is what made the reel
+             feel slow, since swiping brings the next card into view instantly. */
+          preload="auto"
+          /*
+           * Cloudinary builds a derived clip lazily: the first request for a
+           * transformation it hasn't made yet answers 423 while it renders in
+           * the background, and a <video> treats that as fatal and never tries
+           * again — one dead tile, permanently. scripts/warm-gallery-derived.mjs
+           * is what normally stops that happening, by making the first request
+           * from a terminal instead; this is the safety net for a clip added
+           * without running it.
+           */
+          onError={() => {
+            const el = videoRef.current;
+            if (!el || retriedRef.current) return;
+            retriedRef.current = true;
+            window.setTimeout(() => {
+              el.load();
+              const playing = el.play();
+              if (playing && playing.catch) playing.catch(() => {});
+            }, 2500);
+          }}
+          /*
+           * `canplay`, not `canplaythrough`. canplaythrough waits until the
+           * browser thinks the WHOLE clip can play start to finish without
+           * stalling — in practice, until it is very nearly all downloaded. The
+           * tile stayed on its poster at opacity 0 for that entire time, which
+           * is what read as the gallery being slow: the video was usually
+           * playable seconds before it was allowed to be seen. canplay fires
+           * when there's enough buffered to start, and the clip is muted, short
+           * and looping, so it keeps up from there.
+           */
+          onCanPlay={() => setVideoReady(true)}
+          /* Video-only entries have no still to measure, so the clip's own
+             dimensions are the only way the parent can learn its shape. */
+          onLoadedMetadata={(e) => {
+            const { videoWidth, videoHeight } = e.currentTarget;
+            if (videoWidth && videoHeight) onRatio?.(videoWidth / videoHeight);
+          }}
+          /* Revealed the instant it can play, with no transition. The clip's
+             poster is the same frame as the still underneath it, so there is
+             nothing to crossfade between — a fade here only announced a swap
+             that would otherwise be invisible.
+             Readiness only, deliberately not `isInViewport`: tying visibility
+             to that made the clip vanish and come back every time a card
+             crossed the observer's edge, which in a horizontal reel is once per
+             swipe. It's paused off-screen by the effect above instead, and a
+             paused video keeps painting its current frame. */
+          className={`absolute inset-0 w-full h-full object-cover ${videoReady ? 'opacity-100' : 'opacity-0'}`}
         />
       )}
     </div>
@@ -298,16 +487,21 @@ function SpatialGridCard({
     rotateX.set(0); rotateY.set(0); glareX.set(0.5); glareY.set(0.5); onHover(null, null);
   };
 
-  const canAnimate = !reduceMotion && !isMobile;
+  const still = reduceMotion || isMobile;
+  const canAnimate = !still;
 
   return (
     <m.div
       layoutId={`card-container-${item.id}`}
-      initial={{ opacity: 0, y: 40, scale: 0.88, rotateX: canAnimate ? 8 : 0 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+      /* No entry animation on a phone. Tiles staggered in over 0.8s with up to
+         0.6s of delay, which on a short scroll meant a tile was still fading up
+         while its own media was arriving underneath — two overlapping reveals
+         on the same card. */
+      initial={still ? false : { opacity: 0, y: 40, scale: 0.88, rotateX: 8 }}
+      whileInView={still ? undefined : { opacity: 1, y: 0, scale: 1, rotateX: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: Math.min(index * 0.07, 0.6) }}
-      className={`group/card relative h-full w-full transition-[opacity,filter] duration-500 ${tall ? 'row-span-2' : ''} ${isDimmed ? 'opacity-40 saturate-50 blur-[0.5px]' : ''}`}
+      className={`group/card relative h-full w-full ${still ? '' : 'transition-[opacity,filter] duration-500'} ${tall ? 'row-span-2' : ''} ${isDimmed ? 'opacity-40 saturate-50 blur-[0.5px]' : ''}`}
       style={{ perspective: 800 }}
     >
       <m.div
@@ -342,14 +536,42 @@ function SpatialGridCard({
 }
 
 function OrbitalReelCard({
-  item, index, isDimmed, reduceMotion, containerRef, onOpen, onHover, isDragging, priority
+  item, index, isDimmed, reduceMotion, isMobile, containerRef, onOpen, onHover, isDragging, priority
 }: {
   item: GalleryItem; index: number; isDimmed: boolean; reduceMotion: boolean; isMobile: boolean; containerRef: RefObject<HTMLDivElement | null>; onOpen: () => void; onHover: HoverFn; isDragging: boolean; priority: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollXProgress } = useScroll({ target: ref, container: containerRef, axis: 'x', offset: ['start end', 'center center', 'end start'] });
-  
-  const canAnimate = !reduceMotion;
+
+  /*
+   * `isMobile` was already being passed in and typed here, but never
+   * destructured — so none of it applied and the reel ran its full desktop
+   * treatment on phones. That's the worst of the blinking: every card's opacity
+   * is driven by its position in the scroller (0.3 at the edges, 1 in the
+   * middle), so swiping faded each card out and back in, on top of a one-off
+   * entry animation and a scanline sweep. On a touch scroller that reads as the
+   * media appearing, blinking, and appearing again.
+   */
+  const still = reduceMotion || isMobile;
+  const canAnimate = !still;
+
+  /*
+   * The card takes its shape from whatever it holds.
+   *
+   * It used to be a hard `aspect-[4/5]` portrait frame for everything, and the
+   * collection is an even split — 13 landscape, 13 portrait, plus 15 video-only
+   * entries. So half of it was a landscape photo letterboxed into a portrait
+   * box: black bars top and bottom, and the picture itself shrunk to a band in
+   * the middle. Matching the box to the media shows each one at its own
+   * proportions and leaves nothing to letterbox.
+   *
+   * Clamped because the source material runs to extremes (a 0.54 phone portrait,
+   * a 1.89 crop) and an unclamped strip would lurch between a sliver and a
+   * billboard. Null until the media reports back, so the default is the portrait
+   * shape the reel had before.
+   */
+  const [ratio, setRatio] = useState<number | null>(null);
+  const aspectRatio = ratio ? Math.min(Math.max(ratio, 0.7), 1.5) : 4 / 5;
 
   const scale = useTransform(scrollXProgress, [0, 0.5, 1], [0.75, 1, 0.75]);
   const rotY = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [35, 0, -35] : [0, 0, 0]);
@@ -359,16 +581,22 @@ function OrbitalReelCard({
   return (
     <m.div
       layoutId={`card-container-${item.id}`}
-      initial={{ opacity: 0, x: 60 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={still ? false : { opacity: 0, x: 60 }}
+      whileInView={still ? undefined : { opacity: 1, x: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 }}
-      className={`group/card w-[72vw] flex-shrink-0 snap-center sm:w-[420px] transition-[opacity] duration-500 ${isDimmed ? 'opacity-40' : ''}`}
+      className={`group/card w-[72vw] flex-shrink-0 snap-center sm:w-[420px] ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
       style={{ perspective: 1000 }}
     >
       <m.div
         ref={ref}
-        style={canAnimate ? { scale, rotateY: rotY, opacity, z: zTrans, transformStyle: 'preserve-3d' as const } : reduceMotion ? undefined : { scale, opacity }}
+        /* No scroll-driven transform at all when still — the previous fallback
+           still applied `scale` and `opacity`, which is the fade-per-swipe. */
+        style={
+          canAnimate
+            ? { aspectRatio, scale, rotateY: rotY, opacity, z: zTrans, transformStyle: 'preserve-3d' as const }
+            : { aspectRatio }
+        }
         onClick={() => {
           if (isDragging) return;
           const card = ref.current;
@@ -391,7 +619,9 @@ function OrbitalReelCard({
         }}
         onMouseEnter={() => onHover(item.id, 'VIEW')}
         onMouseLeave={() => onHover(null, null)}
-        className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-black/10 select-none shadow-[var(--elevation-2)] hover:shadow-[var(--elevation-3)] transition-shadow duration-500 cursor-pointer"
+        /* No aspect-[4/5] here — the shape comes from `aspectRatio` in the
+           style above, which follows the media. */
+        className="relative w-full overflow-hidden rounded-2xl bg-black/10 select-none shadow-[var(--elevation-2)] hover:shadow-[var(--elevation-3)] transition-shadow duration-500 cursor-pointer"
         onDragStart={(e) => e.preventDefault()}
       >
         {canAnimate && (
@@ -405,7 +635,7 @@ function OrbitalReelCard({
           />
         )}
         
-        <SmartMedia item={item} priority={priority} />
+        <SmartMedia item={item} priority={priority} onRatio={setRatio} fill />
 
         <CardChrome item={item} />
       </m.div>
@@ -472,8 +702,15 @@ export default function Gallery() {
   const scrollLeft = useRef(0);
   const isDraggingRef = useRef(false);
 
+  /*
+   * Click-and-drag scrolling is a mouse affordance, and touch already has one
+   * that's better. Phones synthesise mouse events after a touch sequence, so
+   * without this guard the emulation could start on a swipe, and its first act
+   * is `scrollSnapType = 'none'` — which only gets restored by mouseup/mouseleave,
+   * events touch doesn't reliably deliver. Snapping then stays off for good.
+   */
   const handleMouseDown = (e: ReactMouseEvent) => {
-    if (!reelRef.current) return;
+    if (!reelRef.current || !isFinePointer) return;
     startX.current = e.pageX;
     scrollLeft.current = reelRef.current.scrollLeft;
     isDraggingRef.current = false;
@@ -481,7 +718,7 @@ export default function Gallery() {
   };
 
   const handleReelMouseMove = (e: ReactMouseEvent) => {
-    if (!reelRef.current || startX.current === 0) return;
+    if (!reelRef.current || !isFinePointer || startX.current === 0) return;
     const dx = Math.abs(e.pageX - startX.current);
 
     if (!isDraggingRef.current && dx > dragThreshold) {
@@ -655,7 +892,7 @@ export default function Gallery() {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="relative min-h-screen bg-[var(--bg-primary)] pt-24 pb-12 px-6 overflow-hidden">
+      <div className="relative min-h-screen bg-[var(--bg-primary)] transition-colors duration-[400ms] ease-out pt-24 pb-12 px-6 overflow-hidden">
         
         {cursorActive && (
           <style>{`
@@ -696,7 +933,7 @@ export default function Gallery() {
             className="w-full sm:w-auto flex justify-start sm:justify-center overflow-x-auto [&::-webkit-scrollbar]:hidden order-1 sm:order-2" 
             style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
           >
-            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] w-max sm:mx-auto">
+            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] transition-colors duration-[400ms] ease-out w-max sm:mx-auto">
               {CATEGORIES.map((cat) => (
                 <button 
                   key={cat} 
@@ -713,7 +950,7 @@ export default function Gallery() {
           </div>
 
           <div className="w-full sm:w-1/4 flex justify-center sm:justify-end order-3 shrink-0">
-            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)]">
+            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] transition-colors duration-[400ms] ease-out">
               {viewModes.map(({ key, label, icon: Icon }) => (
                 <button key={key} onClick={() => setViewMode(key)} onMouseEnter={() => setCursorLabel(label)} onMouseLeave={() => setCursorLabel(null)} aria-label={`${label} view`} className={`relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.1em] transition-colors duration-300 ${viewMode === key ? 'text-fg' : 'text-fg-muted hover:text-fg'}`}>
                   {viewMode === key && <m.span layoutId="viewModePill" transition={{ type: 'spring', stiffness: 340, damping: 30 }} className="absolute inset-0 rounded-full bg-[var(--brand-glow)] border border-[var(--border-subtle)]" />}
@@ -746,7 +983,24 @@ export default function Gallery() {
             )}
 
             {viewMode === 'reel' && filteredItems.length > 0 && (
-              <div className="relative w-full max-w-[100vw] -mx-6 px-6">
+              /*
+               * Was `w-full max-w-[100vw] -mx-6 px-6` — an attempt at the
+               * full-bleed trick, and the reason the reel sat off-centre.
+               *
+               * That trick only works on a box whose width is `auto`, where
+               * negative margins genuinely widen it. `w-full` pins the width to
+               * the parent, so `-mx-6` couldn't widen anything and just shifted
+               * the whole box 24px left; `px-6` then pulled the content in
+               * another 24px on each side. Net effect: a track starting at the
+               * parent's left edge but ending 48px short of its right one.
+               * Asymmetric, so the centred card was 24px left of true centre and
+               * the next card was clipped early with dead space beside it.
+               *
+               * The bleed wasn't buying anything, so it's gone. The track is now
+               * the parent's content box — symmetric by construction — which is
+               * what the `calc(50% - 36vw)` side padding below assumes.
+               */
+              <div className="relative">
                 <button onClick={() => reelRef.current?.scrollBy({ left: -500, behavior: 'smooth' })} className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-3 text-white backdrop-blur transition-colors hover:bg-black/80 sm:flex" aria-label="Scroll reel left">
                   <ChevronLeft size={24} />
                 </button>
@@ -758,12 +1012,40 @@ export default function Gallery() {
                   onMouseLeave={handleMouseLeaveOrUp} 
                   onMouseUp={handleMouseLeaveOrUp} 
                   onMouseMove={handleReelMouseMove} 
-                  className="relative flex gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 px-[14vw] sm:px-[calc(50vw-210px)] [&::-webkit-scrollbar]:hidden" 
+                  /*
+                   * items-center: cards no longer share one height now that each
+                   * takes the shape of its own media, so without this they'd
+                   * hang from the top of the tallest one.
+                   *
+                   * The side padding is what centres a card, and it must be
+                   * exactly half the leftover space: (track - card) / 2.
+                   *
+                   * It used to be `14vw` against a `72vw` card — 14 + 72 + 14 =
+                   * 100, which is only correct if the track is the full viewport.
+                   * It isn't: the wrapper above is `-mx-6 px-6`, so the track is
+                   * about 48px narrower, and 14vw overshot by ~24px. The first
+                   * card therefore sat off-centre at scrollLeft 0, and the only
+                   * thing hiding it was scroll-snap pulling it back — which the
+                   * drag handlers switch off (`scrollSnapType = 'none'`) and
+                   * which touch doesn't reliably switch back on. When it stayed
+                   * off, the card stayed off-centre.
+                   *
+                   * `50%` in padding resolves against the containing block's
+                   * width — the track — so `calc(50% - <half card>)` is that
+                   * exact half-leftover whatever the track turns out to be. The
+                   * card is now centred at scrollLeft 0 by construction, with
+                   * snapping as polish rather than as the mechanism.
+                   */
+                  className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 px-[calc(50%-36vw)] sm:px-[calc(50%-210px)] [&::-webkit-scrollbar]:hidden"
                   style={{ scrollbarWidth: 'none', perspective: 1200 }}
                 >
                   <AnimatePresence>
+                    {/* priority={i < 3}: the reel is a horizontal scroller, so
+                        the second and third cards are one swipe from being on
+                        screen — load them eagerly rather than waiting for them
+                        to come within range. */}
                     {filteredItems.map((item, i) => (
-                      <OrbitalReelCard key={item.id} item={item} index={i} isDimmed={hoveredCardId !== null && hoveredCardId !== item.id} reduceMotion={prefersReducedMotion} isMobile={isMobile} priority={i === 0} containerRef={reelRef} onOpen={() => openAt(i, item.id)} onHover={handleHover} isDragging={isDragging} />
+                      <OrbitalReelCard key={item.id} item={item} index={i} isDimmed={hoveredCardId !== null && hoveredCardId !== item.id} reduceMotion={prefersReducedMotion} isMobile={isMobile} priority={i < 3} containerRef={reelRef} onOpen={() => openAt(i, item.id)} onHover={handleHover} isDragging={isDragging} />
                     ))}
                   </AnimatePresence>
                 </div>
@@ -828,7 +1110,7 @@ export default function Gallery() {
                       </div>
                     ) : (
                       <div className="relative flex justify-center max-h-[85vh]">
-                        <img src={activeItem.imageUrl} alt={activeItem.title} draggable={false} className="max-w-full max-h-[85vh] w-auto h-auto object-contain" />
+                        <img src={sizedImage(activeItem.imageUrl, 1800)} alt={activeItem.title} draggable={false} className="max-w-full max-h-[85vh] w-auto h-auto object-contain" />
                         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none z-10">
                           <h2 className="text-3xl text-white font-display font-extrabold m-0 leading-none drop-shadow-lg">{activeItem.title}</h2>
                         </div>

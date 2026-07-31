@@ -393,7 +393,7 @@ try {
     if (achievement.blurb) add("/history", page, achievement.blurb, undefined, anchor);
     for (const award of achievement.awards) {
       if (award.place) {
-        add("/history", page, `${award.place} — ${award.title}`, undefined, anchor);
+        add("/history", page, `${award.place} · ${award.title}`, undefined, anchor);
       }
       add("/history", page, award.title, undefined, anchor);
       add("/history", page, award.competition, undefined, anchor);

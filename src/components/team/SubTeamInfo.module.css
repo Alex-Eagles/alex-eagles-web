@@ -100,7 +100,9 @@
   pointer-events: none;
   transition:
     opacity 0.22s ease,
-    transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1.2);
+    transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1.2),
+    background-color var(--transition-slow),
+    border-color var(--transition-slow);
 }
 
 .card[data-open="true"] {

@@ -98,7 +98,7 @@ export default function Publications() {
             className="font-sans text-body text-fg-secondary leading-[1.7] mt-6 mx-auto text-center"
             style={{ maxWidth: "var(--maxw-prose)" }}
           >
-            Papers the team has published — in aircraft design, and in the
+            Papers the team has published, in aircraft design, and in the
             computer vision that gets flown with it.
           </ScrubbedText>
         </motion.div>
@@ -276,7 +276,7 @@ function PublicationRow({
                 href={paper.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`${paper.title} — ${paper.venue} (opens in a new tab)`}
+                aria-label={`${paper.title}, ${paper.venue} (opens in a new tab)`}
                 className="no-underline text-fg group-hover:text-[var(--sky)] transition-colors duration-[220ms] [transition-timing-function:var(--ease-out-strong)]"
               >
                 {paper.title}
