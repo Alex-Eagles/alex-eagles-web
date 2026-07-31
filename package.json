@@ -10,6 +10,7 @@
     "search:index": "node scripts/build-search-index.mjs",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
+    "test": "node --test scripts/*.test.mjs",
     "images:cutouts": "node scripts/cutout-svg-to-webp.mjs src/assets/members/cutouts",
     "images:optimize": "node scripts/optimize-images.mjs src/assets/members/photos",
     "media:vehicle": "node scripts/process-vehicle-media.mjs"

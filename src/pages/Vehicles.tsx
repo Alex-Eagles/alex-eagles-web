@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Prototypes from "@/components/sections/Prototypes";
 
 /**
  * Vehicles page — the Neith build experience, rendered INLINE (no iframe).
@@ -148,20 +149,23 @@ export default function Vehicles() {
   }, []);
 
   return (
-    // The bundle is fetched after mount, so this container is empty for a beat
-    // and the Footer rides up under the Navbar before the page drops in. Hold a
-    // viewport of height in the page's own background colour so the first paint
-    // is the page arriving, not the footer flashing past.
-    <div
-      ref={hostRef}
-      data-vehicle-root
-      style={{ minHeight: "100dvh", backgroundColor: "#07091c" }}
-    >
-      {error && (
-        <p style={{ padding: 32, color: "var(--text-muted)" }}>
-          Couldn’t load the vehicle experience. {error}
-        </p>
-      )}
-    </div>
+    <>
+      {/* The bundle is fetched after mount, so this container is empty for a
+          beat and the Footer rides up under the Navbar before the page drops
+          in. Hold a viewport of height in the page's own background colour so
+          the first paint is the page arriving, not the footer flashing past. */}
+      <div
+        ref={hostRef}
+        data-vehicle-root
+        style={{ minHeight: "100dvh", backgroundColor: "#07091c" }}
+      >
+        {error && (
+          <p style={{ padding: 32, color: "var(--text-muted)" }}>
+            Couldn’t load the vehicle experience. {error}
+          </p>
+        )}
+      </div>
+      <Prototypes />
+    </>
   );
 }

@@ -35,12 +35,18 @@ const TOP_ROLES = [
   },
 ];
 
+/* Accents are the site's own brand colors, fixed (not swapped per theme)
+ * because the cards are solid fills with white text on top: dark mode's
+ * --sky (#60a5fa) is deliberately light for text-on-dark use and fails
+ * contrast as a background under white labels. #3c40b5/#1d4ed8 are the
+ * site's own indigo/sky, already used with white text elsewhere (the CTA
+ * button; theme.css's own contrast notes measure #1d4ed8 at 6.0:1). */
 const LEADS = [
   {
     id: "mechanical",
     lead: "Mechanical Lead",
     icon: Wrench,
-    color: "#8b5cf6",
+    color: "#3c40b5",
     // Matches Team.tsx's division heading id (`division-${division.num}`) —
     // team.ts's Mechanical division is num "01".
     to: "/team#division-01",
@@ -64,7 +70,7 @@ const LEADS = [
     id: "autonomous",
     lead: "Autonomous Lead",
     icon: Cpu,
-    color: "#3b82f6",
+    color: "#1d4ed8",
     // team.ts's Autonomous division is num "02".
     to: "/team#division-02",
     desc: "Manages the integration between the autonomous subsystems, so software, hardware and AI arrive as one working stack rather than three separate ones.",

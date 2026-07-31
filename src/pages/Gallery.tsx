@@ -23,6 +23,13 @@ type ViewMode = 'grid' | 'reel';
 const CATEGORIES = ['All', 'SUAS', 'UAVC','Test Flight', 'Manufacturing', 'Team'] as const;
 type Category = (typeof CATEGORIES)[number];
 
+// Ask Cloudinary for an appropriately-sized image instead of shipping full-res
+// originals to small thumbnail cards.
+function sizedImage(url: string | undefined, width: number): string | undefined {
+  if (!url || !url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', `/upload/w_${width},c_limit,dpr_auto/`);
+}
+
 function getCSSVar(name: string): string {
   if (typeof window === 'undefined') return '';
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -218,10 +225,11 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
 
   return (
     <div ref={containerRef} className="relative w-full h-full pointer-events-none bg-[#050505]">
-      <img 
-        src={item.imageUrl} 
+      <img
+        src={sizedImage(item.imageUrl, 600)}
         alt={item.title}
         loading={priority ? "eager" : "lazy"}
+        decoding="async"
         onLoad={(e) => {
           const { naturalWidth, naturalHeight } = e.currentTarget;
           if (naturalWidth / naturalHeight > 1.35) {
@@ -229,19 +237,20 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
           }
           setImgLoaded(true);
         }}
-        className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${isLandscapeImg ? 'object-contain' : 'object-cover'} ${(!imgLoaded || (videoReady && isInViewport)) ? 'opacity-0' : 'opacity-100'}`} 
+        className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${isLandscapeImg ? 'object-contain' : 'object-cover'} ${(!imgLoaded || (videoReady && isInViewport)) ? 'opacity-0' : 'opacity-100'}`}
       />
-      
+
       {item.videoUrl && (shouldPreload || priority) && (
-        <video 
-          ref={videoRef} 
-          src={`${item.videoUrl}#t=0.001`} 
-          muted 
-          loop 
-          playsInline 
+        <video
+          ref={videoRef}
+          src={`${item.videoUrl}#t=0.001`}
+          poster={sizedImage(item.imageUrl, 600)}
+          muted
+          loop
+          playsInline
           preload={priority ? "auto" : "metadata"}
           onCanPlayThrough={() => setVideoReady(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoReady && isInViewport ? 'opacity-100' : 'opacity-0'}`} 
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoReady && isInViewport ? 'opacity-100' : 'opacity-0'}`}
         />
       )}
     </div>
@@ -828,7 +837,7 @@ export default function Gallery() {
                       </div>
                     ) : (
                       <div className="relative flex justify-center max-h-[85vh]">
-                        <img src={activeItem.imageUrl} alt={activeItem.title} draggable={false} className="max-w-full max-h-[85vh] w-auto h-auto object-contain" />
+                        <img src={sizedImage(activeItem.imageUrl, 1800)} alt={activeItem.title} draggable={false} className="max-w-full max-h-[85vh] w-auto h-auto object-contain" />
                         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none z-10">
                           <h2 className="text-3xl text-white font-display font-extrabold m-0 leading-none drop-shadow-lg">{activeItem.title}</h2>
                         </div>

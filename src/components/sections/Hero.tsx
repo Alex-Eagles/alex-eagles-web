@@ -134,7 +134,7 @@ export default function Hero() {
             maxWidth: "560px",
           }}
         >
-          Alexandria University’s Unmanned Aerial Systems team — engineering
+          Alexandria University’s Unmanned Aerial Systems team, engineering
           precision flight for the SUAS competition.
         </p>
 

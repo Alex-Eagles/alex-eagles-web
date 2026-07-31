@@ -36,7 +36,7 @@ export default function About() {
 
         {/* Achievement highlight. */}
         <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[var(--brand-glow)] border border-border mb-6">
-          <Trophy size={16} className="text-brand-light" />
+          <Trophy size={16} className="text-gold" />
           <span className="font-sans text-[13px] font-semibold text-fg">
             Top-10 finish · SUAS 2024
           </span>
@@ -58,7 +58,7 @@ export default function About() {
         <div
           className="relative aspect-[4/3] rounded-md overflow-hidden border border-border flex items-center justify-center"
           style={{
-            background: "linear-gradient(135deg, var(--brand-dark), #0f0f0f)",
+            background: "linear-gradient(135deg, #161A50, #0A0D2B)",
             boxShadow: "var(--elevation-3)",
           }}
         >

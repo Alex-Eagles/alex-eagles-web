@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -56,10 +57,38 @@ function getInitialTheme(): Theme {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const isFirstRun = useRef(true);
 
   // Reflect the theme onto <html> and persist it whenever it changes.
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+    const root = document.documentElement;
+
+    /*
+     * Wrap the flip in `.theme-transitioning` (see global.css) so every
+     * themed surface crossfades together instead of snapping while only the
+     * body's own transition eases. Skipped under prefers-reduced-motion —
+     * and on the very first run, so the initial theme doesn't visibly fade
+     * in on load — and removed after the crossfade finishes so hover/press
+     * transitions elsewhere don't inherit its duration in between toggles.
+     */
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    let clearTransitionClass: (() => void) | undefined;
+    if (!reduceMotion && !isFirstRun.current) {
+      root.classList.add("theme-transitioning");
+      const timer = setTimeout(
+        () => root.classList.remove("theme-transitioning"),
+        450,
+      );
+      clearTransitionClass = () => {
+        clearTimeout(timer);
+        root.classList.remove("theme-transitioning");
+      };
+    }
+    isFirstRun.current = false;
+
+    root.setAttribute("data-theme", theme);
 
     /*
      * Keep the browser chrome in step with the theme. index.html ships a
@@ -78,6 +107,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore write failures (private mode, quota) */
     }
+
+    return clearTransitionClass;
   }, [theme]);
 
   const setTheme = useCallback((next: Theme) => setThemeState(next), []);

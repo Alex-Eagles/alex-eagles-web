@@ -33,7 +33,7 @@ export const BRAND = {
   name: "Alex Eagles",
   unit: "UAV Team",
   mission:
-    "A young, multidisciplinary team engineering the autonomous aircraft of tomorrow — today.",
+    "A young, multidisciplinary team engineering the autonomous aircraft of tomorrow, today.",
 } as const;
 
 export const CONTACT = {
@@ -50,7 +50,7 @@ export const CONTACT = {
  * whatever the visitor typed. Edit the wording here to change the outgoing email.
  */
 export const NEWSLETTER_EMAIL = {
-  subject: "New updates subscriber — interested in Alex Eagles",
+  subject: "New updates subscriber: interested in Alex Eagles",
   body: [
     "Hello Alex Eagles team,",
     "",
