@@ -18,6 +18,25 @@
   overflow: hidden;
 }
 
+/*
+ * Wrapper around the two clips, and the reason it exists: `position` plus a
+ * real `z-index` (not `auto`) makes this a stacking context, so the z-index
+ * the clips use to order themselves during a crossfade stays sealed inside it.
+ *
+ * Without the wrapper, the active clip's z-index competed with .hero-scrim,
+ * .hero-body, .hero-scroll and .hero-ticker — every one of which is positioned
+ * at the default level and merely relies on coming later in the DOM — and the
+ * video painted over the lot, hiding the dimming scrim and the headline.
+ *
+ * At z-index 0 the wrapper ties with those siblings and loses on DOM order,
+ * which is exactly where the single <video> used to sit.
+ */
+.hero-media-stack {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
 .hero-media {
   position: absolute;
   inset: 0;

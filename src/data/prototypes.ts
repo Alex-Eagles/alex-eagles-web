@@ -31,7 +31,14 @@ export interface Prototype {
   lesson: string;
   groundImage: string;
   flightImage: string;
-  /** YouTube embed URL (https://www.youtube.com/embed/…). Undefined = footage not filmed/uploaded yet. */
+  /**
+   * YouTube embed URL, dropped straight into the modal's <iframe src>, so it
+   * must be the /embed/ form — a youtu.be or /watch?v= link refuses to frame.
+   * Use the nocookie host like Video.jsx does: same embed, but YouTube holds
+   * off on tracking cookies until someone actually presses play. Drop the `si`
+   * share token from a copied link; it only identifies who shared it.
+   * Undefined = footage not filmed/uploaded yet.
+   */
   videoUrl?: string;
 }
 
@@ -62,6 +69,7 @@ export const prototypes: Prototype[] = [
       "This was our first real airframe, so it set the baseline everything after inherited: the avionics stack, the plywood-frame build method, and the first PID tuning pass — all validated with FEA rather than assumed safe.",
     groundImage: hexaGround,
     flightImage: hexaFlight,
+    videoUrl: "https://www.youtube-nocookie.com/embed/KrsQcj8R7ck",
   },
   {
     id: "quad-test",

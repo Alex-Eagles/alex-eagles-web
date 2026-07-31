@@ -85,25 +85,28 @@ export default function Hero() {
   return (
     <section className="hero" ref={rootRef}>
       {/* Muted, looping flight footage. The poster paints immediately so the
-          hero is never a black rectangle while the file buffers. */}
-      {Object.keys(HERO_MEDIA).map((key) => (
-        <video
-          key={key}
-          ref={(el) => {
-            videoRefs.current[key] = el;
-          }}
-          className="hero-media"
-          data-active={key === active}
-          src={requested[key] ? HERO_MEDIA[key].src : undefined}
-          poster={requested[key] ? HERO_MEDIA[key].poster : undefined}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        />
-      ))}
+          hero is never a black rectangle while the file buffers. The wrapper
+          keeps the clips' crossfade z-index from escaping over the scrim and
+          the headline — see .hero-media-stack in Hero.css. */}
+      <div className="hero-media-stack" aria-hidden="true">
+        {Object.keys(HERO_MEDIA).map((key) => (
+          <video
+            key={key}
+            ref={(el) => {
+              videoRefs.current[key] = el;
+            }}
+            className="hero-media"
+            data-active={key === active}
+            src={requested[key] ? HERO_MEDIA[key].src : undefined}
+            poster={requested[key] ? HERO_MEDIA[key].poster : undefined}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+        ))}
+      </div>
       <div className="hero-scrim" aria-hidden="true" />
 
       <div className="hero-body">
