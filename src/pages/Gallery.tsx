@@ -702,8 +702,15 @@ export default function Gallery() {
   const scrollLeft = useRef(0);
   const isDraggingRef = useRef(false);
 
+  /*
+   * Click-and-drag scrolling is a mouse affordance, and touch already has one
+   * that's better. Phones synthesise mouse events after a touch sequence, so
+   * without this guard the emulation could start on a swipe, and its first act
+   * is `scrollSnapType = 'none'` — which only gets restored by mouseup/mouseleave,
+   * events touch doesn't reliably deliver. Snapping then stays off for good.
+   */
   const handleMouseDown = (e: ReactMouseEvent) => {
-    if (!reelRef.current) return;
+    if (!reelRef.current || !isFinePointer) return;
     startX.current = e.pageX;
     scrollLeft.current = reelRef.current.scrollLeft;
     isDraggingRef.current = false;
@@ -711,7 +718,7 @@ export default function Gallery() {
   };
 
   const handleReelMouseMove = (e: ReactMouseEvent) => {
-    if (!reelRef.current || startX.current === 0) return;
+    if (!reelRef.current || !isFinePointer || startX.current === 0) return;
     const dx = Math.abs(e.pageX - startX.current);
 
     if (!isDraggingRef.current && dx > dragThreshold) {
@@ -988,13 +995,31 @@ export default function Gallery() {
                   onMouseLeave={handleMouseLeaveOrUp} 
                   onMouseUp={handleMouseLeaveOrUp} 
                   onMouseMove={handleReelMouseMove} 
-                  /* items-center: cards no longer share one height now that each
-                     takes the shape of its own media, so without this they'd
-                     hang from the top of the tallest one.
-                     The padding is what centres a card horizontally, and it has
-                     to stay the complement of the card width — 14 + 72 + 14 on
-                     phones, and (50vw-210) + 420 + (50vw-210) from sm up. */
-                  className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 px-[14vw] sm:px-[calc(50vw-210px)] [&::-webkit-scrollbar]:hidden"
+                  /*
+                   * items-center: cards no longer share one height now that each
+                   * takes the shape of its own media, so without this they'd
+                   * hang from the top of the tallest one.
+                   *
+                   * The side padding is what centres a card, and it must be
+                   * exactly half the leftover space: (track - card) / 2.
+                   *
+                   * It used to be `14vw` against a `72vw` card — 14 + 72 + 14 =
+                   * 100, which is only correct if the track is the full viewport.
+                   * It isn't: the wrapper above is `-mx-6 px-6`, so the track is
+                   * about 48px narrower, and 14vw overshot by ~24px. The first
+                   * card therefore sat off-centre at scrollLeft 0, and the only
+                   * thing hiding it was scroll-snap pulling it back — which the
+                   * drag handlers switch off (`scrollSnapType = 'none'`) and
+                   * which touch doesn't reliably switch back on. When it stayed
+                   * off, the card stayed off-centre.
+                   *
+                   * `50%` in padding resolves against the containing block's
+                   * width — the track — so `calc(50% - <half card>)` is that
+                   * exact half-leftover whatever the track turns out to be. The
+                   * card is now centred at scrollLeft 0 by construction, with
+                   * snapping as polish rather than as the mechanism.
+                   */
+                  className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 px-[calc(50%-36vw)] sm:px-[calc(50%-210px)] [&::-webkit-scrollbar]:hidden"
                   style={{ scrollbarWidth: 'none', perspective: 1200 }}
                 >
                   <AnimatePresence>
