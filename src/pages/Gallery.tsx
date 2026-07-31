@@ -74,6 +74,25 @@ function sizedVideo(url: string | undefined, width: number): string | undefined 
   return url.replace('/upload/', `/upload/w_${width},c_limit/`);
 }
 
+/*
+ * A still pulled from the clip itself, for the entries that are video-only.
+ *
+ * Several items in src/data/gallery.ts carry a videoUrl and no imageUrl, so
+ * they had no poster and no fallback image — nothing at all to show until the
+ * video painted its first frame. On a tile with a near-black backdrop that read
+ * as a black square, and on mobile, where the clip wasn't loading, it stayed
+ * that way. Cloudinary can hand back a frame from the video (`so_0`, asked for
+ * as .jpg), so the poster costs no new asset and no upload.
+ */
+function videoPoster(url: string | undefined, width: number): string | undefined {
+  if (!url || !url.includes('res.cloudinary.com') || !url.includes('/video/upload/')) {
+    return undefined;
+  }
+  return url
+    .replace('/video/upload/', `/video/upload/so_0,w_${width},c_limit,q_auto/`)
+    .replace(/\.(mp4|webm|mov)$/i, '.jpg');
+}
+
 function getCSSVar(name: string): string {
   if (typeof window === 'undefined') return '';
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -258,17 +277,47 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
   const shouldPreload = useInView(containerRef, { once: true, margin: "800px" });
   const isInViewport = useInView(containerRef, { margin: "100px" });
   const videoRef = useRef<HTMLVideoElement>(null);
+  /* One retry only — see the video's onError below. */
+  const retriedRef = useRef(false);
 
+  /*
+   * Start playback as soon as the tile is near the viewport — not once the clip
+   * has reported itself ready.
+   *
+   * Gating this on `videoReady` deadlocked on phones. `videoReady` is set from
+   * `canplay`, `canplay` can't fire until the browser actually fetches the
+   * clip, and mobile browsers routinely ignore `preload` until something asks
+   * for playback. So: nothing loaded, `canplay` never fired, play() was never
+   * called, nothing loaded. The tile sat on its poster forever, and the clip
+   * only ever appeared in the lightbox — whose <video> carries `controls` and
+   * `autoPlay` and so loads on its own.
+   *
+   * Calling play() is what kicks the fetch off; the browser starts playing once
+   * it has enough buffered, and a rejected promise (autoplay refused, no data
+   * yet) just leaves the poster up, which is the same thing it showed before.
+   */
   useEffect(() => {
-    if (isInViewport && videoReady && videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    } else if (!isInViewport && videoRef.current) {
-      videoRef.current.pause();
+    const el = videoRef.current;
+    if (!el) return;
+    if (!isInViewport) {
+      el.pause();
+      return;
     }
-  }, [isInViewport, videoReady]);
+    const playing = el.play();
+    if (playing && playing.catch) playing.catch(() => {});
+    // shouldPreload is a dependency because it is what mounts the <video>:
+    // without it this runs before there's an element to play.
+  }, [isInViewport, shouldPreload]);
+
+  /* A clip with no still of its own falls back to a frame from itself. */
+  const poster = sizedImage(item.imageUrl, 600) ?? videoPoster(item.videoUrl, 640);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full pointer-events-none bg-[#050505]">
+    <div ref={containerRef} className="relative w-full h-full pointer-events-none">
+      {/* Video-only entries have no imageUrl, and an <img> with no src is an
+          empty box that can surface its alt text — the clip's own poster covers
+          those instead. */}
+      {item.imageUrl && (
       <img
         src={sizedImage(item.imageUrl, 600)}
         alt={item.title}
@@ -281,18 +330,48 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
           }
           setImgLoaded(true);
         }}
-        className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${isLandscapeImg ? 'object-contain' : 'object-cover'} ${(!imgLoaded || (videoReady && isInViewport)) ? 'opacity-0' : 'opacity-100'}`}
+        /*
+         * Stays fully opaque once loaded, and is covered by the clip rather
+         * than fading out under it. It used to drop to opacity-0 the moment the
+         * video was ready while the video faded up over 1s — so mid-crossfade
+         * both sat at part alpha and the tile's own near-black backdrop showed
+         * straight through. That dip, plus fading in from that same backdrop on
+         * first load, is the black blink. The backdrop is gone from the wrapper
+         * above and nothing dips now: the still is simply hidden behind an
+         * opaque video.
+         */
+        className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${isLandscapeImg ? 'object-contain' : 'object-cover'} ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
       />
+      )}
 
       {item.videoUrl && (shouldPreload || priority) && (
         <video
           ref={videoRef}
           src={`${sizedVideo(item.videoUrl, 640)}#t=0.001`}
-          poster={sizedImage(item.imageUrl, 600)}
+          poster={poster}
           muted
           loop
           playsInline
           preload={priority ? "auto" : "metadata"}
+          /*
+           * Cloudinary builds a derived clip lazily: the first request for a
+           * transformation it hasn't made yet answers 423 while it renders in
+           * the background, and a <video> treats that as fatal and never tries
+           * again — one dead tile, permanently. scripts/warm-gallery-derived.mjs
+           * is what normally stops that happening, by making the first request
+           * from a terminal instead; this is the safety net for a clip added
+           * without running it.
+           */
+          onError={() => {
+            const el = videoRef.current;
+            if (!el || retriedRef.current) return;
+            retriedRef.current = true;
+            window.setTimeout(() => {
+              el.load();
+              const playing = el.play();
+              if (playing && playing.catch) playing.catch(() => {});
+            }, 2500);
+          }}
           /*
            * `canplay`, not `canplaythrough`. canplaythrough waits until the
            * browser thinks the WHOLE clip can play start to finish without
