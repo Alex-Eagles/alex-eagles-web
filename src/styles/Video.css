@@ -109,6 +109,14 @@
   position: absolute;
   inset: 0;
   z-index: 0;
+  /* No transition here (deliberately): a plain `transition: background`
+   * cannot crossfade a gradient built from literal rgba() stops — the
+   * browser recomputes it instantly regardless. Doing this for real would
+   * mean registering each of this gradient's 6 stops as its own @property
+   * colour (see theme.css's "ANIMATABLE GRADIENT STOPS", used for the
+   * simpler 2-stop cases in Blog.tsx/TrackRecord.css), which isn't worth it
+   * for a translucent fog overlay sitting on top of .video and .video-photo,
+   * both of which already crossfade correctly. */
   background:
     radial-gradient(
       120% 90% at 18% 34%,

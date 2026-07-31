@@ -38,6 +38,12 @@ export default function BlogCard({
   const cardStyle = {
     backgroundColor: isDark ? style.bg.dark : style.bg.light,
     borderColor: style.accent,
+    // Inline style.transition overrides GlassCard's own `transition-[transform,
+    // box-shadow]` class entirely (inline always wins over classes for the
+    // same property, it doesn't merge) — so its hover transition has to be
+    // repeated here alongside the new background/border crossfade.
+    transition:
+      "transform 250ms ease-out, box-shadow 250ms ease-out, background-color var(--transition-slow), border-color var(--transition-slow)",
   };
 
   return (

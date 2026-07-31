@@ -94,9 +94,13 @@ export default function Blog() {
     <div
       className="min-h-dvh"
       style={{
-        background: isDark
-          ? "#121B34"
-          : "linear-gradient(to bottom, var(--bg-elevated) 0%, var(--bg-primary) 60%)",
+        // --blog-bg-stop1/2 are registered via @property in theme.css
+        // specifically so this gradient can crossfade on theme toggle — a
+        // plain isDark-ternary background (the old approach) snaps instantly
+        // because unregistered custom-property/gradient swaps don't
+        // interpolate.
+        background: "linear-gradient(to bottom, var(--blog-bg-stop1) 0%, var(--blog-bg-stop2) 60%)",
+        transition: "--blog-bg-stop1 var(--transition-slow), --blog-bg-stop2 var(--transition-slow)",
       }}
     >
       <BlogHeader activeFilter={activeFilter} onFilterChange={handleFilterChange} />
@@ -109,7 +113,10 @@ export default function Blog() {
         <div
           ref={panelRef}
           className="border border-border rounded-2xl p-[30px] shadow-[var(--elevation-2)] scroll-mt-24"
-          style={{ backgroundColor: isDark ? "#121B34" : "#E3E3E8" }}
+          style={{
+            backgroundColor: isDark ? "#121B34" : "#E3E3E8",
+            transition: "background-color var(--transition-slow)",
+          }}
         >
           {filteredPosts.length > 0 ? (
             <>

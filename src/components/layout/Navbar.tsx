@@ -113,6 +113,7 @@ export default function Navbar() {
           background: "var(--bg-glass)",
           border: "1px solid var(--border-subtle)",
           color: "var(--text-primary)",
+          transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
           /* Blur comes from `.ui-blur` — pointer devices only. */
         }}
       >
@@ -137,6 +138,7 @@ export default function Navbar() {
             background: "var(--bg-glass)",
             backdropFilter: "blur(22px)",
             WebkitBackdropFilter: "blur(22px)",
+            transition: "background-color var(--transition-slow)",
           }}
         >
           <button
@@ -149,6 +151,7 @@ export default function Navbar() {
               background: "var(--bg-elevated)",
               border: "1px solid var(--border-subtle)",
               color: "var(--text-primary)",
+              transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
             }}
           >
             <X size={22} />

@@ -655,7 +655,7 @@ export default function Gallery() {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="relative min-h-screen bg-[var(--bg-primary)] pt-24 pb-12 px-6 overflow-hidden">
+      <div className="relative min-h-screen bg-[var(--bg-primary)] transition-colors duration-[400ms] ease-out pt-24 pb-12 px-6 overflow-hidden">
         
         {cursorActive && (
           <style>{`
@@ -696,7 +696,7 @@ export default function Gallery() {
             className="w-full sm:w-auto flex justify-start sm:justify-center overflow-x-auto [&::-webkit-scrollbar]:hidden order-1 sm:order-2" 
             style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
           >
-            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] w-max sm:mx-auto">
+            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] transition-colors duration-[400ms] ease-out w-max sm:mx-auto">
               {CATEGORIES.map((cat) => (
                 <button 
                   key={cat} 
@@ -713,7 +713,7 @@ export default function Gallery() {
           </div>
 
           <div className="w-full sm:w-1/4 flex justify-center sm:justify-end order-3 shrink-0">
-            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)]">
+            <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] transition-colors duration-[400ms] ease-out">
               {viewModes.map(({ key, label, icon: Icon }) => (
                 <button key={key} onClick={() => setViewMode(key)} onMouseEnter={() => setCursorLabel(label)} onMouseLeave={() => setCursorLabel(null)} aria-label={`${label} view`} className={`relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.1em] transition-colors duration-300 ${viewMode === key ? 'text-fg' : 'text-fg-muted hover:text-fg'}`}>
                   {viewMode === key && <m.span layoutId="viewModePill" transition={{ type: 'spring', stiffness: 340, damping: 30 }} className="absolute inset-0 rounded-full bg-[var(--brand-glow)] border border-[var(--border-subtle)]" />}
