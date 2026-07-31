@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Wrench, Cpu } from "lucide-react";
 import "../styles/TeamStructure.css";
@@ -9,30 +9,34 @@ import "../styles/TeamStructure.css";
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
 /**
- * The two roles above the split. `lit` picks up the existing traveling-light
- * animation class (tp-box--lit-0 / -1), which is timed to the connector legs.
+ * The two roles above the split.
  */
 const TOP_ROLES = [
   {
     id: "leader",
     title: "Team Leader",
-    lit: 0,
     desc: "Sets the season plan, owns the competition roadmap and makes the final call when subsystems disagree.",
   },
   {
     id: "vice",
     title: "Team Vice Lead",
-    lit: 1,
     desc: "Runs the week: schedules, design reviews, logistics and travel, and stands in for the leader whenever needed.",
   },
 ];
 
+/* Accents are the site's own brand colors, fixed (not swapped per theme)
+ * because the cards are solid fills with white text on top: dark mode's
+ * --sky (#60a5fa) is deliberately light for text-on-dark use and fails
+ * contrast as a background under white labels. #3c40b5/#1d4ed8 are the
+ * site's own indigo/sky, already used with white text elsewhere (the CTA
+ * button; theme.css's own contrast notes measure #1d4ed8 at 6.0:1). */
 const LEADS = [
   {
     id: "mechanical",
     lead: "Mechanical Lead",
     icon: Wrench,
-    color: "#8b5cf6",
+    color: "#3c40b5",
+    to: "/team#division-01",
     desc: "Keeps aerodesign, structures and propulsion working to the same set of numbers, so the airframe comes together as one aircraft.",
     children: [
       {
@@ -53,7 +57,8 @@ const LEADS = [
     id: "autonomous",
     lead: "Autonomous Lead",
     icon: Cpu,
-    color: "#3b82f6",
+    color: "#1d4ed8",
+    to: "/team#division-02",
     desc: "Manages the integration between the autonomous subsystems, so software, hardware and AI arrive as one working stack rather than three separate ones.",
     children: [
       {
@@ -142,14 +147,12 @@ export default function TeamStructure() {
           onMouseLeave={() => setActiveId(null)}
           onBlur={() => setActiveId(null)}
         >
-          {TOP_ROLES.map((role, i) => (
-            <Fragment key={role.id}>
-              <div className="tp-tier tp-tier--single">
+          <div className="tp-trunk">
+            {TOP_ROLES.map((role) => (
+              <div className="tp-tier tp-tier--single" key={role.id}>
+                <span className="tp-dot tp-dot--top" aria-hidden="true" />
                 <div
-                  className={nodeClass(
-                    `tp-box tp-box--top tp-box--lit-${role.lit}`,
-                    role.id,
-                  )}
+                  className={nodeClass("tp-box tp-box--top", role.id)}
                   {...nodeProps(role.id, "/team#leadership")}
                 >
                   <span className="tp-node-head">{role.title}</span>
@@ -158,42 +161,27 @@ export default function TeamStructure() {
                   </span>
                 </div>
               </div>
+            ))}
+          </div>
 
-              <div
-                className={`tp-connector tp-connector--${i === 0 ? "top" : "branch"}`}
-              />
-            </Fragment>
-          ))}
+          <div className="tp-fork" aria-hidden="true">
+            <span className="tp-fork-bar" />
+          </div>
 
-          <div className="tp-tier3">
-            <span
-              className="tp-split-ball tp-split-ball--left"
-              aria-hidden="true"
-            />
-            <span
-              className="tp-split-ball tp-split-ball--right"
-              aria-hidden="true"
-            />
-            <div className="tp-leads">
-              {LEADS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    className="tp-lead-column"
-                    key={item.id}
-                    style={{ "--accent": item.color }}
-                  >
+          <div className="tp-leads">
+            {LEADS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  className="tp-lead-column"
+                  key={item.id}
+                  style={{ "--accent": item.color }}
+                >
+                  <div className="tp-tier tp-tier--single">
+                    <span className="tp-dot" aria-hidden="true" />
                     <div
-                      className="tp-connector tp-connector--split"
-                      aria-hidden="true"
-                    />
-
-                    <div
-                      className={nodeClass(
-                        "tp-box tp-box--lead tp-box--lit-2",
-                        item.id,
-                      )}
-                      {...nodeProps(item.id)}
+                      className={nodeClass("tp-box tp-box--lead", item.id)}
+                      {...nodeProps(item.id, item.to)}
                     >
                       <span className="tp-node-head">
                         <span className="tp-lead-icon">
@@ -205,16 +193,16 @@ export default function TeamStructure() {
                         <span>{item.desc}</span>
                       </span>
                     </div>
+                  </div>
 
-                    <div className="tp-connector tp-lead-connector" />
-
-                    <div className="tp-owns">
-                      {item.children.map((child) => {
-                        const childId = `${item.id}-${child.name}`;
-                        return (
+                  <div className="tp-owns">
+                    {item.children.map((child) => {
+                      const childId = `${item.id}-${child.name}`;
+                      return (
+                        <div className="tp-tier tp-tier--single" key={child.name}>
+                          <span className="tp-dot tp-dot--sm" aria-hidden="true" />
                           <div
                             className={nodeClass("tp-owns-item", childId)}
-                            key={child.name}
                             {...nodeProps(childId, `/team#${slugify(child.name)}`)}
                           >
                             <span className="tp-node-head">{child.name}</span>
@@ -222,13 +210,13 @@ export default function TeamStructure() {
                               <span>{child.desc}</span>
                             </span>
                           </div>
-                        );
-                      })}
-                    </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

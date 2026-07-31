@@ -474,7 +474,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We shape how the aircraft flies — the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+            "We shape how the aircraft flies: the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
         }),
         section("Structure", [
           slot("Section Lead", "Mira Barsoum", {
@@ -504,7 +504,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We design and build the airframe that holds everything together — sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
+            "We design and build the airframe that holds everything together: sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
         }),
         // Co-leads — Hana and Rodyna run Propulsion together, no vice.
         section("Propulsion", [
@@ -522,7 +522,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We power the aircraft — selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
+            "We power the aircraft: selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
         }),
       ],
     },
@@ -596,7 +596,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We give the aircraft its eyes — detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
+            "We give the aircraft its eyes: detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
           icon: "computer-vision",
         }),
         // Youssef Hozayen also runs Hardware, on top of his top-level Vice Lead card.
@@ -641,7 +641,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We build the electronics that make the aircraft think — the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
+            "We build the electronics that make the aircraft think: the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
         }),
         // Co-leads — Mazen and Sara run Software together, no vice.
         section("Software", [
@@ -688,7 +688,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We write the software that flies the aircraft on its own — the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
+            "We write the software that flies the aircraft on its own: the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
           // Mazen above Sara down the left column. Propulsion's co-leads stay
           // side by side, so this is opt-in rather than a rule for co-leads.
           stackLeads: true,
@@ -726,7 +726,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We design and build the airframe that holds everything together — sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
+              "We design and build the airframe that holds everything together: sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
           },
         ),
         /*
@@ -778,7 +778,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We shape how the aircraft flies — the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+              "We shape how the aircraft flies: the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
           },
         ),
         section(
@@ -791,7 +791,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We power the aircraft — selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
+              "We power the aircraft: selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
           },
         ),
       ],
@@ -821,7 +821,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We write the software that flies the aircraft on its own — the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
+              "We write the software that flies the aircraft on its own: the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
           },
         ),
         section(
@@ -834,7 +834,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We build the electronics that make the aircraft think — the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
+              "We build the electronics that make the aircraft think: the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
           },
         ),
         section(
@@ -849,7 +849,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We give the aircraft its eyes — detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
+              "We give the aircraft its eyes: detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
           },
         ),
       ],

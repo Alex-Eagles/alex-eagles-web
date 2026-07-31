@@ -203,6 +203,7 @@
   @keyframes vp-callout-in { from { opacity:0; transform:translateY(9px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
   @keyframes vp-callout-pop { 0% { transform:scale(0); } 62% { transform:scale(1.3); } 100% { transform:scale(1); } }
   #vp-build-skip:hover { background:rgba(60,64,181,0.92)!important; border-color:#60a5fa!important; color:#fff!important; }
+  .vp-secnav-link[data-active="1"] { color:#fff !important; background:#3c40b5 !important; border-color:#3c40b5 !important; }
 </style>
 <script src="./image-slot.js"></script>
 </helmet>
@@ -253,8 +254,37 @@
     </div>
   </header>
 
+  <!-- ========================= SECTION NAV ========================= -->
+  <nav aria-label="Vehicle page sections" style="position:sticky; top:96px; z-index:20; display:flex; justify-content:center; padding:0 16px; pointer-events:none;">
+    <div style="pointer-events:auto; display:flex; gap:6px; overflow-x:auto; max-width:100%; padding:7px 12px; border-radius:9999px; background:rgba(18,27,52,0.65); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(59,130,246,0.18); box-shadow:0 14px 40px rgba(0,0,0,0.35); scrollbar-width:none;">
+      <a href="#vp-stats" class="vp-secnav-link" data-nav="vp-stats" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Stats</a>
+      <a href="#vp-build-scroll" class="vp-secnav-link" data-nav="vp-build-scroll" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Build</a>
+      <a href="#vp-explorer" class="vp-secnav-link" data-nav="vp-explorer" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Avionics</a>
+      <a href="#vp-process" class="vp-secnav-link" data-nav="vp-process" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Process</a>
+      <a href="#vp-software" class="vp-secnav-link" data-nav="vp-software" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Software</a>
+      <a href="#vp-reports" class="vp-secnav-link" data-nav="vp-reports" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Reports</a>
+      <a href="#vp-gallery" class="vp-secnav-link" data-nav="vp-gallery" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Gallery</a>
+      <a href="#vp-action" class="vp-secnav-link" data-nav="vp-action" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">In Action</a>
+    </div>
+  </nav>
+
   <!-- ============================ MISSION ============================ -->
-  
+  <section id="vp-stats" style="position:relative; background:#07091c; padding:70px 32px 96px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">By the numbers</div>
+        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(30px,4.4vw,44px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Every choice, measured.</h2>
+      </div>
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease .1s, transform .8s cubic-bezier(.2,.7,.2,1) .1s; display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:1px; margin-top:44px; background:rgba(60,64,181,0.25); border:1px solid rgba(60,64,181,0.25); border-radius:14px; overflow:hidden;">
+        <div style="background:#0d1035; padding:26px 20px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:30px; color:#f0f2ff; line-height:1;">6.8<span style="font-size:13px; color:#8b8fc8;"> kg</span></div><div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">All-up weight</div><div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">Down 60%+ from 18 kg in 2025</div></div>
+        <div style="background:#0d1035; padding:26px 20px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:30px; color:#f0f2ff; line-height:1;">2.7&times;</div><div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">Structural safety factor</div><div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">Bottom plate at full takeoff thrust</div></div>
+        <div style="background:#0d1035; padding:26px 20px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:30px; color:#f0f2ff; line-height:1;">3<span style="font-size:13px; color:#8b8fc8;"> cm</span></div><div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">RTK positioning accuracy</div><div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">From 3&ndash;5 m uncorrected</div></div>
+        <div style="background:#0d1035; padding:26px 20px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:30px; color:#f0f2ff; line-height:1;">1.5<span style="font-size:13px; color:#8b8fc8;"> km</span></div><div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">Link range tested</div><div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">Telemetry, control &amp; video held</div></div>
+        <div style="background:#0d1035; padding:26px 20px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:30px; color:#f0f2ff; line-height:1;">&lt;3<span style="font-size:13px; color:#8b8fc8;"> min</span></div><div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">Field setup time</div><div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">Carry-On footprint, tool-less legs</div></div>
+        <div style="background:#0d1035; padding:26px 20px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:30px; color:#f0f2ff; line-height:1;">77.4<span style="font-size:13px; color:#8b8fc8;">/100</span></div><div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">Trade-study score</div><div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">X-quadcopter over FW, hexa &amp; VTOL</div></div>
+      </div>
+    </div>
+  </section>
 
   <!-- ==================== SCROLL-BUILD SEQUENCE ==================== -->
   <section id="vp-build-scroll" style="position:relative; height:300vh; background:#07091c; padding:0;">
@@ -339,7 +369,7 @@
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
         <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Explore our avionics</div>
         <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Every component, up close.</h2>
-        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:480px; line-height:1.6;">Tap a number on the aircraft — or a chip below — to inspect the part.</p>
+        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:480px; line-height:1.6;">Tap a number on the aircraft, or a chip below, to inspect the part.</p>
       </div>
 
       <!-- drone stage: sits centered, markers reveal on entry -->
@@ -397,13 +427,13 @@
         </div>
         <div style="padding:28px 30px;">
           <div data-exp-panel="cube">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">01 · COMPUTE — FLIGHT CONTROLLER</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">01 · COMPUTE / FLIGHT CONTROLLER</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Pixhawk Cube Orange 2</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every decision starts here. A high-performance STM32 runs the entire autonomy loop in real time — fusing every sensor into one trusted picture of attitude and position and commanding the props thousands of times per second.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every decision starts here. A high-performance STM32 runs the entire autonomy loop in real time, fusing every sensor into one trusted picture of attitude and position and commanding the props thousands of times per second.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> redundant IMU stack, deterministic execution and vibration-isolated sensors.</p>
           </div>
           <div data-exp-panel="gnss" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">02 · SENSING — POSITIONING</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">02 · SENSING / POSITIONING</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Here3+ GNSS Module</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The absolute reference behind every waypoint. Mast-mounted, it delivers global position, velocity and precise timing over the CAN bus; every fix folds into the Cube's Extended Kalman Filter.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> DroneCAN-native and raised 9–15 cm above the frame, clear of propulsion EMI.</p>
@@ -412,42 +442,42 @@
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">03 · GIMBAL CAMERA</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">SIYI A8 Mini</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Eyes that stay level while the aircraft doesn't. A 4K 8MP Sony sensor rides a 3-axis FOC-stabilised gimbal with 6× digital zoom, feeding imagery down the ground link over HDMI and Ethernet.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> the best size-to-capability ratio: stabilised 4K without costing endurance.</p>
           </div>
           <div data-exp-panel="link" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · TELEMETRY</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Herelink</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Three links collapsed into one. A single 2.4 GHz digital pipe carries RC control, MAVLink telemetry and 1080p video together — up to 20 km at roughly 110 ms latency.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Three links collapsed into one. A single 2.4 GHz digital pipe carries RC control, MAVLink telemetry and 1080p video together, up to 20 km at roughly 110 ms latency.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> pilot, operator and observer all work from one link; the handheld device becomes a fully mobile ground station.</p>
           </div>
           <div data-exp-panel="pdb" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">05 · POWER — DISTRIBUTION</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">05 · POWER / DISTRIBUTION</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Matek PDB HEX</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every amp passes through here. Heavy copper carries 2–12S / 6–60 V to the ESCs while an onboard sensor reads current up to 264 A and streams voltage and current back to the Cube.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> the six-output variant on a quad leaves distribution headroom for payload growth — one board instead of a harness.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> the six-output variant on a quad leaves distribution headroom for payload growth, one board instead of a harness.</p>
           </div>
           <div data-exp-panel="bec" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">06 · POWER — REGULATION</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">06 · POWER / REGULATION</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">MAUCH BEC</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Clean power, guarded from the noise of flight. It converts raw LiPo voltage into stable rails for the flight controller, GPS and LiDAR, absorbing ripple, transients and motor/ESC interference before they reach a sensor.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> stable and redundant power supply isolating noise-sensitive systems from high-current bus.</p>
           </div>
           <div data-exp-panel="custom" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">07 · POWER / IN-HOUSE PCB</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Alex Eagles Power Board</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Designed, routed, and fabricated from scratch by us- splits HV battery rail into dedicated power supplies for all onboard electronics.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> all in 1 system power supply for all our aircrafts. </p>
           </div>
           <div data-exp-panel="prop" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">08 · PROPULSION — ×4</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">08 · PROPULSION / ×4</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">T-Motor 6007 II System</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF2211 props — one factory-tuned system per arm across the quad.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF2211 props, one factory-tuned system per arm across the quad.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
           </div>
           <div data-exp-panel="batt" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER — MAIN BATTERY</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER / MAIN BATTERY</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Tattu 28 000 mAh 6S</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission — a 28 000 mAh 6S LiPo feeding the entire platform through the power distribution network.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission: a 28 000 mAh 6S LiPo feeding the entire platform through the power distribution network.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> high capacity for long-endurance autonomous flights without swapping packs mid-mission.</p>
           </div>
         </div>
@@ -457,6 +487,7 @@
 
   <!-- shared-element flyer: bridges the build render into the explorer drone -->
   <img id="vp-flyer" src="assets/drone.png" alt="" aria-hidden="true" style="position:fixed; left:0; top:0; width:0; height:0; object-fit:contain; pointer-events:none; z-index:40; opacity:0; will-change:left,top,width,height,transform; filter:drop-shadow(0 26px 60px rgba(0,0,0,0.55));">
+
 
 
   <!-- ========================= DEVELOPMENT PROCESS ========================= -->
@@ -571,17 +602,18 @@
         </article>
 
         <article class="vpt-item" data-idx="4">
-          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Autotuning">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Component and subsystem testing">
             <div class="vpt-shell">
               <div class="vpt-core">
                 <div class="vpt-media">
-                  <img src="assets/process/05-autotune.webp" alt="" loading="lazy" data-on="1">
-                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                  <img src="/images/blog/sw-mapping-camera.png" alt="" loading="lazy" data-on="1">
+                  <img src="/images/blog/fw-rtk-gps.jpeg" alt="" loading="lazy" data-on="0">
+                  <img src="/images/blog/fw-herelink-range.jpeg" alt="" loading="lazy" data-on="0">
                 </div>
                 <div class="vpt-body">
-                  <div class="vpt-kicker">Control tuning</div>
-                  <h3 class="vpt-title">Autotuning.</h3>
-                  <p class="vpt-text">The controller twitches each axis against a disturbance it generates itself, then raises the rate gains to the sharpest response Neith holds without overshoot.</p>
+                  <div class="vpt-kicker">Validation</div>
+                  <h3 class="vpt-title">Component &amp; subsystem testing.</h3>
+                  <p class="vpt-text">Every part earns its place on the aircraft: PDB load and thermal testing, a dedicated camera test rig, RTK accuracy down to 3 cm, and a Herelink link held to 1.5 km.</p>
                 </div>
               </div>
             </div>
@@ -592,6 +624,27 @@
         </article>
 
         <article class="vpt-item" data-idx="5">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Autotuning">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/05-autotune.webp" alt="" loading="lazy" data-on="1">
+                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Control tuning</div>
+                  <h3 class="vpt-title">Autotuning.</h3>
+                  <p class="vpt-text">The controller twitches each axis against a disturbance it generates itself, then raises the rate gains to the sharpest response Neith holds without overshoot, under 0.1&deg; of tracking error, post-tune.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="6">
           <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Flight testing">
             <div class="vpt-shell">
               <div class="vpt-core">
@@ -629,7 +682,66 @@
       </div>
     </div>
   </section>
+  <!-- ========================= MISSION SOFTWARE ========================= -->
+  <section id="vp-software" style="position:relative; background:#0d1035; padding:clamp(88px,12vh,140px) 32px;">
+    <div style="max-width:1120px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Mission software</div>
+        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">The brain stays on the ground.</h2>
+        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:600px; line-height:1.6;">Off-the-shelf stations like Mission Planner and QGroundControl aren&rsquo;t built around the SUAS flow, so we built our own: a web app with a React front end over independent backend services (MAVLink, camera, detection, and payload) behind an API gateway, so a fault in one can&rsquo;t take down telemetry.</p>
+      </div>
 
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:56px;">
+        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+          <div style="display:flex; align-items:center; gap:6px; padding:9px 12px; background:#12142c; border-bottom:1px solid rgba(60,64,181,0.3);">
+            <span style="width:9px; height:9px; border-radius:9999px; background:#d9302a;"></span>
+            <span style="width:9px; height:9px; border-radius:9999px; background:#e0a83c;"></span>
+            <span style="width:9px; height:9px; border-radius:9999px; background:#3ec97a;"></span>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#565a94; margin-left:8px;">Alex Eagles &middot; Ground Control Station</span>
+          </div>
+          <img src="/images/blog/sw-gcs.jpeg" alt="Custom ground control station: mission planning view with mapping survey area and live telemetry" style="display:block; width:100%; height:auto;">
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">BUILT FOR THE MISSION, NOT GENERIC FLIGHT</div>
+          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 14px;">Every screen optimizes for what moves the score.</h3>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(217,48,42,0.16); border:1px solid rgba(217,48,42,0.4); color:#d9302a; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">01</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Search boundaries are pre-loaded; selecting one auto-generates the lawnmower survey path in under three seconds for a 10-acre area.</p></div>
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">02</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Every detection is queued for a one-click operator accept or reject, rather than auto-dropping on a model&rsquo;s confidence alone.</p></div>
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">03</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">A dedicated, always-on panel shows boundaries, position, ground speed, and AGL altitude for the judge, isolated so a fault elsewhere can&rsquo;t hide it.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- data pipeline: capture -> downlink/batch -> detect -> cluster -> operator -> drop -->
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); margin-top:64px;">
+        <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#5458cc; text-align:center; margin-bottom:22px;">MISSION DATA ARCHITECTURE</div>
+        <div style="display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px;">
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">01</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Capture</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">SIYI A8 mini geotags each frame via the flight controller&rsquo;s GPS at the instant of capture.</div></div>
+          <div style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">02</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Downlink &amp; batch</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">Images cross the Herelink downlink and queue until a batch of 8 is ready, amortizing inference latency.</div></div>
+          <div style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">03</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Detect</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">UAV-DETR, a transformer tuned for small aerial objects, flags candidate tents and mannequins per batch.</div></div>
+          <div style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">04</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Cluster</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">k-means resolves repeat sightings of the same object across overlapping frames into one coordinate.</div></div>
+          <div style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(217,48,42,0.4); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">05</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Operator &amp; drop</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">One click accepts the candidate; the aircraft navigates to it and releases the matching payload.</div></div>
+        </div>
+      </div>
+
+      <!-- mapping -->
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div>
+          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">MAPPING &middot; RISK ASSESSMENT</div>
+          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 14px;">When 4K was the problem.</h3>
+          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 12px;">The lawnmower survey feeds a georeferenced orthomosaic built with OpenDroneMap, which anchors every photo to its GPS geotag rather than guessing position from overlap, so the map stays globally consistent instead of bowing across a large area.</p>
+          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0;">Our first pass (10 m/s, a photo every 0.3 s, full 4K) failed: the camera couldn&rsquo;t finish writing one frame before the next trigger, so far fewer images landed than commanded. Slowing to 6 m/s and dropping to 1080p kept the camera in pace and packed in more overlap, same hardware, same software, and the map built cleanly.</p>
+        </div>
+        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+          <img src="/images/blog/sw-mapping.jpeg" alt="Georeferenced orthomosaic reconstructed from a tuned survey flight" style="display:block; width:100%; height:auto;">
+        </div>
+      </div>
+    </div>
+  </section>
   <!-- ========================= REPORTS ========================= -->
   <section id="vp-reports" style="position:relative; background:#07091c; padding:80px 32px; text-align:center;">
     <div style="max-width:720px; margin:0 auto;">
@@ -817,7 +929,7 @@
   </section>
 
   <!-- ========================= CTA ========================= -->
-  <section style="position:relative; background:#07091c; padding:clamp(96px,13vh,150px) 32px clamp(104px,14vh,160px); text-align:center;">
+  <section id="vp-action" style="position:relative; background:#07091c; padding:clamp(96px,13vh,150px) 32px clamp(104px,14vh,160px); text-align:center;">
     <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:1000px; margin:0 auto;">
       <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0 0 clamp(34px,5vh,56px); color:#f0f2ff;">Neith in action</h2>
       
@@ -864,15 +976,15 @@ class Component extends DCLogic {
       const sms = [...document.querySelectorAll('.vpg-sm')];
       const rails = [...document.querySelectorAll('.vpg-railitem')];
       const meta = [
-        { k: 'Field note 01 · Flight',      t: 'Airborne.',         d: 'Neith in the air during a test sortie — holding attitude under its own power.' },
+        { k: 'Field note 01 · Flight',      t: 'Airborne.',         d: 'Neith in the air during a test sortie, holding attitude under its own power.' },
         { k: 'Field note 02 · Fabrication', t: 'Cut in-house.',     d: 'Machining the carbon-fiber top plate on our CNC, tuned to the exact build layout.' },
         { k: 'Field note 03 · Team',       t: 'Heads down.',        d: 'The team deep in a build session, working through the day.' },
         { k: 'Field note 04 · Night',      t: 'Lit up.',            d: 'Navigation and arm lighting running at full brightness during a night systems check.' },
         { k: 'Field note 05 · Fabrication', t: 'In production.',    d: 'Hand-drilling an arm mount on the bench during a manufacturing run.' },
         { k: 'Field note 06 · Flight',     t: 'In the air.',        d: 'Neith mid-flight during a test sortie.' },
         { k: 'Field note 07 · Night',      t: 'Hover, after dark.', d: 'Holding a steady hover under floodlight, the projected mark tracking the aircraft below.' },
-        { k: 'Field note 08 · Team',       t: 'Late night session.', d: 'Still at it after dark — a build night that ran long.' },
-        { k: 'Field note 09 · Display',    t: 'Flight-ready.',      d: 'The finished Neith on show — every system integrated, wired, and cleared to fly.' },
+        { k: 'Field note 08 · Team',       t: 'Late night session.', d: 'Still at it after dark, a build night that ran long.' },
+        { k: 'Field note 09 · Display',    t: 'Flight-ready.',      d: 'The finished Neith on show: every system integrated, wired, and cleared to fly.' },
         { k: 'Field note 10 · Flight',     t: 'Another pass.',      d: 'A second angle on Neith airborne.' },
         { k: 'Field note 11 · Prototype',  t: 'Where it started.',  d: 'The wooden proof-of-concept frame that validated the geometry before carbon.' },
         { k: 'Field note 12 · Team',       t: 'Flying together.',   d: 'The team on-site as Neith flies overhead.' },
@@ -969,9 +1081,12 @@ class Component extends DCLogic {
         { badge: 'Integration', title: 'System integration.', date: 'June 2026',
           media: [{ t: 'i', s: 'assets/process/04-integration-top.webp' }, { t: 'i', s: 'assets/process/04-integration-wiring.webp' }, { t: 'i', s: 'assets/process/04-integration-bay.webp' }],
           text: 'Next we bring the airframe to life by integrating the electronics, flight controller, motors, wiring, battery and payload systems, including the gimbal-mounted camera. This is where mechanical design meets functional engineering, ensuring every component works together as a cohesive system.' },
+        { badge: 'Validation', title: 'Component & subsystem testing.', date: 'June 2026',
+          media: [{ t: 'i', s: '/images/blog/sw-mapping-camera.png' }, { t: 'i', s: '/images/blog/fw-rtk-gps.jpeg' }, { t: 'i', s: '/images/blog/fw-herelink-range.jpeg' }],
+          text: 'Every component is validated against a defined objective before it earns a place on the aircraft. The custom power board was load-tested on each regulator to its rated capacity, then thermal-imaged under high-ambient heat to confirm the hotspots matched our simulation. A dedicated test interface exercised the camera’s gimbal, video stream, and geotagged capture in isolation before flight. GPS positioning, measured by hovering over a marked target, ran 3–5 m without correction. Turning on RTK brought that down to as low as 3 cm. The Herelink link was range-tested by walking the ground unit out while monitoring quality, holding telemetry, control, and video to roughly 1.5 km, with no loss of control authority even with the antennas deliberately obstructed.' },
         { badge: 'Control tuning', title: 'Autotuning.', date: 'June 2026',
-          media: [{ t: 'v', s: 'assets/process/05-autotune.mp4', p: 'assets/process/05-autotune.webp' }],
-          text: 'A quadcopter only flies as well as its control gains, and those gains belong to one specific airframe: this mass, this arm length, these propellers. Set them by hand and you are guessing, flying, watching the aircraft wobble, then guessing again. AutoTune runs that search properly. Neith twitches each axis against a disturbance it generates itself, measures how fast it answers and how far it overshoots, and keeps the highest gains it can hold without ringing. We autotune so the aircraft is tuned to itself rather than to a number copied off someone else’s build.' },
+          media: [{ t: 'v', s: 'assets/process/05-autotune.mp4', p: 'assets/process/05-autotune.webp' }, { t: 'i', s: 'assets/software/tuning-pitch-log.webp' }],
+          text: 'A quadcopter only flies as well as its control gains, and those gains belong to one specific airframe: this mass, this arm length, these propellers. We don’t touch autonomous modes until manual flight looks right: first flights in Stabilize with light inputs, backing off the PID gains and retrying if the response is wrong, then Altitude Hold, then a notch filter tuned from the early vibration signature to cut motor-frequency noise. Logs (vibration, magnetometer interference, GPS quality) are reviewed after every stage before advancing. Loiter is where AutoTune runs, twitching each axis against a disturbance it generates itself and keeping the highest gains it can hold without ringing. The post-tune log shows why it matters: commanded 4.18° roll, got 4.14°; commanded −5.04° pitch, got −4.96°, under 0.1° of tracking error on both axes. Only then do we verify Takeoff, Return-to-Launch, and Guided before any full mission is attempted.' },
         { badge: 'Flight', title: 'Flight testing.', date: 'June 2026',
           media: [{ t: 'v', s: 'assets/process/06-flight-test.mp4', p: 'assets/process/06-flight-test.webp' }],
           text: 'Finally, the fully integrated platform undergoes rigorous flight and payload testing. We evaluate stability, endurance, control response, and payload performance under real-world conditions, refining the system until it meets our standards for reliability and field readiness.' },
@@ -1338,7 +1453,28 @@ class Component extends DCLogic {
       window.addEventListener('scroll', onScrollFade, { passive: true });
     }
 
-    const FREEZE_AT = 14;   // the clip zooms onto the drone at ~14s — hold there, then reveal
+    // section nav: smooth-scroll on click (offset for the fixed navbar + this
+    // sticky bar) and highlight whichever section is currently in view
+    const navLinks = Array.from(document.querySelectorAll('.vp-secnav-link'));
+    if (navLinks.length) {
+      const setActive = (id) => navLinks.forEach((a) => { a.dataset.active = a.dataset.nav === id ? '1' : '0'; });
+      navLinks.forEach((a) => {
+        a.addEventListener('click', (e) => {
+          const target = document.getElementById(a.dataset.nav);
+          if (!target) return;
+          e.preventDefault();
+          const y = target.getBoundingClientRect().top + window.pageYOffset - 150;
+          window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
+        });
+      });
+      const sections = navLinks.map((a) => document.getElementById(a.dataset.nav)).filter(Boolean);
+      const spy = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => { if (entry.isIntersecting) setActive(entry.target.id); });
+      }, { rootMargin: '-110px 0px -65% 0px', threshold: 0 });
+      sections.forEach((s) => spy.observe(s));
+    }
+
+    const FREEZE_AT = 999;   // clip is pre-trimmed to cut before the person walks in — play it through, hold on the last frame
 
     if (reduced) {
       heroReveals.forEach((_, i) => show(i));
@@ -1363,7 +1499,7 @@ class Component extends DCLogic {
       else hero.addEventListener('loadedmetadata', initHero, { once: true });
       hero.addEventListener('error', revealInfo);
       hero.addEventListener('ended', revealInfo);
-      setTimeout(revealInfo, (FREEZE_AT + 1.5) * 1000);   // safety net
+      setTimeout(revealInfo, 8000);   // safety net — clip is ~6s, so this only fires if playback never starts
     } else {
       heroReveals.forEach((_, i) => show(i));
     }

@@ -16,13 +16,15 @@ const CLOUDINARY = "https://res.cloudinary.com/deqkkrtk/video/upload";
  * on first frame, and serving them from our own origin avoids a third-party
  * DNS + TLS round trip before the hero has anything to show.
  *
- * Delivered without a q_auto/f_auto transformation on purpose. These were
- * already encoded at CRF 30 before upload, and Cloudinary's auto-quality
- * re-encodes them UPWARD from that: measured 3.02MB -> 3.74MB for the light
- * clip and 752KB -> 1.02MB for the night one. */
+ * The light clip is delivered without a q_auto/f_auto transformation on
+ * purpose. It was already encoded at CRF 30 before upload, and Cloudinary's
+ * auto-quality re-encodes it UPWARD from that: measured 3.02MB -> 3.74MB.
+ *
+ * The dark clip is served locally at 1080p/CRF 21 (a reversed flight-in
+ * clip) rather than from Cloudinary, since it isn't part of that account. */
 const HERO_MEDIA = {
   dark: {
-    src: `${CLOUDINARY}/v1785383033/hero-night_lxnno0.mp4`,
+    src: "/media/hero-night.mp4",
     poster: "/Home/hero-night-poster.jpg",
   },
   light: {

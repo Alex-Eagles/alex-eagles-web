@@ -573,7 +573,7 @@ function Milestone({
               {achievement.awards.map((award, i) => (
                 <li key={i}>
                   <h3 className="font-display font-bold text-h4 text-fg m-0 leading-tight">
-                    {award.place ? `${award.place} — ` : ""}
+                    {award.place ? `${award.place} · ` : ""}
                     {award.title}
                   </h3>
                   {/* --text-secondary, matching the same line on the 3D stop

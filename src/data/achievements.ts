@@ -391,7 +391,7 @@ export const achievements: Achievement[] = [
   {
     id: "2017-sae-design",
     year: "2017",
-    title: "2nd Place — Best Design",
+    title: "2nd Place · Best Design",
     awards: [
       { place: "2nd Place", title: "Best Design", competition: "SAE Aero Design" },
     ],
@@ -400,7 +400,7 @@ export const achievements: Achievement[] = [
   {
     id: "2018-sae-design",
     year: "2018",
-    title: "1st Place — Best Design",
+    title: "1st Place · Best Design",
     awards: [
       { place: "1st Place", title: "Best Design", competition: "SAE Aero Design" },
     ],
@@ -409,7 +409,7 @@ export const achievements: Achievement[] = [
   {
     id: "2019-sae-design",
     year: "2019",
-    title: "3rd Place — Best Design",
+    title: "3rd Place · Best Design",
     awards: [
       { place: "3rd Place", title: "Best Design", competition: "SAE Aero Design" },
     ],
@@ -418,7 +418,7 @@ export const achievements: Achievement[] = [
   {
     id: "2020-sae-overall",
     year: "2020",
-    title: "3rd Place — Overall",
+    title: "3rd Place · Overall",
     awards: [
       { place: "3rd Place", title: "Overall", competition: "SAE Aero Design" },
     ],
@@ -438,7 +438,7 @@ export const achievements: Achievement[] = [
   {
     id: "2022-sae-double",
     year: "2022",
-    title: "1st Place — Best Design",
+    title: "1st Place · Best Design",
     awards: [
       { place: "1st Place", title: "Best Design", competition: "SAE Aero Design" },
       {
@@ -456,7 +456,7 @@ export const achievements: Achievement[] = [
   {
     id: "2023-sae-overall",
     year: "2023",
-    title: "11th Place — Overall",
+    title: "11th Place · Overall",
     awards: [
       { place: "11th Place", title: "Overall", competition: "SAE Aero Design" },
     ],
@@ -541,7 +541,7 @@ export const achievements: Achievement[] = [
   {
     id: "2025-uavc-suas",
     year: "2025",
-    title: "5th Place — Overall",
+    title: "5th Place · Overall",
     awards: [
       { place: "5th Place", title: "Overall", competition: "UAVC" },
       { title: "Best Technical Design Report", competition: "UAVC" },

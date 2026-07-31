@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <ComingSoon
       title="Page not found"
-      blurb="This page doesn’t exist — it may have moved or never taken off. Head back to the home page to continue exploring."
+      blurb="This page doesn’t exist. It may have moved or never taken off. Head back to the home page to continue exploring."
     />
   );
 }

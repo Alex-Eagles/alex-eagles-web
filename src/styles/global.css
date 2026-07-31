@@ -533,6 +533,34 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * THEME-SWITCH CROSSFADE — every surface, not just body.
+ *
+ * ThemeContext toggles this class onto <html> for a short window around the
+ * data-theme flip (see theme.css's --transition-slow for the duration), so
+ * every element repainting for the new palette — cards, borders, shadows,
+ * icons — eases into it together instead of only the page background fading
+ * while everything on top of it snaps.
+ *
+ * Scoped to a class rather than left on permanently: transitioning every
+ * element unconditionally would also delay hover/press feedback (a button's
+ * background-color transition would inherit this duration all the time),
+ * which reads as sluggish UI. Applied only during the toggle window, it costs
+ * nothing the rest of the time.
+ *
+ * ThemeContext skips adding this class under prefers-reduced-motion, so the
+ * reduced-motion rule below never has to fight this one's !important.
+ * --------------------------------------------------------------------------*/
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition-property: background-color, color, border-color, box-shadow,
+    fill, stroke, opacity !important;
+  transition-duration: var(--transition-slow) !important;
+  transition-timing-function: ease-out !important;
+}
+
+/* ----------------------------------------------------------------------------
  * REDUCED MOTION — honor the OS setting. Kills decorative + scroll animation.
  * (Framer Motion is handled separately via the useReducedMotion hook.)
  * --------------------------------------------------------------------------*/

@@ -134,7 +134,7 @@ export default function History() {
             style={{ maxWidth: "var(--maxw-content)" }}
           >
             <SectionHeader
-              eyebrow={`${firstYear} — ${currentYear}`}
+              eyebrow={`${firstYear}–${currentYear}`}
               title={
                 <>
                   A decade of
