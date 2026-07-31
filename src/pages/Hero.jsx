@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { TICKER_RESULTS } from "../data/home";
 import { useTheme } from "../context/ThemeContext";
@@ -7,10 +7,8 @@ import "../styles/Hero.css";
 
 /**
  * One clip per theme: a daylight campus flight for light mode, a night flight
- * for dark. Both elements are in the DOM so the toggle can crossfade. The
- * active clip loads immediately; the other is warmed in the background once the
- * page goes idle, so the first toggle doesn't have to wait on a download (and
- * is skipped entirely on a metered or 2G connection).
+ * for dark. Both are stacked in the DOM and both load up front, so switching
+ * theme reveals a clip that already has frames rather than starting a download.
  */
 const CLOUDINARY = "https://res.cloudinary.com/deqkkrtk/video/upload";
 
@@ -51,59 +49,35 @@ export default function Hero() {
    * new one entered it, so there was nothing to fade from and the hero cut
    * while the rest of the page crossfaded around it.
    *
-   * Only a clip that has actually been shown gets a `src`/`poster`. An
-   * un-requested element paints nothing, which is what keeps a swap clean: the
-   * outgoing clip stays visible underneath until the incoming one has a real
-   * frame to show, instead of fading to a black box.
+   * Both clips load from the first render.
+   *
+   * Earlier versions fetched the second one lazily — at the moment of the
+   * toggle, then on an idle callback — to save a visitor who never switches a
+   * download. Both still lagged: at the toggle the swap waited on the whole
+   * download (and for light mode that's a third-party origin, so DNS and TLS
+   * before the first byte), and the idle version simply lost the race whenever
+   * someone toggled early or the callback hadn't fired.
+   *
+   * There is no clever version of this. A clip can only appear instantly if its
+   * data is already there, so both are fetched up front and the toggle is
+   * guaranteed to be immediate. That costs one extra video for visitors who
+   * never switch themes, which is the deliberate trade.
    */
-  const [requested, setRequested] = useState(() => ({ [active]: true }));
-  useEffect(() => {
-    setRequested((prev) => (prev[active] ? prev : { ...prev, [active]: true }));
-  }, [active]);
+  const mediaKeys = Object.keys(HERO_MEDIA);
 
   /*
-   * Fetch the other theme's clip once the page has gone idle.
+   * The clip that isn't showing is kept loaded but paused — not playing.
    *
-   * Requesting it only at the moment of the toggle meant the first toggle
-   * *started* the download — and for light mode that's a third-party origin, so
-   * a DNS and TLS handshake before the first byte. The crossfade would run
-   * against a clip that had nothing to show yet and the hero visibly stalled.
-   * Warming it in the background makes the first toggle as instant as every
-   * one after it.
+   * Paused is enough for an instant swap: once a video has data it paints its
+   * current frame, so the incoming clip is already showing real footage the
+   * moment it's revealed, and resuming a buffered video costs a frame. Leaving
+   * both playing would look identical and risks far more — iOS has historically
+   * allowed only one inline video to play at a time, and a hidden clip that
+   * steals playback from the visible one is a worse bug than any it fixes.
    *
-   * Deferred to idle rather than done up front so it never competes with the
-   * visible clip, the poster, or anything else on the critical path — and
-   * skipped outright on a metered or very slow connection, where a second video
-   * nobody asked for is a real cost and a beat of lag is not.
+   * Also why there's no `autoplay` attribute: playback is started here, for the
+   * visible clip only.
    */
-  useEffect(() => {
-    const pending = Object.keys(HERO_MEDIA).filter((key) => !requested[key]);
-    if (!pending.length) return;
-
-    const link = navigator.connection;
-    if (link?.saveData || /(^|-)2g$/.test(link?.effectiveType ?? "")) return;
-
-    const warm = () =>
-      setRequested((prev) => {
-        const next = { ...prev };
-        pending.forEach((key) => {
-          next[key] = true;
-        });
-        return next;
-      });
-
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(warm, { timeout: 4000 });
-      return () => window.cancelIdleCallback?.(id);
-    }
-    const id = window.setTimeout(warm, 2500);
-    return () => window.clearTimeout(id);
-  }, [requested]);
-
-  /* Only the visible clip should be decoding frames — the one underneath is
-     paused rather than left looping out of sight. This is also why the
-     elements carry no `autoplay` attribute: a warmed clip would honour it and
-     start playing behind the visible one the moment its data arrived. */
   const videoRefs = useRef({});
   useEffect(() => {
     Object.entries(videoRefs.current).forEach(([key, el]) => {
@@ -117,7 +91,7 @@ export default function Hero() {
       const playing = el.play();
       if (playing && playing.catch) playing.catch(() => {});
     });
-  }, [active, requested]);
+  }, [active]);
 
   const scrollToAbout = () => {
     document.querySelector(".features")?.scrollIntoView({ behavior: "smooth" });
@@ -130,7 +104,7 @@ export default function Hero() {
           keeps the clips' crossfade z-index from escaping over the scrim and
           the headline — see .hero-media-stack in Hero.css. */}
       <div className="hero-media-stack" aria-hidden="true">
-        {Object.keys(HERO_MEDIA).map((key) => (
+        {mediaKeys.map((key) => (
           <video
             key={key}
             ref={(el) => {
@@ -138,16 +112,15 @@ export default function Hero() {
             }}
             className="hero-media"
             data-active={key === active}
-            src={requested[key] ? HERO_MEDIA[key].src : undefined}
-            poster={requested[key] ? HERO_MEDIA[key].poster : undefined}
+            src={HERO_MEDIA[key].src}
+            poster={HERO_MEDIA[key].poster}
             muted
             loop
             playsInline
-            /* Buffer a clip properly once it's been asked for — "metadata" left
-               the warmed clip holding nothing but headers, which is the stall
-               this is meant to remove. Playback is started imperatively above,
-               not by an `autoplay` attribute. */
-            preload={requested[key] ? "auto" : "none"}
+            /* "auto", not "metadata": metadata fetches headers and stops, which
+               leaves the hidden clip with nothing to paint and is exactly the
+               stall this is meant to remove. */
+            preload="auto"
           />
         ))}
       </div>

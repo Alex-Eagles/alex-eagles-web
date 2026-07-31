@@ -268,9 +268,23 @@
          being used — the team tab's --tab-opacity idea, without the variable. */
       background:rgba(60,64,181,0.82);
       box-shadow:0 8px 22px -8px rgba(60,64,181,0.6);
-      transition:right .38s cubic-bezier(.2,.8,.2,1), background .2s ease;
+      transition:right .38s cubic-bezier(.2,.8,.2,1), background .2s ease,
+                 opacity .24s ease, transform .32s cubic-bezier(.2,.8,.2,1);
     }
     #vp-secnav-tab[data-open="1"] { right:236px; background:#3c40b5; }
+
+    /* Out of the way until the hero has been scrolled past: jumping between
+       sections means nothing while the hero is still what you're looking at.
+       Same rule the team page's JumpNav follows, and it comes back if you
+       scroll to the top again. The tab slides off to the right rather than
+       blinking out, and takes its pointer events with it so it can't be
+       tapped through. (JS also drops it out of the tab order — see below.) */
+    #vp-secnav-tab[data-visible="0"],
+    #vp-secnav-panel[data-visible="0"] {
+      opacity:0;
+      pointer-events:none;
+    }
+    #vp-secnav-tab[data-visible="0"] { transform:translateY(-50%) translateX(160%); }
     #vp-secnav-tab:focus-visible { outline:2px solid #60a5fa; outline-offset:3px; }
     .vp-secnav-tablabel { font-family:'JetBrains Mono'; font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
     .vp-secnav-chev { transition:transform .35s ease; }
@@ -377,6 +391,7 @@
       <a href="#vp-process" class="vp-secnav-link" data-nav="vp-process" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Process</a>
       <a href="#vp-payload" class="vp-secnav-link" data-nav="vp-payload" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Payload</a>
       <a href="#vp-software" class="vp-secnav-link" data-nav="vp-software" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Software</a>
+      <a href="#vp-prototypes-slot" class="vp-secnav-link" data-nav="vp-prototypes-slot" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Test drones</a>
       <a href="#vp-stats" class="vp-secnav-link" data-nav="vp-stats" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Stats</a>
       <a href="#vp-reports" class="vp-secnav-link" data-nav="vp-reports" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Reports</a>
       <a href="#vp-gallery" class="vp-secnav-link" data-nav="vp-gallery" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Gallery</a>
@@ -389,12 +404,12 @@
        they're inert markup that never paints. The links carry .vp-secnav-link
        and data-nav like the pills do, so the existing click-to-scroll and
        scrollspy handlers below pick them up with no extra wiring. -->
-  <button id="vp-secnav-tab" type="button" data-open="0" aria-expanded="false" aria-controls="vp-secnav-panel" aria-label="Jump to section">
+  <button id="vp-secnav-tab" type="button" data-open="0" data-visible="0" tabindex="-1" aria-hidden="true" aria-expanded="false" aria-controls="vp-secnav-panel" aria-label="Jump to section">
     <svg class="vp-secnav-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
     <span class="vp-secnav-tablabel">Pull</span>
   </button>
 
-  <nav id="vp-secnav-panel" data-open="0" aria-label="Jump to section" inert="">
+  <nav id="vp-secnav-panel" data-open="0" data-visible="0" aria-label="Jump to section" inert="">
     <div class="vp-secnav-panelhead">
       <span class="vp-secnav-paneltitle">Jump to</span>
       <button type="button" class="vp-secnav-close" aria-label="Close">
@@ -407,6 +422,7 @@
     <a href="#vp-process" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-process">Process</a>
     <a href="#vp-payload" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-payload">Payload</a>
     <a href="#vp-software" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-software">Software</a>
+    <a href="#vp-prototypes-slot" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-prototypes-slot">Test drones</a>
     <a href="#vp-stats" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-stats">Stats</a>
     <a href="#vp-reports" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-reports">Reports</a>
     <a href="#vp-gallery" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-gallery">Gallery</a>
@@ -891,7 +907,7 @@
   </section>
 
   <!-- ========================= MISSION SOFTWARE ========================= -->
-  <section id="vp-software" style="position:relative; background:#0d1035; padding:clamp(88px,12vh,140px) 32px;">
+  <section id="vp-software" style="position:relative; background:#07091c; padding:clamp(88px,12vh,140px) 32px;">
     <div style="max-width:1120px; margin:0 auto;">
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
         <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Mission software</div>
@@ -956,13 +972,18 @@
       </div>
     </div>
   </section>
-  <!-- Mount point for the React <Prototypes /> section ("Before the build").
-       That section is part of the site's React tree, not this document, so
-       Vehicles.tsx portals it in here once this page has rendered — which is
-       what puts it between Mission software and Technical documentation
-       instead of after everything. Left empty on purpose: the DC runtime
-       renders this element and must not think it owns any children. -->
-  <div id="vp-prototypes-slot"></div>
+  <!-- Mount point for the React <Prototypes /> section ("Before the final
+       build"). That section is part of the site's React tree, not this
+       document, so Vehicles.tsx moves it in here once this page has rendered —
+       which is what puts it between Mission software and Technical
+       documentation instead of after everything.
+
+       The background is set here rather than on the component: this page runs a
+       dark / light-indigo alternation from Payload delivery down, and the
+       component itself is shared styling that knows nothing about it. Empty on
+       purpose otherwise — the DC runtime renders this element, so it must not
+       think it owns any children. -->
+  <div id="vp-prototypes-slot" style="background:#0d1035;"></div>
 
   <!-- ============================ MISSION ============================ -->
   <section id="vp-stats" style="position:relative; background:#07091c; padding:70px 32px 96px;">
@@ -983,7 +1004,7 @@
   </section>
 
   <!-- ========================= REPORTS ========================= -->
-  <section id="vp-reports" style="position:relative; background:#07091c; padding:80px 32px; text-align:center;">
+  <section id="vp-reports" style="position:relative; background:#0d1035; padding:80px 32px; text-align:center;">
     <div style="max-width:720px; margin:0 auto;">
       <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Technical documentation</div>
       <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(28px,4vw,40px); line-height:1; letter-spacing:-0.01em; margin:0 0 28px; color:#f0f2ff;">Read the full write-ups.</h2>
@@ -995,7 +1016,7 @@
   </section>
 
   <!-- ========================= GALLERY ========================= -->
-  <section id="vp-gallery" style="position:relative; background:#0d1035; padding:120px 32px;">
+  <section id="vp-gallery" style="position:relative; background:#07091c; padding:120px 32px;">
     <div style="max-width:1180px; margin:0 auto;">
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
         <div>
@@ -1169,7 +1190,7 @@
   </section>
 
   <!-- ========================= CTA ========================= -->
-  <section id="vp-action" style="position:relative; background:#07091c; padding:clamp(96px,13vh,150px) 32px clamp(104px,14vh,160px); text-align:center;">
+  <section id="vp-action" style="position:relative; background:#0d1035; padding:clamp(96px,13vh,150px) 32px clamp(104px,14vh,160px); text-align:center;">
     <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:1000px; margin:0 auto;">
       <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0 0 clamp(34px,5vh,56px); color:#f0f2ff;">Neith in action</h2>
       
@@ -1705,7 +1726,14 @@ class Component extends DCLogic {
           const target = document.getElementById(a.dataset.nav);
           if (!target) return;
           e.preventDefault();
-          const y = target.getBoundingClientRect().top + window.pageYOffset - 150;
+          /* Clear the fixed site navbar, plus the sticky pill row when that's
+             what's on screen. The flat 150px assumed the pill row was always
+             there; on a phone it's replaced by the side panel, so those 46-odd
+             pixels were dead space and every jump landed short of its heading.
+             Measure what's actually showing instead of guessing per breakpoint. */
+          const bar = document.getElementById('vp-secnav');
+          const barShown = bar && getComputedStyle(bar).display !== 'none';
+          const y = target.getBoundingClientRect().top + window.pageYOffset - (barShown ? 150 : 104);
           /* Jump rather than smooth-scroll on touch, matching JumpNav on the
              team page: these targets are thousands of pixels apart, and
              animating across that much of a media-heavy page is what iOS can't
@@ -1761,6 +1789,30 @@ class Component extends DCLogic {
         if (secPanel.contains(e.target) || secTab.contains(e.target)) return;
         setPanel(false);
       });
+
+      /* Hold the tab back until the hero has been scrolled past, and bring it
+         back if you return to the top — the same rule the team page's JumpNav
+         follows, and for the same reason: jumping between sections is
+         meaningless while the hero is still what you're looking at.
+         Watching the hero rather than the first section is deliberate; with a
+         section as the trigger the tab would vanish again once you scrolled
+         past it, which is exactly when it's wanted. */
+      const hero = document.getElementById('vp-hero');
+      if (hero) {
+        const setVisible = (on) => {
+          secTab.dataset.visible = on ? '1' : '0';
+          secPanel.dataset.visible = on ? '1' : '0';
+          // Not a control you can reach but not see.
+          if (on) { secTab.removeAttribute('tabindex'); secTab.removeAttribute('aria-hidden'); }
+          else { secTab.setAttribute('tabindex', '-1'); secTab.setAttribute('aria-hidden', 'true'); }
+          // Scrolling back up shouldn't leave an open panel riding out with it.
+          if (!on && secPanel.dataset.open === '1') setPanel(false);
+        };
+        new IntersectionObserver(
+          ([entry]) => setVisible(!entry.isIntersecting),
+          { threshold: 0 },
+        ).observe(hero);
+      }
     }
 
     const FREEZE_AT = 999;   // clip is pre-trimmed to cut before the person walks in — play it through, hold on the last frame

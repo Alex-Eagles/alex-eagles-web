@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import Prototypes from "@/components/sections/Prototypes";
+import { useTheme } from "@/context/ThemeContext";
 
 /**
  * Vehicles page — the Neith build experience, rendered INLINE (no iframe).
@@ -29,18 +29,41 @@ const SUPPORT_URL = "/vehicle/support.js";
 
 export default function Vehicles() {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [error, setError] = useState<string | null>(null);
+  /* React's own container, and the home the Prototypes wrapper is returned to
+     before teardown. */
+  const rootRef = useRef<HTMLDivElement>(null);
   /*
-   * #vp-prototypes-slot, once the DC runtime has rendered it. The "Before the
-   * build" section belongs between Mission software and Technical documentation
-   * — inside the injected page — but it's a React component, so it can't just
-   * be markup in that document. Portalling into a slot the page provides is
-   * what places it there; `null` means the page hasn't rendered yet (or the
-   * slot is missing, in which case the fallback below still renders it after
-   * the page rather than dropping it).
+   * Wrapper around <Prototypes />. "Before the final build" belongs between
+   * Mission software and Technical documentation — inside the injected page —
+   * but it's a React component, so it can't simply be markup in that document.
+   *
+   * React renders it here and we then move this wrapper into the slot the page
+   * provides. React keeps owning everything inside the wrapper and doesn't care
+   * where the wrapper itself sits in the document, so relocating it is safe.
+   *
+   * Moving rather than portalling is deliberate: if the slot never turns up,
+   * the section simply stays where React put it — after the page — instead of
+   * rendering into a node that isn't in the document and vanishing.
    */
-  const [protoSlot, setProtoSlot] = useState<HTMLElement | null>(null);
-  const [slotSettled, setSlotSettled] = useState(false);
+  const protoRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  /*
+   * The Neith experience is a fixed dark design — its sections carry their own
+   * hard-coded backgrounds and the global toggle is hidden here (see App.tsx).
+   * Arriving in light mode used to leave the shell around it (navbar, footer,
+   * the page behind the mount) light against a black page, so pin the whole
+   * site dark for as long as this route is mounted.
+   *
+   * A pin, not setTheme: it never touches the saved preference, so leaving goes
+   * straight back to whatever the visitor was using before they came in.
+   */
+  const { pinTheme } = useTheme();
+  useEffect(() => {
+    pinTheme("dark");
+    return () => pinTheme(null);
+  }, [pinTheme]);
+
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
@@ -138,34 +161,41 @@ export default function Vehicles() {
           window.setTimeout(() => window.clearInterval(t), 5000);
         }
         /*
-         * The slot only exists once the DC runtime has rendered the template
-         * (it replaces <x-dc> with its own root), and boot above may still be
-         * waiting on support.js — so poll for it the same way. Giving up marks
-         * it settled, which is what lets the fallback render the section in its
-         * old position rather than losing it.
+         * Move the Prototypes wrapper into the page's slot.
+         *
+         * Gated on #dc-root, which is the crux: the raw markup we injected in
+         * step 2 already contains a #vp-prototypes-slot, but __dcBoot replaces
+         * the whole <x-dc> with its own #dc-root and re-renders the template
+         * into it — throwing that first slot away. Matching the early one put
+         * the section inside a discarded subtree, which is exactly how it went
+         * missing. #dc-root only exists after boot, so waiting for it means the
+         * slot we find is the live one.
+         *
+         * Boot itself may still be waiting on support.js, and the runtime's
+         * render is async on top of that, so poll rather than checking once.
          */
-        const findSlot = () => {
+        const placeProto = () => {
           if (cancelled) return true;
-          const el = host.querySelector<HTMLElement>("#vp-prototypes-slot");
-          if (!el) return false;
-          setProtoSlot(el);
-          setSlotSettled(true);
+          const proto = protoRef.current;
+          if (!proto) return false;
+          const slot = host
+            .querySelector("#dc-root")
+            ?.querySelector("#vp-prototypes-slot");
+          if (!slot) return false;
+          if (proto.parentNode !== slot) slot.appendChild(proto);
           return true;
         };
-        if (!findSlot()) {
+        if (!placeProto()) {
           slotPoll = window.setInterval(() => {
-            if (findSlot()) window.clearInterval(slotPoll);
-          }, 50);
-          slotGiveUp = window.setTimeout(() => {
-            window.clearInterval(slotPoll);
-            if (!cancelled) setSlotSettled(true);
-          }, 6000);
+            if (placeProto()) window.clearInterval(slotPoll);
+          }, 60);
+          slotGiveUp = window.setTimeout(
+            () => window.clearInterval(slotPoll),
+            8000,
+          );
         }
       } catch (e) {
-        if (!cancelled) {
-          setError(String(e));
-          setSlotSettled(true);
-        }
+        if (!cancelled) setError(String(e));
         console.error("[vehicles] inline mount failed:", e);
       }
     })();
@@ -174,9 +204,13 @@ export default function Vehicles() {
       cancelled = true;
       window.clearInterval(slotPoll);
       window.clearTimeout(slotGiveUp);
-      /* Drop the portal before the slot is destroyed below, so React unmounts
-         the section while its container is still the node it rendered into. */
-      setProtoSlot(null);
+      /* Hand the wrapper back to React's own container before the injected page
+         is torn down. Leave it inside the slot and React would later unmount a
+         node whose parent no longer exists, which throws. */
+      const proto = protoRef.current;
+      if (proto && rootRef.current && proto.parentNode !== rootRef.current) {
+        rootRef.current.appendChild(proto);
+      }
       injected.forEach((n) => n.parentNode?.removeChild(n));
       if (host) host.innerHTML = "";
 
@@ -195,7 +229,7 @@ export default function Vehicles() {
   }, []);
 
   return (
-    <>
+    <div ref={rootRef}>
       {/* The bundle is fetched after mount, so this container is empty for a
           beat and the Footer rides up under the Navbar before the page drops
           in. Hold a viewport of height in the page's own background colour so
@@ -212,15 +246,12 @@ export default function Vehicles() {
         )}
       </div>
 
-      {/* Into the page's own slot (between Mission software and Technical
-          documentation) once it exists. If the page never rendered one — an
-          older cached copy of vehicle/index.html, or a failed mount — fall back
-          to the original position after the page, so the section is late rather
-          than missing. Nothing renders while it's still undecided, to avoid
-          showing it in the wrong place and then moving it. */}
-      {protoSlot
-        ? createPortal(<Prototypes />, protoSlot)
-        : slotSettled && <Prototypes />}
-    </>
+      {/* Moved into the page's own slot (between Mission software and Technical
+          documentation) once the runtime has rendered it — see placeProto
+          above. Until then, and if the slot never appears, it stays here. */}
+      <div ref={protoRef}>
+        <Prototypes />
+      </div>
+    </div>
   );
 }

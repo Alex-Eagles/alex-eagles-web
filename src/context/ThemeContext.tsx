@@ -36,10 +36,20 @@ const THEME_COLORS: Record<Theme, string> = {
 };
 
 interface ThemeContextValue {
+  /** What the site should render as right now — a pin, if one is set, else the preference. */
   theme: Theme;
   isDark: boolean;
   toggle: () => void;
   setTheme: (theme: Theme) => void;
+  /**
+   * Pin the whole site to one theme for as long as a route needs it, or pass
+   * `null` to release. /vehicles is a fixed dark design, so it pins dark.
+   *
+   * A pin changes what everything renders as but never touches the saved
+   * preference, so leaving the route restores whatever the visitor had chosen —
+   * and closing the tab while pinned doesn't quietly rewrite it either.
+   */
+  pinTheme: (theme: Theme | null) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -56,7 +66,11 @@ function getInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  /* The visitor's own choice. This is the only thing that is ever persisted. */
+  const [preference, setThemeState] = useState<Theme>(getInitialTheme);
+  /* A route-level override (see pinTheme). Null when nothing is pinning. */
+  const [pinned, setPinned] = useState<Theme | null>(null);
+  const theme = pinned ?? preference;
   const isFirstRun = useRef(true);
 
   // Reflect the theme onto <html> and persist it whenever it changes.
@@ -102,24 +116,33 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     if (meta) meta.content = THEME_COLORS[theme];
 
+    return clearTransitionClass;
+  }, [theme]);
+
+  /*
+   * Persist the preference, not the effective theme. Keeping this separate from
+   * the effect above is the whole point of the split: a route that pins dark
+   * (see pinTheme) must not overwrite what the visitor actually chose, or
+   * closing the tab on /vehicles would silently make dark their new default.
+   */
+  useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, theme);
+      localStorage.setItem(STORAGE_KEY, preference);
     } catch {
       /* ignore write failures (private mode, quota) */
     }
-
-    return clearTransitionClass;
-  }, [theme]);
+  }, [preference]);
 
   const setTheme = useCallback((next: Theme) => setThemeState(next), []);
   const toggle = useCallback(
     () => setThemeState((t) => (t === "dark" ? "light" : "dark")),
     [],
   );
+  const pinTheme = useCallback((next: Theme | null) => setPinned(next), []);
 
   return (
     <ThemeContext.Provider
-      value={{ theme, isDark: theme === "dark", toggle, setTheme }}
+      value={{ theme, isDark: theme === "dark", toggle, setTheme, pinTheme }}
     >
       {children}
     </ThemeContext.Provider>
