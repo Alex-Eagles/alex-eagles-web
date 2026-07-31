@@ -20,6 +20,42 @@
     .vp-grow > * { order:0 !important; }
     .vp-grow .vp-media { order:-1 !important; }
   }
+  /* ---- SPLIT SECTIONS on phones: heading, then media, then the prose ----
+     Payload delivery, the GCS block and mapping are all a two-column text/media
+     grid on desktop, and the columns alternate side to side down the page so the
+     layout doesn't read as a list. Stacking that naively leaves whichever column
+     happens to come first in the DOM on top, so half these blocks opened with a
+     wall of text and the other half with a picture — and in the text-first ones
+     the heading that names the block sat above its own media while in the
+     others it sat below, which is the inconsistency that made it feel unordered.
+
+     `display:contents` on the text column promotes its two halves (.vp-split-head
+     and .vp-split-body) to grid items of the section itself, which is what lets
+     all three pieces be ordered independently rather than moving as one block.
+     Every one of these then reads the same way: what it is, what it looks like,
+     then the detail. Desktop is untouched — the wrapper only dissolves below the
+     breakpoint, above it the original two-column grid is exactly as it was. */
+  @media (max-width:760px) {
+    .vp-split { grid-template-columns:1fr !important; gap:20px !important; }
+    .vp-split-text { display:contents; }
+    .vp-split-head { order:1; }
+    .vp-split-media { order:2; }
+    .vp-split-body { order:3; }
+  }
+  /* ---- MISSION DATA ARCHITECTURE on phones: one column, top to bottom ----
+     The desktop pipeline is a centred flex row of five cards joined by "→".
+     Wrapping it on a narrow screen breaks the run into ragged 2-2-1 groups, and
+     a wrapped row puts an arrow at the end of one line pointing into the start
+     of the next — so the 01→05 order the arrows exist to convey is exactly what
+     gets lost. Stack it and turn the connectors a quarter turn to point down. */
+  @media (max-width:760px) {
+    #vp-dataflow { flex-direction:column; align-items:stretch !important; flex-wrap:nowrap !important; }
+    /* Turning the row into a column turns the cards' `flex:1 1 150px` into a
+       150px *height* basis, since flex-basis follows the main axis — so reset
+       them to size from their own content and fill the width instead. */
+    #vp-dataflow > div { flex:0 0 auto !important; max-width:none !important; }
+    #vp-dataflow .vp-dataflow-arrow { transform:rotate(90deg); align-self:center !important; }
+  }
   /* ---- HERO: on phones the desktop corner-pinned layout collides (specs over
      the name, scroll cue over the buttons). Reflow into a comfortable stack:
      specs pinned top-right (smaller), name + buttons pinned bottom-left, and
@@ -204,6 +240,85 @@
   @keyframes vp-callout-pop { 0% { transform:scale(0); } 62% { transform:scale(1.3); } 100% { transform:scale(1); } }
   #vp-build-skip:hover { background:rgba(60,64,181,0.92)!important; border-color:#60a5fa!important; color:#fff!important; }
   .vp-secnav-link[data-active="1"] { color:#fff !important; background:#3c40b5 !important; border-color:#3c40b5 !important; }
+
+  /* ---- SECTION NAV on phones: the team page's pull-out panel ----------------
+     The sticky pill row is a horizontal scroller. On a phone it shows about
+     three of its nine links at a time, with the other six behind a sideways
+     swipe that nothing on screen advertises, and it holds a band of vertical
+     space directly under the navbar for the entire page.
+
+     Below the breakpoint it's replaced by the same pull tab + side panel the
+     team page uses (src/components/team/JumpNav.tsx): same geometry, same
+     open/close behaviour, same Escape and tap-outside handling. It's rebuilt in
+     plain CSS/JS rather than imported because this page is a standalone
+     document that the React tree only injects, so it can't mount a component.
+     Above the breakpoint the tab and panel are display:none and never paint. */
+  #vp-secnav-tab, #vp-secnav-panel { display:none; }
+
+  @media (max-width:760px) {
+    #vp-secnav { display:none !important; }
+
+    #vp-secnav-tab {
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+      position:fixed; top:50%; right:16px; z-index:51;
+      transform:translateY(-50%);
+      width:46px; height:56px; border-radius:12px; border:none;
+      cursor:pointer; color:#f0f2ff;
+      /* Translucent while it's just floating over the page, solid once it's
+         being used — the team tab's --tab-opacity idea, without the variable. */
+      background:rgba(60,64,181,0.82);
+      box-shadow:0 8px 22px -8px rgba(60,64,181,0.6);
+      transition:right .38s cubic-bezier(.2,.8,.2,1), background .2s ease;
+    }
+    #vp-secnav-tab[data-open="1"] { right:236px; background:#3c40b5; }
+    #vp-secnav-tab:focus-visible { outline:2px solid #60a5fa; outline-offset:3px; }
+    .vp-secnav-tablabel { font-family:'JetBrains Mono'; font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    .vp-secnav-chev { transition:transform .35s ease; }
+    #vp-secnav-tab[data-open="1"] .vp-secnav-chev { transform:rotate(180deg); }
+
+    #vp-secnav-panel {
+      display:flex; flex-direction:column; gap:2px;
+      position:fixed; top:50%; right:16px; z-index:50;
+      width:212px; max-height:82vh; overflow:auto;
+      padding:16px 12px;
+      /* Opaque rather than backdrop-filtered: a blur on a fixed element is
+         repainted against whatever scrolls behind it, every frame (same reason
+         JumpNav drops it under `@media (hover: none)`). */
+      background:#0d1035;
+      border:1px solid rgba(60,64,181,0.45); border-radius:16px;
+      box-shadow:0 20px 50px -18px rgba(0,0,0,0.8);
+      transform:translateY(-50%) translateX(120%);
+      opacity:0; pointer-events:none;
+      transition:transform .38s cubic-bezier(.2,.8,.2,1), opacity .3s ease;
+    }
+    #vp-secnav-panel[data-open="1"] { transform:translateY(-50%) translateX(0); opacity:1; pointer-events:auto; }
+
+    .vp-secnav-panelhead { display:flex; align-items:center; justify-content:space-between; margin:0 6px 8px; }
+    .vp-secnav-paneltitle { font-family:'Inter'; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#8b8fc8; }
+    .vp-secnav-close { display:flex; padding:2px; background:none; border:none; color:#8b8fc8; cursor:pointer; }
+    .vp-secnav-close:hover, .vp-secnav-close:focus-visible { color:#f0f2ff; }
+    .vp-secnav-grouplabel { margin:10px 8px 3px; font-family:'JetBrains Mono'; font-size:9px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#d9302a; }
+
+    .vp-secnav-panellink {
+      display:block; padding:8px 11px; border-radius:8px;
+      font-family:'Inter'; font-size:13px; font-weight:600;
+      color:#a0a3d2; text-decoration:none; white-space:nowrap;
+      border:1px solid transparent;
+      transition:background .2s ease, color .2s ease;
+    }
+    .vp-secnav-panellink:hover, .vp-secnav-panellink:focus-visible { background:rgba(60,64,181,0.28); color:#f0f2ff; }
+  }
+
+  /* Matches JumpNav's own narrow-screen step so the tab clears the cards. */
+  @media (max-width:640px) {
+    #vp-secnav-tab { right:10px; width:40px; height:50px; }
+    #vp-secnav-tab[data-open="1"] { right:206px; }
+    #vp-secnav-panel { right:10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #vp-secnav-tab, #vp-secnav-panel, .vp-secnav-chev { transition-duration:0.01ms; }
+  }
 </style>
 <script src="./image-slot.js"></script>
 </helmet>
@@ -255,7 +370,7 @@
   </header>
 
   <!-- ========================= SECTION NAV ========================= -->
-  <nav aria-label="Vehicle page sections" style="position:sticky; top:96px; z-index:20; display:flex; justify-content:center; padding:0 16px; pointer-events:none;">
+  <nav id="vp-secnav" aria-label="Vehicle page sections" style="position:sticky; top:96px; z-index:20; display:flex; justify-content:center; padding:0 16px; pointer-events:none;">
     <div style="pointer-events:auto; display:flex; gap:6px; overflow-x:auto; max-width:100%; padding:7px 12px; border-radius:9999px; background:rgba(18,27,52,0.65); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(59,130,246,0.18); box-shadow:0 14px 40px rgba(0,0,0,0.35); scrollbar-width:none;">
       <a href="#vp-stats" class="vp-secnav-link" data-nav="vp-stats" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Stats</a>
       <a href="#vp-build-scroll" class="vp-secnav-link" data-nav="vp-build-scroll" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Build</a>
@@ -267,6 +382,35 @@
       <a href="#vp-gallery" class="vp-secnav-link" data-nav="vp-gallery" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Gallery</a>
       <a href="#vp-action" class="vp-secnav-link" data-nav="vp-action" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">In Action</a>
     </div>
+  </nav>
+
+  <!-- Phone-only replacement for the pill row above: the team page's pull tab +
+       side panel. Both are display:none until the breakpoint, so on desktop
+       they're inert markup that never paints. The links carry .vp-secnav-link
+       and data-nav like the pills do, so the existing click-to-scroll and
+       scrollspy handlers below pick them up with no extra wiring. -->
+  <button id="vp-secnav-tab" type="button" data-open="0" aria-expanded="false" aria-controls="vp-secnav-panel" aria-label="Jump to section">
+    <svg class="vp-secnav-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+    <span class="vp-secnav-tablabel">Pull</span>
+  </button>
+
+  <nav id="vp-secnav-panel" data-open="0" aria-label="Jump to section" inert="">
+    <div class="vp-secnav-panelhead">
+      <span class="vp-secnav-paneltitle">Jump to</span>
+      <button type="button" class="vp-secnav-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <p class="vp-secnav-grouplabel">Neith</p>
+    <a href="#vp-stats" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-stats">Stats</a>
+    <a href="#vp-build-scroll" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-build-scroll">Build</a>
+    <a href="#vp-payload" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-payload">Payload</a>
+    <a href="#vp-explorer" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-explorer">Avionics</a>
+    <a href="#vp-process" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-process">Process</a>
+    <a href="#vp-software" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-software">Software</a>
+    <a href="#vp-reports" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-reports">Reports</a>
+    <a href="#vp-gallery" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-gallery">Gallery</a>
+    <a href="#vp-action" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-action">In Action</a>
   </nav>
 
   <!-- ============================ MISSION ============================ -->
@@ -373,52 +517,71 @@
       </div>
 
       <!-- 01 · Drag parachute recovery -->
-      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
-        <div>
-          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">01 &middot; IN DEVELOPMENT</div>
-          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">Drag parachute recovery.</h3>
-          <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c; margin-bottom:12px;">Flat hexagonal canopy, sized per payload</div>
-          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">Two purpose-sized flat-hexagon drag parachutes slow the Beacon (155&nbsp;g) and Bottle (250&nbsp;g) payloads to a safe 4.0&nbsp;m/s and 3.5&nbsp;m/s terminal velocity, derived directly from the drag equation (C<sub>d</sub>&nbsp;=&nbsp;0.80). Cut as a single 6-panel sheet with a 10% apex spill vent to kill pendulum sway, built from polyester taffeta with braided PE shroud lines.</p>
-          <div style="display:flex; flex-direction:column; gap:10px;">
-            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#d9302a;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Beacon canopy: 0.194&nbsp;m&sup2; &middot; 6 lines &middot; 59&nbsp;cm each. Bottle canopy: 0.409&nbsp;m&sup2; &middot; 6 lines &middot; 86&nbsp;cm each.</p></div>
-            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#d9302a;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Drop-test validated: 3.64&nbsp;m/s (Beacon) and 3.22&nbsp;m/s (Bottle) measured descent rates.</p></div>
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">01 &middot; IN DEVELOPMENT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">Drag parachute recovery.</h3>
+            <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c;">Flat hexagonal canopy, sized per payload</div>
+          </div>
+          <div class="vp-split-body" style="margin-top:12px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">Two purpose-sized flat-hexagon drag parachutes slow the Beacon (155&nbsp;g) and Bottle (250&nbsp;g) payloads to a safe 4.0&nbsp;m/s and 3.5&nbsp;m/s terminal velocity, derived directly from the drag equation (C<sub>d</sub>&nbsp;=&nbsp;0.80). Cut as a single 6-panel sheet with a 10% apex spill vent to kill pendulum sway, built from polyester taffeta with braided PE shroud lines.</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#d9302a;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Beacon canopy: 0.194&nbsp;m&sup2; &middot; 6 lines &middot; 59&nbsp;cm each. Bottle canopy: 0.409&nbsp;m&sup2; &middot; 6 lines &middot; 86&nbsp;cm each.</p></div>
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#d9302a;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Drop-test validated: 3.64&nbsp;m/s (Beacon) and 3.22&nbsp;m/s (Bottle) measured descent rates.</p></div>
+            </div>
           </div>
         </div>
-        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
-          <video src="/images/payload/parachute.mp4" muted loop playsinline controls preload="auto" style="display:block; width:100%; height:auto;"></video>
+        <!-- The drop test is portrait phone footage, so the frame is capped and
+             centred rather than stretched across the column the way the CAD
+             stills beside it are. preload="none" + poster: the still is what
+             paints, and the clip itself is only fetched once it scrolls into
+             view (see the data-vp-autoplay observer). -->
+        <div class="vp-split-media" style="display:flex; align-items:center; justify-content:center;">
+          <div style="width:100%; max-width:300px; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#07091c; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+            <video data-vp-autoplay="" src="/images/payload/parachute.mp4" poster="/images/payload/parachute-poster.webp" muted loop playsinline controls preload="none" style="display:block; width:100%; height:auto;"></video>
+          </div>
         </div>
       </div>
 
       <!-- 02 · Retarded payload deployment -->
-      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:64px;">
-        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
           <img src="/images/payload/screw-nut-mechanism.jpeg" alt="Retarded payload deployment CAD: lead-screw spool-nut assembly with rotary damper" style="display:block; width:100%; height:auto;">
         </div>
-        <div>
-          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">02 &middot; CONCEPT</div>
-          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">Retarded payload deployment.</h3>
-          <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c; margin-bottom:12px;">Lead-screw spool with rotary damper</div>
-          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">A passive two-stage descent: a servo release drops the payload into free-fall while its rope unwinds from a custom spool-nut riding a stationary lead screw. Once the spool-nut hits the end stop, translation converts to rotation &mdash; the screw and spool spin together against a rotary damper, braking the remaining descent at a controlled rate.</p>
-          <div style="display:flex; flex-direction:column; gap:10px;">
-            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">No active electronics needed after release.</p></div>
-            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Bearings carry all structural load, so the damper only ever sees torsion.</p></div>
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">02 &middot; CONCEPT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">Retarded payload deployment.</h3>
+            <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c;">Lead-screw spool with rotary damper</div>
+          </div>
+          <div class="vp-split-body" style="margin-top:12px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">A passive two-stage descent: a servo release drops the payload into free-fall while its rope unwinds from a custom spool-nut riding a stationary lead screw. Once the spool-nut hits the end stop, translation converts to rotation &mdash; the screw and spool spin together against a rotary damper, braking the remaining descent at a controlled rate.</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">No active electronics needed after release.</p></div>
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Bearings carry all structural load, so the damper only ever sees torsion.</p></div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- 03 · DC motor magazine dispenser -->
-      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
-        <div>
-          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">03 &middot; CONCEPT</div>
-          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">DC motor magazine dispenser.</h3>
-          <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c; margin-bottom:12px;">Dual-tower silo with synchronized trapdoors</div>
-          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">Two stacked-plate magazine towers &mdash; one for discs, one for the water bottle &mdash; release payloads in two coordinated stages. A single servo drives a double slider-crank linkage that opens both base trapdoors simultaneously; a DC motor with a cone-shaped horn then nudges the lowest item off its resting plate so it drops straight through.</p>
-          <div style="display:flex; flex-direction:column; gap:10px;">
-            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Single servo + double slider-crank opens both towers' doors in sync.</p></div>
-            <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Door-then-drop sequencing keeps the payload from jamming against a closed door.</p></div>
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">03 &middot; CONCEPT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">DC motor magazine dispenser.</h3>
+            <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c;">Dual-tower silo with synchronized trapdoors</div>
+          </div>
+          <div class="vp-split-body" style="margin-top:12px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">Two stacked-plate magazine towers &mdash; one for discs, one for the water bottle &mdash; release payloads in two coordinated stages. A single servo drives a double slider-crank linkage that opens both base trapdoors simultaneously; a DC motor with a cone-shaped horn then nudges the lowest item off its resting plate so it drops straight through.</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Single servo + double slider-crank opens both towers' doors in sync.</p></div>
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Door-then-drop sequencing keeps the payload from jamming against a closed door.</p></div>
+            </div>
           </div>
         </div>
-        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
           <img src="/images/payload/dc-winch-dispenser.png" alt="DC motor magazine dispenser CAD: dual-tower silo with servo-actuated trapdoors" style="display:block; width:100%; height:auto;">
         </div>
       </div>
@@ -754,8 +917,8 @@
         <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:600px; line-height:1.6;">Off-the-shelf stations like Mission Planner and QGroundControl aren&rsquo;t built around the SUAS flow, so we built our own: a web app with a React front end over independent backend services (MAVLink, camera, detection, and payload) behind an API gateway, so a fault in one can&rsquo;t take down telemetry.</p>
       </div>
 
-      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:56px;">
-        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:56px;">
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
           <div style="display:flex; align-items:center; gap:6px; padding:9px 12px; background:#12142c; border-bottom:1px solid rgba(60,64,181,0.3);">
             <span style="width:9px; height:9px; border-radius:9999px; background:#d9302a;"></span>
             <span style="width:9px; height:9px; border-radius:9999px; background:#e0a83c;"></span>
@@ -764,10 +927,12 @@
           </div>
           <img src="/images/blog/sw-gcs.jpeg" alt="Custom ground control station: mission planning view with mapping survey area and live telemetry" style="display:block; width:100%; height:auto;">
         </div>
-        <div>
-          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">BUILT FOR THE MISSION, NOT GENERIC FLIGHT</div>
-          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 14px;">Every screen optimizes for what moves the score.</h3>
-          <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">BUILT FOR THE MISSION, NOT GENERIC FLIGHT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0;">Every screen optimizes for what moves the score.</h3>
+          </div>
+          <div class="vp-split-body" style="display:flex; flex-direction:column; gap:16px; margin-top:14px;">
             <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(217,48,42,0.16); border:1px solid rgba(217,48,42,0.4); color:#d9302a; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">01</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Search boundaries are pre-loaded; selecting one auto-generates the lawnmower survey path in under three seconds for a 10-acre area.</p></div>
             <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">02</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Every detection is queued for a one-click operator accept or reject, rather than auto-dropping on a model&rsquo;s confidence alone.</p></div>
             <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">03</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">A dedicated, always-on panel shows boundaries, position, ground speed, and AGL altitude for the judge, isolated so a fault elsewhere can&rsquo;t hide it.</p></div>
@@ -778,28 +943,32 @@
       <!-- data pipeline: capture -> downlink/batch -> detect -> cluster -> operator -> drop -->
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); margin-top:64px;">
         <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#5458cc; text-align:center; margin-bottom:22px;">MISSION DATA ARCHITECTURE</div>
-        <div style="display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px;">
+        <div id="vp-dataflow" style="display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px;">
           <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">01</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Capture</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">SIYI A8 mini geotags each frame via the flight controller&rsquo;s GPS at the instant of capture.</div></div>
-          <div style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
           <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">02</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Downlink &amp; batch</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">Images cross the Herelink downlink and queue until a batch of 8 is ready, amortizing inference latency.</div></div>
-          <div style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
           <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">03</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Detect</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">UAV-DETR, a transformer tuned for small aerial objects, flags candidate tents and mannequins per batch.</div></div>
-          <div style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
           <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">04</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Cluster</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">k-means resolves repeat sightings of the same object across overlapping frames into one coordinate.</div></div>
-          <div style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
           <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(217,48,42,0.4); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">05</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Operator &amp; drop</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">One click accepts the candidate; the aircraft navigates to it and releases the matching payload.</div></div>
         </div>
       </div>
 
       <!-- mapping -->
-      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
-        <div>
-          <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">MAPPING &middot; RISK ASSESSMENT</div>
-          <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 14px;">When 4K was the problem.</h3>
-          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 12px;">The lawnmower survey feeds a georeferenced orthomosaic built with OpenDroneMap, which anchors every photo to its GPS geotag rather than guessing position from overlap, so the map stays globally consistent instead of bowing across a large area.</p>
-          <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0;">Our first pass (10 m/s, a photo every 0.3 s, full 4K) failed: the camera couldn&rsquo;t finish writing one frame before the next trigger, so far fewer images landed than commanded. Slowing to 6 m/s and dropping to 1080p kept the camera in pace and packed in more overlap, same hardware, same software, and the map built cleanly.</p>
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">MAPPING &middot; RISK ASSESSMENT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0;">When 4K was the problem.</h3>
+          </div>
+          <div class="vp-split-body" style="margin-top:14px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 12px;">The lawnmower survey feeds a georeferenced orthomosaic built with OpenDroneMap, which anchors every photo to its GPS geotag rather than guessing position from overlap, so the map stays globally consistent instead of bowing across a large area.</p>
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0;">Our first pass (10 m/s, a photo every 0.3 s, full 4K) failed: the camera couldn&rsquo;t finish writing one frame before the next trigger, so far fewer images landed than commanded. Slowing to 6 m/s and dropping to 1080p kept the camera in pace and packed in more overlap, same hardware, same software, and the map built cleanly.</p>
+          </div>
         </div>
-        <div style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
           <img src="/images/blog/sw-mapping.jpeg" alt="Georeferenced orthomosaic reconstructed from a tuned survey flight" style="display:block; width:100%; height:auto;">
         </div>
       </div>
@@ -1027,7 +1196,9 @@ class Component extends DCLogic {
         else { v.pause(); }
       });
     }, { threshold: 0.2 });
-    setTimeout(() => document.querySelectorAll('#vp-gallery video').forEach(v => { v.removeAttribute('autoplay'); v.loop = true; io.observe(v); }), 60);
+    // [data-vp-autoplay] opts a clip outside the gallery into the same treatment
+    // (the payload drop test): preload="none" until it's on screen, then play.
+    setTimeout(() => document.querySelectorAll('#vp-gallery video, video[data-vp-autoplay]').forEach(v => { v.removeAttribute('autoplay'); v.loop = true; io.observe(v); }), 60);
 
     // ---- gallery: arrow-paged mosaic + click-to-expand focus ----
     setTimeout(() => {
@@ -1527,7 +1698,14 @@ class Component extends DCLogic {
           if (!target) return;
           e.preventDefault();
           const y = target.getBoundingClientRect().top + window.pageYOffset - 150;
-          window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
+          /* Jump rather than smooth-scroll on touch, matching JumpNav on the
+             team page: these targets are thousands of pixels apart, and
+             animating across that much of a media-heavy page is what iOS can't
+             rasterise in time — it shows un-painted area for the length of the
+             animation. A jump has no in-between frames to miss. Pointer devices
+             keep the smooth scroll, where the hardware keeps up. */
+          const coarse = window.matchMedia('(hover: none)').matches;
+          window.scrollTo({ top: y, behavior: (reduced || coarse) ? 'auto' : 'smooth' });
         });
       });
       const sections = navLinks.map((a) => document.getElementById(a.dataset.nav)).filter(Boolean);
@@ -1535,6 +1713,46 @@ class Component extends DCLogic {
         entries.forEach((entry) => { if (entry.isIntersecting) setActive(entry.target.id); });
       }, { rootMargin: '-110px 0px -65% 0px', threshold: 0 });
       sections.forEach((s) => spy.observe(s));
+    }
+
+    // ---- phone section nav: pull tab + side panel (mirrors JumpNav.tsx) ----
+    // The links themselves are already wired by the block above; this only owns
+    // opening and closing the panel.
+    const secTab = document.getElementById('vp-secnav-tab');
+    const secPanel = document.getElementById('vp-secnav-panel');
+    if (secTab && secPanel) {
+      const setPanel = (open) => {
+        secTab.dataset.open = open ? '1' : '0';
+        secPanel.dataset.open = open ? '1' : '0';
+        secTab.setAttribute('aria-expanded', open ? 'true' : 'false');
+        secTab.setAttribute('aria-label', open ? 'Close section nav' : 'Jump to section');
+        const label = secTab.querySelector('.vp-secnav-tablabel');
+        if (label) label.textContent = open ? 'Close' : 'Pull';
+        // Keeps the links out of the tab order while the panel is closed.
+        if (open) secPanel.removeAttribute('inert');
+        else secPanel.setAttribute('inert', '');
+        if (open) { const first = secPanel.querySelector('a'); if (first) first.focus(); }
+      };
+
+      secTab.addEventListener('click', () => setPanel(secPanel.dataset.open !== '1'));
+      const closeBtn = secPanel.querySelector('.vp-secnav-close');
+      if (closeBtn) closeBtn.addEventListener('click', () => setPanel(false));
+      // Picking a destination closes the panel; the scroll itself is handled by
+      // the shared .vp-secnav-link click handler above.
+      secPanel.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setPanel(false)));
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && secPanel.dataset.open === '1') setPanel(false);
+      });
+      /* Anything outside closes it — pointerdown covers mouse and touch, and
+         fires early enough that the panel is on its way out before the tap
+         completes. The tab is excluded because it toggles on its own click: if
+         this closed the panel first, the tab would immediately reopen it. */
+      document.addEventListener('pointerdown', (e) => {
+        if (secPanel.dataset.open !== '1') return;
+        if (secPanel.contains(e.target) || secTab.contains(e.target)) return;
+        setPanel(false);
+      });
     }
 
     const FREEZE_AT = 999;   // clip is pre-trimmed to cut before the person walks in — play it through, hold on the last frame

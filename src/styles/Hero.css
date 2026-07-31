@@ -26,6 +26,41 @@
   object-fit: cover;
 }
 
+/*
+ * One <video> per theme, stacked, so a theme toggle crossfades instead of
+ * cutting (Hero.jsx renders both).
+ *
+ * Only the incoming clip animates: it fades up on top while the outgoing one
+ * holds full opacity underneath it. Fading both in opposite directions at once
+ * is the obvious version and the wrong one — mid-transition they'd both sit at
+ * roughly half alpha and the page background would show straight through the
+ * middle of the hero. Ending the fade at a fully opaque top layer means the
+ * layer beneath is simply covered, never revealed.
+ */
+.hero-media[data-active="false"] {
+  z-index: 0;
+}
+
+.hero-media[data-active="true"] {
+  z-index: 1;
+  animation: hero-media-in var(--transition-slow) both;
+}
+
+@keyframes hero-media-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-media[data-active="true"] {
+    animation: none;
+  }
+}
+
 /* Dark at the top so the fixed nav stays legible, lightest at 42% to let the
  * subject through, darkest at the bottom where the copy and ticker live. */
 .hero-scrim {

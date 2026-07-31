@@ -53,10 +53,19 @@
 
 /* ─── Photo backdrop ──────────────────────────────────────────────────────── */
 
-/* A flight photo per theme, swapped in CSS so the browser only ever fetches
- * the rule that matches. Anchored to the left half and masked to nothing well
- * before the right column, so it sits behind the copy and never runs under
- * the video frame. */
+/* A flight photo per theme. Anchored to the left half so it sits behind the
+ * copy and never runs under the video frame.
+ *
+ * The two shots are stacked layers that crossfade, rather than one element
+ * whose background-image is swapped per theme. background-image cannot be
+ * transitioned — the browser recomputes it in a single frame no matter what
+ * `transition` is set — so the swapped version snapped while .video's own
+ * background-color faded around it, which is exactly the seam this removes.
+ *
+ * The cost is that both photos are fetched instead of only the matching one.
+ * That's the price of having something to fade between: a crossfade needs the
+ * outgoing image still decoded while the incoming one comes up. This section
+ * is well below the fold, so neither file is on the first-paint path. */
 .video-photo {
   position: absolute;
   /* Bleed the box a little past every edge so the blur below doesn't leave a
@@ -64,18 +73,38 @@
   inset: -40px;
   width: auto;
   z-index: 0;
-  background-image: url("/Home/flight-backdrop-dark.jpg");
+}
+
+.video-photo::before,
+.video-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   /* `contain`-ish framing so the whole aircraft reads instead of a cropped,
    * zoomed-in slice — sized to ~112% and centred, which shows most of the frame
    * while still covering the wide/short section. */
   background-size: cover;
-  /* The drone's own hub sits at (48%, 30%) of this source photo. Because
-   * background-position's X%/Y% pins that exact point of the image to that
-   * same X%/Y% point of this box, using the hub's own fraction here anchors
-   * it to a fixed on-screen spot regardless of viewport/cover-crop — see the
-   * light variant below, which anchors its (different) source photo's hub to
-   * its own fraction, so both themes' drones land within a few percent of
-   * each other rather than drifting apart. */
+}
+
+/* Dark-mode shot, and the permanently opaque base of the pair: only the light
+ * layer above it ever changes opacity, so this one is simply covered or
+ * uncovered rather than fading in step.
+ *
+ * Fading the two in opposite directions is the obvious version and the wrong
+ * one: halfway through, both would sit at roughly half alpha and .video's own
+ * background-color — which is crossfading at the same time — would show through
+ * the middle of the photo. With an always-opaque base there is no frame in
+ * which anything behind the pair is visible, in either direction.
+ *
+ * The drone's own hub sits at (48%, 30%) of this source photo.
+ * Because background-position's X%/Y% pins that exact point of the image to
+ * that same X%/Y% point of this box, using the hub's own fraction here anchors
+ * it to a fixed on-screen spot regardless of viewport/cover-crop — see the
+ * light layer below, which anchors its (different) source photo's hub to its
+ * own fraction, so both themes' drones land within a few percent of each other
+ * rather than drifting apart. */
+.video-photo::before {
+  background-image: url("/Home/flight-backdrop-dark.jpg");
   background-position: 48% 30%;
   /* The fog: a soft blur plus a slight darken so the shot reads as an
    * atmospheric backdrop rather than a sharp photo competing with the copy. */
@@ -85,20 +114,23 @@
    * above so the anchor doesn't shift, closes most of that scale gap. */
   transform: scale(1.1);
   transform-origin: 48% 30%;
+  opacity: 1;
 }
 
-:root[data-theme="light"] .video-photo {
+/* Light-mode shot. Already fills the frame edge-to-edge in the source photo,
+ * so no extra zoom is needed (or possible without cropping into the drone
+ * itself), and it isn't darkened — a gentle blur and a whisper of lift, kept
+ * far from the old blown-out white wash. The tint comes from the scrim below. */
+.video-photo::after {
   background-image: url("/Home/flight-backdrop-light.webp");
-  /* This source photo's hub sits at (46%, 34%) — see the dark variant's
-   * comment above for why matching the position to the photo's own hub
-   * fraction is what keeps the two themes' drones aligned. */
   background-position: 46% 34%;
-  /* Light mode: don't darken — a gentle blur and a whisper of lift, kept far
-   * from the old blown-out white wash. The tint comes from the scrim below. */
   filter: blur(0px) brightness(1) saturate(1.2);
-  /* Already fills the frame edge-to-edge in the source photo, so no extra
-   * zoom is needed (or possible without cropping into the drone itself). */
-  transform: none;
+  transition: opacity var(--transition-slow);
+  opacity: 0;
+}
+
+:root[data-theme="light"] .video-photo::after {
+  opacity: 1;
 }
 
 /* The atmosphere layer over the photo — a deep blue "fog" that pools at the

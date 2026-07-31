@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { TICKER_RESULTS } from "../data/home";
 import { useTheme } from "../context/ThemeContext";
@@ -7,8 +7,9 @@ import "../styles/Hero.css";
 
 /**
  * One clip per theme: a daylight campus flight for light mode, a night flight
- * for dark. Only the active one is ever in the DOM, so a visitor downloads a
- * single video rather than both.
+ * for dark. Both elements are in the DOM so the toggle can crossfade, but only
+ * a clip that has actually been shown is given a source — a visitor who never
+ * switches themes still downloads a single video rather than both.
  */
 const CLOUDINARY = "https://res.cloudinary.com/deqkkrtk/video/upload";
 
@@ -38,7 +39,44 @@ export default function Hero() {
   useReveal(rootRef);
 
   const { theme } = useTheme();
-  const media = HERO_MEDIA[theme] ?? HERO_MEDIA.dark;
+  const active = HERO_MEDIA[theme] ? theme : "dark";
+
+  /*
+   * Both clips are their own <video> element, stacked, and the theme toggle
+   * crossfades between them (see .hero-media in Hero.css).
+   *
+   * This used to be a single <video> keyed on the theme, which remounted the
+   * element on every toggle: the old clip left the DOM in the same frame the
+   * new one entered it, so there was nothing to fade from and the hero cut
+   * while the rest of the page crossfaded around it.
+   *
+   * Only a clip that has actually been shown gets a `src`/`poster`, so a
+   * visitor who never touches the toggle still downloads one video rather than
+   * both. An un-requested element paints nothing, which is also what keeps the
+   * first toggle clean: the outgoing clip stays visible underneath until the
+   * incoming one has a real frame to show, instead of fading to a black box.
+   */
+  const [requested, setRequested] = useState(() => ({ [active]: true }));
+  useEffect(() => {
+    setRequested((prev) => (prev[active] ? prev : { ...prev, [active]: true }));
+  }, [active]);
+
+  /* Only the visible clip should be decoding frames — the one underneath is
+     paused rather than left looping out of sight. */
+  const videoRefs = useRef({});
+  useEffect(() => {
+    Object.entries(videoRefs.current).forEach(([key, el]) => {
+      if (!el) return;
+      if (key !== active) {
+        el.pause();
+        return;
+      }
+      // Autoplay can be refused (low power mode, a paused-media preference);
+      // the poster stays up in that case, so there's nothing to recover from.
+      const playing = el.play();
+      if (playing && playing.catch) playing.catch(() => {});
+    });
+  }, [active, requested]);
 
   const scrollToAbout = () => {
     document.querySelector(".features")?.scrollIntoView({ behavior: "smooth" });
@@ -47,21 +85,25 @@ export default function Hero() {
   return (
     <section className="hero" ref={rootRef}>
       {/* Muted, looping flight footage. The poster paints immediately so the
-          hero is never a black rectangle while the file buffers. Keyed by
-          theme so switching modes remounts the element and actually loads the
-          other clip, rather than leaving the old one decoded in place. */}
-      <video
-        key={theme}
-        className="hero-media"
-        src={media.src}
-        poster={media.poster}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        aria-hidden="true"
-      />
+          hero is never a black rectangle while the file buffers. */}
+      {Object.keys(HERO_MEDIA).map((key) => (
+        <video
+          key={key}
+          ref={(el) => {
+            videoRefs.current[key] = el;
+          }}
+          className="hero-media"
+          data-active={key === active}
+          src={requested[key] ? HERO_MEDIA[key].src : undefined}
+          poster={requested[key] ? HERO_MEDIA[key].poster : undefined}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+        />
+      ))}
       <div className="hero-scrim" aria-hidden="true" />
 
       <div className="hero-body">
