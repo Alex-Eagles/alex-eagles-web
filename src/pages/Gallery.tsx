@@ -983,7 +983,24 @@ export default function Gallery() {
             )}
 
             {viewMode === 'reel' && filteredItems.length > 0 && (
-              <div className="relative w-full max-w-[100vw] -mx-6 px-6">
+              /*
+               * Was `w-full max-w-[100vw] -mx-6 px-6` — an attempt at the
+               * full-bleed trick, and the reason the reel sat off-centre.
+               *
+               * That trick only works on a box whose width is `auto`, where
+               * negative margins genuinely widen it. `w-full` pins the width to
+               * the parent, so `-mx-6` couldn't widen anything and just shifted
+               * the whole box 24px left; `px-6` then pulled the content in
+               * another 24px on each side. Net effect: a track starting at the
+               * parent's left edge but ending 48px short of its right one.
+               * Asymmetric, so the centred card was 24px left of true centre and
+               * the next card was clipped early with dead space beside it.
+               *
+               * The bleed wasn't buying anything, so it's gone. The track is now
+               * the parent's content box — symmetric by construction — which is
+               * what the `calc(50% - 36vw)` side padding below assumes.
+               */
+              <div className="relative">
                 <button onClick={() => reelRef.current?.scrollBy({ left: -500, behavior: 'smooth' })} className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-3 text-white backdrop-blur transition-colors hover:bg-black/80 sm:flex" aria-label="Scroll reel left">
                   <ChevronLeft size={24} />
                 </button>
