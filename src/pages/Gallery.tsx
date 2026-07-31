@@ -25,9 +25,53 @@ type Category = (typeof CATEGORIES)[number];
 
 // Ask Cloudinary for an appropriately-sized image instead of shipping full-res
 // originals to small thumbnail cards.
+/**
+ * Widths at or below this get the pre-built grid-sized copy; anything larger
+ * (the lightbox) gets the original. Kept just above the 640px the tiles are
+ * generated at, so `sizedImage(url, 600)` lands on the small file.
+ */
+const TILE_MAX_WIDTH = 800;
+
 function sizedImage(url: string | undefined, width: number): string | undefined {
+  if (!url) return url;
+
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/w_${width},c_limit,dpr_auto/`);
+  }
+
+  /*
+   * Local photos, which is what every entry in src/data/gallery.ts actually is.
+   * The Cloudinary branch above never matched them, so this helper used to hand
+   * the grid the full-size original — camera files up to 5712px wide — and
+   * that, more than anything else, is why the page was slow to fill in.
+   *
+   * There's no on-the-fly resize for a static file, so the small copy is built
+   * ahead of time by scripts/build-gallery-tiles.mjs into a `tiles/` subfolder
+   * under the same name. Swap the directory in and keep the filename.
+   */
+  if (width <= TILE_MAX_WIDTH) {
+    const local = /^(.*\/)?([^/]+)\.(?:jpe?g|png|webp)$/i.exec(url);
+    if (local && !url.includes('//')) {
+      return `${local[1] ?? ''}tiles/${local[2]}.webp`;
+    }
+  }
+
+  return url;
+}
+
+/*
+ * Same idea for the clips. Cloudinary serves a video at its source resolution
+ * unless a transform says otherwise, and these URLs only carry `q_auto,f_auto`
+ * — so a full-size clip was being downloaded into a grid tile a few hundred
+ * pixels wide. Chaining a width cap in front of the existing transform is the
+ * single biggest win on this page.
+ *
+ * Tiles only; the lightbox keeps the untouched URL so opening one still plays
+ * at full quality.
+ */
+function sizedVideo(url: string | undefined, width: number): string | undefined {
   if (!url || !url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
-  return url.replace('/upload/', `/upload/w_${width},c_limit,dpr_auto/`);
+  return url.replace('/upload/', `/upload/w_${width},c_limit/`);
 }
 
 function getCSSVar(name: string): string {
@@ -243,13 +287,23 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
       {item.videoUrl && (shouldPreload || priority) && (
         <video
           ref={videoRef}
-          src={`${item.videoUrl}#t=0.001`}
+          src={`${sizedVideo(item.videoUrl, 640)}#t=0.001`}
           poster={sizedImage(item.imageUrl, 600)}
           muted
           loop
           playsInline
           preload={priority ? "auto" : "metadata"}
-          onCanPlayThrough={() => setVideoReady(true)}
+          /*
+           * `canplay`, not `canplaythrough`. canplaythrough waits until the
+           * browser thinks the WHOLE clip can play start to finish without
+           * stalling — in practice, until it is very nearly all downloaded. The
+           * tile stayed on its poster at opacity 0 for that entire time, which
+           * is what read as the gallery being slow: the video was usually
+           * playable seconds before it was allowed to be seen. canplay fires
+           * when there's enough buffered to start, and the clip is muted, short
+           * and looping, so it keeps up from there.
+           */
+          onCanPlay={() => setVideoReady(true)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoReady && isInViewport ? 'opacity-100' : 'opacity-0'}`}
         />
       )}

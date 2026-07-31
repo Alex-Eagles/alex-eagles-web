@@ -7,9 +7,10 @@ import "../styles/Hero.css";
 
 /**
  * One clip per theme: a daylight campus flight for light mode, a night flight
- * for dark. Both elements are in the DOM so the toggle can crossfade, but only
- * a clip that has actually been shown is given a source — a visitor who never
- * switches themes still downloads a single video rather than both.
+ * for dark. Both elements are in the DOM so the toggle can crossfade. The
+ * active clip loads immediately; the other is warmed in the background once the
+ * page goes idle, so the first toggle doesn't have to wait on a download (and
+ * is skipped entirely on a metered or 2G connection).
  */
 const CLOUDINARY = "https://res.cloudinary.com/deqkkrtk/video/upload";
 
@@ -50,19 +51,59 @@ export default function Hero() {
    * new one entered it, so there was nothing to fade from and the hero cut
    * while the rest of the page crossfaded around it.
    *
-   * Only a clip that has actually been shown gets a `src`/`poster`, so a
-   * visitor who never touches the toggle still downloads one video rather than
-   * both. An un-requested element paints nothing, which is also what keeps the
-   * first toggle clean: the outgoing clip stays visible underneath until the
-   * incoming one has a real frame to show, instead of fading to a black box.
+   * Only a clip that has actually been shown gets a `src`/`poster`. An
+   * un-requested element paints nothing, which is what keeps a swap clean: the
+   * outgoing clip stays visible underneath until the incoming one has a real
+   * frame to show, instead of fading to a black box.
    */
   const [requested, setRequested] = useState(() => ({ [active]: true }));
   useEffect(() => {
     setRequested((prev) => (prev[active] ? prev : { ...prev, [active]: true }));
   }, [active]);
 
+  /*
+   * Fetch the other theme's clip once the page has gone idle.
+   *
+   * Requesting it only at the moment of the toggle meant the first toggle
+   * *started* the download — and for light mode that's a third-party origin, so
+   * a DNS and TLS handshake before the first byte. The crossfade would run
+   * against a clip that had nothing to show yet and the hero visibly stalled.
+   * Warming it in the background makes the first toggle as instant as every
+   * one after it.
+   *
+   * Deferred to idle rather than done up front so it never competes with the
+   * visible clip, the poster, or anything else on the critical path — and
+   * skipped outright on a metered or very slow connection, where a second video
+   * nobody asked for is a real cost and a beat of lag is not.
+   */
+  useEffect(() => {
+    const pending = Object.keys(HERO_MEDIA).filter((key) => !requested[key]);
+    if (!pending.length) return;
+
+    const link = navigator.connection;
+    if (link?.saveData || /(^|-)2g$/.test(link?.effectiveType ?? "")) return;
+
+    const warm = () =>
+      setRequested((prev) => {
+        const next = { ...prev };
+        pending.forEach((key) => {
+          next[key] = true;
+        });
+        return next;
+      });
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(warm, 2500);
+    return () => window.clearTimeout(id);
+  }, [requested]);
+
   /* Only the visible clip should be decoding frames — the one underneath is
-     paused rather than left looping out of sight. */
+     paused rather than left looping out of sight. This is also why the
+     elements carry no `autoplay` attribute: a warmed clip would honour it and
+     start playing behind the visible one the moment its data arrived. */
   const videoRefs = useRef({});
   useEffect(() => {
     Object.entries(videoRefs.current).forEach(([key, el]) => {
@@ -99,11 +140,14 @@ export default function Hero() {
             data-active={key === active}
             src={requested[key] ? HERO_MEDIA[key].src : undefined}
             poster={requested[key] ? HERO_MEDIA[key].poster : undefined}
-            autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
+            /* Buffer a clip properly once it's been asked for — "metadata" left
+               the warmed clip holding nothing but headers, which is the stall
+               this is meant to remove. Playback is started imperatively above,
+               not by an `autoplay` attribute. */
+            preload={requested[key] ? "auto" : "none"}
           />
         ))}
       </div>

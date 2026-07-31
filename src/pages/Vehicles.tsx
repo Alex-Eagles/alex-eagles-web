@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Prototypes from "@/components/sections/Prototypes";
 
 /**
@@ -29,10 +30,23 @@ const SUPPORT_URL = "/vehicle/support.js";
 export default function Vehicles() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
+  /*
+   * #vp-prototypes-slot, once the DC runtime has rendered it. The "Before the
+   * build" section belongs between Mission software and Technical documentation
+   * — inside the injected page — but it's a React component, so it can't just
+   * be markup in that document. Portalling into a slot the page provides is
+   * what places it there; `null` means the page hasn't rendered yet (or the
+   * slot is missing, in which case the fallback below still renders it after
+   * the page rather than dropping it).
+   */
+  const [protoSlot, setProtoSlot] = useState<HTMLElement | null>(null);
+  const [slotSettled, setSlotSettled] = useState(false);
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
     let cancelled = false;
+    let slotPoll = 0;
+    let slotGiveUp = 0;
     const injected: Node[] = [];
 
     (async () => {
@@ -123,14 +137,46 @@ export default function Vehicles() {
           }, 50);
           window.setTimeout(() => window.clearInterval(t), 5000);
         }
+        /*
+         * The slot only exists once the DC runtime has rendered the template
+         * (it replaces <x-dc> with its own root), and boot above may still be
+         * waiting on support.js — so poll for it the same way. Giving up marks
+         * it settled, which is what lets the fallback render the section in its
+         * old position rather than losing it.
+         */
+        const findSlot = () => {
+          if (cancelled) return true;
+          const el = host.querySelector<HTMLElement>("#vp-prototypes-slot");
+          if (!el) return false;
+          setProtoSlot(el);
+          setSlotSettled(true);
+          return true;
+        };
+        if (!findSlot()) {
+          slotPoll = window.setInterval(() => {
+            if (findSlot()) window.clearInterval(slotPoll);
+          }, 50);
+          slotGiveUp = window.setTimeout(() => {
+            window.clearInterval(slotPoll);
+            if (!cancelled) setSlotSettled(true);
+          }, 6000);
+        }
       } catch (e) {
-        if (!cancelled) setError(String(e));
+        if (!cancelled) {
+          setError(String(e));
+          setSlotSettled(true);
+        }
         console.error("[vehicles] inline mount failed:", e);
       }
     })();
 
     return () => {
       cancelled = true;
+      window.clearInterval(slotPoll);
+      window.clearTimeout(slotGiveUp);
+      /* Drop the portal before the slot is destroyed below, so React unmounts
+         the section while its container is still the node it rendered into. */
+      setProtoSlot(null);
       injected.forEach((n) => n.parentNode?.removeChild(n));
       if (host) host.innerHTML = "";
 
@@ -165,7 +211,16 @@ export default function Vehicles() {
           </p>
         )}
       </div>
-      <Prototypes />
+
+      {/* Into the page's own slot (between Mission software and Technical
+          documentation) once it exists. If the page never rendered one — an
+          older cached copy of vehicle/index.html, or a failed mount — fall back
+          to the original position after the page, so the section is late rather
+          than missing. Nothing renders while it's still undecided, to avoid
+          showing it in the wrong place and then moving it. */}
+      {protoSlot
+        ? createPortal(<Prototypes />, protoSlot)
+        : slotSettled && <Prototypes />}
     </>
   );
 }
