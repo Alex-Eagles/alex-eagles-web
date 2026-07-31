@@ -267,11 +267,21 @@ function CardChrome({ item }: { item: GalleryItem }) {
   );
 }
 
+/*
+ * Media paints the moment it's usable, with no fade — on every viewport.
+ *
+ * There used to be two independent opacity transitions in here: the still faded
+ * up over 0.5s on load, then the clip faded up over it on its own 1s timing.
+ * Two fades over the same tile, at different speeds, is the blink — the tile
+ * arrives, dips, and arrives again. Nothing is gained by them: the browser only
+ * paints an image once it has decoded it either way, and the clip's poster is
+ * the same frame as the still, so swapping between them is invisible without a
+ * fade and obvious with one.
+ */
 function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }) {
   const [videoReady, setVideoReady] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  
-  const [isLandscapeImg, setIsLandscapeImg] = useState(false); 
+
+  const [isLandscapeImg, setIsLandscapeImg] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldPreload = useInView(containerRef, { once: true, margin: "800px" });
@@ -328,19 +338,12 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
           if (naturalWidth / naturalHeight > 1.35) {
             setIsLandscapeImg(true);
           }
-          setImgLoaded(true);
         }}
-        /*
-         * Stays fully opaque once loaded, and is covered by the clip rather
-         * than fading out under it. It used to drop to opacity-0 the moment the
-         * video was ready while the video faded up over 1s — so mid-crossfade
-         * both sat at part alpha and the tile's own near-black backdrop showed
-         * straight through. That dip, plus fading in from that same backdrop on
-         * first load, is the black blink. The backdrop is gone from the wrapper
-         * above and nothing dips now: the still is simply hidden behind an
-         * opaque video.
-         */
-        className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${isLandscapeImg ? 'object-contain' : 'object-cover'} ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+        /* No opacity gate and no transition: an image that hasn't decoded yet
+           paints nothing regardless, so fading it in only delays it. It also
+           stays put once the clip is up — it's covered by an opaque video, not
+           faded out under one, which is what used to let the tile dip. */
+        className={`absolute inset-0 w-full h-full ${isLandscapeImg ? 'object-contain' : 'object-cover'}`}
       />
       )}
 
@@ -352,7 +355,12 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
           muted
           loop
           playsInline
-          preload={priority ? "auto" : "metadata"}
+          /* "auto" for anything mounted at all, not just the first tile. The
+             element is only mounted once it's within 800px of the viewport
+             (shouldPreload), so this buffers the next card or two ahead rather
+             than starting the fetch as you arrive — which is what made the reel
+             feel slow, since swiping brings the next card into view instantly. */
+          preload="auto"
           /*
            * Cloudinary builds a derived clip lazily: the first request for a
            * transformation it hasn't made yet answers 423 while it renders in
@@ -383,7 +391,16 @@ function SmartMedia({ item, priority }: { item: GalleryItem; priority: boolean }
            * and looping, so it keeps up from there.
            */
           onCanPlay={() => setVideoReady(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoReady && isInViewport ? 'opacity-100' : 'opacity-0'}`}
+          /* Revealed the instant it can play, with no transition. The clip's
+             poster is the same frame as the still underneath it, so there is
+             nothing to crossfade between — a fade here only announced a swap
+             that would otherwise be invisible.
+             Readiness only, deliberately not `isInViewport`: tying visibility
+             to that made the clip vanish and come back every time a card
+             crossed the observer's edge, which in a horizontal reel is once per
+             swipe. It's paused off-screen by the effect above instead, and a
+             paused video keeps painting its current frame. */
+          className={`absolute inset-0 w-full h-full object-cover ${videoReady ? 'opacity-100' : 'opacity-0'}`}
         />
       )}
     </div>
@@ -440,16 +457,21 @@ function SpatialGridCard({
     rotateX.set(0); rotateY.set(0); glareX.set(0.5); glareY.set(0.5); onHover(null, null);
   };
 
-  const canAnimate = !reduceMotion && !isMobile;
+  const still = reduceMotion || isMobile;
+  const canAnimate = !still;
 
   return (
     <m.div
       layoutId={`card-container-${item.id}`}
-      initial={{ opacity: 0, y: 40, scale: 0.88, rotateX: canAnimate ? 8 : 0 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+      /* No entry animation on a phone. Tiles staggered in over 0.8s with up to
+         0.6s of delay, which on a short scroll meant a tile was still fading up
+         while its own media was arriving underneath — two overlapping reveals
+         on the same card. */
+      initial={still ? false : { opacity: 0, y: 40, scale: 0.88, rotateX: 8 }}
+      whileInView={still ? undefined : { opacity: 1, y: 0, scale: 1, rotateX: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: Math.min(index * 0.07, 0.6) }}
-      className={`group/card relative h-full w-full transition-[opacity,filter] duration-500 ${tall ? 'row-span-2' : ''} ${isDimmed ? 'opacity-40 saturate-50 blur-[0.5px]' : ''}`}
+      className={`group/card relative h-full w-full ${still ? '' : 'transition-[opacity,filter] duration-500'} ${tall ? 'row-span-2' : ''} ${isDimmed ? 'opacity-40 saturate-50 blur-[0.5px]' : ''}`}
       style={{ perspective: 800 }}
     >
       <m.div
@@ -484,14 +506,24 @@ function SpatialGridCard({
 }
 
 function OrbitalReelCard({
-  item, index, isDimmed, reduceMotion, containerRef, onOpen, onHover, isDragging, priority
+  item, index, isDimmed, reduceMotion, isMobile, containerRef, onOpen, onHover, isDragging, priority
 }: {
   item: GalleryItem; index: number; isDimmed: boolean; reduceMotion: boolean; isMobile: boolean; containerRef: RefObject<HTMLDivElement | null>; onOpen: () => void; onHover: HoverFn; isDragging: boolean; priority: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollXProgress } = useScroll({ target: ref, container: containerRef, axis: 'x', offset: ['start end', 'center center', 'end start'] });
-  
-  const canAnimate = !reduceMotion;
+
+  /*
+   * `isMobile` was already being passed in and typed here, but never
+   * destructured — so none of it applied and the reel ran its full desktop
+   * treatment on phones. That's the worst of the blinking: every card's opacity
+   * is driven by its position in the scroller (0.3 at the edges, 1 in the
+   * middle), so swiping faded each card out and back in, on top of a one-off
+   * entry animation and a scanline sweep. On a touch scroller that reads as the
+   * media appearing, blinking, and appearing again.
+   */
+  const still = reduceMotion || isMobile;
+  const canAnimate = !still;
 
   const scale = useTransform(scrollXProgress, [0, 0.5, 1], [0.75, 1, 0.75]);
   const rotY = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [35, 0, -35] : [0, 0, 0]);
@@ -501,16 +533,18 @@ function OrbitalReelCard({
   return (
     <m.div
       layoutId={`card-container-${item.id}`}
-      initial={{ opacity: 0, x: 60 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={still ? false : { opacity: 0, x: 60 }}
+      whileInView={still ? undefined : { opacity: 1, x: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 }}
-      className={`group/card w-[72vw] flex-shrink-0 snap-center sm:w-[420px] transition-[opacity] duration-500 ${isDimmed ? 'opacity-40' : ''}`}
+      className={`group/card w-[72vw] flex-shrink-0 snap-center sm:w-[420px] ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
       style={{ perspective: 1000 }}
     >
       <m.div
         ref={ref}
-        style={canAnimate ? { scale, rotateY: rotY, opacity, z: zTrans, transformStyle: 'preserve-3d' as const } : reduceMotion ? undefined : { scale, opacity }}
+        /* No scroll-driven transform at all when still — the previous fallback
+           still applied `scale` and `opacity`, which is the fade-per-swipe. */
+        style={canAnimate ? { scale, rotateY: rotY, opacity, z: zTrans, transformStyle: 'preserve-3d' as const } : undefined}
         onClick={() => {
           if (isDragging) return;
           const card = ref.current;
@@ -904,8 +938,12 @@ export default function Gallery() {
                   style={{ scrollbarWidth: 'none', perspective: 1200 }}
                 >
                   <AnimatePresence>
+                    {/* priority={i < 3}: the reel is a horizontal scroller, so
+                        the second and third cards are one swipe from being on
+                        screen — load them eagerly rather than waiting for them
+                        to come within range. */}
                     {filteredItems.map((item, i) => (
-                      <OrbitalReelCard key={item.id} item={item} index={i} isDimmed={hoveredCardId !== null && hoveredCardId !== item.id} reduceMotion={prefersReducedMotion} isMobile={isMobile} priority={i === 0} containerRef={reelRef} onOpen={() => openAt(i, item.id)} onHover={handleHover} isDragging={isDragging} />
+                      <OrbitalReelCard key={item.id} item={item} index={i} isDimmed={hoveredCardId !== null && hoveredCardId !== item.id} reduceMotion={prefersReducedMotion} isMobile={isMobile} priority={i < 3} containerRef={reelRef} onOpen={() => openAt(i, item.id)} onHover={handleHover} isDragging={isDragging} />
                     ))}
                   </AnimatePresence>
                 </div>
