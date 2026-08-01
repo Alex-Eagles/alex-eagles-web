@@ -63,7 +63,7 @@ export function MemberCardSolid({
       /* Every card carries its sub-team's colour — the badge, the big first
        * name, the panel role and (on lead tiers) the accent ring all read from
        * it, so a 2025 card is colour-coded to its section exactly like a 2026
-       * one. Team Leader / Vice Lead / EM Integration Lead keep the brand,
+       * one. Team Leader / Team Vice Lead / EM Integration Lead keep the brand,
        * which `memberAccent` handles. Named `--card-accent`, not `--accent`,
        * because the latter is a shadcn theme token on :root. */
       style={{ "--card-accent": accent } as CSSProperties}

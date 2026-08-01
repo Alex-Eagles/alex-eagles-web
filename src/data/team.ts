@@ -41,7 +41,7 @@
 /** Card role label. Shown in the rest-state pill and again in the hover panel. */
 export type Role =
   | "Team Leader"
-  | "Vice Lead"
+  | "Team Vice Lead"
   | "Head of Autonomous"
   | "Vice Lead of Autonomous"
   | "EM Integration Lead"
@@ -62,7 +62,7 @@ export type Tier = "exec" | "head" | "lead" | "vice" | "member";
 export function roleTier(role: Role): Tier {
   switch (role) {
     case "Team Leader":
-    case "Vice Lead":
+    case "Team Vice Lead":
     case "EM Integration Lead":
       return "exec";
     case "Head of Autonomous":
@@ -329,7 +329,7 @@ export const BRAND_ACCENT = "#3d3ecc";
  */
 const TEAM_WIDE_ROLES: ReadonlySet<Role> = new Set<Role>([
   "Team Leader",
-  "Vice Lead",
+  "Team Vice Lead",
   "EM Integration Lead",
 ]);
 
@@ -439,7 +439,7 @@ const ROSTER_2026: YearRoster = {
       department: "Team Leadership",
     },
     {
-      ...slot("Vice Lead", "Youssef Hozayen", {
+      ...slot("Team Vice Lead", "Youssef Hozayen", {
         photo: "youssef-hozayen-2026",
         linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
         gradYear: "2027",
@@ -598,7 +598,7 @@ const ROSTER_2026: YearRoster = {
             "We give the aircraft its eyes — detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
           icon: "computer-vision",
         }),
-        // Youssef Hozayen also runs Hardware, on top of his top-level Vice Lead card.
+        // Youssef Hozayen also runs Hardware, on top of his top-level Team Vice Lead card.
         section("Hardware", [
           slot("Section Lead", "Youssef Hozayen", {
             photo: "youssef-hozayen-2026",
@@ -705,7 +705,7 @@ const ROSTER_2026: YearRoster = {
 const ROSTER_2025: YearRoster = {
   year: "2025",
   leadership: [
-    { ...slot("Vice Lead", "Norhan Mohammed", { photo: "norhan-mohammed" }), department: "Team Leadership" },
+    { ...slot("Team Vice Lead", "Norhan Mohammed", { photo: "norhan-mohammed" }), department: "Team Leadership" },
     { ...slot("Team Leader", "Ahmed Baheyeldin", { photo: "ahmed-baheyeldin" }), department: "Team Leadership" },
     { ...slot("EM Integration Lead", "Peter Ayoub", { photo: "peter-ayoub" }), department: "Team Leadership" },
   ],
@@ -873,7 +873,7 @@ export const ROSTERS: Record<RosterYear, YearRoster> = {
  * Headline counts for a roster year — what the hero states under the year tabs.
  *
  * `members` counts distinct individuals, not filled slots: someone who holds
- * two posts (Youssef Hozayen is Vice Lead *and* runs Hardware) is counted once,
+ * two posts (Youssef Hozayen is Team Vice Lead *and* runs Hardware) is counted once,
  * so the headline reflects how many people are actually on the team. Unfilled
  * slots are skipped — an empty placeholder isn't a member.
  */
