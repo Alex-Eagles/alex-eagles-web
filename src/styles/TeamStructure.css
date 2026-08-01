@@ -42,6 +42,10 @@
   --tp-glow: rgba(79, 70, 229, 0.9);
   --tp-halo: radial-gradient(900px 520px at 78% 8%, rgba(79, 70, 229, 0.22), transparent 60%),
     radial-gradient(700px 500px at 6% 82%, rgba(56, 84, 220, 0.13), transparent 62%);
+  /* Kept from the pyramid so the eyebrow can stay byte-identical to the ones
+   * on Features, TrackRecord and Video. */
+  --ts-text-muted-2: rgba(255, 255, 255, 0.5);
+  --ts-border-soft: rgba(255, 255, 255, 0.2);
 
   position: relative;
   overflow: hidden;
@@ -87,6 +91,10 @@
   --tp-glow: rgba(79, 70, 229, 0.32);
   --tp-halo: radial-gradient(900px 520px at 78% 8%, rgba(79, 70, 229, 0.1), transparent 60%),
     radial-gradient(700px 500px at 6% 82%, rgba(56, 84, 220, 0.07), transparent 62%);
+  /* #4a6a99, not the old #5b7bab: that measured 4.32:1 on white, under AA at
+   * 11-13px. */
+  --ts-text-muted-2: #4a6a99;
+  --ts-border-soft: #dbeafe;
 }
 
 /* Carried over from the pyramid: softens the seam with Features above. */
@@ -121,32 +129,34 @@
 
 /* ─── Intro column ────────────────────────────────────────────────────────── */
 
+/* The eyebrow is the pyramid's, unchanged — same metrics, same tokens, same
+ * solid rule. The radial concept restyled it (tighter tracking, a gradient
+ * rule, indigo label) and that broke step with the identical eyebrows on
+ * Features, TrackRecord and Video. */
 .tp-eyebrow {
   display: flex;
   align-items: center;
-  gap: 18px;
-  margin-bottom: 34px;
-}
-
-.tp-eyebrow-index {
+  justify-content: flex-start;
+  gap: 14px;
+  margin-bottom: 28px;
   font-family: var(--font-mono);
   font-size: 13px;
-  letter-spacing: 0.14em;
-  color: var(--tp-accent-bright);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ts-text-muted-2);
+}
+
+/* var(--sky) rather than a hardcoded blue: at 13px this needs 4.5:1, and the
+ * light theme's darker brand blue is what clears it against white. */
+.tp-eyebrow-index {
+  color: var(--sky);
+  font-weight: 700;
 }
 
 .tp-eyebrow-line {
-  width: 64px;
+  flex: 0 0 60px;
   height: 1px;
-  background: linear-gradient(90deg, var(--tp-accent-bright), transparent);
-}
-
-.tp-eyebrow-label {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--tp-ink-faint);
+  background: var(--ts-border-soft);
 }
 
 .tp-headline {
@@ -204,39 +214,34 @@
   }
 }
 
+/* The pyramid's button, unchanged: brand fill, 10px radius, sans not mono, and
+ * no trailing glyph. The concept's pill-with-an-arrow was a different button
+ * from every other CTA on the site. */
 .tp-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  padding: 8px 8px 8px 26px;
-  border-radius: 999px;
-  background: var(--tp-accent);
-  color: #fff;
-  font-size: 15px;
+  display: inline-block;
+  margin-top: 28px;
+  padding: 14px 26px;
+  border-radius: 10px;
+  background: var(--brand);
+  font-family: var(--font-sans);
+  font-size: 16px;
   font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
   text-decoration: none;
-  box-shadow: 0 18px 40px -18px var(--tp-glow);
-  transition: background 0.7s cubic-bezier(0.32, 0.72, 0, 1),
-    transform 0.7s cubic-bezier(0.32, 0.72, 0, 1),
-    box-shadow 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+  white-space: nowrap;
+  transition:
+    background var(--transition-base),
+    transform var(--transition-fast);
 }
 
-.tp-cta:is(:hover, :focus-visible) {
-  background: var(--tp-accent-bright);
-  transform: translateY(-2px);
-  box-shadow: 0 26px 54px -18px var(--tp-glow);
-  color: #fff;
+.tp-cta:hover {
+  background: var(--brand-light);
+  color: #ffffff;
 }
 
-.tp-cta-arrow {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
+.tp-cta:active {
+  transform: translateY(1px);
 }
 
 /* ─── Stage ───────────────────────────────────────────────────────────────── */
@@ -507,6 +512,40 @@
   text-transform: uppercase;
   color: var(--tp-accent-soft);
   margin: 0 0 8px;
+}
+
+/*
+ * The role's name is the way into its team page. On touch it's the only way —
+ * tapping a node reveals the description and stops there — so it has to look
+ * unmistakably like a link rather than a heading: underlined, and carrying the
+ * arrow that says it leaves this page.
+ */
+.tp-readout-link {
+  color: var(--tp-accent-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: color var(--transition-base);
+}
+
+.tp-readout-link:is(:hover, :focus-visible) {
+  color: var(--tp-ink-strong);
+}
+
+.tp-readout-arrow {
+  /* No underline under the glyph itself — it reads as a mark, not a letter. */
+  text-decoration: none;
+  display: inline-block;
+  font-size: 11px;
+  line-height: 1;
+  transition: transform var(--transition-base);
+}
+
+.tp-readout-link:is(:hover, :focus-visible) .tp-readout-arrow {
+  transform: translate(2px, -2px);
 }
 
 .tp-readout-text {

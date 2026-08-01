@@ -72,6 +72,32 @@ export default function Navbar() {
 
   return (
     <>
+      {/*
+       * ---------- Brand mark (top-left) ----------
+       *
+       * Desktop only. Below `md` the hamburger already owns the top-left corner
+       * and the toggle the top-right, which is the whole of the mobile chrome —
+       * a logo squeezed between them would be an addition to a bar that's
+       * deliberately spare, so `hidden md:flex` leaves phones untouched.
+       *
+       * Mirrors <ThemeToggle/> opposite it (md:top-6 md:right-8) so the two
+       * pieces of fixed chrome sit at the same height, a little above the
+       * centred link pill, which starts at 35px. `md:h-12` matches the toggle's
+       * box so both line up on their centres rather than their top edges.
+       *
+       * AeLogo already swaps white-on-dark / blue-on-light by theme, and both
+       * source emblems are transparent, so nothing extra is needed here.
+       */}
+      <Link
+        to="/"
+        aria-label="Alex Eagles — home"
+        className="fixed z-40 md:top-6 md:left-8 hidden md:flex items-center h-12 transition-opacity duration-200 hover:opacity-80"
+      >
+        {/* size sets the intrinsic width/height (so it reserves space before it
+            decodes); the class sets what's actually drawn. */}
+        <AeLogo size={48} className="w-12 h-12" title="" />
+      </Link>
+
       {/* ---------- Desktop: centered glass pill ---------- */}
       <nav
         className="fixed top-[35px] left-0 right-0 z-40 hidden md:flex justify-center pointer-events-none"

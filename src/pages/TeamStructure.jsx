@@ -129,9 +129,6 @@ const ALL_NODES = [
 export default function TeamStructure() {
   /** Which node is hovered, focused or tapped. `null` = chart at rest. */
   const [activeId, setActiveId] = useState(null);
-  /* Second-tap arming for touch devices — see handleActivate. Unused on
-   * hover-capable devices, where a single click still navigates. */
-  const [tappedId, setTappedId] = useState(null);
   const navigate = useNavigate();
 
   /* True on mice/trackpads, false on touch — computed once, since it tracks
@@ -164,22 +161,23 @@ export default function TeamStructure() {
 
   const mode = scale < RADIAL_MIN_SCALE ? "stack" : "radial";
 
-  /* On a hover-capable device the node's info is already showing (hover got
-   * there first), so a click/Enter navigates immediately. On touch there's no
-   * hover, so the first tap only reveals the description; a second tap on the
-   * same node navigates. Tapping a different node re-arms for that one
-   * instead of navigating. */
+  /*
+   * On a hover-capable device the description is already showing (hover got
+   * there first), so a click or Enter navigates straight away.
+   *
+   * On touch there is no hover, so a tap only reveals the description — it
+   * never navigates. Getting to the team page is then an explicit link on the
+   * role's name in the readout below the chart. This replaces an earlier
+   * tap-once-to-reveal, tap-again-to-navigate scheme: the second tap was
+   * invisible state, indistinguishable from the first, so the same gesture did
+   * two different things depending on history. A named link says where it goes.
+   */
   const handleActivate = useCallback(
     (id, to) => {
       setActiveId(id);
-      if (prefersHover || tappedId === id) {
-        setTappedId(null);
-        navigate(to);
-      } else {
-        setTappedId(id);
-      }
+      if (prefersHover) navigate(to);
     },
-    [prefersHover, tappedId, navigate],
+    [prefersHover, navigate],
   );
 
   /* Props shared by every interactive node. */
@@ -206,10 +204,7 @@ export default function TeamStructure() {
     [activeId, handleActivate],
   );
 
-  const clearActive = () => {
-    setActiveId(null);
-    setTappedId(null);
-  };
+  const clearActive = () => setActiveId(null);
 
   const active = ALL_NODES.find((n) => n.id === activeId) ?? null;
 
@@ -298,17 +293,14 @@ export default function TeamStructure() {
           </p>
 
           <p className="tp-hint tp-hint--desktop">
-            Hover any node to trace its line
+            Hover a role to see what it does
           </p>
           <p className="tp-hint tp-hint--mobile">
-            Tap a role to see what it does, tap again to open its team page
+            Tap a role to see what it does
           </p>
 
           <Link to="/team" className="tp-cta">
             Meet the team
-            <span className="tp-cta-arrow" aria-hidden="true">
-              ↗
-            </span>
           </Link>
         </div>
 
@@ -437,13 +429,25 @@ export default function TeamStructure() {
           {/*
            * One shared readout rather than a popover per node: on the radial the
            * nodes sit at the canvas edges, where an attached tooltip would
-           * either overflow the section or cover its neighbours. aria-live is
-           * off — every node already carries its own description for screen
-           * readers, and announcing on hover would be noise.
+           * either overflow the section or cover its neighbours.
+           *
+           * The role's name here is a real link, and on touch it's the only way
+           * into the team page — so this can't be aria-hidden, and it isn't
+           * aria-live either: every node already carries its own description
+           * for screen readers, and announcing on hover would just be noise.
            */}
-          <div className="tp-readout" data-empty={String(!active)} aria-hidden="true">
+          <div className="tp-readout" data-empty={String(!active)}>
             <p className="tp-readout-title">
-              {active ? active.title ?? active.lead : "Select a role"}
+              {active ? (
+                <Link className="tp-readout-link" to={active.to}>
+                  {active.title ?? active.lead}
+                  <span className="tp-readout-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </Link>
+              ) : (
+                "Select a role"
+              )}
             </p>
             <p className="tp-readout-text">
               {active
