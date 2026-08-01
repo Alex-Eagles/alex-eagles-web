@@ -5,6 +5,7 @@ import { NAV_LINKS } from "@/data/site";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTheme } from "@/context/ThemeContext";
 import AeLogo from "@/components/ui/AeLogo";
+import AeLockup from "@/components/ui/AeLockup";
 import SearchBox from "@/components/search/SearchBox";
 
 /**
@@ -85,17 +86,15 @@ export default function Navbar() {
        * centred link pill, which starts at 35px. `md:h-12` matches the toggle's
        * box so both line up on their centres rather than their top edges.
        *
-       * AeLogo already swaps white-on-dark / blue-on-light by theme, and both
-       * source emblems are transparent, so nothing extra is needed here.
+       * AeLockup handles the theme swap itself — white emblem and white type on
+       * dark, blue emblem and matching blue type on light.
        */}
       <Link
         to="/"
         aria-label="Alex Eagles — home"
         className="fixed z-40 md:top-6 md:left-8 hidden md:flex items-center h-12 transition-opacity duration-200 hover:opacity-80"
       >
-        {/* size sets the intrinsic width/height (so it reserves space before it
-            decodes); the class sets what's actually drawn. */}
-        <AeLogo size={48} className="w-12 h-12" title="" />
+        <AeLockup size={44} />
       </Link>
 
       {/* ---------- Desktop: centered glass pill ---------- */}
