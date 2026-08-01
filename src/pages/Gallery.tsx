@@ -572,6 +572,16 @@ function OrbitalReelCard({
    */
   const [ratio, setRatio] = useState<number | null>(null);
   const aspectRatio = ratio ? Math.min(Math.max(ratio, 0.7), 1.5) : 4 / 5;
+  const [isWideViewport, setIsWideViewport] = useState(
+  typeof window !== 'undefined' ? window.matchMedia('(min-width: 640px)').matches : false
+);
+useEffect(() => {
+  const mq = window.matchMedia('(min-width: 640px)');
+  setIsWideViewport(mq.matches);
+  const handler = (e: MediaQueryListEvent) => setIsWideViewport(e.matches);
+  mq.addEventListener('change', handler);
+  return () => mq.removeEventListener('change', handler);
+}, []);
 
   const scale = useTransform(scrollXProgress, [0, 0.5, 1], [0.75, 1, 0.75]);
   const rotY = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [35, 0, -35] : [0, 0, 0]);
@@ -586,7 +596,7 @@ function OrbitalReelCard({
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 }}
       className={`group/card flex-shrink-0 snap-center ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
-      style={{ perspective: 1000, width: isMobile ? '72vw' : '420px' }}
+      style={{ perspective: 1000, width: isWideViewport ? '420px' : '72vw' }}
     >
       <m.div
         ref={ref}
@@ -1037,7 +1047,7 @@ export default function Gallery() {
                    * snapping as polish rather than as the mechanism.
                    */
                  className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 [&::-webkit-scrollbar]:hidden"
-                  style={{ scrollbarWidth: 'none', perspective: 1200, paddingLeft: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)', paddingRight: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)' }}
+                style={{ scrollbarWidth: 'none', perspective: 1200, paddingLeft: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)', paddingRight: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)' }}
                 >
                   <AnimatePresence>
                     {/* priority={i < 3}: the reel is a horizontal scroller, so
