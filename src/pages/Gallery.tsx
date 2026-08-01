@@ -585,8 +585,8 @@ function OrbitalReelCard({
       whileInView={still ? undefined : { opacity: 1, x: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 }}
-      className={`group/card w-[72vw] flex-shrink-0 snap-center sm:w-[420px] ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
-      style={{ perspective: 1000 }}
+      className={`group/card flex-shrink-0 snap-center ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
+      style={{ perspective: 1000, width: isMobile ? '72vw' : '420px' }}
     >
       <m.div
         ref={ref}
@@ -1036,8 +1036,8 @@ export default function Gallery() {
                    * card is now centred at scrollLeft 0 by construction, with
                    * snapping as polish rather than as the mechanism.
                    */
-                  className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 px-[calc(50%-36vw)] sm:px-[calc(50%-210px)] [&::-webkit-scrollbar]:hidden"
-                  style={{ scrollbarWidth: 'none', perspective: 1200 }}
+                 className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 [&::-webkit-scrollbar]:hidden"
+                  style={{ scrollbarWidth: 'none', perspective: 1200, paddingLeft: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)', paddingRight: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)' }}
                 >
                   <AnimatePresence>
                     {/* priority={i < 3}: the reel is a horizontal scroller, so
