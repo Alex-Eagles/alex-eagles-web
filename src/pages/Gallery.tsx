@@ -14,11 +14,12 @@ import {
   type MotionValue,
   type PanInfo,
 } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Play, LayoutGrid, Film } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Play, LayoutGrid } from 'lucide-react';
+// import { X, ChevronLeft, ChevronRight, Play, LayoutGrid, Film } from 'lucide-react';
 import { galleryData } from '@/data/gallery';
 
 type GalleryItem = (typeof galleryData)[number];
-type ViewMode = 'grid' | 'reel';
+type ViewMode = 'grid';
 
 const CATEGORIES = ['All', 'SUAS', 'UAVC','Test Flight', 'Manufacturing', 'Team'] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -572,16 +573,6 @@ function OrbitalReelCard({
    */
   const [ratio, setRatio] = useState<number | null>(null);
   const aspectRatio = ratio ? Math.min(Math.max(ratio, 0.7), 1.5) : 4 / 5;
-  const [isWideViewport, setIsWideViewport] = useState(
-  typeof window !== 'undefined' ? window.matchMedia('(min-width: 640px)').matches : false
-);
-useEffect(() => {
-  const mq = window.matchMedia('(min-width: 640px)');
-  setIsWideViewport(mq.matches);
-  const handler = (e: MediaQueryListEvent) => setIsWideViewport(e.matches);
-  mq.addEventListener('change', handler);
-  return () => mq.removeEventListener('change', handler);
-}, []);
 
   const scale = useTransform(scrollXProgress, [0, 0.5, 1], [0.75, 1, 0.75]);
   const rotY = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [35, 0, -35] : [0, 0, 0]);
@@ -595,8 +586,8 @@ useEffect(() => {
       whileInView={still ? undefined : { opacity: 1, x: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 }}
-      className={`group/card flex-shrink-0 snap-center ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
-      style={{ perspective: 1000, width: isWideViewport ? '420px' : '72vw' }}
+      className={`group/card w-[72vw] flex-shrink-0 snap-center sm:w-[420px] ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
+      style={{ perspective: 1000 }}
     >
       <m.div
         ref={ref}
@@ -895,10 +886,14 @@ export default function Gallery() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  const viewModes: { key: ViewMode; label: string; icon: typeof LayoutGrid }[] = [
-    { key: 'grid', label: 'Grid', icon: LayoutGrid },
-    { key: 'reel', label: 'Reel', icon: Film },
-  ];
+  // const viewModes: { key: ViewMode; label: string; icon: typeof LayoutGrid }[] = [
+  //   { key: 'grid', label: 'Grid', icon: LayoutGrid },
+  //   { key: 'reel', label: 'Reel', icon: Film },
+  // ];
+
+  const viewModes = [
+  { key: 'grid', label: 'Grid', icon: LayoutGrid },
+];
 
   return (
     <LazyMotion features={domAnimation}>
@@ -992,98 +987,7 @@ export default function Gallery() {
               </m.div>
             )}
 
-            {viewMode === 'reel' && filteredItems.length > 0 && (
-              /*
-               * Was `w-full max-w-[100vw] -mx-6 px-6` — an attempt at the
-               * full-bleed trick, and the reason the reel sat off-centre.
-               *
-               * That trick only works on a box whose width is `auto`, where
-               * negative margins genuinely widen it. `w-full` pins the width to
-               * the parent, so `-mx-6` couldn't widen anything and just shifted
-               * the whole box 24px left; `px-6` then pulled the content in
-               * another 24px on each side. Net effect: a track starting at the
-               * parent's left edge but ending 48px short of its right one.
-               * Asymmetric, so the centred card was 24px left of true centre and
-               * the next card was clipped early with dead space beside it.
-               *
-               * The bleed wasn't buying anything, so it's gone. The track is now
-               * the parent's content box — symmetric by construction — which is
-               * what the `calc(50% - 36vw)` side padding below assumes.
-               */
-              <div className="relative">
-                <button onClick={() => reelRef.current?.scrollBy({ left: -500, behavior: 'smooth' })} className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-3 text-white backdrop-blur transition-colors hover:bg-black/80 sm:flex" aria-label="Scroll reel left">
-                  <ChevronLeft size={24} />
-                </button>
-                
-                <div 
-                  ref={reelRef} 
-                  onScroll={updateActiveReelIndex}
-                  onMouseDown={handleMouseDown} 
-                  onMouseLeave={handleMouseLeaveOrUp} 
-                  onMouseUp={handleMouseLeaveOrUp} 
-                  onMouseMove={handleReelMouseMove} 
-                  /*
-                   * items-center: cards no longer share one height now that each
-                   * takes the shape of its own media, so without this they'd
-                   * hang from the top of the tallest one.
-                   *
-                   * The side padding is what centres a card, and it must be
-                   * exactly half the leftover space: (track - card) / 2.
-                   *
-                   * It used to be `14vw` against a `72vw` card — 14 + 72 + 14 =
-                   * 100, which is only correct if the track is the full viewport.
-                   * It isn't: the wrapper above is `-mx-6 px-6`, so the track is
-                   * about 48px narrower, and 14vw overshot by ~24px. The first
-                   * card therefore sat off-centre at scrollLeft 0, and the only
-                   * thing hiding it was scroll-snap pulling it back — which the
-                   * drag handlers switch off (`scrollSnapType = 'none'`) and
-                   * which touch doesn't reliably switch back on. When it stayed
-                   * off, the card stayed off-centre.
-                   *
-                   * `50%` in padding resolves against the containing block's
-                   * width — the track — so `calc(50% - <half card>)` is that
-                   * exact half-leftover whatever the track turns out to be. The
-                   * card is now centred at scrollLeft 0 by construction, with
-                   * snapping as polish rather than as the mechanism.
-                   */
-                 className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 [&::-webkit-scrollbar]:hidden"
-                style={{ scrollbarWidth: 'none', perspective: 1200, paddingLeft: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)', paddingRight: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)' }}
-                >
-                  <AnimatePresence>
-                    {/* priority={i < 3}: the reel is a horizontal scroller, so
-                        the second and third cards are one swipe from being on
-                        screen — load them eagerly rather than waiting for them
-                        to come within range. */}
-                    {filteredItems.map((item, i) => (
-                      <OrbitalReelCard key={item.id} item={item} index={i} isDimmed={hoveredCardId !== null && hoveredCardId !== item.id} reduceMotion={prefersReducedMotion} isMobile={isMobile} priority={i < 3} containerRef={reelRef} onOpen={() => openAt(i, item.id)} onHover={handleHover} isDragging={isDragging} />
-                    ))}
-                  </AnimatePresence>
-                </div>
-
-                <div className="flex md:hidden justify-center items-center gap-2 mt-4 pb-4">
-                  {filteredItems.map((item, i) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        const container = reelRef.current;
-                        const cards = container?.querySelectorAll('.group\\/card');
-                        if (container && cards && cards[i]) {
-                          const card = cards[i] as HTMLElement;
-                          const scrollPos = card.offsetLeft - (container.clientWidth / 2) + (card.clientWidth / 2);
-                          container.scrollTo({ left: scrollPos, behavior: 'smooth' });
-                        }
-                      }}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${i === activeReelIndex ? 'w-6 bg-[var(--brand-glow)]' : 'w-1.5 bg-[var(--border-subtle)] hover:bg-white/50'}`}
-                      aria-label={`Go to slide ${i + 1}`}
-                    />
-                  ))}
-                </div>
-
-                <button onClick={() => reelRef.current?.scrollBy({ left: 500, behavior: 'smooth' })} className="absolute right-6 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-3 text-white backdrop-blur transition-colors hover:bg-black/80 sm:flex" aria-label="Scroll reel right">
-                  <ChevronRight size={24} />
-                </button>
-              </div>
-            )}
+            
           </m.div>
         </AnimatePresence>
 
