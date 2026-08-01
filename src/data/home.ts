@@ -36,7 +36,7 @@ export const LATEST_POSTS: BlogPost[] = [
     date: "WED, 04 JUN 25",
     title: "Carbon wing layup complete",
     excerpt:
-      "The main wing spar came out of the autoclave this week. Final mass landed 8% under target while exceeding our spanwise stiffness goal — a major win for the structures crew heading into integration.",
+      "The main wing spar came out of the autoclave this week. Final mass landed 8% under target while exceeding our spanwise stiffness goal, a major win for the structures crew heading into integration.",
   },
   {
     subteam: "Avionics",

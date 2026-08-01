@@ -94,7 +94,14 @@ export default function BlogPostModal({ post, onClose }: BlogPostModalProps) {
 
       <motion.div
         className="relative w-full max-w-[720px] max-h-[85dvh] rounded-2xl border shadow-2xl overflow-hidden"
-        style={{ backgroundColor: cardBg, borderColor: style.accent }}
+        style={{
+          backgroundColor: cardBg,
+          borderColor: style.accent,
+          // Plain CSS transition for the theme-driven colour swap — distinct
+          // from the `transition` prop below, which is framer-motion's own
+          // enter/exit animation config, not a CSS property.
+          transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
+        }}
         initial={{ opacity: 0, scale: 0.94, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 8 }}

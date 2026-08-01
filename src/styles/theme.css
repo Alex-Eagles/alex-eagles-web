@@ -163,12 +163,22 @@
   --team-accent: #2727a3;
 
   --team-management: #3d3ecc; /* brand blue (accent)    */
-  --team-aerodesign: #85b7eb; /* sky blue               */
+  /* Below: matched 1:1 to the Blog page's per-category `bg.dark` colour
+   * (src/data/blog.ts CATEGORY_STYLE), so a subteam's colour matches its
+   * Blog card background. `wing` and `tail-stability` have no Blog category,
+   * so they keep their original standalone tones.
+   *
+   * ⚠ These are also used as literal TEXT colour on this card (see
+   * TeamMemberCard.module.css `color: var(--card-accent)`), and `bg.dark` is
+   * a near-black wash meant to sit *behind* Blog's separate light `text`
+   * colour — not to BE text. On this dark card surface that reads as
+   * low-to-no contrast. Flagging in case that's not what's wanted. */
+   --team-aerodesign: #85b7eb; /* sky blue               */
   --team-wing: #6ad1d8; /* cyan                   */
   --team-tail-stability: #f0a07a; /* coral                  */
-  --team-structure: #c2c0b4; /* warm gray              */
-  --team-propulsion: #97c459; /* green                  */
-  --team-software: #5dcaa5; /* teal                   */
+  --team-structure: #97c459; /* green                  */
+  --team-propulsion: #c497c4; /* dusty mauve            */
+  --team-software: #6bc78a; /* emerald                */
   --team-hardware: #f0b24a; /* gold                   */
   --team-computer-vision: #d01925de; /* pink                   */
   --team-ai: #d5323cde; /* pink — same discipline as Computer Vision */
@@ -410,6 +420,56 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * ANIMATABLE GRADIENT STOPS
+ *
+ * A plain `background: linear-gradient(...)` does not crossfade on theme
+ * toggle even with `transition: background` set — browsers only interpolate
+ * background-color/background-image between values reached by transitioning
+ * an *animatable* property, and an unregistered custom property swap (the
+ * usual `var(--x)` pattern used everywhere else in this file) recomputes the
+ * gradient instantly rather than frame-by-frame.
+ *
+ * `@property` fixes this: registering a custom property with `syntax:
+ * '<color>'` makes the browser treat IT as the animatable value, so
+ * `transition: --my-stop var(--transition-slow)` (naming the custom property,
+ * not `background`) genuinely tweens it — and any gradient built from
+ * `var(--my-stop)` recomputes every frame with the interpolated colour.
+ *
+ * `initial-value` can't contain var() (spec restriction on @property), so it
+ * repeats the dark-mode literal that's set immediately below anyway.
+ * -------------------------------------------------------------------------*/
+@property --blog-bg-stop1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #121b34;
+}
+@property --blog-bg-stop2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #121b34;
+}
+@property --tr-panel-stop1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0d1529;
+}
+@property --tr-panel-stop2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #090f1e;
+}
+@property --tr-card-stop1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1a2544;
+}
+@property --tr-card-stop2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #121b34;
+}
+
+/* ----------------------------------------------------------------------------
  * 3. COLOR TOKENS — DARK MODE (default)
  * --------------------------------------------------------------------------*/
 :root,
@@ -555,6 +615,16 @@
    * instead of a rectangle of different colour. */
   --elevation-panel: inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 4px 14px rgba(0, 0, 0, 0.45), 0 28px 64px rgba(0, 0, 0, 0.6);
+
+  /* See "ANIMATABLE GRADIENT STOPS" above. Blog/BlogPost's root wrapper reads
+     flat here (both stops the same) since dark mode's version of that
+     backdrop was always a flat fill, not a real gradient. */
+  --blog-bg-stop1: #121b34;
+  --blog-bg-stop2: #121b34;
+  --tr-panel-stop1: #0d1529;
+  --tr-panel-stop2: #090f1e;
+  --tr-card-stop1: #1a2544;
+  --tr-card-stop2: #121b34;
 }
 
 /* ----------------------------------------------------------------------------
@@ -997,18 +1067,32 @@
    * value (they're one discipline). Editing one does not move the other — edit
    * both, in both places, if you want them to stay in step.
    * ------------------------------------------------------------------------ */
-  --team-aerodesign-page: #1d65b0;
-  --team-wing-page: #1e6e73;
-  --team-tail-stability-page: #aa4413;
-  --team-structure-page: #676454;
-  --team-propulsion-page: #4f6d27;
-  --team-software-page: #257057;
-  --team-hardware-page: #895a0b;
-  --team-computer-vision-page: #d01925de;
-  --team-ai-page: #d01925de;
-  --team-firmware-page: #5b4ed8;
-  /* --team-management / --team-accent are brand blue and already clear 5.9:1. */
+  /* Matched 1:1 to the Blog page's per-category `bg.light` colour
+   * (src/data/blog.ts CATEGORY_STYLE). `wing` and `tail-stability` have no
+   * Blog category, so they keep their original standalone tones.
+   *
+   * ⚠ Same caveat as the dark block above: `bg.light` is a pale wash meant
+   * to sit BEHIND Blog's separate dark `text` colour on the white plate this
+   * token targets, so pale-on-white here reads as low contrast. */
+   --team-aerodesign-page: #1d65b0;
+   --team-wing-page: #1e6e73;
+   --team-tail-stability-page: #aa4413;
+   --team-structure-page: #4f6d27;
+   --team-propulsion-page: #6b2e6b;
+   --team-software-page: #206f3a;
+   --team-hardware-page: #895a0b;
+   --team-computer-vision-page: #d01925de;
+   --team-ai-page: #d01925de;
+   --team-firmware-page: #5b4ed8;
+   /* --team-management / --team-accent are brand blue and already clear 5.9:1. */
 
+  /* See "ANIMATABLE GRADIENT STOPS" near the dark block. */
+  --blog-bg-stop1: var(--bg-elevated);
+  --blog-bg-stop2: var(--bg-primary);
+  --tr-panel-stop1: #f4f8ff;
+  --tr-panel-stop2: #f4f8ff;
+  --tr-card-stop1: var(--card);
+  --tr-card-stop2: var(--card);
 }
 
 /* ----------------------------------------------------------------------------

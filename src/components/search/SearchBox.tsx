@@ -155,6 +155,7 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "", onN
         background: "var(--bg-glass)",
         border: "1px solid var(--border-subtle)",
         color: "var(--text-primary)",
+        transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
       };
 
   const showPanel = query.trim().length >= 2;
@@ -217,6 +218,7 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "", onN
                 border: "1px solid var(--border-subtle)",
                 color: "var(--text-primary)",
                 boxShadow: "var(--elevation-2)",
+                transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
               }}
             />
             {busy && (
@@ -240,6 +242,7 @@ export default function SearchBox({ variant = "pill", wrapperClassName = "", onN
                 background: "var(--card)",
                 border: "1px solid var(--border-subtle)",
                 boxShadow: "var(--elevation-3)",
+                transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
               }}
             >
               {hits.length === 0 ? (

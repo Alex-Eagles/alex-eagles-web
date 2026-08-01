@@ -22,15 +22,17 @@ function Features() {
 
         <h2 className="features-headline">
           <span className="features-headline-line">
-            Engineers <span className="features-headline-accent">First.</span>
+            Engineers <span className="features-headline-accent">by Degree.</span>
           </span>
-          <span className="features-headline-line">Aviators Second</span>
+          <span className="features-headline-line">Aviators by Passion.</span>
         </h2>
 
         <p className="features-copy-text">
-          Established in 2013 at Alexandria University: a multidisciplinary
-          team of aerospace, mechatronics, electrical, and software engineers
-          who design, build, and fly autonomous aircraft end to end.
+          Established in 2013 at Alexandria University's Faculty of
+          Engineering: a multidisciplinary team of mechanical, mechatronics,
+          electrical, and software engineers with no aviation department to
+          lean on — we taught ourselves to design, build, and fly autonomous
+          aircraft end to end, out of passion.
         </p>
 
         <div className="features-credential">

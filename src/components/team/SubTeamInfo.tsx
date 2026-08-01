@@ -81,7 +81,7 @@ export function SubTeamInfo({
       id={panelId}
       className={styles.card}
       role="dialog"
-      aria-label={`${name} — what we do`}
+      aria-label={`${name}: what we do`}
       data-open={open}
       /* Carried inline so theming survives the portal, which renders the card
          outside .wrap where the --accent custom property is set. */

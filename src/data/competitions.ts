@@ -85,7 +85,7 @@ export interface CompetitionProfile {
  */
 export const PROFILES: Record<Competition, CompetitionProfile> = {
   "SAE Aero Design": {
-    fullName: "SAE International — Aero Design",
+    fullName: "SAE International: Aero Design",
     href: "https://www.sae.org/events/student/about/aero-design",
     blurb:
       "An esteemed international aerospace engineering event, conducted under the supervision of Lockheed Martin Co., challenges aspiring students to design and construct cutting-edge aircraft.",

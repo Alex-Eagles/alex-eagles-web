@@ -16,6 +16,7 @@ import {
   ROSTER_YEARS,
   ROSTERS,
   type Section,
+  slugify,
   splitByTier,
   splitRows,
   subTeamAccent,
@@ -59,10 +60,20 @@ export default function Team({
    * single scroll can fire before the target exists; poll a few animation
    * frames until it's in the DOM, then stop. scroll-margin-top on the section
    * anchors keeps them clear of the fixed navbar.
+   *
+   * `year` stays a dependency so a hash that doesn't exist yet (content for
+   * that tab hasn't rendered) gets retried once the roster switches to it —
+   * but that also re-ran this same effect, and so this same scroll, on every
+   * later tab toggle for as long as the hash stayed in the URL. Land via
+   * /team#propulsion once and every 2025 ⇄ 2026 switch afterward yanked the
+   * page back down to Propulsion, in whichever year was now showing. Tracking
+   * the hash already handled and bailing out is what makes it a one-time
+   * arrival scroll instead of a standing rule of "always show this section".
    */
   const { hash } = useLocation();
+  const scrolledHashRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!hash) return;
+    if (!hash || scrolledHashRef.current === hash) return;
     const id = decodeURIComponent(hash.slice(1));
     let frames = 0;
     let raf = 0;
@@ -70,6 +81,7 @@ export default function Team({
       const el = document.getElementById(id);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
+        scrolledHashRef.current = hash;
         return;
       }
       if (frames++ < 30) raf = requestAnimationFrame(tryScroll);
@@ -400,6 +412,7 @@ export default function Team({
             {roster.leadership.map((leader, i) => (
               <div
                 key={leader.id}
+                id={slugify(leader.role)}
                 className={
                   roster.leadership.length === 3 && i === 1
                     ? styles.leaderCentre

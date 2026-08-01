@@ -392,7 +392,7 @@ function StopOverlay({
                     className="font-display font-bold leading-[1.08] text-[var(--text-primary)] tracking-[-0.01em]"
                     style={{ fontSize: LABEL.titleSize }}
                   >
-                    {award.place ? `${award.place} — ` : ""}
+                    {award.place ? `${award.place} · ` : ""}
                     {award.title}
                   </div>
                   <div

@@ -39,11 +39,21 @@
  * -------------------------------------------------------------------------*/
 
 /** Card role label. Shown in the rest-state pill and again in the hover panel. */
+/**
+ * `Vice Team Lead` is the team-wide deputy (one per roster); `Vice Lead` is a
+ * sub-team's deputy, of which there are many. Both *display* as "Vice Lead" —
+ * see memberRoleLabel — but they are deliberately separate keys, because
+ * everything downstream keys off the role: the team-wide one is an exec-tier
+ * card wearing the brand colour, the sub-team one is a vice-tier card wearing
+ * its section's colour. Collapsing them to a single key silently promotes all
+ * fifteen section deputies to exec cards in brand indigo.
+ */
 export type Role =
   | "Team Leader"
-  | "Team Vice Lead"
+  | "Vice Team Lead"
   | "Head of Autonomous"
   | "Vice Lead of Autonomous"
+  | "Head of Mechanical"
   | "EM Integration Lead"
   | "Section Lead"
   | "Vice Lead"
@@ -62,10 +72,11 @@ export type Tier = "exec" | "head" | "lead" | "vice" | "member";
 export function roleTier(role: Role): Tier {
   switch (role) {
     case "Team Leader":
-    case "Team Vice Lead":
+    case "Vice Team Lead":
     case "EM Integration Lead":
       return "exec";
     case "Head of Autonomous":
+    case "Head of Mechanical":
       return "head";
     case "Vice Lead of Autonomous":
     case "Vice Lead":
@@ -291,6 +302,10 @@ export function memberYearLabel(member: TeamMember, rosterYear: string): string 
 export function memberRoleLabel(member: TeamMember): string {
   if (member.roleLabel) return member.roleLabel;
   if (member.role === "Section Lead") return `${member.department} Lead`;
+  /* The team-wide deputy reads "Vice Lead" on the card like a section deputy
+     does — the two are only separate keys so that tier and colour can differ
+     (see the Role union). Nobody wants to read "Vice Team Lead". */
+  if (member.role === "Vice Team Lead") return "Vice Lead";
   return member.role;
 }
 
@@ -329,7 +344,7 @@ export const BRAND_ACCENT = "#3d3ecc";
  */
 const TEAM_WIDE_ROLES: ReadonlySet<Role> = new Set<Role>([
   "Team Leader",
-  "Team Vice Lead",
+  "Vice Team Lead",
   "EM Integration Lead",
 ]);
 
@@ -428,7 +443,18 @@ const head = (
 
 const ROSTER_2026: YearRoster = {
   year: "2026",
+  // Three leadership cards render left, centre, right with the middle card
+  // raised — Farah sits in the centre, flanked by Youssef and Ziad.
   leadership: [
+    {
+      ...slot("Vice Team Lead", "Youssef Hozayen", {
+        photo: "youssef-hozayen-2026",
+        linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
+        gradYear: "2027",
+        major: "Mechatronics and robotics engineering",
+      }),
+      department: "Team Leadership",
+    },
     {
       ...slot("Team Leader", "Farah Harfoush", {
         photo: "farah-harfoush-2026",
@@ -439,11 +465,9 @@ const ROSTER_2026: YearRoster = {
       department: "Team Leadership",
     },
     {
-      ...slot("Team Vice Lead", "Youssef Hozayen", {
-        photo: "youssef-hozayen-2026",
-        linkedIn: "https://www.linkedin.com/in/youssef-hozayen-4047812b1/",
-        gradYear: "2027",
-        major: "Mechatronics and robotics engineering",
+      ...slot("EM Integration Lead", "Ziad Essam", {
+        photo: "ziad-essam",
+        linkedIn: "https://www.linkedin.com/in/ziad-essam-a202b3244",
       }),
       department: "Team Leadership",
     },
@@ -474,11 +498,12 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We shape how the aircraft flies — the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+            "We shape how the aircraft flies: the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
         }),
         section("Structure", [
           slot("Section Lead", "Mira Barsoum", {
-            photo: "mira-barsoum-2026",
+            photo: "mira-barsoum-2026-2",
+            cutout: "mira-barsoum-2026",
             linkedIn: "https://www.linkedin.com/in/mira-barsoum-457531297/",
             gradYear: "2026",
             major: "Mechatronics and Robotics",
@@ -504,7 +529,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We design and build the airframe that holds everything together — sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
+            "We design and build the airframe that holds everything together: sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
         }),
         // Co-leads — Hana and Rodyna run Propulsion together, no vice.
         section("Propulsion", [
@@ -522,7 +547,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We power the aircraft — selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
+            "We power the aircraft: selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
         }),
       ],
     },
@@ -550,23 +575,24 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2026",
             major: "Computer & Communication Engineering",
           }),
-          slot("Member", "Abdelrahman Aboelwafa", {
-            photo: "abdelrahman-yasser",
-            linkedIn: "https://www.linkedin.com/in/abdelrahmanaboelwafa",
-            gradYear: "2028+",
-            major: "CCE",
-          }),
           slot("Member", "Ahmed ElMetwalli", {
             photo: "ahmed-elmetwalli",
             linkedIn: "https://www.linkedin.com/in/ahmed-el-mitwally-71385433b/",
             gradYear: "2028",
             major: "Computer and Communications",
           }),
-          slot("Member", "Dina Shiha", {
-            photo: "dina-shiha",
-            linkedIn: "https://www.linkedin.com/in/dina-shiha-822b43203",
-            gradYear: "2026",
-            major: "Electromechanical Engineering",
+          slot("Member", "Abdelrahman Aboelwafa", {
+            photo: "abdelrahman-yasser-2026",
+            linkedIn: "https://www.linkedin.com/in/abdelrahmanaboelwafa",
+            gradYear: "2028+",
+            major: "CCE",
+          }),
+          slot("Member", "Hossam Eldin Elshazly", {
+            photo: "hossam-eldin-2026",
+            linkedIn:
+              "https://www.linkedin.com/in/hossam-eldeen-2158a4284?utm_source=share_via&utm_content=profile&utm_medium=member_ios",
+            gradYear: "2027",
+            major: "Computer and communication",
           }),
           slot("Member", "Fai Raafat", {
             photo: "fai-raafat",
@@ -575,7 +601,8 @@ const ROSTER_2026: YearRoster = {
             major: "CCE",
           }),
           slot("Member", "Jana Hani", {
-            photo: "jana-hani",
+            photo: "jana-hani2",
+            cutout: "jana-hani",
             linkedIn: "https://www.linkedin.com/in/jana-elmenoufi-644319256/",
             gradYear: "2026",
             major: "Mechatronics",
@@ -586,16 +613,15 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Mechatronics",
           }),
-          slot("Member", "Hossam Eldin Elshazly", {
-            photo: "hossam-eldin-2026",
-            linkedIn:
-              "https://www.linkedin.com/in/hossam-eldeen-2158a4284?utm_source=share_via&utm_content=profile&utm_medium=member_ios",
-            gradYear: "2027",
-            major: "Computer and communication",
+          slot("Member", "Dina Shiha", {
+            photo: "dina-shiha",
+            linkedIn: "https://www.linkedin.com/in/dina-shiha-822b43203",
+            gradYear: "2026",
+            major: "Electromechanical Engineering",
           }),
         ], {
           blurb:
-            "We give the aircraft its eyes — detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
+            "We give the aircraft its eyes: detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
           icon: "computer-vision",
         }),
         // Youssef Hozayen also runs Hardware, on top of his top-level Team Vice Lead card.
@@ -640,7 +666,7 @@ const ROSTER_2026: YearRoster = {
           }),
         ], {
           blurb:
-            "We build the electronics that make the aircraft think — the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
+            "We build the electronics that make the aircraft think: the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
         }),
         // Co-leads — Mazen and Sara run Software together, no vice.
         section("Software", [
@@ -662,32 +688,33 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Electromechanics",
           }),
-          slot("Member", "Mariyam Ramadan", {
-            photo: "mariyam-ramdan",
-            linkedIn: "https://www.linkedin.com/in/mariyam-ramadan",
-            gradYear: "2027",
-            major: "Mechatronics",
-          }),
-          // No portrait yet — hidden rather than shown as an empty slot.
-          // Add a `photo` and drop `hidden` to bring the card back.
-          slot("Member", "Ahmed Ibrahim", { hidden: true }),
-          // Onto a second row, below the other two — Nour sits beside Tarek.
           slot("Member", "Tarek Mohamed", {
-            breakBefore: true,
             photo: "tarek-mohamed",
             linkedIn: "https://www.linkedin.com/in/tarek-mohamed-elsayed-08b120403",
             gradYear: "2027",
             major: "Computer and Communication",
           }),
+          // No portrait yet — hidden rather than shown as an empty slot.
+          // Add a `photo` and drop `hidden` to bring the card back.
+          slot("Member", "Ahmed Ibrahim", { hidden: true }),
+          // Onto a second row, below the other two — Nour sits beside Mariyam.
+          slot("Member", "Mariyam Ramadan", {
+            breakBefore: true,
+            photo: "mariyam-ramdan",
+            linkedIn: "https://www.linkedin.com/in/mariyam-ramadan",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
           slot("Member", "Nour Walid", {
-            photo: "nour-walid",
+            photo: "nour-walid2",
+            cutout: "nour-walid",
             linkedIn: "https://www.linkedin.com/in/nour-walid-6b2b8b262/",
             gradYear: "2026",
             major: "Mechatronics",
           }),
         ], {
           blurb:
-            "We write the software that flies the aircraft on its own — the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
+            "We write the software that flies the aircraft on its own: the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
           // Mazen above Sara down the left column. Propulsion's co-leads stay
           // side by side, so this is opt-in rather than a rule for co-leads.
           stackLeads: true,
@@ -705,7 +732,7 @@ const ROSTER_2026: YearRoster = {
 const ROSTER_2025: YearRoster = {
   year: "2025",
   leadership: [
-    { ...slot("Team Vice Lead", "Norhan Mohammed", { photo: "norhan-mohammed" }), department: "Team Leadership" },
+    { ...slot("Vice Team Lead", "Norhan Mohammed", { photo: "norhan-mohammed" }), department: "Team Leadership" },
     { ...slot("Team Leader", "Ahmed Baheyeldin", { photo: "ahmed-baheyeldin" }), department: "Team Leadership" },
     { ...slot("EM Integration Lead", "Peter Ayoub", { photo: "peter-ayoub" }), department: "Team Leadership" },
   ],
@@ -713,21 +740,19 @@ const ROSTER_2025: YearRoster = {
     {
       num: "01",
       name: "Mechanical",
+      // Mohamed Fathallah runs the whole division, on top of the sub-teams —
+      // mirrors Autonomous's `heads` row below. Ehdaa Farahat succeeds him as
+      // Structure's own Section Lead (see that section).
+      heads: [
+        head("Head of Mechanical", "Mohamed Fathallah", "Mechanical", {
+          photo: "mohamed-fathallah",
+          // "Mechanical Lead" to match the "<Section> Lead" naming every
+          // other lead card on the page uses, rather than Autonomous's
+          // "Head of X" phrasing.
+          roleLabel: "Mechanical Lead",
+        }),
+      ],
       sections: [
-        section(
-          "Structure",
-          [
-            slot("Section Lead", "Mohamed Fathallah", { photo: "mohamed-fathallah" }),
-            slot("Vice Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
-            slot("Member", "Hana Waleed", { photo: "hana-waleed" }),
-            slot("Member", "Hossam Eldeen", { photo: "hossam-eldeen" }),
-            slot("Member", "Reem Eldalil", { photo: "reem-eldalil" }),
-          ],
-          {
-            blurb:
-              "We design and build the airframe that holds everything together — sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
-          },
-        ),
         /*
          * One flat Aerodesign section. Wing and Tail & Stability used to hang
          * off it as nested subsections; they're folded in here instead, so the
@@ -777,7 +802,20 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We shape how the aircraft flies — the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+              "We shape how the aircraft flies: the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+          },
+        ),
+        section(
+          "Structure",
+          [
+            slot("Section Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
+            slot("Member", "Hana Waleed", { photo: "hana-waleed" }),
+            slot("Member", "Hossam Eldeen", { photo: "hossam-eldeen" }),
+            slot("Member", "Reem Eldalil", { photo: "reem-eldalil" }),
+          ],
+          {
+            blurb:
+              "We design and build the airframe that holds everything together: sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
           },
         ),
         section(
@@ -790,7 +828,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We power the aircraft — selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
+              "We power the aircraft: selecting motors and propellers, sizing the powertrain, and matching thrust to the mission so it takes off, climbs, and cruises reliably.",
           },
         ),
       ],
@@ -820,7 +858,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We write the software that flies the aircraft on its own — the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
+              "We write the software that flies the aircraft on its own: the control and navigation stack, mission logic, and the ground station that plans and monitors every autonomous flight.",
           },
         ),
         section(
@@ -833,7 +871,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We build the electronics that make the aircraft think — the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
+              "We build the electronics that make the aircraft think: the avionics, sensors, power systems, and wiring that connect the flight computer to everything on board.",
           },
         ),
         section(
@@ -848,7 +886,7 @@ const ROSTER_2025: YearRoster = {
           ],
           {
             blurb:
-              "We give the aircraft its eyes — detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
+              "We give the aircraft its eyes: detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
           },
         ),
       ],

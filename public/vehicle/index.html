@@ -20,6 +20,42 @@
     .vp-grow > * { order:0 !important; }
     .vp-grow .vp-media { order:-1 !important; }
   }
+  /* ---- SPLIT SECTIONS on phones: heading, then media, then the prose ----
+     Payload delivery, the GCS block and mapping are all a two-column text/media
+     grid on desktop, and the columns alternate side to side down the page so the
+     layout doesn't read as a list. Stacking that naively leaves whichever column
+     happens to come first in the DOM on top, so half these blocks opened with a
+     wall of text and the other half with a picture — and in the text-first ones
+     the heading that names the block sat above its own media while in the
+     others it sat below, which is the inconsistency that made it feel unordered.
+
+     `display:contents` on the text column promotes its two halves (.vp-split-head
+     and .vp-split-body) to grid items of the section itself, which is what lets
+     all three pieces be ordered independently rather than moving as one block.
+     Every one of these then reads the same way: what it is, what it looks like,
+     then the detail. Desktop is untouched — the wrapper only dissolves below the
+     breakpoint, above it the original two-column grid is exactly as it was. */
+  @media (max-width:760px) {
+    .vp-split { grid-template-columns:1fr !important; gap:20px !important; }
+    .vp-split-text { display:contents; }
+    .vp-split-head { order:1; }
+    .vp-split-media { order:2; }
+    .vp-split-body { order:3; }
+  }
+  /* ---- MISSION DATA ARCHITECTURE on phones: one column, top to bottom ----
+     The desktop pipeline is a centred flex row of five cards joined by "→".
+     Wrapping it on a narrow screen breaks the run into ragged 2-2-1 groups, and
+     a wrapped row puts an arrow at the end of one line pointing into the start
+     of the next — so the 01→05 order the arrows exist to convey is exactly what
+     gets lost. Stack it and turn the connectors a quarter turn to point down. */
+  @media (max-width:760px) {
+    #vp-dataflow { flex-direction:column; align-items:stretch !important; flex-wrap:nowrap !important; }
+    /* Turning the row into a column turns the cards' `flex:1 1 150px` into a
+       150px *height* basis, since flex-basis follows the main axis — so reset
+       them to size from their own content and fill the width instead. */
+    #vp-dataflow > div { flex:0 0 auto !important; max-width:none !important; }
+    #vp-dataflow .vp-dataflow-arrow { transform:rotate(90deg); align-self:center !important; }
+  }
   /* ---- HERO: on phones the desktop corner-pinned layout collides (specs over
      the name, scroll cue over the buttons). Reflow into a comfortable stack:
      specs pinned top-right (smaller), name + buttons pinned bottom-left, and
@@ -193,7 +229,7 @@
     #vpt-fill, #vpt-head { transition:none; }
   }
   @keyframes vp-grid { from { background-position:0 0; } to { background-position:64px 64px; } }
-  @keyframes vp-bounce { 0%,100% { transform:translateY(0); opacity:.45; } 50% { transform:translateY(9px); opacity:1; } }
+  @keyframes vp-bounce { 0%,100% { transform:translateY(0) rotate(45deg); opacity:.45; } 50% { transform:translateY(9px) rotate(45deg); opacity:1; } }
   @keyframes vp-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
   a { color:#60a5fa; text-decoration:none; }
   a:hover { color:#93c5fd; }
@@ -203,6 +239,184 @@
   @keyframes vp-callout-in { from { opacity:0; transform:translateY(9px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
   @keyframes vp-callout-pop { 0% { transform:scale(0); } 62% { transform:scale(1.3); } 100% { transform:scale(1); } }
   #vp-build-skip:hover { background:rgba(60,64,181,0.92)!important; border-color:#60a5fa!important; color:#fff!important; }
+  .vp-secnav-link[data-active="1"] { color:#fff !important; background:#3c40b5 !important; border-color:#3c40b5 !important; }
+
+  /* ---- SECTION NAV: the team page's pull-out panel, at every width --------
+     The sticky pill row was a horizontal scroller. On a phone it showed about
+     three of its nine links at a time, with the other six behind a sideways
+     swipe that nothing on screen advertised, and it held a band of vertical
+     space directly under the navbar for the entire page. Desktop had the same
+     row, just with more links visible at once.
+
+     It's replaced everywhere by the same pull tab + side panel the team page
+     uses (src/components/team/JumpNav.tsx): same geometry, same open/close
+     behaviour, same Escape and tap-outside handling. It's rebuilt in plain
+     CSS/JS rather than imported because this page is a standalone document
+     that the React tree only injects, so it can't mount a component. */
+  #vp-secnav { display:none !important; }
+
+  #vp-secnav-tab {
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+      position:fixed; top:50%; right:16px; z-index:51;
+      transform:translateY(-50%);
+      width:46px; height:56px; border-radius:12px; border:none;
+      cursor:pointer; color:#f0f2ff;
+      /* Translucent while it's just floating over the page, solid once it's
+         being used — the team tab's --tab-opacity idea, without the variable. */
+      background:rgba(60,64,181,0.82);
+      box-shadow:0 8px 22px -8px rgba(60,64,181,0.6);
+      transition:right .38s cubic-bezier(.2,.8,.2,1), background .2s ease,
+                 opacity .24s ease, transform .32s cubic-bezier(.2,.8,.2,1);
+    }
+    #vp-secnav-tab[data-open="1"] { right:236px; background:#3c40b5; }
+
+    /* Out of the way until the hero has been scrolled past: jumping between
+       sections means nothing while the hero is still what you're looking at.
+       Same rule the team page's JumpNav follows, and it comes back if you
+       scroll to the top again. The tab slides off to the right rather than
+       blinking out, and takes its pointer events with it so it can't be
+       tapped through. (JS also drops it out of the tab order — see below.) */
+    #vp-secnav-tab[data-visible="0"],
+    #vp-secnav-panel[data-visible="0"] {
+      opacity:0;
+      pointer-events:none;
+    }
+    #vp-secnav-tab[data-visible="0"] { transform:translateY(-50%) translateX(160%); }
+    #vp-secnav-tab:focus-visible { outline:2px solid #60a5fa; outline-offset:3px; }
+    .vp-secnav-tablabel { font-family:'JetBrains Mono'; font-size:9px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    .vp-secnav-chev { transition:transform .35s ease; }
+    #vp-secnav-tab[data-open="1"] .vp-secnav-chev { transform:rotate(180deg); }
+
+    #vp-secnav-panel {
+      display:flex; flex-direction:column; gap:2px;
+      position:fixed; top:50%; right:16px; z-index:50;
+      width:212px; max-height:82vh; overflow:auto;
+      padding:16px 12px;
+      /* Opaque rather than backdrop-filtered: a blur on a fixed element is
+         repainted against whatever scrolls behind it, every frame (same reason
+         JumpNav drops it under `@media (hover: none)`). */
+      background:#0d1035;
+      border:1px solid rgba(60,64,181,0.45); border-radius:16px;
+      box-shadow:0 20px 50px -18px rgba(0,0,0,0.8);
+      transform:translateY(-50%) translateX(120%);
+      opacity:0; pointer-events:none;
+      transition:transform .38s cubic-bezier(.2,.8,.2,1), opacity .3s ease;
+    }
+    #vp-secnav-panel[data-open="1"] { transform:translateY(-50%) translateX(0); opacity:1; pointer-events:auto; }
+
+    .vp-secnav-panelhead { display:flex; align-items:center; justify-content:space-between; margin:0 6px 8px; }
+    .vp-secnav-paneltitle { font-family:'Inter'; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#8b8fc8; }
+    .vp-secnav-close { display:flex; padding:2px; background:none; border:none; color:#8b8fc8; cursor:pointer; }
+    .vp-secnav-close:hover, .vp-secnav-close:focus-visible { color:#f0f2ff; }
+    .vp-secnav-grouplabel { margin:10px 8px 3px; font-family:'JetBrains Mono'; font-size:9px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#d9302a; }
+
+    .vp-secnav-panellink {
+      display:block; padding:8px 11px; border-radius:8px;
+      font-family:'Inter'; font-size:13px; font-weight:600;
+      color:#a0a3d2; text-decoration:none; white-space:nowrap;
+      border:1px solid transparent;
+      transition:background .2s ease, color .2s ease;
+    }
+  .vp-secnav-panellink:hover, .vp-secnav-panellink:focus-visible { background:rgba(60,64,181,0.28); color:#f0f2ff; }
+
+  /* Matches JumpNav's own narrow-screen step so the tab clears the cards. */
+  @media (max-width:640px) {
+    #vp-secnav-tab { right:10px; width:40px; height:50px; }
+    #vp-secnav-tab[data-open="1"] { right:206px; }
+    #vp-secnav-panel { right:10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #vp-secnav-tab, #vp-secnav-panel, .vp-secnav-chev { transition-duration:0.01ms; }
+  }
+
+  /* ---- Stats (vp-stats): bento layout, tile hover, count-up meters ---- */
+  .vp-stats-grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; margin-top:44px; }
+  .vp-stat-hero   { grid-column:1 / span 5; grid-row:1 / span 2; }
+  .vp-stat-safety { grid-column:6 / span 4; grid-row:1; }
+  .vp-stat-rtk    { grid-column:10 / span 3; grid-row:1; }
+  .vp-stat-range  { grid-column:6 / span 4; grid-row:2; }
+  .vp-stat-setup  { grid-column:10 / span 3; grid-row:2; }
+  .vp-stat-score  { grid-column:1 / span 12; grid-row:3; }
+
+  .vp-stat-tile {
+    position:relative; background:#0d1035; border:1px solid rgba(60,64,181,0.28);
+    border-radius:16px; padding:24px 22px; overflow:hidden;
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s ease, box-shadow .3s ease;
+    --mx:50%; --my:50%;
+  }
+  /* Cursor-tracked spotlight: --mx/--my are set on pointermove (see the
+     stats script block), so the glow follows the mouse across the tile.
+     z-index:-1 keeps it behind the real content — a positioned element
+     would otherwise paint above the tile's plain in-flow text/icons. */
+  .vp-stat-tile::before {
+    content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit;
+    background:radial-gradient(240px circle at var(--mx) var(--my), rgba(132,136,230,0.22), transparent 68%);
+    opacity:0; transition:opacity .35s ease;
+  }
+  .vp-stat-tile::after {
+    content:''; position:absolute; left:0; right:0; bottom:0; height:2px;
+    background:linear-gradient(90deg,#5458cc,#d9302a);
+    transform:scaleX(0); transform-origin:left; transition:transform .45s cubic-bezier(.2,.8,.2,1);
+  }
+  .vp-stat-tile:hover { transform:translateY(-4px); border-color:rgba(84,88,204,0.6); box-shadow:0 20px 40px -20px rgba(0,0,0,0.75); }
+  .vp-stat-tile:hover::after { transform:scaleX(1); }
+  .vp-stat-tile:hover::before { opacity:1; }
+  .vp-stat-tile:hover .vp-stat-icon { transform:scale(1.12) rotate(-6deg); background:rgba(84,88,204,0.34); color:#f0f2ff; }
+  .vp-stat-hero.vp-stat-tile { background:linear-gradient(160deg,#11154a,#0d1035 60%); display:flex; flex-direction:column; }
+
+  .vp-stat-icon {
+    display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px;
+    border-radius:10px; background:rgba(84,88,204,0.2); color:#a7abe8; flex:0 0 auto;
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), background .3s ease, color .3s ease;
+  }
+
+  .vp-stat-meter-track { position:relative; height:6px; border-radius:9999px; background:rgba(139,143,200,0.16); overflow:hidden; }
+  .vp-stat-meter-fill { position:absolute; inset:0; width:0%; border-radius:9999px; background:linear-gradient(90deg,#5458cc,#a7abe8); transition:width 1.15s cubic-bezier(.2,.8,.2,1); }
+  .vp-stat-meter-marker { position:absolute; top:-4px; bottom:-4px; width:2px; background:#d9302a; z-index:1; }
+
+  .vp-stat-weightbar { height:8px; border-radius:9999px; background:rgba(139,143,200,0.14); overflow:hidden; }
+  .vp-stat-weightbar > div { height:100%; border-radius:9999px; }
+  .vp-stat-weightbar > div[data-meter] { width:0%; transition:width 1.15s cubic-bezier(.2,.8,.2,1); background:linear-gradient(90deg,#5458cc,#d9302a); }
+
+  .vp-stat-signal { display:flex; align-items:flex-end; gap:3px; height:20px; }
+  .vp-stat-signal i { display:block; width:5px; background:linear-gradient(180deg,#a7abe8,#5458cc); border-radius:2px; font-style:normal; }
+
+  /* Honest fact chips — no invented numbers, just what's true (achieved value,
+     and the universal 1.0x = failure-threshold definition of a safety factor). */
+  .vp-stat-badge {
+    display:inline-flex; align-items:center; gap:5px; padding:5px 10px 5px 8px;
+    border-radius:9999px; font-family:'JetBrains Mono'; font-size:10.5px; font-weight:600;
+    white-space:nowrap;
+  }
+  .vp-stat-badge-pass { background:rgba(74,222,128,0.12); border:1px solid rgba(74,222,128,0.35); color:#4ade80; }
+  .vp-stat-badge-ref  { background:rgba(139,143,200,0.12); border:1px solid rgba(139,143,200,0.3); color:#a7abe8; }
+
+  .vp-stat-ring { transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1); }
+
+  @keyframes vp-stat-radar { 0% { box-shadow:0 0 0 0 rgba(84,88,204,0.5); } 100% { box-shadow:0 0 0 15px rgba(84,88,204,0); } }
+  .vp-stat-rtk .vp-stat-icon { animation:vp-stat-radar 2.6s ease-out infinite; }
+
+  @media (max-width:900px) {
+    .vp-stats-grid { grid-template-columns:repeat(6,1fr); }
+    .vp-stat-hero   { grid-column:1 / span 6; grid-row:1; }
+    .vp-stat-safety { grid-column:1 / span 3; grid-row:2; }
+    .vp-stat-rtk    { grid-column:4 / span 3; grid-row:2; }
+    .vp-stat-range  { grid-column:1 / span 3; grid-row:3; }
+    .vp-stat-setup  { grid-column:4 / span 3; grid-row:3; }
+    .vp-stat-score  { grid-column:1 / span 6; grid-row:4; }
+  }
+  @media (max-width:640px) {
+    .vp-stats-grid { grid-template-columns:1fr; }
+    .vp-stat-hero, .vp-stat-safety, .vp-stat-rtk, .vp-stat-range, .vp-stat-setup, .vp-stat-score {
+      grid-column:1 / -1; grid-row:auto;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vp-stat-tile { transition:none; }
+    .vp-stat-meter-fill, .vp-stat-weightbar > div[data-meter], .vp-stat-ring { transition:none; }
+    .vp-stat-rtk .vp-stat-icon { animation:none; }
+  }
 </style>
 <script src="./image-slot.js"></script>
 </helmet>
@@ -213,12 +427,11 @@
   <header id="vp-hero" style="position:relative; height:100vh; min-height:640px; width:100%; overflow:hidden; background:#07091c;">
     <!-- MEDIA: full-bleed during landing, slides to the right half when the clip ends -->
     <div id="vp-hero-media" style="position:absolute; top:0; left:0; right:0; bottom:0; z-index:1; overflow:hidden; transition:left 1.15s cubic-bezier(.45,.05,.2,1);">
-      <video id="vp-hero-video" muted="" playsinline="" preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 45%;">
+      <video id="vp-hero-video" muted="" playsinline="" preload="auto" poster="assets/landing-poster.webp" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 45%;">
         <source src="assets/landing.mp4" type="video/mp4">
       </video>
       <div data-dim="" aria-hidden="true" style="position:absolute; inset:0; transition:opacity 1.15s ease; background:radial-gradient(120% 90% at 50% -10%, rgba(22,26,80,0.35) 0%, rgba(7,9,28,0.35) 45%, rgba(7,9,28,0.85) 100%);"></div>
       <div data-dim="" aria-hidden="true" style="position:absolute; inset:0; transition:opacity 1.15s ease; background:linear-gradient(to bottom, rgba(7,9,28,0.55) 0%, rgba(7,9,28,0.1) 30%, rgba(7,9,28,0.55) 62%, #07091c 100%);"></div>
-      <div id="vp-hero-grid" aria-hidden="true" style="position:absolute; inset:0; opacity:.4; background-image:linear-gradient(rgba(60,64,181,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(60,64,181,0.18) 1px, transparent 1px); background-size:64px 64px; animation:vp-grid 18s linear infinite; -webkit-mask-image:radial-gradient(80% 70% at 50% 50%, #000 0%, transparent 78%); mask-image:radial-gradient(80% 70% at 50% 50%, #000 0%, transparent 78%);"></div>
     </div>
 
     <!-- INFO: overlays the video, then occupies the left half on landing -->
@@ -239,9 +452,9 @@
 
       <!-- name + buttons, bottom-left -->
       <div class="vp-hero-name" style="position:absolute; left:44px; bottom:88px; z-index:3;">
-        <h3 data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1.1s ease, transform 1.1s cubic-bezier(.2,.7,.2,1); font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(64px,9vw,120px); line-height:.84; letter-spacing:-0.02em; margin:0; background:linear-gradient(135deg,#f0f2ff 0 50%,#60a5fa 50% 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;">NEITH</h3>
+        <h3 data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1.1s ease, transform 1.1s cubic-bezier(.2,.7,.2,1); font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(64px,9vw,120px); line-height:.84; letter-spacing:-0.02em; margin:0 0 0 4px; background:linear-gradient(135deg,#f0f2ff 0 50%,#3c40b5 50% 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;">NEITH</h3>
         <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity 1s ease, transform 1s cubic-bezier(.2,.7,.2,1); display:flex; gap:14px; margin-top:26px; flex-wrap:wrap; pointer-events:auto;">
-          <a href="#vp-build-scroll" style="text-decoration:none; font-family:'Inter'; font-weight:600; font-size:14px; padding:13px 30px; border-radius:9999px; color:#fff; border:1px solid rgba(96,165,250,0.55); background:linear-gradient(115deg,#3c40b5 50%, rgba(96,165,250,0.10) 50%); background-size:220% 100%; background-position:100% 0; transition:background-position .45s ease;" onmouseover="this.style.backgroundPosition='0 0'" onmouseout="this.style.backgroundPosition='100% 0'">Explore the build</a>
+          <a href="#vp-explorer" style="text-decoration:none; font-family:'Inter'; font-weight:600; font-size:14px; padding:13px 30px; border-radius:9999px; color:#fff; border:1px solid rgba(96,165,250,0.55); background:linear-gradient(135deg,rgba(240,242,255,0.14) 50%, #3c40b5 50%); background-size:220% 100%; background-position:100% 0; transition:background-position .45s ease;" onmouseover="this.style.backgroundPosition='0 0'" onmouseout="this.style.backgroundPosition='100% 0'">Explore our avionics</a>
           <a href="#vp-gallery" style="text-decoration:none; font-family:'Inter'; font-weight:600; font-size:14px; padding:13px 30px; border-radius:9999px; color:#f0f2ff; border:1px solid rgba(60,64,181,0.55); background:linear-gradient(115deg,rgba(60,64,181,0.65) 50%, rgba(60,64,181,0.06) 50%); background-size:220% 100%; background-position:100% 0; transition:background-position .45s ease;" onmouseover="this.style.backgroundPosition='0 0'" onmouseout="this.style.backgroundPosition='100% 0'">See more of Neith</a>
         </div>
       </div>
@@ -254,8 +467,51 @@
     </div>
   </header>
 
-  <!-- ============================ MISSION ============================ -->
-  
+  <!-- ========================= SECTION NAV ========================= -->
+  <nav id="vp-secnav" aria-label="Vehicle page sections" style="position:sticky; top:96px; z-index:20; display:flex; justify-content:center; padding:0 16px; pointer-events:none;">
+    <div style="pointer-events:auto; display:flex; gap:6px; overflow-x:auto; max-width:100%; padding:7px 12px; border-radius:9999px; background:rgba(18,27,52,0.65); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(59,130,246,0.18); box-shadow:0 14px 40px rgba(0,0,0,0.35); scrollbar-width:none;">
+      <a href="#vp-build-scroll" class="vp-secnav-link" data-nav="vp-build-scroll" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Build</a>
+      <a href="#vp-explorer" class="vp-secnav-link" data-nav="vp-explorer" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Avionics</a>
+      <a href="#vp-process" class="vp-secnav-link" data-nav="vp-process" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Process</a>
+      <a href="#vp-software" class="vp-secnav-link" data-nav="vp-software" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Software</a>
+      <a href="#vp-payload" class="vp-secnav-link" data-nav="vp-payload" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Payload</a>
+      <a href="#vp-prototypes-slot" class="vp-secnav-link" data-nav="vp-prototypes-slot" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Test drones</a>
+      <a href="#vp-stats" class="vp-secnav-link" data-nav="vp-stats" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Stats</a>
+      <a href="#vp-reports" class="vp-secnav-link" data-nav="vp-reports" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Reports</a>
+      <a href="#vp-gallery" class="vp-secnav-link" data-nav="vp-gallery" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Gallery</a>
+      <a href="#vp-action" class="vp-secnav-link" data-nav="vp-action" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">In Action</a>
+    </div>
+  </nav>
+
+  <!-- Phone-only replacement for the pill row above: the team page's pull tab +
+       side panel. Both are display:none until the breakpoint, so on desktop
+       they're inert markup that never paints. The links carry .vp-secnav-link
+       and data-nav like the pills do, so the existing click-to-scroll and
+       scrollspy handlers below pick them up with no extra wiring. -->
+  <button id="vp-secnav-tab" type="button" data-open="0" data-visible="0" tabindex="-1" aria-hidden="true" aria-expanded="false" aria-controls="vp-secnav-panel" aria-label="Jump to section">
+    <svg class="vp-secnav-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+    <span class="vp-secnav-tablabel">Pull</span>
+  </button>
+
+  <nav id="vp-secnav-panel" data-open="0" data-visible="0" aria-label="Jump to section" inert="">
+    <div class="vp-secnav-panelhead">
+      <span class="vp-secnav-paneltitle">Jump to</span>
+      <button type="button" class="vp-secnav-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <p class="vp-secnav-grouplabel">Neith</p>
+    <a href="#vp-build-scroll" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-build-scroll">Build</a>
+    <a href="#vp-explorer" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-explorer">Avionics</a>
+    <a href="#vp-process" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-process">Process</a>
+    <a href="#vp-software" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-software">Software</a>
+    <a href="#vp-payload" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-payload">Payload</a>
+    <a href="#vp-prototypes-slot" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-prototypes-slot">Test drones</a>
+    <a href="#vp-stats" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-stats">Stats</a>
+    <a href="#vp-reports" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-reports">Reports</a>
+    <a href="#vp-gallery" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-gallery">Gallery</a>
+    <a href="#vp-action" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-action">In Action</a>
+  </nav>
 
   <!-- ==================== SCROLL-BUILD SEQUENCE ==================== -->
   <section id="vp-build-scroll" style="position:relative; height:300vh; background:#07091c; padding:0;">
@@ -338,9 +594,9 @@
     <div aria-hidden="true" style="position:absolute; inset:0; background:radial-gradient(60% 55% at 50% 42%, rgba(60,64,181,0.16) 0%, transparent 70%);"></div>
     <div style="position:relative; max-width:1120px; margin:0 auto;">
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
-        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Explore the build</div>
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Explore our avionics</div>
         <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Every component, up close.</h2>
-        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:480px; line-height:1.6;">Tap a number on the aircraft — or a chip below — to inspect the part.</p>
+        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:480px; line-height:1.6;">Tap a number on the aircraft, or a chip below, to inspect the part.</p>
       </div>
 
       <!-- drone stage: sits centered, markers reveal on entry -->
@@ -348,25 +604,25 @@
         <div id="vp-exp-stage" style="position:relative; display:inline-block; width:100%; max-width:600px;">
           <img src="assets/drone.png" alt="Neith quad" style="display:block; width:100%; filter:drop-shadow(0 26px 60px rgba(0,0,0,0.5));">
           <svg id="vp-exp-lines" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; opacity:0; transition:opacity .6s ease;">
+            <line x1="35" y1="91.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="21.7" y1="16.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="6.7" y1="42.4" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="78.3" y1="16.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="11.9" y1="72" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="65" y1="91.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="93.3" y1="42.4" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
+            <line x1="88.1" y1="72" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
             <line x1="50" y1="6" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
-            <line x1="79.6" y1="16.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
-            <line x1="95.3" y1="42.4" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
-            <line x1="89.8" y1="72" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
-            <line x1="65.7" y1="91.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
-            <line x1="34.3" y1="91.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
-            <line x1="10.2" y1="72" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
-            <line x1="4.7" y1="42.4" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
-            <line x1="20.4" y1="16.3" x2="50" y2="50" stroke="rgba(96,165,250,0.28)" stroke-width="0.35" stroke-dasharray="1.4 1.6"></line>
           </svg>
-          <div data-exp-marker="cube" style="position:absolute; left:50%; top:6%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:#d9302a; color:#07091c; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">1</div>
-          <div data-exp-marker="gnss" style="position:absolute; left:79.6%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">2</div>
-          <div data-exp-marker="cam" style="position:absolute; left:95.3%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">3</div>
-          <div data-exp-marker="link" style="position:absolute; left:89.8%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">4</div>
-          <div data-exp-marker="pdb" style="position:absolute; left:65.7%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">5</div>
-          <div data-exp-marker="bec" style="position:absolute; left:34.3%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">6</div>
-          <div data-exp-marker="custom" style="position:absolute; left:10.2%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #d9302a; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">7</div>
-          <div data-exp-marker="prop" style="position:absolute; left:4.7%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #d9302a; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">8</div>
-          <div data-exp-marker="batt" style="position:absolute; left:20.4%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">9</div>
+          <div data-exp-marker="cube" style="position:absolute; left:35%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:#d9302a; color:#07091c; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">1</div>
+          <div data-exp-marker="gnss" style="position:absolute; left:21.7%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">2</div>
+          <div data-exp-marker="cam" style="position:absolute; left:6.7%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">3</div>
+          <div data-exp-marker="link" style="position:absolute; left:78.3%; top:16.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">4</div>
+          <div data-exp-marker="pdb" style="position:absolute; left:11.9%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">5</div>
+          <div data-exp-marker="bec" style="position:absolute; left:65%; top:91.3%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">6</div>
+          <div data-exp-marker="custom" style="position:absolute; left:93.3%; top:42.4%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #d9302a; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">7</div>
+          <div data-exp-marker="prop" style="position:absolute; left:88.1%; top:72%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #d9302a; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">8</div>
+          <div data-exp-marker="batt" style="position:absolute; left:50%; top:6%; margin:-14px; width:28px; height:28px; border-radius:9999px; background:rgba(13,16,53,0.92); border:1.5px solid #60a5fa; color:#c3c6ea; font-family:'JetBrains Mono'; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2; opacity:0; transform:scale(.5); transition:opacity .4s ease, transform .4s cubic-bezier(.34,1.56,.64,1);">9</div>
         </div>
       </div>
 
@@ -398,13 +654,13 @@
         </div>
         <div style="padding:28px 30px;">
           <div data-exp-panel="cube">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">01 · COMPUTE — FLIGHT CONTROLLER</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">01 · COMPUTE / FLIGHT CONTROLLER</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Pixhawk Cube Orange +</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every decision starts here. A high-performance STM32 runs the entire autonomy loop in real time — fusing every sensor into one trusted picture of attitude and position and commanding the props thousands of times per second.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every decision starts here. A high-performance STM32 runs the entire autonomy loop in real time, fusing every sensor into one trusted picture of attitude and position and commanding the props thousands of times per second.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> redundant IMU stack, deterministic execution and vibration-isolated sensors.</p>
           </div>
           <div data-exp-panel="gnss" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">02 · SENSING — POSITIONING</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">02 · SENSING / POSITIONING</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Here3+ GNSS Module</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The absolute reference behind every waypoint. Mast-mounted, it delivers global position, velocity and precise timing over the CAN bus; every fix folds into the Cube's Extended Kalman Filter.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> DroneCAN-native and raised 9–15 cm above the frame, clear of propulsion EMI.</p>
@@ -413,42 +669,42 @@
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">03 · GIMBAL CAMERA</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">SIYI A8 Mini</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Eyes that stay level while the aircraft doesn't. A 4K 8MP Sony sensor rides a 3-axis FOC-stabilised gimbal with 6× digital zoom, feeding imagery down the ground link over HDMI and Ethernet.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> the best size-to-capability ratio — stabilised 4K without costing endurance.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> the best size-to-capability ratio: stabilised 4K without costing endurance.</p>
           </div>
           <div data-exp-panel="link" style="display:none;">
             <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">04 · TELEMETRY</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Herelink</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Three links collapsed into one. A single 2.4 GHz digital pipe carries RC control, MAVLink telemetry and 1080p video together — up to 20 km at roughly 110 ms latency.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Three links collapsed into one. A single 2.4 GHz digital pipe carries RC control, MAVLink telemetry and 1080p video together, up to 20 km at roughly 110 ms latency.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> pilot, operator and observer all work from one link; the handheld device becomes a fully mobile ground station.</p>
           </div>
           <div data-exp-panel="pdb" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">05 · POWER — DISTRIBUTION</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">05 · POWER / DISTRIBUTION</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Matek PDB HEX</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Every amp passes through here. Heavy copper carries 2–12S / 6–60 V to the ESCs while an onboard sensor reads current up to 264 A and streams voltage and current back to the Cube.</p>
-            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> the six-output variant on a quad leaves distribution headroom for payload growth — one board instead of a harness.</p>
+            <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> the six-output variant on a quad leaves distribution headroom for payload growth, one board instead of a harness.</p>
           </div>
           <div data-exp-panel="bec" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">06 · POWER — REGULATION</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">06 · POWER / REGULATION</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">MAUCH BEC</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Clean power, guarded from the noise of flight. It converts raw LiPo voltage into stable rails for the flight controller, GPS and LiDAR, absorbing ripple, transients and motor/ESC interference before they reach a sensor.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> stable and redundant power supply isolating noise-sensitive systems from high-current bus.</p>
           </div>
           <div data-exp-panel="custom" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">07 · POWER — IN-HOUSE PCB</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">07 · POWER / IN-HOUSE PCB</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Alex Eagles Power Board</h3>
             <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">Designed, routed, and fabricated from scratch by us- splits HV battery rail into dedicated power supplies for all onboard electronics.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> all in 1 system power supply for all our aircrafts. </p>
           </div>
           <div data-exp-panel="prop" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">08 · PROPULSION — ×4</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#d9302a; margin-bottom:8px;">08 · PROPULSION / ×4</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">T-Motor 6007 II System</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF2211 props — one factory-tuned system per arm across the quad.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">An integrated propulsion set, matched end to end: MN6007 320 KV motors, Alpha 60 A ESCs and MF2211 props, one factory-tuned system per arm across the quad.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#d9302a;">Why:</b> motor, ESC and prop engineered as one unit for peak efficiency and reliability.</p>
           </div>
           <div data-exp-panel="batt" style="display:none;">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER — MAIN BATTERY</div>
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.1em; color:#60a5fa; margin-bottom:8px;">09 · POWER / MAIN BATTERY</div>
             <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:30px; line-height:1; color:#f0f2ff; margin:0 0 10px;">Tattu 28 000 mAh 6S</h3>
-            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission — a 28 000 mAh 6S LiPo feeding the entire platform through the power distribution network.</p>
+            <p style="font-family:'Inter'; font-size:14px; color:#c3c6ea; line-height:1.6; margin:0 0 10px;">The endurance behind the mission: a 28 000 mAh 6S LiPo feeding the entire platform through the power distribution network.</p>
             <p style="font-family:'Inter'; font-size:13px; color:#8b8fc8; line-height:1.55; margin:0;"><b style="color:#60a5fa;">Why:</b> high capacity for long-endurance autonomous flights without swapping packs mid-mission.</p>
           </div>
         </div>
@@ -458,6 +714,7 @@
 
   <!-- shared-element flyer: bridges the build render into the explorer drone -->
   <img id="vp-flyer" src="assets/drone.png" alt="" aria-hidden="true" style="position:fixed; left:0; top:0; width:0; height:0; object-fit:contain; pointer-events:none; z-index:40; opacity:0; will-change:left,top,width,height,transform; filter:drop-shadow(0 26px 60px rgba(0,0,0,0.55));">
+
 
 
   <!-- ========================= DEVELOPMENT PROCESS ========================= -->
@@ -572,17 +829,18 @@
         </article>
 
         <article class="vpt-item" data-idx="4">
-          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Autotuning">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Component and subsystem testing">
             <div class="vpt-shell">
               <div class="vpt-core">
                 <div class="vpt-media">
-                  <img src="assets/process/05-autotune.webp" alt="" loading="lazy" data-on="1">
-                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                  <img src="/images/blog/sw-mapping-camera.png" alt="" loading="lazy" data-on="1">
+                  <img src="/images/blog/fw-rtk-gps.jpeg" alt="" loading="lazy" data-on="0">
+                  <img src="/images/blog/fw-herelink-range.jpeg" alt="" loading="lazy" data-on="0">
                 </div>
                 <div class="vpt-body">
-                  <div class="vpt-kicker">Control tuning</div>
-                  <h3 class="vpt-title">Autotuning.</h3>
-                  <p class="vpt-text">The controller twitches each axis against a disturbance it generates itself, then raises the rate gains to the sharpest response Neith holds without overshoot.</p>
+                  <div class="vpt-kicker">Validation</div>
+                  <h3 class="vpt-title">Component &amp; subsystem testing.</h3>
+                  <p class="vpt-text">Every part earns its place on the aircraft: PDB load and thermal testing, a dedicated camera test rig, RTK accuracy down to 3 cm, and a Herelink link held to 1.5 km.</p>
                 </div>
               </div>
             </div>
@@ -593,6 +851,27 @@
         </article>
 
         <article class="vpt-item" data-idx="5">
+          <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Autotuning">
+            <div class="vpt-shell">
+              <div class="vpt-core">
+                <div class="vpt-media">
+                  <img src="assets/process/05-autotune.webp" alt="" loading="lazy" data-on="1">
+                  <span class="vpt-play" aria-hidden="true">&#9654;</span>
+                </div>
+                <div class="vpt-body">
+                  <div class="vpt-kicker">Control tuning</div>
+                  <h3 class="vpt-title">Autotuning.</h3>
+                  <p class="vpt-text">The controller twitches each axis against a disturbance it generates itself, then raises the rate gains to the sharpest response Neith holds without overshoot, under 0.1&deg; of tracking error, post-tune.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vpt-stem"></div>
+          <div class="vpt-stoprow"><span class="vpt-stop"></span></div>
+          <div class="vpt-date">Jun 2026</div>
+        </article>
+
+        <article class="vpt-item" data-idx="6">
           <div class="vpt-card" role="button" tabindex="0" aria-label="Open milestone: Flight testing">
             <div class="vpt-shell">
               <div class="vpt-core">
@@ -631,8 +910,279 @@
     </div>
   </section>
 
+  <!-- ========================= MISSION SOFTWARE ========================= -->
+  <section id="vp-software" style="position:relative; background:#0d1035; padding:clamp(88px,12vh,140px) 32px;">
+    <div style="max-width:1120px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Mission software</div>
+        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">The brain stays on the ground.</h2>
+        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:600px; line-height:1.6;">Off-the-shelf stations like Mission Planner and QGroundControl aren&rsquo;t built around the SUAS flow, so we built our own: a web app with a React front end over independent backend services (MAVLink, camera, detection, and payload) behind an API gateway, so a fault in one can&rsquo;t take down telemetry.</p>
+      </div>
+
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:56px;">
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+          <div style="display:flex; align-items:center; gap:6px; padding:9px 12px; background:#12142c; border-bottom:1px solid rgba(60,64,181,0.3);">
+            <span style="width:9px; height:9px; border-radius:9999px; background:#d9302a;"></span>
+            <span style="width:9px; height:9px; border-radius:9999px; background:#e0a83c;"></span>
+            <span style="width:9px; height:9px; border-radius:9999px; background:#3ec97a;"></span>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#565a94; margin-left:8px;">Alex Eagles &middot; Ground Control Station</span>
+          </div>
+          <img src="/images/blog/sw-gcs.jpeg" alt="Custom ground control station: mission planning view with mapping survey area and live telemetry" style="display:block; width:100%; height:auto;">
+        </div>
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">BUILT FOR THE MISSION, NOT GENERIC FLIGHT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0;">Every screen optimizes for what moves the score.</h3>
+          </div>
+          <div class="vp-split-body" style="display:flex; flex-direction:column; gap:16px; margin-top:14px;">
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(217,48,42,0.16); border:1px solid rgba(217,48,42,0.4); color:#d9302a; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">01</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Search boundaries are pre-loaded; selecting one auto-generates the lawnmower survey path in under three seconds for a 10-acre area.</p></div>
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">02</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Every detection is queued for a one-click operator accept or reject, rather than auto-dropping on a model&rsquo;s confidence alone.</p></div>
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">03</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">A dedicated, always-on panel shows boundaries, position, ground speed, and AGL altitude for the judge, isolated so a fault elsewhere can&rsquo;t hide it.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- data pipeline: capture -> downlink/batch -> detect -> cluster -> operator -> drop -->
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); margin-top:64px;">
+        <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#5458cc; text-align:center; margin-bottom:22px;">MISSION DATA ARCHITECTURE</div>
+        <div id="vp-dataflow" style="display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px;">
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">01</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Capture</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">SIYI A8 mini geotags each frame via the flight controller&rsquo;s GPS at the instant of capture.</div></div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">02</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Downlink &amp; batch</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">Images cross the Herelink downlink and queue until a batch of 8 is ready, amortizing inference latency.</div></div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">03</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Detect</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">UAV-DETR, a transformer tuned for small aerial objects, flags candidate tents and mannequins per batch.</div></div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">04</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Cluster</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">k-means resolves repeat sightings of the same object across overlapping frames into one coordinate.</div></div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(217,48,42,0.4); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">05</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Operator &amp; drop</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">One click accepts the candidate; the aircraft navigates to it and releases the matching payload.</div></div>
+        </div>
+      </div>
+
+      <!-- mapping -->
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">MAPPING &middot; RISK ASSESSMENT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0;">When 4K was the problem.</h3>
+          </div>
+          <div class="vp-split-body" style="margin-top:14px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 12px;">The lawnmower survey feeds a georeferenced orthomosaic built with OpenDroneMap, which anchors every photo to its GPS geotag rather than guessing position from overlap, so the map stays globally consistent instead of bowing across a large area.</p>
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0;">Our first pass (10 m/s, a photo every 0.3 s, full 4K) failed: the camera couldn&rsquo;t finish writing one frame before the next trigger, so far fewer images landed than commanded. Slowing to 6 m/s and dropping to 1080p kept the camera in pace and packed in more overlap, same hardware, same software, and the map built cleanly.</p>
+          </div>
+        </div>
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+          <img src="/images/blog/sw-mapping.jpeg" alt="Georeferenced orthomosaic reconstructed from a tuned survey flight" style="display:block; width:100%; height:auto;">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <!-- ========================= PAYLOAD DELIVERY ========================= -->
+  <section id="vp-payload" style="position:relative; background:#07091c; padding:clamp(88px,12vh,140px) 32px;">
+    <div style="max-width:1120px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Payload delivery</div>
+        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Three ways to get the payload down.</h2>
+        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:640px; line-height:1.6;">Every deployment mechanism was sized, calculated, and evaluated on paper before build &mdash; from drag-parachute canopy area to release sequencing.</p>
+      </div>
+
+      <!-- 01 · Drag parachute recovery -->
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">01 &middot; IN DEVELOPMENT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">Drag parachute recovery.</h3>
+            <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c;">Flat hexagonal canopy, sized per payload</div>
+          </div>
+          <div class="vp-split-body" style="margin-top:12px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">Two purpose-sized flat-hexagon drag parachutes slow the Beacon (155&nbsp;g) and Bottle (250&nbsp;g) payloads to a safe 4.0&nbsp;m/s and 3.5&nbsp;m/s terminal velocity, derived directly from the drag equation (C<sub>d</sub>&nbsp;=&nbsp;0.80). Cut as a single 6-panel sheet with a 10% apex spill vent to kill pendulum sway, built from polyester taffeta with braided PE shroud lines.</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#d9302a;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Beacon canopy: 0.194&nbsp;m&sup2; &middot; 6 lines &middot; 59&nbsp;cm each. Bottle canopy: 0.409&nbsp;m&sup2; &middot; 6 lines &middot; 86&nbsp;cm each.</p></div>
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#d9302a;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Drop-test validated: 3.64&nbsp;m/s (Beacon) and 3.22&nbsp;m/s (Bottle) measured descent rates.</p></div>
+            </div>
+          </div>
+        </div>
+        <!-- The drop test is portrait phone footage, so the frame is capped and
+             centred rather than stretched across the column the way the CAD
+             stills beside it are. preload="none" + poster: the still is what
+             paints, and the clip itself is only fetched once it scrolls into
+             view (see the data-vp-autoplay observer). -->
+        <div class="vp-split-media" style="display:flex; align-items:center; justify-content:center;">
+          <div style="width:100%; max-width:300px; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#07091c; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+            <video data-vp-autoplay="" src="/images/payload/parachute.mp4" poster="/images/payload/parachute-poster.webp" muted loop playsinline controls preload="none" style="display:block; width:100%; height:auto;"></video>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 · Retarded payload deployment -->
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
+          <img src="/images/payload/screw-nut-mechanism.jpeg" alt="Retarded payload deployment CAD: lead-screw spool-nut assembly with rotary damper" style="display:block; width:100%; height:auto;">
+        </div>
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">02 &middot; CONCEPT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">Retarded payload deployment.</h3>
+            <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c;">Lead-screw spool with rotary damper</div>
+          </div>
+          <div class="vp-split-body" style="margin-top:12px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">A passive two-stage descent: a servo release drops the payload into free-fall while its rope unwinds from a custom spool-nut riding a stationary lead screw. Once the spool-nut hits the end stop, translation converts to rotation &mdash; the screw and spool spin together against a rotary damper, braking the remaining descent at a controlled rate.</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">No active electronics needed after release.</p></div>
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Bearings carry all structural load, so the damper only ever sees torsion.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 · DC motor magazine dispenser -->
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">03 &middot; CONCEPT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0 0 6px;">DC motor magazine dispenser.</h3>
+            <div style="font-family:'Inter'; font-size:13.5px; font-weight:600; color:#e0a83c;">Dual-tower silo with synchronized trapdoors</div>
+          </div>
+          <div class="vp-split-body" style="margin-top:12px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 16px;">Two stacked-plate magazine towers &mdash; one for discs, one for the water bottle &mdash; release payloads in two coordinated stages. A single servo drives a double slider-crank linkage that opens both base trapdoors simultaneously; a DC motor with a cone-shaped horn then nudges the lowest item off its resting plate so it drops straight through.</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Single servo + double slider-crank opens both towers' doors in sync.</p></div>
+              <div style="display:flex; gap:10px;"><span style="flex:0 0 auto; width:6px; height:6px; margin-top:7px; border-radius:9999px; background:#60a5fa;"></span><p style="font-family:'Inter'; font-size:12.5px; color:#a8ace0; line-height:1.5; margin:0;">Door-then-drop sequencing keeps the payload from jamming against a closed door.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
+          <img src="/images/payload/dc-winch-dispenser.png" alt="DC motor magazine dispenser CAD: dual-tower silo with servo-actuated trapdoors" style="display:block; width:100%; height:auto;">
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Mount point for the React <Prototypes /> section ("Before the final
+       build"). That section is part of the site's React tree, not this
+       document, so Vehicles.tsx moves it in here once this page has rendered —
+       which is what puts it between Mission software and Technical
+       documentation instead of after everything.
+
+       The background is set here rather than on the component: this page runs a
+       dark / light-indigo alternation from Payload delivery down, and the
+       component itself is shared styling that knows nothing about it. Empty on
+       purpose otherwise — the DC runtime renders this element, so it must not
+       think it owns any children. -->
+  <div id="vp-prototypes-slot" style="background:#0d1035;"></div>
+
+  <!-- ============================ MISSION ============================ -->
+  <section id="vp-stats" style="position:relative; background:#07091c; padding:70px 32px 96px;">
+    <div style="max-width:1180px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">By the numbers</div>
+        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(30px,4.4vw,44px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">Every choice, measured.</h2>
+      </div>
+      <div class="vp-stats-grid">
+
+        <!-- Hero: all-up weight, with a 2025 → 2026 comparison bar -->
+        <div class="vp-stat-tile vp-stat-hero" data-reveal="" style="opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1);">
+          <div class="vp-stat-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="18"></line><polyline points="6 12 12 18 18 12"></polyline></svg>
+          </div>
+          <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:clamp(38px,3.6vw,46px); color:#f0f2ff; line-height:1; margin-top:18px;"><span data-countup="6.8" data-decimals="1">0.0</span><span style="font-size:16px; color:#8b8fc8;"> kg</span></div>
+          <div style="font-family:'Inter'; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:10px;">All-up weight</div>
+          <div style="font-family:'Inter'; font-size:11.5px; color:#5458cc; margin-top:4px;">Down 60%+ from 18 kg in 2025</div>
+
+          <div style="margin-top:auto; padding-top:26px;">
+            <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono'; font-size:10px; color:#8b8fc8; margin-bottom:5px;"><span>2025</span><span>18.0 kg</span></div>
+            <div class="vp-stat-weightbar"><div style="width:100%; background:rgba(139,143,200,0.3);"></div></div>
+            <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono'; font-size:10px; color:#f0f2ff; margin:12px 0 5px;"><span>2026</span><span>6.8 kg</span></div>
+            <div class="vp-stat-weightbar"><div data-meter="37.8"></div></div>
+          </div>
+        </div>
+
+        <!-- Structural safety factor. No invented scale/ceiling here — just the
+             achieved value and the one number that's true by definition: a
+             safety factor under 1.0x always means structural failure. -->
+        <div class="vp-stat-tile vp-stat-safety" data-reveal="" style="opacity:0; transform:translateY(24px); transition:opacity .7s ease .06s, transform .7s cubic-bezier(.2,.7,.2,1) .06s;">
+          <div class="vp-stat-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+          </div>
+          <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-top:16px;"><span data-countup="2.7" data-decimals="1">0.0</span><span>&times;</span></div>
+          <div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">Structural safety factor</div>
+          <div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">Bottom plate at full takeoff thrust</div>
+          <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:16px;">
+            <span class="vp-stat-badge vp-stat-badge-pass"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>FEA verified</span>
+            <span class="vp-stat-badge vp-stat-badge-ref">1.0&times; = failure threshold</span>
+          </div>
+        </div>
+
+        <!-- RTK positioning accuracy -->
+        <div class="vp-stat-tile vp-stat-rtk" data-reveal="" style="opacity:0; transform:translateY(24px); transition:opacity .7s ease .12s, transform .7s cubic-bezier(.2,.7,.2,1) .12s;">
+          <div class="vp-stat-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="2.6"></circle><line x1="12" y1="1.5" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22.5"></line><line x1="1.5" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22.5" y2="12"></line></svg>
+          </div>
+          <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-top:16px;"><span data-countup="3" data-decimals="0">0</span><span style="font-size:13px; color:#8b8fc8;"> cm</span></div>
+          <div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">RTK positioning accuracy</div>
+          <div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">From 3&ndash;5 m uncorrected</div>
+        </div>
+
+        <!-- Link range tested, with a staggered signal-strength visual -->
+        <div class="vp-stat-tile vp-stat-range" data-reveal="" style="opacity:0; transform:translateY(24px); transition:opacity .7s ease .18s, transform .7s cubic-bezier(.2,.7,.2,1) .18s;">
+          <div class="vp-stat-signal" aria-hidden="true">
+            <i data-reveal="" style="height:7px; opacity:0; transform:translateY(6px); transition:opacity .5s ease .18s, transform .5s ease .18s;"></i>
+            <i data-reveal="" style="height:11px; opacity:0; transform:translateY(6px); transition:opacity .5s ease .28s, transform .5s ease .28s;"></i>
+            <i data-reveal="" style="height:15px; opacity:0; transform:translateY(6px); transition:opacity .5s ease .38s, transform .5s ease .38s;"></i>
+            <i data-reveal="" style="height:20px; opacity:0; transform:translateY(6px); transition:opacity .5s ease .48s, transform .5s ease .48s;"></i>
+          </div>
+          <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-top:14px;"><span data-countup="1.5" data-decimals="1">0.0</span><span style="font-size:13px; color:#8b8fc8;"> km</span></div>
+          <div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">Link range tested</div>
+          <div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">Telemetry, control &amp; video held</div>
+        </div>
+
+        <!-- Field setup time -->
+        <div class="vp-stat-tile vp-stat-setup" data-reveal="" style="opacity:0; transform:translateY(24px); transition:opacity .7s ease .24s, transform .7s cubic-bezier(.2,.7,.2,1) .24s;">
+          <div class="vp-stat-icon" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><polyline points="12 13 12 9"></polyline><line x1="9" y1="2" x2="15" y2="2"></line></svg>
+          </div>
+          <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-top:16px;"><span>&lt;</span><span data-countup="3" data-decimals="0">0</span><span style="font-size:13px; color:#8b8fc8;"> min</span></div>
+          <div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:8px;">Field setup time</div>
+          <div style="font-family:'Inter'; font-size:11px; color:#5458cc; margin-top:3px;">Carry-On footprint, tool-less legs</div>
+        </div>
+
+        <!-- Trade-study score, full-width meter -->
+        <!-- Trade-study score, as a radial gauge: /100 is a genuine ratio, so
+             the ring's fill is exactly the printed number — nothing invented. -->
+        <div class="vp-stat-tile vp-stat-score" data-reveal="" style="opacity:0; transform:translateY(24px); transition:opacity .7s ease .3s, transform .7s cubic-bezier(.2,.7,.2,1) .3s; display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:18px; flex:0 0 auto;">
+            <svg width="82" height="82" viewBox="0 0 96 96" style="flex:0 0 auto; transform:rotate(-90deg);" aria-hidden="true">
+              <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"></circle>
+              <circle class="vp-stat-ring" data-ring="77.4" cx="48" cy="48" r="40" fill="none" stroke="#c3c8ff" stroke-width="8" stroke-linecap="round" stroke-dasharray="251.33" stroke-dashoffset="251.33" style="filter:drop-shadow(0 0 6px rgba(84,88,204,0.55));"></circle>
+            </svg>
+            <div>
+              <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:32px; color:#f0f2ff; line-height:1;"><span data-countup="77.4" data-decimals="1">0.0</span><span style="font-size:14px; color:#8b8fc8;">/100</span></div>
+              <div style="font-family:'Inter'; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:#c3c6ea; margin-top:6px; white-space:nowrap;">Trade-study score</div>
+            </div>
+          </div>
+          <div style="flex:1 1 200px; min-width:160px;">
+            <div style="font-family:'Inter'; font-size:12px; color:#5458cc;">X-quadcopter over FW, hexa &amp; VTOL</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= REPORTS ========================= -->
+  <section id="vp-reports" style="position:relative; background:#0d1035; padding:80px 32px; text-align:center;">
+    <div style="max-width:720px; margin:0 auto;">
+      <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Technical documentation</div>
+      <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(28px,4vw,40px); line-height:1; letter-spacing:-0.01em; margin:0 0 28px; color:#f0f2ff;">Read the full write-ups.</h2>
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+        <a href="assets/reports/Alex-Eagles-SUAS-2026-TDR.pdf" target="_blank" rel="noopener" style="text-decoration:none; font-family:'Inter'; font-weight:600; font-size:14px; padding:14px 30px; border-radius:9999px; color:#fff; border:1px solid rgba(217,48,42,0.55); background:rgba(217,48,42,0.16); transition:background .25s ease;" onmouseover="this.style.background='rgba(217,48,42,0.32)'" onmouseout="this.style.background='rgba(217,48,42,0.16)'">TDR &middot; SUAS 2026</a>
+        <a href="assets/reports/Alex-Eagles-UAVC-2026-CDR.pdf" target="_blank" rel="noopener" style="text-decoration:none; font-family:'Inter'; font-weight:600; font-size:14px; padding:14px 30px; border-radius:9999px; color:#f0f2ff; border:1px solid rgba(60,64,181,0.55); background:rgba(60,64,181,0.16); transition:background .25s ease;" onmouseover="this.style.background='rgba(60,64,181,0.32)'" onmouseout="this.style.background='rgba(60,64,181,0.16)'">CDR &middot; UAVC 2026</a>
+      </div>
+    </div>
+  </section>
+
   <!-- ========================= GALLERY ========================= -->
-  <section id="vp-gallery" style="position:relative; background:#0d1035; padding:120px 32px;">
+  <section id="vp-gallery" style="position:relative; background:#07091c; padding:120px 32px;">
     <div style="max-width:1180px; margin:0 auto;">
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
         <div>
@@ -648,41 +1198,41 @@
           <div style="flex:1 1 auto; min-width:0; overflow:hidden;">
             <div id="vpg-page-0" class="vpg-page" style="display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,19vw,210px); grid-auto-flow:dense; gap:14px;">
               <div class="vpg-tile" data-idx="0" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
-                <video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Flight-ready.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Airborne.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="1" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
-                <video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
-                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Airborne.</div></div>
-                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
-              </div>
-              <div class="vpg-tile" data-idx="2" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
                 <video src="assets/gallery/cnc-machining.mp4" poster="assets/gallery/cnc-machining.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
                 <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FABRICATION</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Cut in-house.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
+              <div class="vpg-tile" data-idx="2" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/team-working.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">TEAM</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Heads down.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
               <div class="vpg-tile" data-idx="3" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
-                <img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
-                <div style="position:absolute; inset:0; background:linear-gradient(to right, rgba(5,6,26,0.92), transparent 60%);"></div>
-                <div style="position:absolute; left:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:center; padding:20px; max-width:62%;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">PROTOTYPE</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Where it started.</div></div>
+                <img src="assets/gallery/night-lights.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">NIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Lit up.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
             </div>
             <div id="vpg-page-1" class="vpg-page" style="display:none; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,19vw,210px); grid-auto-flow:dense; gap:14px;">
               <div class="vpg-tile" data-idx="4" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
-                <video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <video src="assets/gallery/manufacturing.mp4" poster="assets/gallery/manufacturing.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Drone footage.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FABRICATION</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">In production.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="5" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
-                <img src="assets/gallery/night-lights.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <img src="assets/gallery/neith-flying.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
-                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">NIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Lit up.</div></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">In the air.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="6" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
@@ -692,9 +1242,55 @@
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
               <div class="vpg-tile" data-idx="7" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
+                <img src="assets/gallery/team-night.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">TEAM</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Late night session.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+            </div>
+            <div id="vpg-page-2" class="vpg-page" style="display:none; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,19vw,210px); grid-auto-flow:dense; gap:14px;">
+              <div class="vpg-tile" data-idx="8" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2; grid-row:span 2;">
+                <video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:20px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1;">Flight-ready.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="9" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/neith-flying-2.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FLIGHT</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Another pass.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="10" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">PROTOTYPE</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Where it started.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="11" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
+                <img src="assets/gallery/neith-flying-team.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">TEAM</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Flying together.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+            </div>
+            <div id="vpg-page-3" class="vpg-page" style="display:none; grid-template-columns:repeat(4,1fr); grid-auto-rows:clamp(150px,19vw,210px); grid-auto-flow:dense; gap:14px;">
+              <div class="vpg-tile" data-idx="12" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; grid-column:span 2;">
+                <video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">DISPLAY</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:22px; color:#f0f2ff; line-height:1;">Drone footage.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="13" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
                 <img src="assets/gallery/field-ready.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;">
                 <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
                 <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">FIELD</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Ready on the grass.</div></div>
+                <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
+              </div>
+              <div class="vpg-tile" data-idx="14" style="position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(60,64,181,0.3); background:#0a0c24; cursor:pointer; ">
+                <video src="assets/gallery/calibrate.mp4" poster="assets/gallery/calibrate.webp" muted loop playsinline preload="none" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"></video>
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent 55%);"></div>
+                <div style="position:absolute; left:0; bottom:0; padding:16px;"><div style="font-family:'JetBrains Mono'; font-size:10px; letter-spacing:.14em; color:#d9302a; margin-bottom:6px;">SETUP</div><div style="font-family:'Barlow Condensed'; font-weight:700; font-size:20px; color:#f0f2ff; line-height:1;">Calibrating.</div></div>
                 <div style="position:absolute; right:12px; top:12px; width:28px; height:28px; border-radius:7px; background:rgba(8,10,28,0.6); display:flex; align-items:center; justify-content:center; color:#f0f2ff; font-size:15px;">⤢</div>
               </div>
             </div>
@@ -704,20 +1300,29 @@
         <div id="vpg-dots" style="display:flex; justify-content:center; align-items:center; gap:9px; margin-top:18px;">
           <div class="vpg-dot" data-page="0" role="button" tabindex="0" style="width:24px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:#d9302a;"></div>
           <div class="vpg-dot" data-page="1" role="button" tabindex="0" style="width:9px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:rgba(96,165,250,0.35);"></div>
+          <div class="vpg-dot" data-page="2" role="button" tabindex="0" style="width:9px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:rgba(96,165,250,0.35);"></div>
+          <div class="vpg-dot" data-page="3" role="button" tabindex="0" style="width:9px; height:9px; border-radius:9999px; cursor:pointer; transition:width .3s ease, background .3s ease; background:rgba(96,165,250,0.35);"></div>
         </div>
       </div>
 
       <div id="vpg-focus" style="display:none; margin-top:22px;">
         <div style="display:flex; gap:14px; height:min(66vh,540px);">
           <div id="vpg-stage" style="position:relative; flex:1 1 auto; min-width:0; border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; will-change:transform;">
-            <div class="vpg-sm" data-idx="0" style="display:block;"><video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
-            <div class="vpg-sm" data-idx="1" style="display:none;"><video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
-            <div class="vpg-sm" data-idx="2" style="display:none;"><video src="assets/gallery/cnc-machining.mp4" poster="assets/gallery/cnc-machining.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
-            <div class="vpg-sm" data-idx="3" style="display:none;"><img src="assets/gallery/wooden-prototype.png" alt="Wooden prototype" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
-            <div class="vpg-sm" data-idx="4" style="display:none;"><video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
-            <div class="vpg-sm" data-idx="5" style="display:none;"><img src="assets/gallery/night-lights.webp" alt="Neith lit up on the pad" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="0" style="display:block;"><video src="assets/gallery/first-flight.mp4" poster="assets/gallery/first-flight.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="1" style="display:none;"><video src="assets/gallery/cnc-machining.mp4" poster="assets/gallery/cnc-machining.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="2" style="display:none;"><img src="assets/gallery/team-working.webp" alt="Team working on the aircraft" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="3" style="display:none;"><img src="assets/gallery/night-lights.webp" alt="Neith lit up on the pad" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="4" style="display:none;"><video src="assets/gallery/manufacturing.mp4" poster="assets/gallery/manufacturing.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="5" style="display:none;"><img src="assets/gallery/neith-flying.webp" alt="Neith in flight" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
             <div class="vpg-sm" data-idx="6" style="display:none;"><img src="assets/gallery/night-hover.webp" alt="Neith hovering at night" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
-            <div class="vpg-sm" data-idx="7" style="display:none;"><img src="assets/gallery/field-ready.webp" alt="Neith ready for a field sortie" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="7" style="display:none;"><img src="assets/gallery/team-night.webp" alt="Team working late at night" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="8" style="display:none;"><video src="assets/gallery/flight-ready.mp4" poster="assets/gallery/flight-ready.jpg" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="9" style="display:none;"><img src="assets/gallery/neith-flying-2.webp" alt="Neith in flight" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="10" style="display:none;"><img src="assets/gallery/wooden-prototype.png" alt="Wooden prototype" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="11" style="display:none;"><img src="assets/gallery/neith-flying-team.webp" alt="Neith flying with the team" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="12" style="display:none;"><video src="assets/gallery/show-off.mp4" poster="assets/gallery/show-off.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
+            <div class="vpg-sm" data-idx="13" style="display:none;"><img src="assets/gallery/field-ready.webp" alt="Neith ready for a field sortie" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></div>
+            <div class="vpg-sm" data-idx="14" style="display:none;"><video src="assets/gallery/calibrate.mp4" poster="assets/gallery/calibrate.webp" muted loop playsinline controls preload="none" style="width:100%; height:100%; object-fit:contain; position:absolute; inset:0; background:#000;"></video></div>
             <div style="position:absolute; left:0; right:0; bottom:0; padding:22px 20px 18px; background:linear-gradient(to top, rgba(5,6,26,0.92), transparent); pointer-events:none;">
               <div id="vpg-kicker" style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#d9302a; margin-bottom:8px;"></div>
               <div id="vpg-title" style="font-family:'Barlow Condensed'; font-weight:700; font-size:28px; color:#f0f2ff; line-height:1; margin-bottom:8px;"></div>
@@ -729,14 +1334,21 @@
             <div id="vpg-counter" style="position:absolute; left:14px; top:14px; font-family:'JetBrains Mono'; font-size:11px; color:#8b8fc8; background:rgba(8,10,28,0.5); padding:4px 9px; border-radius:6px; white-space:nowrap;"></div>
           </div>
           <div id="vpg-rail" class="rail" style="flex:0 0 128px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; padding-right:4px;">
-            <div class="vpg-railitem" data-idx="0" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/flight-ready.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Flight-ready</div></div>
-            <div class="vpg-railitem" data-idx="1" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/first-flight.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Airborne</div></div>
-            <div class="vpg-railitem" data-idx="2" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/cnc-machining.webp" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Cut in-house</div></div>
-            <div class="vpg-railitem" data-idx="3" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Prototype</div></div>
-            <div class="vpg-railitem" data-idx="4" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/show-off.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Show off</div></div>
-            <div class="vpg-railitem" data-idx="5" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/night-lights.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Lit up</div></div>
+            <div class="vpg-railitem" data-idx="0" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/first-flight.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Airborne</div></div>
+            <div class="vpg-railitem" data-idx="1" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/cnc-machining.webp" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Cut in-house</div></div>
+            <div class="vpg-railitem" data-idx="2" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/team-working.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Heads down</div></div>
+            <div class="vpg-railitem" data-idx="3" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/night-lights.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Lit up</div></div>
+            <div class="vpg-railitem" data-idx="4" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/manufacturing.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">In production</div></div>
+            <div class="vpg-railitem" data-idx="5" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/neith-flying.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">In the air</div></div>
             <div class="vpg-railitem" data-idx="6" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/night-hover.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Night hover</div></div>
-            <div class="vpg-railitem" data-idx="7" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/field-ready.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Field ready</div></div>
+            <div class="vpg-railitem" data-idx="7" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/team-night.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Late night</div></div>
+            <div class="vpg-railitem" data-idx="8" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/flight-ready.jpg" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Flight-ready</div></div>
+            <div class="vpg-railitem" data-idx="9" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/neith-flying-2.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Another pass</div></div>
+            <div class="vpg-railitem" data-idx="10" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/wooden-prototype.png" alt="" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Prototype</div></div>
+            <div class="vpg-railitem" data-idx="11" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/neith-flying-team.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Flying together</div></div>
+            <div class="vpg-railitem" data-idx="12" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/show-off.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Show off</div></div>
+            <div class="vpg-railitem" data-idx="13" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/field-ready.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Field ready</div></div>
+            <div class="vpg-railitem" data-idx="14" style="position:relative; flex:0 0 auto; height:88px; border-radius:9px; overflow:hidden; cursor:pointer; border:1px solid rgba(60,64,181,0.4); transition:border-color .2s ease;"><img src="assets/gallery/calibrate.webp" alt="" loading="lazy" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0;"><div style="position:absolute; left:0; right:0; bottom:0; padding:5px 7px; font-family:'JetBrains Mono'; font-size:9px; letter-spacing:.06em; color:#f0f2ff; background:linear-gradient(to top, rgba(5,6,26,0.9), transparent);">Calibrating</div></div>
           </div>
         </div>
       </div>
@@ -744,7 +1356,7 @@
   </section>
 
   <!-- ========================= CTA ========================= -->
-  <section style="position:relative; background:#07091c; padding:clamp(96px,13vh,150px) 32px clamp(104px,14vh,160px); text-align:center;">
+  <section id="vp-action" style="position:relative; background:#0d1035; padding:clamp(96px,13vh,150px) 32px clamp(104px,14vh,160px); text-align:center;">
     <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); max-width:1000px; margin:0 auto;">
       <h2 style="font-family:'Barlow Condensed'; font-weight:800; font-size:clamp(38px,6vw,72px); line-height:.95; letter-spacing:-0.02em; margin:0 0 clamp(34px,5vh,56px); color:#f0f2ff;">Neith in action</h2>
       
@@ -779,26 +1391,35 @@ class Component extends DCLogic {
         else { v.pause(); }
       });
     }, { threshold: 0.2 });
-    setTimeout(() => document.querySelectorAll('#vp-gallery video').forEach(v => { v.removeAttribute('autoplay'); v.loop = true; io.observe(v); }), 60);
+    // [data-vp-autoplay] opts a clip outside the gallery into the same treatment
+    // (the payload drop test): preload="none" until it's on screen, then play.
+    setTimeout(() => document.querySelectorAll('#vp-gallery video, video[data-vp-autoplay]').forEach(v => { v.removeAttribute('autoplay'); v.loop = true; io.observe(v); }), 60);
 
     // ---- gallery: arrow-paged mosaic + click-to-expand focus ----
     setTimeout(() => {
       const grid = document.getElementById('vpg');
       const focus = document.getElementById('vpg-focus');
       if (!grid || !focus) return;
-      const pages = [document.getElementById('vpg-page-0'), document.getElementById('vpg-page-1')];
+      const pages = [document.getElementById('vpg-page-0'), document.getElementById('vpg-page-1'), document.getElementById('vpg-page-2'), document.getElementById('vpg-page-3')];
       const dots = [...document.querySelectorAll('.vpg-dot')];
       const sms = [...document.querySelectorAll('.vpg-sm')];
       const rails = [...document.querySelectorAll('.vpg-railitem')];
       const meta = [
-        { k: 'Field note 01 · Display',     t: 'Flight-ready.',     d: 'The finished Neith on show — every system integrated, wired, and cleared to fly.' },
-        { k: 'Field note 02 · Flight',      t: 'Airborne.',         d: 'Neith in the air during a test sortie — holding attitude under its own power.' },
-        { k: 'Field note 03 · Fabrication', t: 'Cut in-house.',     d: 'Machining the carbon-fiber top plate on our CNC, tuned to the exact build layout.' },
-        { k: 'Field note 04 · Prototype',   t: 'Where it started.', d: 'The wooden proof-of-concept frame that validated the geometry before carbon.' },
-        { k: 'Field note 05 · Display',    t: 'Drone footage.',       d: '' },
-        { k: 'Field note 06 · Night',      t: 'Lit up.',            d: 'Navigation and arm lighting running at full brightness during a night systems check.' },
+        { k: 'Field note 01 · Flight',      t: 'Airborne.',         d: 'Neith in the air during a test sortie, holding attitude under its own power.' },
+        { k: 'Field note 02 · Fabrication', t: 'Cut in-house.',     d: 'Machining the carbon-fiber top plate on our CNC, tuned to the exact build layout.' },
+        { k: 'Field note 03 · Team',       t: 'Heads down.',        d: 'The team deep in a build session, working through the day.' },
+        { k: 'Field note 04 · Night',      t: 'Lit up.',            d: 'Navigation and arm lighting running at full brightness during a night systems check.' },
+        { k: 'Field note 05 · Fabrication', t: 'In production.',    d: 'Hand-drilling an arm mount on the bench during a manufacturing run.' },
+        { k: 'Field note 06 · Flight',     t: 'In the air.',        d: 'Neith mid-flight during a test sortie.' },
         { k: 'Field note 07 · Night',      t: 'Hover, after dark.', d: 'Holding a steady hover under floodlight, the projected mark tracking the aircraft below.' },
-        { k: 'Field note 08 · Field',      t: 'Ready on the grass.', d: 'Props on, batteries in, waiting for the go on a field sortie.' },
+        { k: 'Field note 08 · Team',       t: 'Late night session.', d: 'Still at it after dark, a build night that ran long.' },
+        { k: 'Field note 09 · Display',    t: 'Flight-ready.',      d: 'The finished Neith on show: every system integrated, wired, and cleared to fly.' },
+        { k: 'Field note 10 · Flight',     t: 'Another pass.',      d: 'A second angle on Neith airborne.' },
+        { k: 'Field note 11 · Prototype',  t: 'Where it started.',  d: 'The wooden proof-of-concept frame that validated the geometry before carbon.' },
+        { k: 'Field note 12 · Team',       t: 'Flying together.',   d: 'The team on-site as Neith flies overhead.' },
+        { k: 'Field note 13 · Display',    t: 'Drone footage.',     d: '' },
+        { k: 'Field note 14 · Field',      t: 'Ready on the grass.', d: 'Props on, batteries in, waiting for the go on a field sortie.' },
+        { k: 'Field note 15 · Setup',      t: 'Calibrating.',       d: 'Two team members balancing the airframe on a test rig before a calibration pass.' },
       ];
       const N = meta.length, PAGES = pages.length;
       let page = 0, active = 0, from = null;
@@ -889,9 +1510,12 @@ class Component extends DCLogic {
         { badge: 'Integration', title: 'System integration.', date: 'June 2026',
           media: [{ t: 'i', s: 'assets/process/04-integration-top.webp' }, { t: 'i', s: 'assets/process/04-integration-wiring.webp' }, { t: 'i', s: 'assets/process/04-integration-bay.webp' }],
           text: 'Next we bring the airframe to life by integrating the electronics, flight controller, motors, wiring, battery and payload systems, including the gimbal-mounted camera. This is where mechanical design meets functional engineering, ensuring every component works together as a cohesive system.' },
+        { badge: 'Validation', title: 'Component & subsystem testing.', date: 'June 2026',
+          media: [{ t: 'i', s: '/images/blog/sw-mapping-camera.png' }, { t: 'i', s: '/images/blog/fw-rtk-gps.jpeg' }, { t: 'i', s: '/images/blog/fw-herelink-range.jpeg' }],
+          text: 'Every component is validated against a defined objective before it earns a place on the aircraft. The custom power board was load-tested on each regulator to its rated capacity, then thermal-imaged under high-ambient heat to confirm the hotspots matched our simulation. A dedicated test interface exercised the camera’s gimbal, video stream, and geotagged capture in isolation before flight. GPS positioning, measured by hovering over a marked target, ran 3–5 m without correction. Turning on RTK brought that down to as low as 3 cm. The Herelink link was range-tested by walking the ground unit out while monitoring quality, holding telemetry, control, and video to roughly 1.5 km, with no loss of control authority even with the antennas deliberately obstructed.' },
         { badge: 'Control tuning', title: 'Autotuning.', date: 'June 2026',
-          media: [{ t: 'v', s: 'assets/process/05-autotune.mp4', p: 'assets/process/05-autotune.webp' }],
-          text: 'A quadcopter only flies as well as its control gains, and those gains belong to one specific airframe: this mass, this arm length, these propellers. Set them by hand and you are guessing, flying, watching the aircraft wobble, then guessing again. AutoTune runs that search properly. Neith twitches each axis against a disturbance it generates itself, measures how fast it answers and how far it overshoots, and keeps the highest gains it can hold without ringing. We autotune so the aircraft is tuned to itself rather than to a number copied off someone else’s build.' },
+          media: [{ t: 'v', s: 'assets/process/05-autotune.mp4', p: 'assets/process/05-autotune.webp' }, { t: 'i', s: 'assets/software/tuning-pitch-log.webp' }],
+          text: 'A quadcopter only flies as well as its control gains, and those gains belong to one specific airframe: this mass, this arm length, these propellers. We don’t touch autonomous modes until manual flight looks right: first flights in Stabilize with light inputs, backing off the PID gains and retrying if the response is wrong, then Altitude Hold, then a notch filter tuned from the early vibration signature to cut motor-frequency noise. Logs (vibration, magnetometer interference, GPS quality) are reviewed after every stage before advancing. Loiter is where AutoTune runs, twitching each axis against a disturbance it generates itself and keeping the highest gains it can hold without ringing. The post-tune log shows why it matters: commanded 4.18° roll, got 4.14°; commanded −5.04° pitch, got −4.96°, under 0.1° of tracking error on both axes. Only then do we verify Takeoff, Return-to-Launch, and Guided before any full mission is attempted.' },
         { badge: 'Flight', title: 'Flight testing.', date: 'June 2026',
           media: [{ t: 'v', s: 'assets/process/06-flight-test.mp4', p: 'assets/process/06-flight-test.webp' }],
           text: 'Finally, the fully integrated platform undergoes rigorous flight and payload testing. We evaluate stability, endurance, control response, and payload performance under real-world conditions, refining the system until it meets our standards for reliability and field readiness.' },
@@ -1245,7 +1869,119 @@ class Component extends DCLogic {
     // reveal the info as soon as the page opens — don't make people wait for the drone to land
     if (!reduced) setTimeout(revealInfo, 350);
 
-    const FREEZE_AT = 14;   // the clip zooms onto the drone at ~14s — hold there, then reveal
+    // fade the scroll cue out as soon as the visitor starts scrolling, rather
+    // than letting it ride along with the hero until it scrolls off-screen
+    const cue = document.querySelector('.vp-hero-cue');
+    if (cue) {
+      const onScrollFade = () => {
+        const y = window.scrollY || window.pageYOffset || 0;
+        cue.style.opacity = String(Math.max(0, 1 - y / 120));
+        cue.style.pointerEvents = y > 10 ? 'none' : '';
+      };
+      cue.style.transition = 'opacity .25s ease';
+      window.addEventListener('scroll', onScrollFade, { passive: true });
+    }
+
+    // section nav: smooth-scroll on click (offset for the fixed navbar + this
+    // sticky bar) and highlight whichever section is currently in view
+    const navLinks = Array.from(document.querySelectorAll('.vp-secnav-link'));
+    if (navLinks.length) {
+      const setActive = (id) => navLinks.forEach((a) => { a.dataset.active = a.dataset.nav === id ? '1' : '0'; });
+      navLinks.forEach((a) => {
+        a.addEventListener('click', (e) => {
+          const target = document.getElementById(a.dataset.nav);
+          if (!target) return;
+          e.preventDefault();
+          /* Clear the fixed site navbar, plus the sticky pill row when that's
+             what's on screen. The flat 150px assumed the pill row was always
+             there; on a phone it's replaced by the side panel, so those 46-odd
+             pixels were dead space and every jump landed short of its heading.
+             Measure what's actually showing instead of guessing per breakpoint. */
+          const bar = document.getElementById('vp-secnav');
+          const barShown = bar && getComputedStyle(bar).display !== 'none';
+          const y = target.getBoundingClientRect().top + window.pageYOffset - (barShown ? 150 : 104);
+          /* Jump rather than smooth-scroll on touch, matching JumpNav on the
+             team page: these targets are thousands of pixels apart, and
+             animating across that much of a media-heavy page is what iOS can't
+             rasterise in time — it shows un-painted area for the length of the
+             animation. A jump has no in-between frames to miss. Pointer devices
+             keep the smooth scroll, where the hardware keeps up. */
+          const coarse = window.matchMedia('(hover: none)').matches;
+          window.scrollTo({ top: y, behavior: (reduced || coarse) ? 'auto' : 'smooth' });
+        });
+      });
+      const sections = navLinks.map((a) => document.getElementById(a.dataset.nav)).filter(Boolean);
+      const spy = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => { if (entry.isIntersecting) setActive(entry.target.id); });
+      }, { rootMargin: '-110px 0px -65% 0px', threshold: 0 });
+      sections.forEach((s) => spy.observe(s));
+    }
+
+    // ---- phone section nav: pull tab + side panel (mirrors JumpNav.tsx) ----
+    // The links themselves are already wired by the block above; this only owns
+    // opening and closing the panel.
+    const secTab = document.getElementById('vp-secnav-tab');
+    const secPanel = document.getElementById('vp-secnav-panel');
+    if (secTab && secPanel) {
+      const setPanel = (open) => {
+        secTab.dataset.open = open ? '1' : '0';
+        secPanel.dataset.open = open ? '1' : '0';
+        secTab.setAttribute('aria-expanded', open ? 'true' : 'false');
+        secTab.setAttribute('aria-label', open ? 'Close section nav' : 'Jump to section');
+        const label = secTab.querySelector('.vp-secnav-tablabel');
+        if (label) label.textContent = open ? 'Close' : 'Pull';
+        // Keeps the links out of the tab order while the panel is closed.
+        if (open) secPanel.removeAttribute('inert');
+        else secPanel.setAttribute('inert', '');
+        if (open) { const first = secPanel.querySelector('a'); if (first) first.focus(); }
+      };
+
+      secTab.addEventListener('click', () => setPanel(secPanel.dataset.open !== '1'));
+      const closeBtn = secPanel.querySelector('.vp-secnav-close');
+      if (closeBtn) closeBtn.addEventListener('click', () => setPanel(false));
+      // Picking a destination closes the panel; the scroll itself is handled by
+      // the shared .vp-secnav-link click handler above.
+      secPanel.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setPanel(false)));
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && secPanel.dataset.open === '1') setPanel(false);
+      });
+      /* Anything outside closes it — pointerdown covers mouse and touch, and
+         fires early enough that the panel is on its way out before the tap
+         completes. The tab is excluded because it toggles on its own click: if
+         this closed the panel first, the tab would immediately reopen it. */
+      document.addEventListener('pointerdown', (e) => {
+        if (secPanel.dataset.open !== '1') return;
+        if (secPanel.contains(e.target) || secTab.contains(e.target)) return;
+        setPanel(false);
+      });
+
+      /* Hold the tab back until the hero has been scrolled past, and bring it
+         back if you return to the top — the same rule the team page's JumpNav
+         follows, and for the same reason: jumping between sections is
+         meaningless while the hero is still what you're looking at.
+         Watching the hero rather than the first section is deliberate; with a
+         section as the trigger the tab would vanish again once you scrolled
+         past it, which is exactly when it's wanted. */
+      const hero = document.getElementById('vp-hero');
+      if (hero) {
+        const setVisible = (on) => {
+          secTab.dataset.visible = on ? '1' : '0';
+          secPanel.dataset.visible = on ? '1' : '0';
+          // Not a control you can reach but not see.
+          if (on) { secTab.removeAttribute('tabindex'); secTab.removeAttribute('aria-hidden'); }
+          else { secTab.setAttribute('tabindex', '-1'); secTab.setAttribute('aria-hidden', 'true'); }
+          // Scrolling back up shouldn't leave an open panel riding out with it.
+          if (!on && secPanel.dataset.open === '1') setPanel(false);
+        };
+        new IntersectionObserver(
+          ([entry]) => setVisible(!entry.isIntersecting),
+          { threshold: 0 },
+        ).observe(hero);
+      }
+    }
+
+    const FREEZE_AT = 999;   // clip is pre-trimmed to cut before the person walks in — play it through, hold on the last frame
 
     if (reduced) {
       heroReveals.forEach((_, i) => show(i));
@@ -1270,7 +2006,7 @@ class Component extends DCLogic {
       else hero.addEventListener('loadedmetadata', initHero, { once: true });
       hero.addEventListener('error', revealInfo);
       hero.addEventListener('ended', revealInfo);
-      setTimeout(revealInfo, (FREEZE_AT + 1.5) * 1000);   // safety net
+      setTimeout(revealInfo, 8000);   // safety net — clip is ~6s, so this only fires if playback never starts
     } else {
       heroReveals.forEach((_, i) => show(i));
     }
@@ -1292,6 +2028,70 @@ class Component extends DCLogic {
       revealEls.forEach(el => io.observe(el));
     } else {
       revealEls.forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; });
+    }
+
+    // ---- stats (#vp-stats): count-up numbers + meter/weight-bar fills ----
+    // Runs once per element, triggered the moment it scrolls into view — same
+    // threshold/rootMargin family as the reveal above, kept separate because
+    // this one drives a number/width tween instead of a plain opacity swap.
+    function formatCountUp(el, value) {
+      const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      el.textContent = value.toFixed(decimals);
+    }
+    function runCountUp(el) {
+      const target = parseFloat(el.getAttribute('data-countup'));
+      if (Number.isNaN(target)) return;
+      const duration = 1100;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - p, 3);
+        formatCountUp(el, target * eased);
+        if (p < 1) requestAnimationFrame(tick);
+        else formatCountUp(el, target);
+      }
+      requestAnimationFrame(tick);
+    }
+    function runMeter(el) {
+      const pct = parseFloat(el.getAttribute('data-meter'));
+      if (Number.isNaN(pct)) return;
+      requestAnimationFrame(() => { el.style.width = pct + '%'; });
+    }
+    // Radial gauge (trade-study score): dash-offset the stroke by the same
+    // percentage the printed number already claims — the ring's fill is
+    // never anything other than a direct readout of data-ring.
+    function runRing(el) {
+      const pct = parseFloat(el.getAttribute('data-ring'));
+      const r = parseFloat(el.getAttribute('r'));
+      if (Number.isNaN(pct) || Number.isNaN(r)) return;
+      const circumference = 2 * Math.PI * r;
+      const offset = circumference * (1 - pct / 100);
+      requestAnimationFrame(() => { el.style.strokeDashoffset = String(offset); });
+    }
+    const statNums = Array.from(document.querySelectorAll('#vp-stats [data-countup]'));
+    const statMeters = Array.from(document.querySelectorAll('#vp-stats [data-meter]'));
+    const statRings = Array.from(document.querySelectorAll('#vp-stats [data-ring]'));
+    if (reduced) {
+      statNums.forEach(el => formatCountUp(el, parseFloat(el.getAttribute('data-countup'))));
+      statMeters.forEach(el => runMeter(el));
+      statRings.forEach(el => runRing(el));
+    } else if ('IntersectionObserver' in window) {
+      const ioStats = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          if (e.target.hasAttribute('data-countup')) runCountUp(e.target);
+          if (e.target.hasAttribute('data-meter')) runMeter(e.target);
+          if (e.target.hasAttribute('data-ring')) runRing(e.target);
+          ioStats.unobserve(e.target);
+        });
+      }, { threshold: 0.4 });
+      statNums.forEach(el => ioStats.observe(el));
+      statMeters.forEach(el => ioStats.observe(el));
+      statRings.forEach(el => ioStats.observe(el));
+    } else {
+      statNums.forEach(el => formatCountUp(el, parseFloat(el.getAttribute('data-countup'))));
+      statMeters.forEach(el => runMeter(el));
+      statRings.forEach(el => runRing(el));
     }
 
     // ---- build sequence: scroll-scrubbed on desktop, an autoplaying clip on phones ----
@@ -1385,13 +2185,40 @@ class Component extends DCLogic {
         if (a && a.complete && a.naturalWidth) { ctx.globalAlpha = 1; ctx.drawImage(a, 0, 0, canvas.width, canvas.height); }
         if (t > 0.001 && b && b.complete && b.naturalWidth) { ctx.globalAlpha = t; ctx.drawImage(b, 0, 0, canvas.width, canvas.height); ctx.globalAlpha = 1; }
       };
-      for (let i = 0; i < FRAMES; i++) {
+      /*
+       * All 140 frames used to be requested in one synchronous loop the moment
+       * this script ran — ~22MB of PNGs firing off at once, right alongside the
+       * hero video, the hoisted fonts/CSS, and support.js. Every one of those
+       * competed for the same handful of connections the browser will open to
+       * this origin, so nothing on the page — including the hero, which is what
+       * actually paints first — got its fair share of bandwidth for however long
+       * that queue took to drain.
+       *
+       * Only the first handful load eagerly now (enough that the scrub already
+       * has something to draw the instant the section is reached), each tagged
+       * fetchPriority 'high' so they don't lose out to fonts/CSS of similar
+       * eagerness. The remaining frames are queued one at a time behind
+       * requestIdleCallback at 'low' priority, so they fill in during idle time
+       * instead of racing everything else for the initial connections.
+       */
+      const EAGER_FRAMES = 12;
+      const loadFrame = (i) => {
         const im = new Image();
         im.decoding = 'async';
+        if ('fetchPriority' in im) im.fetchPriority = i < EAGER_FRAMES ? 'high' : 'low';
         im.src = 'assets/frames/f' + String(i).padStart(3, '0') + '.png';
         im.onload = () => { drawFrame(curF); };
-        imgs.push(im);
-      }
+        imgs[i] = im;
+      };
+      for (let i = 0; i < Math.min(EAGER_FRAMES, FRAMES); i++) loadFrame(i);
+      const scheduleIdle = (fn) =>
+        'requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 600 }) : setTimeout(fn, 32);
+      const loadRest = (i) => {
+        if (i >= FRAMES) return;
+        loadFrame(i);
+        scheduleIdle(() => loadRest(i + 1));
+      };
+      if (FRAMES > EAGER_FRAMES) scheduleIdle(() => loadRest(EAGER_FRAMES));
 
       let lastEi = -1;
       const updateUI = (prog) => {

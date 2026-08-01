@@ -5,6 +5,7 @@ import { NAV_LINKS } from "@/data/site";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTheme } from "@/context/ThemeContext";
 import AeLogo from "@/components/ui/AeLogo";
+import AeLockup from "@/components/ui/AeLockup";
 import SearchBox from "@/components/search/SearchBox";
 
 /**
@@ -22,6 +23,23 @@ import SearchBox from "@/components/search/SearchBox";
  *
  * The theme toggle is a separate fixed control (see <ThemeToggle/> in App).
  */
+// Fired on hover over the "Vehicles" link, well before the click: warms the
+// browser cache for the inline vehicle bundle (see Vehicles.tsx) and its
+// hero video so the page doesn't stall on those fetches after navigation.
+let vehiclePrefetched = false;
+function prefetchVehiclePage() {
+  if (vehiclePrefetched) return;
+  vehiclePrefetched = true;
+  fetch("/vehicle/index.html", { credentials: "same-origin" }).catch(() => {});
+  fetch("/vehicle/support.js", { credentials: "same-origin" }).catch(() => {});
+  // Prefetch hint (not a forced full download) for the large hero video.
+  const link = document.createElement("link");
+  link.rel = "prefetch";
+  link.as = "video";
+  link.href = "/vehicle/assets/landing.mp4";
+  document.head.appendChild(link);
+}
+
 export default function Navbar() {
   const scrollY = useScrollPosition();
   const scrolled = scrollY > 80;
@@ -55,6 +73,37 @@ export default function Navbar() {
 
   return (
     <>
+      {/*
+       * ---------- Brand mark (top-left) ----------
+       *
+       * Desktop only. Below `md` the hamburger already owns the top-left corner
+       * and the toggle the top-right, which is the whole of the mobile chrome —
+       * a logo squeezed between them would be an addition to a bar that's
+       * deliberately spare, so `hidden md:flex` leaves phones untouched.
+       *
+       * Mirrors <ThemeToggle/> opposite it (md:top-[35px] md:right-8) so the
+       * two pieces of fixed chrome sit at the same height. Both share the nav
+       * pill's own `top-[35px]` rather than a separate guessed offset — the
+       * toggle (51px) and the logo's `md:h-12` (48px) box are both close
+       * enough to the pill's own rendered height that starting all three from
+       * the same top edge lines up their centres too, instead of the ~11px
+       * mismatch a shorter top produced.
+       *
+       * AeLockup handles the theme swap itself — white emblem and white type on
+       * dark, blue emblem and matching blue type on light.
+       */}
+      <Link
+        to="/"
+        aria-label="Alex Eagles — home"
+        className="fixed z-40 md:top-[35px] md:left-8 hidden md:flex items-center h-12 transition-opacity duration-200 hover:opacity-80"
+      >
+        {/* Keyed on the route so the wordmark replays its entrance on every
+            navigation. The navbar itself never unmounts between pages, so
+            without this the animation would run once on first load and never
+            again. */}
+        <AeLockup key={pathname} size={44} />
+      </Link>
+
       {/* ---------- Desktop: centered glass pill ---------- */}
       <nav
         className="fixed top-[35px] left-0 right-0 z-40 hidden md:flex justify-center pointer-events-none"
@@ -89,6 +138,7 @@ export default function Navbar() {
                 }}
                 onMouseEnter={(e) => {
                   if (!active) e.currentTarget.style.color = "var(--text-primary)";
+                  if (link.path === "/vehicles") prefetchVehiclePage();
                 }}
                 onMouseLeave={(e) => {
                   if (!active) e.currentTarget.style.color = "var(--text-secondary)";
@@ -113,6 +163,7 @@ export default function Navbar() {
           background: "var(--bg-glass)",
           border: "1px solid var(--border-subtle)",
           color: "var(--text-primary)",
+          transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
           /* Blur comes from `.ui-blur` — pointer devices only. */
         }}
       >
@@ -137,6 +188,7 @@ export default function Navbar() {
             background: "var(--bg-glass)",
             backdropFilter: "blur(22px)",
             WebkitBackdropFilter: "blur(22px)",
+            transition: "background-color var(--transition-slow)",
           }}
         >
           <button
@@ -149,6 +201,7 @@ export default function Navbar() {
               background: "var(--bg-elevated)",
               border: "1px solid var(--border-subtle)",
               color: "var(--text-primary)",
+              transition: "background-color var(--transition-slow), border-color var(--transition-slow)",
             }}
           >
             <X size={22} />

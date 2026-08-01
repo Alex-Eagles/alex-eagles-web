@@ -22,7 +22,7 @@ export default function Footer() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
 
   return (
-    <footer className="bg-canvas border-t border-border-strong relative overflow-hidden">
+    <footer className="bg-canvas border-t border-border-strong transition-colors duration-[400ms] ease-out relative overflow-hidden">
       <div className="max-w-[var(--maxw-content)] mx-auto px-6 pt-[72px] pb-7 relative z-10">
         <div className="grid gap-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr]">
           {/* Column 1 — brand + mission + socials */}
@@ -109,7 +109,7 @@ export default function Footer() {
                 "I'm interested" message addressed to the team (see
                 NEWSLETTER_EMAIL in site.ts). No backend needed. */}
             <form
-              className="bg-elevated border border-border rounded-[10px] p-4"
+              className="bg-elevated border border-border transition-colors duration-[400ms] ease-out rounded-[10px] p-4"
               onSubmit={(e) => {
                 e.preventDefault();
                 const email = newsletterEmail.trim();
@@ -136,7 +136,7 @@ export default function Footer() {
                   required
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
-                  className="flex-1 min-w-0 h-11 bg-surface border border-border rounded-md px-3 font-sans text-sm text-fg outline-none"
+                  className="flex-1 min-w-0 h-11 bg-surface border border-border transition-colors duration-[400ms] ease-out rounded-md px-3 font-sans text-sm text-fg outline-none"
                 />
                 <button
                   type="submit"

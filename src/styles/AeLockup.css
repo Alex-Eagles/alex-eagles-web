@@ -1,0 +1,77 @@
+/* The brand lockup's entrance — the wordmark emerging from the divider.
+ *
+ * The rule and the emblem are already in place at first paint; only the type
+ * animates, so it reads as the words sliding out from behind the column rather
+ * than the whole mark fading in.
+ *
+ * How the "out of the column" feel is built:
+ *   · clip-path insets from the RIGHT edge (inset(0 100% 0 0) hides it
+ *     entirely), so the reveal is a wipe that starts at the rule and travels
+ *     outward — the letters are uncovered in reading order, never sliding in
+ *     from off-screen fully formed.
+ *   · a small negative translateX runs alongside it, so the type is still
+ *     drifting outward while it's being uncovered. The wipe alone reads as a
+ *     mask; the drift is what sells it as motion coming from the rule.
+ *   · the two are deliberately not the same length — the drift settles a beat
+ *     before the wipe finishes, which stops the tail letters arriving with a
+ *     visible lurch.
+ *
+ * Layout note: the span keeps its full width throughout (it's clipped, not
+ * collapsed), so nothing around it reflows and the mark never shifts.
+ */
+
+.ae-lockup-word {
+  /* both hands of the animation start hidden, so there's no flash of the
+     finished wordmark before the delay elapses */
+  clip-path: inset(0 100% 0 0);
+  animation:
+    ae-lockup-wipe 900ms cubic-bezier(0.22, 1, 0.36, 1) 160ms both,
+    ae-lockup-drift 700ms cubic-bezier(0.22, 1, 0.36, 1) 160ms both;
+}
+
+@keyframes ae-lockup-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ae-lockup-drift {
+  from {
+    /* starts tucked back against the rule */
+    transform: translateX(-0.42em);
+    opacity: 0.55;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* The divider gets a brief lift as the type leaves it — a small cue that the
+ * words came from here, gone before it registers as its own animation. */
+.ae-lockup-rule {
+  animation: ae-lockup-rule-flash 900ms cubic-bezier(0.22, 1, 0.36, 1) 160ms both;
+}
+
+@keyframes ae-lockup-rule-flash {
+  0% {
+    opacity: 0.45;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ae-lockup-word,
+  .ae-lockup-rule {
+    animation: none;
+    clip-path: none;
+  }
+}

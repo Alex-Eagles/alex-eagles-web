@@ -8,7 +8,15 @@
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon-logo.ico" />
+    <!--
+      favicon-logo.ico, rebuilt rather than replaced: it used to hold a single
+      256x256 uncompressed BMP, so every browser downscaled that one bitmap
+      itself to 16 or 32px — which is where the soft tab icon came from. It now
+      packs real PNGs at 16/32/48/64/128/256, so each size is a proper resample,
+      and the file is smaller for it (264 KB -> 45 KB). Same path, and the type
+      now actually matches what's there.
+    -->
+    <link rel="icon" type="image/x-icon" href="/favicon-logo.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!--

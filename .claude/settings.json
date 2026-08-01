@@ -35,7 +35,17 @@
       "Read(//c/Users/Admin/AppData/Local/Temp/claude/e--alex-eagles-web/41a63904-5591-4543-8a7f-3701563cb319/scratchpad/taste-skill/skills/**)",
       "Bash(grep -v \"^\\\\s*//\\\\|^\\\\s*\\\\*\\\\|{/\\\\*\")",
       "Bash(grep -n \"top: 100%\\\\|top: 0%\\\\|left: 50%;\\\\s*$\" e:/alex-eagles-web/src/styles/team-structure-options/pyramid-option.css)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash('C:\\\\Users\\\\farah\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\Lib\\\\site-packages\\\\imageio_ffmpeg\\\\binaries\\\\ffmpeg-win-x86_64-v7.1.exe' -y -i public/media/hero-night.mp4 -vf 'select=eq\\(n\\\\,0\\)' -vframes 1 -q:v 3 public/Home/hero-night-poster.jpg)",
+      "Bash(node -e ' *)",
+      "Bash(curl -sI http://localhost:5173/media/hero-night.mp4)",
+      "Bash(curl -sI http://localhost:5173/)",
+      "Bash(curl -s http://localhost:5173/ -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(jobs -l)",
+      "Bash(curl -s http://localhost:5173/src/pages/TeamStructure.jsx -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5173/ -o /dev/null -w \"home: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5173/src/pages/TeamStructure.jsx -o /dev/null -w \"jsx: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:5173/src/styles/TeamStructure.css -o /dev/null -w \"css: %{http_code}\\\\n\")"
     ]
   },
   "worktree": {

@@ -117,7 +117,7 @@ export default function Contact() {
 
           {status === "sent" && (
             <p className="contact-form-feedback contact-form-feedback--success">
-              Message sent — we'll get back to you soon.
+              Message sent, we'll get back to you soon.
             </p>
           )}
           {status === "error" && (
