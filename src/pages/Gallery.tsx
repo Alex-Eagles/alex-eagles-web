@@ -796,6 +796,26 @@ export default function Gallery() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
+  /*
+   * The reel's 3D orbital effect never landed well on desktop, so it's
+   * mobile-only now — same breakpoint the toggle row already switches on
+   * (`sm:`, 640px). Desktop just gets Grid; the Reel button itself is
+   * hidden there too (see viewModes below) so there's no dead toggle
+   * pointing at a view that no longer exists at that width.
+   */
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 640px)');
+    setIsDesktopViewport(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktopViewport(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    if (isDesktopViewport && viewMode === 'reel') setViewMode('grid');
+  }, [isDesktopViewport, viewMode]);
+
   useEffect(() => {
     if (!isFinePointer) return;
 
@@ -907,7 +927,7 @@ export default function Gallery() {
 
   const viewModes: { key: ViewMode; label: string; icon: typeof LayoutGrid }[] = [
     { key: 'grid', label: 'Grid', icon: LayoutGrid },
-    { key: 'reel', label: 'Reel', icon: Film },
+    ...(isDesktopViewport ? [] : [{ key: 'reel' as const, label: 'Reel', icon: Film }]),
   ];
 
   return (
