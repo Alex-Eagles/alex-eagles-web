@@ -173,16 +173,16 @@
    * a near-black wash meant to sit *behind* Blog's separate light `text`
    * colour — not to BE text. On this dark card surface that reads as
    * low-to-no contrast. Flagging in case that's not what's wanted. */
-  --team-aerodesign: #10202e; /* sky blue               */
+   --team-aerodesign: #85b7eb; /* sky blue               */
   --team-wing: #6ad1d8; /* cyan                   */
   --team-tail-stability: #f0a07a; /* coral                  */
-  --team-structure: #201e19; /* warm gray              */
-  --team-propulsion: #1a2211; /* green                  */
-  --team-software: #10241d; /* teal                   */
-  --team-hardware: #241c12; /* gold                   */
-  --team-computer-vision: #260f1a; /* pink                   */
-  --team-ai: #260f1a; /* pink — same discipline as Computer Vision */
-  --team-firmware: #1a1830; /* lavender               */
+  --team-structure: #c2c0b4; /* warm gray              */
+  --team-propulsion: #97c459; /* green                  */
+  --team-software: #5dcaa5; /* teal                   */
+  --team-hardware: #f0b24a; /* gold                   */
+  --team-computer-vision: #d01925de; /* pink                   */
+  --team-ai: #d5323cde; /* pink — same discipline as Computer Vision */
+  --team-firmware: #afa9ec; /* lavender               */
 
   /* The ink that goes ON one of those accents.
    *
@@ -1074,17 +1074,17 @@
    * ⚠ Same caveat as the dark block above: `bg.light` is a pale wash meant
    * to sit BEHIND Blog's separate dark `text` colour on the white plate this
    * token targets, so pale-on-white here reads as low contrast. */
-  --team-aerodesign-page: #d5e7f7;
-  --team-wing-page: #1e6e73;
-  --team-tail-stability-page: #aa4413;
-  --team-structure-page: #e7e3d6;
-  --team-propulsion-page: #dceac7;
-  --team-software-page: #9fd1ba;
-  --team-hardware-page: #f5e4c4;
-  --team-computer-vision-page: #f6d9e5;
-  --team-ai-page: #f6d9e5;
-  --team-firmware-page: #dedcfc;
-  /* --team-management / --team-accent are brand blue and already clear 5.9:1. */
+   --team-aerodesign-page: #1d65b0;
+   --team-wing-page: #1e6e73;
+   --team-tail-stability-page: #aa4413;
+   --team-structure-page: #676454;
+   --team-propulsion-page: #4f6d27;
+   --team-software-page: #257057;
+   --team-hardware-page: #895a0b;
+   --team-computer-vision-page: #d01925de;
+   --team-ai-page: #d01925de;
+   --team-firmware-page: #5b4ed8;
+   /* --team-management / --team-accent are brand blue and already clear 5.9:1. */
 
   /* See "ANIMATABLE GRADIENT STOPS" near the dark block. */
   --blog-bg-stop1: var(--bg-elevated);
