@@ -506,6 +506,7 @@ function SpatialGridCard({
     >
       <m.div
         ref={ref}
+        data-card-id={item.id}
         style={canAnimate ? { rotateX: springRotateX, rotateY: springRotateY, transformStyle: 'preserve-3d' as const, z: zDepth } : undefined}
         whileHover={canAnimate ? { scale: 1.03, z: zDepth + 15 } : undefined}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -590,6 +591,7 @@ function OrbitalReelCard({
     >
       <m.div
         ref={ref}
+        data-card-id={item.id}
         /* No scroll-driven transform at all when still — the previous fallback
            still applied `scale` and `opacity`, which is the fade-per-swipe. */
         style={
@@ -803,6 +805,24 @@ export default function Gallery() {
       globalMouseX.set(e.clientX);
       globalMouseY.set(e.clientY);
       setPointerInField(true);
+
+      /*
+       * Reel and grid cards tilt in 3D (rotateY/rotateX + perspective), and a
+       * fast-moving pointer can leave a rotated card's hit area without the
+       * browser ever firing its mouseleave — the "VIEW" cursor label then stays
+       * locked onto empty space where the card used to visually be. Cross-check
+       * what's actually under the pointer on every move and drop a stale lock.
+       */
+      setHoveredCardId((current) => {
+        if (current === null) return current;
+        const under = document.elementFromPoint(e.clientX, e.clientY);
+        const card = under?.closest('[data-card-id]');
+        if (!card || card.getAttribute('data-card-id') !== String(current)) {
+          setCursorLabel(null);
+          return null;
+        }
+        return current;
+      });
     };
 
     const handleMouseLeave = () => {
