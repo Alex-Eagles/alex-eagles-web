@@ -69,7 +69,7 @@ export const prototypes: Prototype[] = [
       "This was our first real airframe, so it set the baseline everything after inherited: the avionics stack, the plywood-frame build method, and the first PID tuning pass — all validated with FEA rather than assumed safe.",
     groundImage: hexaGround,
     flightImage: hexaFlight,
-    videoUrl: "https://www.youtube-nocookie.com/embed/KrsQcj8R7ck",
+    videoUrl: "https://www.youtube-nocookie.com/embed/mTjEtiHwIP8",
   },
   {
     id: "quad-test",
