@@ -1,6 +1,6 @@
 import quadGround from "@/assets/vehicles/quad-test/ground.jpg";
 import quadFlight from "@/assets/vehicles/quad-test/flight.jpg";
-import hexaGround from "@/assets/vehicles/hexa-test/ground.jpeg";
+import hexaGround from "@/assets/vehicles/hexa-test/ground.png";
 import hexaFlight from "@/assets/vehicles/hexa-test/flight.png";
 
 /**
@@ -69,7 +69,7 @@ export const prototypes: Prototype[] = [
       "This was our first real airframe, so it set the baseline everything after inherited: the avionics stack, the plywood-frame build method, and the first PID tuning pass — all validated with FEA rather than assumed safe.",
     groundImage: hexaGround,
     flightImage: hexaFlight,
-    videoUrl: "https://www.youtube-nocookie.com/embed/KrsQcj8R7ck",
+    videoUrl: "https://www.youtube-nocookie.com/embed/mTjEtiHwIP8",
   },
   {
     id: "quad-test",
@@ -97,6 +97,6 @@ export const prototypes: Prototype[] = [
       "Because it inherited a proven avionics stack and tuning from the Hexa, the Quad let us validate the complete test process — calibration, PID tuning, and payload-loaded flight — end to end, which is the same process every airframe since has followed.",
     groundImage: quadGround,
     flightImage: quadFlight,
-    videoUrl: "https://www.youtube-nocookie.com/embed/viCYNYaPzIo",
+    videoUrl: "https://www.youtube-nocookie.com/embed/rcxx8AeXm1c",
   },
 ];

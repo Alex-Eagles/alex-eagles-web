@@ -501,6 +501,7 @@ const ROSTER_2026: YearRoster = {
         section("Structure", [
           slot("Section Lead", "Mira Barsoum", {
             photo: "mira-barsoum-2026-2",
+            cutout: "mira-barsoum-2026",
             linkedIn: "https://www.linkedin.com/in/mira-barsoum-457531297/",
             gradYear: "2026",
             major: "Mechatronics and Robotics",
@@ -598,6 +599,7 @@ const ROSTER_2026: YearRoster = {
           }),
           slot("Member", "Jana Hani", {
             photo: "jana-hani2",
+            cutout: "jana-hani",
             linkedIn: "https://www.linkedin.com/in/jana-elmenoufi-644319256/",
             gradYear: "2026",
             major: "Mechatronics",
@@ -684,25 +686,26 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Electromechanics",
           }),
-          slot("Member", "Mariyam Ramadan", {
-            photo: "mariyam-ramdan",
-            linkedIn: "https://www.linkedin.com/in/mariyam-ramadan",
-            gradYear: "2027",
-            major: "Mechatronics",
-          }),
-          // No portrait yet — hidden rather than shown as an empty slot.
-          // Add a `photo` and drop `hidden` to bring the card back.
-          slot("Member", "Ahmed Ibrahim", { hidden: true }),
-          // Onto a second row, below the other two — Nour sits beside Tarek.
           slot("Member", "Tarek Mohamed", {
-            breakBefore: true,
             photo: "tarek-mohamed",
             linkedIn: "https://www.linkedin.com/in/tarek-mohamed-elsayed-08b120403",
             gradYear: "2027",
             major: "Computer and Communication",
           }),
+          // No portrait yet — hidden rather than shown as an empty slot.
+          // Add a `photo` and drop `hidden` to bring the card back.
+          slot("Member", "Ahmed Ibrahim", { hidden: true }),
+          // Onto a second row, below the other two — Nour sits beside Mariyam.
+          slot("Member", "Mariyam Ramadan", {
+            breakBefore: true,
+            photo: "mariyam-ramdan",
+            linkedIn: "https://www.linkedin.com/in/mariyam-ramadan",
+            gradYear: "2027",
+            major: "Mechatronics",
+          }),
           slot("Member", "Nour Walid", {
             photo: "nour-walid2",
+            cutout: "nour-walid",
             linkedIn: "https://www.linkedin.com/in/nour-walid-6b2b8b262/",
             gradYear: "2026",
             major: "Mechatronics",

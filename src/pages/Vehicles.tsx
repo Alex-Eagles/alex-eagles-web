@@ -26,6 +26,15 @@ import { useTheme } from "@/context/ThemeContext";
  */
 const VEHICLE_URL = "/vehicle/index.html";
 const SUPPORT_URL = "/vehicle/support.js";
+// The hero clip lives inside the fetched HTML (as a <source src>), so without
+// this hint the browser has no idea it exists until that fetch resolves, the
+// text is parsed, and the <video> is injected — the rest of the page (navbar,
+// footer, layout) is already visible well before the video even starts
+// downloading. Hinting the exact same URL the injected <source> will use lets
+// the browser start pulling video bytes immediately, in parallel with the
+// index.html fetch, so playback is ready by the time the markup lands instead
+// of noticeably after it.
+const HERO_VIDEO_URL = "/vehicle/assets/landing.mp4";
 
 export default function Vehicles() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -71,6 +80,17 @@ export default function Vehicles() {
     let slotPoll = 0;
     let slotGiveUp = 0;
     const injected: Node[] = [];
+
+    // Kick the hero video's download off now, in parallel with the HTML fetch
+    // below — see the HERO_VIDEO_URL comment. A plain fetch() rather than
+    // <link rel=preload as=video>: Chrome doesn't reliably act on a video
+    // preload hint (it's built for script/style/font/image), but a warm GET
+    // here lands the file in the HTTP cache so the <video>'s own request,
+    // once the markup is injected below, resolves from cache instead of
+    // opening a second cold connection. Not awaited — this races the HTML
+    // fetch, it doesn't block it — and left running on navigation away; an
+    // abandoned same-origin GET has nothing to clean up.
+    void fetch(HERO_VIDEO_URL, { credentials: "same-origin" }).catch(() => {});
 
     (async () => {
       try {
