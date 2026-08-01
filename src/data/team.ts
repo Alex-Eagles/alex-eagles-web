@@ -624,7 +624,7 @@ const ROSTER_2026: YearRoster = {
             "We give the aircraft its eyes: detecting and tracking targets from the onboard camera, and turning raw images into the information the autonomy stack acts on.",
           icon: "computer-vision",
         }),
-        // Youssef Hozayen also runs Hardware, on top of his top-level Vice Lead card.
+        // Youssef Hozayen also runs Hardware, on top of his top-level Team Vice Lead card.
         section("Hardware", [
           slot("Section Lead", "Youssef Hozayen", {
             photo: "youssef-hozayen-2026",
@@ -911,7 +911,7 @@ export const ROSTERS: Record<RosterYear, YearRoster> = {
  * Headline counts for a roster year — what the hero states under the year tabs.
  *
  * `members` counts distinct individuals, not filled slots: someone who holds
- * two posts (Youssef Hozayen is Vice Lead *and* runs Hardware) is counted once,
+ * two posts (Youssef Hozayen is Team Vice Lead *and* runs Hardware) is counted once,
  * so the headline reflects how many people are actually on the team. Unfilled
  * slots are skipped — an empty placeholder isn't a member.
  */

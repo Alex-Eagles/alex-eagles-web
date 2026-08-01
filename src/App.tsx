@@ -4,6 +4,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import ScrollTopButton from "@/components/ui/ScrollTopButton";
 import { useSearchHighlight } from "@/hooks/useSearchHighlight";
 
 /*
@@ -87,6 +88,7 @@ export default function App() {
       {showThemeToggle && <ThemeToggle />}
       <Navbar />
       <ScrollToTop />
+      <ScrollTopButton />
 
       <main id="main-content">
         <Suspense fallback={<RouteFallback />}>
