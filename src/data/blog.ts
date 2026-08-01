@@ -132,10 +132,10 @@ export interface BlogPostFull {
 export const BLOG_POSTS: BlogPostFull[] = [
   {
     id: 16,
-    title: "Flight Controller v3: Revising the Design",
+    title: "Flight Controller v2: Revising the Design",
     excerpt:
-      "Back into the flight controller design, working through a new iteration based on lessons from the PCBWay contest board. Testing is planned in the coming weeks.",
-    image: "/images/blog/flight-controller-v3.png",
+      "Following a full review of our first flight controller, the team is now developing a second-generation design built to match the performance of industry benchmarks like Pixhawk and CUAV — at a fraction of the cost. This project has been a valuable opportunity to advance our skills in microcontroller configuration, signal integrity layout, digital and analog communication, and EMI-preventive design strategies",
+    image: "/images/blog/comingsoon.jpg",
     imageFit: "contain",
     category: "hardware",
     date: "Jul 2026",
@@ -191,7 +191,7 @@ export const BLOG_POSTS: BlogPostFull[] = [
     id: 17,
     title: "Manufacturing a UGV for ICMTC",
     excerpt:
-      "Applied our hardware design expertise to a new platform, manufacturing a ground vehicle for the ICMTC competition.",
+      "The UAVC competition required an unmanned ground vehicle capable of covering the maximum distance possible within a set mission time. Our team designed a limit switch-activated UGV powered by four DC motors that drove the vehicle straight forward, requiring no control loops or microcontroller — a simple yet highly effective solution to the challenge.",
     image: "/images/blog/ugv-icmtc.jpg",
     category: "hardware",
     date: "Jun 2026",
@@ -202,8 +202,8 @@ export const BLOG_POSTS: BlogPostFull[] = [
     id: 18,
     title: "PDB Design Review: What We'd Change Next",
     excerpt:
-      "Reviewed our power distribution board's first revision, identified key improvement areas, and kicked off development of a next-generation version.",
-    image: "/images/blog/pdb-design-review.webp",
+      "Building on lessons from the first design, we developed an improved power distribution board and subjected it to harsher validation criteria. Thermal simulations confirmed no significant risk of failure due to layout, validating the design's reliability under real-world load conditions.",
+    image: "/images/blog/PDB_v2.png",
     imageFit: "contain",
     category: "hardware",
     date: "Jun 2026",
@@ -359,8 +359,8 @@ export const BLOG_POSTS: BlogPostFull[] = [
     id: 19,
     title: "Designing Our Custom Power Distribution Board",
     excerpt:
-      "Designed, built, and tested a custom power distribution board to power every onboard electronic system on the team's UAV.",
-    image: "/images/blog/power-distribution-board.png",
+      "Designed, built, and tested a custom power distribution board to power all onboard electronics for the team's UAV. The design focused on thermal management and strict layout constraints, given the high current load required relative to the board's compact size. Testing revealed substantial room for improvement, informing the next design iteration.",
+    image: "/images/blog/PDB_v1.png",
     imageFit: "contain",
     category: "hardware",
     date: "Mar 2026",
@@ -492,10 +492,10 @@ export const BLOG_POSTS: BlogPostFull[] = [
   },
   {
     id: 20,
-    title: "Entering the PCBWay Design Contest",
+    title: "PCBWay Design Contest",
     excerpt:
-      "Entered the PCBWay Design Contest with an original flight controller module, engineered entirely in-house from schematic to layout.",
-    image: "/images/blog/pcbway-contest-board.webp",
+      "Entered the PCBWay design contest with an original flight controller module engineered entirely in-house. The project deepened our expertise in embedded systems and microcontroller engineering, strengthening our digital communication design skills and laying the groundwork for a more advanced flight controller, one built for commercial release to hobbyists and industrial UAV manufacturers worldwide.",
+    image: "/images/blog/FC_V1.png",
     category: "hardware",
     date: "Jan 2026",
     author: "Hardware Team",
@@ -540,8 +540,8 @@ export const BLOG_POSTS: BlogPostFull[] = [
     id: 21,
     title: "Onboarding the Hardware Team on Altium Designer",
     excerpt:
-      "Trained new members to proficiency in Altium Designer, building the team's core PCB design capability from the ground up.",
-    image: "/images/blog/altium-designer.png",
+      "Trained new members to build proficiency in Altium Designer, strengthening the team's core PCB design capabilities. Members first learned foundational skills through small practice projects, then completed the FEDEVEL course, designing an Arduino Uno PCB from scratch to solidify their understanding of electronic circuit design.",
+    image: "/images/blog/Course_Arduino.png",
     imageFit: "contain",
     category: "hardware",
     date: "Nov 2025",
