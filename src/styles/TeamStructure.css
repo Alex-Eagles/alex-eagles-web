@@ -1,66 +1,95 @@
-/* "Built by Subsystems" — top-down pyramid org chart with per-subsystem
- * colors/icons and a single light bulb relaying down the whole path:
- * Team Leader -> Vice Lead -> branch point -> splits into two, one per
- * Lead -> cascades through each Lead's 3 subteam pills. Theme-aware via
- * the tokens below (dark-mode default, crisp white + light-blue for
- * light mode, matching the team logo). Namespaced with tp-. */
-:root,
-:root[data-theme="dark"] {
-  --ts-bg: #0a0e1f;
-  --ts-text: #ffffff;
-  --ts-text-muted-1: rgba(255, 255, 255, 0.65);
-  --ts-text-muted-2: rgba(255, 255, 255, 0.5);
-  --ts-text-muted-3: rgba(255, 255, 255, 0.35);
-  --ts-border: rgba(255, 255, 255, 0.12);
-  --ts-border-soft: rgba(255, 255, 255, 0.2);
-  --ts-arm: linear-gradient(90deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08));
-  --ts-radar-ring: rgba(255, 255, 255, 0.08);
-  --ts-shadow: rgba(0, 0, 0, 0.6);
-  --ts-card-bg: rgba(255, 255, 255, 0.03);
-  --ts-gold: #f59e0b;
-  --ts-gold-text: #fde68a;
-  --ts-gold-bg: rgba(245, 158, 11, 0.08);
-}
-
-/* Light mode — a crisp white + light-blue palette matching the team logo,
- * instead of the site's generic pale blue-gray tokens. White page/section
- * background, light-blue-tinted card surfaces, and visibly blue (not
- * barely-there) borders/grid/glow, so it still reads as a technical
- * diagram rather than washing out flat. */
-:root[data-theme="light"] {
-  /* Team-page light canvas (--team-bg), the "deeper" band tone — alternates
-     with the white sections above/below so the section reads as separated. */
-  --ts-bg: #e4e8ee;
-  --ts-text: #0b1220;
-  --ts-text-muted-1: #3b5a8a;
-  --ts-text-muted-2: #4a6a99; /* was #5b7bab: 4.32:1, under AA at 11-13px */
-  --ts-text-muted-3: #8aa4c9;
-  --ts-border: #bfdbfe;
-  --ts-border-soft: #dbeafe;
-  --ts-arm: linear-gradient(90deg, #93c5fd, #dbeafe);
-  --ts-radar-ring: #bfdbfe;
-  --ts-shadow: rgba(59, 130, 246, 0.18);
-  --ts-card-bg: #eff6ff;
-  --ts-gold: var(--gold);
-  --ts-gold-text: var(--gold);
-  --ts-gold-bg: rgba(180, 83, 9, 0.1);
-}
+/* "Team Overview" — the Radial Command org chart.
+ *
+ * Ported from the Claude Design concept of the same name: a command disc at the
+ * centre, the vice lead above it, the two division leads out on the ring, and
+ * the six sub-teams fanned beyond them. Every behaviour the old pyramid had is
+ * kept — per-sub-team deep links, keyboard access, and the
+ * tap-to-reveal-then-navigate flow on touch. See TeamStructure.jsx.
+ *
+ * Two layouts share one set of node styles:
+ *   [data-mode="radial"]  the real thing, wherever there's room
+ *   [data-mode="stack"]   a vertical spine for phones
+ * The radial is a fixed 1060x860 canvas scaled to fit its column. Below roughly
+ * 0.62 its labels stop being legible, so rather than shrink it into a smudge
+ * the component swaps to the stack — same discs, pills and cards, top to
+ * bottom. See RADIAL_MIN_SCALE in the component.
+ *
+ * Namespaced with tp-.
+ */
 
 .tp-section {
+  /* Dark is the concept's own palette. */
+  --tp-bg: #080a16;
+  --tp-ink: #e8eaf6;
+  --tp-ink-strong: #f4f5ff;
+  --tp-ink-dim: #9aa2c2;
+  --tp-ink-faint: #7e86a8;
+  --tp-ink-node: #cbd0ea;
+  --tp-accent: #5b5bf0;
+  --tp-accent-bright: #6c6cf5;
+  --tp-accent-soft: #a6a8ff;
+  --tp-hairline: rgba(129, 129, 255, 0.26);
+  --tp-ring: rgba(129, 129, 255, 0.2);
+  --tp-ring-faint: rgba(129, 129, 255, 0.08);
+  --tp-arc: rgba(120, 120, 250, 0.5);
+  --tp-node-bg: rgba(12, 14, 34, 0.88);
+  --tp-node-border: rgba(255, 255, 255, 0.09);
+  --tp-shell: rgba(255, 255, 255, 0.05);
+  --tp-shell-border: rgba(255, 255, 255, 0.1);
+  --tp-card-bg: linear-gradient(160deg, rgba(38, 40, 96, 0.95), rgba(14, 16, 40, 0.95));
+  --tp-disc-bg: linear-gradient(160deg, #2a2ba8, #15173f 70%);
+  --tp-inner-lip: inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  --tp-glow: rgba(79, 70, 229, 0.9);
+  --tp-halo: radial-gradient(900px 520px at 78% 8%, rgba(79, 70, 229, 0.22), transparent 60%),
+    radial-gradient(700px 500px at 6% 82%, rgba(56, 84, 220, 0.13), transparent 62%);
+
   position: relative;
   overflow: hidden;
-  background: var(--ts-bg);
-  /* Matches .ae-band's crossfade (global.css) so this section swaps theme
-   * together with the rest of the page instead of snapping instantly. */
-  transition: background-color var(--transition-slow);
-  /* top padding uses the tight variant — this section follows Features'
-   * fade-to-bg transition, so the full section gap would stack on top of
-   * that and read as an oversized blank gap before the content starts. */
-  padding: var(--space-section-y-tight) 6% var(--space-section-y);
+  background-color: var(--tp-bg);
+  background-image: var(--tp-halo);
+  color: var(--tp-ink);
+  /* Top padding uses the tight variant — this section follows Features'
+   * fade-to-bg transition, and the full section gap would stack on top of that
+   * and read as an oversized blank band before the content starts. */
+  padding: var(--space-section-y-tight) max(6%, 24px) var(--space-section-y);
+  /* Matches .ae-band's crossfade (global.css) so this section swaps theme with
+   * the rest of the page instead of snapping. */
+  transition: background-color var(--transition-slow), color var(--transition-slow);
 }
 
-/* Seam bridge — a thin indigo divider plus a soft tint fading down into the
- * section, standing in for a hard cut where the Features fade hands off. */
+/*
+ * Light mode. The concept is a dark design, so this isn't a tint of it — the
+ * canvas goes pale, the ink inverts and the glows drop to a whisper. What
+ * carries over is the structure and the indigo, which is the site's brand
+ * colour anyway, so the chart reads the same way in either theme.
+ */
+:root[data-theme="light"] .tp-section {
+  --tp-bg: #e9ecf5;
+  --tp-ink: #232744;
+  --tp-ink-strong: #14162e;
+  --tp-ink-dim: #545b7d;
+  --tp-ink-faint: #656d90;
+  --tp-ink-node: #2c3153;
+  --tp-accent: #4f46e5;
+  --tp-accent-bright: #4338ca;
+  --tp-accent-soft: #4338ca;
+  --tp-hairline: rgba(79, 70, 229, 0.3);
+  --tp-ring: rgba(79, 70, 229, 0.24);
+  --tp-ring-faint: rgba(79, 70, 229, 0.12);
+  --tp-arc: rgba(79, 70, 229, 0.55);
+  --tp-node-bg: rgba(255, 255, 255, 0.94);
+  --tp-node-border: rgba(35, 39, 68, 0.14);
+  --tp-shell: rgba(255, 255, 255, 0.72);
+  --tp-shell-border: rgba(35, 39, 68, 0.1);
+  --tp-card-bg: linear-gradient(160deg, #ffffff, #e4e7f6 70%);
+  --tp-disc-bg: linear-gradient(160deg, #4f46e5, #312a9c 70%);
+  --tp-inner-lip: inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  --tp-glow: rgba(79, 70, 229, 0.32);
+  --tp-halo: radial-gradient(900px 520px at 78% 8%, rgba(79, 70, 229, 0.1), transparent 60%),
+    radial-gradient(700px 500px at 6% 82%, rgba(56, 84, 220, 0.07), transparent 62%);
+}
+
+/* Carried over from the pyramid: softens the seam with Features above. */
 .tp-seam-bridge {
   position: absolute;
   top: 0;
@@ -73,991 +102,578 @@
   background: linear-gradient(to bottom, rgba(36, 37, 153, 0.08), transparent);
 }
 
-.tp-layout,
-.tp-chart {
-  position: relative;
-  z-index: 1;
-}
+/* ─── Layout ──────────────────────────────────────────────────────────────── */
 
 .tp-layout {
-  max-width: 1180px;
+  position: relative;
+  z-index: 2;
+  max-width: 1560px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  gap: 64px;
   align-items: center;
-  gap: 60px;
 }
 
 .tp-intro {
-  max-width: 440px;
-  text-align: left;
+  animation: tp-rise 0.9s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
+
+/* ─── Intro column ────────────────────────────────────────────────────────── */
 
 .tp-eyebrow {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 14px;
-  margin-bottom: 28px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--ts-text-muted-2);
+  gap: 18px;
+  margin-bottom: 34px;
 }
 
-/* var(--brand) rather than a hardcoded #3b82f6: at 13px this needs 4.5:1, and
- * the light theme's darker brand blue is what clears it against white. */
 .tp-eyebrow-index {
-  color: var(--sky);
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--tp-accent-bright);
 }
 
 .tp-eyebrow-line {
-  flex: 0 0 60px;
+  width: 64px;
   height: 1px;
-  background: var(--ts-border-soft);
+  background: linear-gradient(90deg, var(--tp-accent-bright), transparent);
+}
+
+.tp-eyebrow-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--tp-ink-faint);
 }
 
 .tp-headline {
-  font-family: "Alfa Slab One", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(36px, 4.6vw, 54px);
-  line-height: 1.05;
+  /* Archivo at 900 rather than the concept's separate "Archivo Black" family:
+   * Archivo is already loaded site-wide, so this costs no extra font request
+   * and is indistinguishable at display sizes. */
+  font-family: "Archivo", var(--font-sans);
+  font-weight: 900;
+  font-size: clamp(46px, 4.6vw, 78px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
-  color: var(--ts-text);
-  margin: 0 0 24px;
+  margin: 0 0 28px;
 }
 
 .tp-headline-line {
   display: block;
+  color: var(--tp-ink-strong);
 }
 
-/* --brand-light, not --brand: the headline stays in the indigo family, but
- * --brand itself only reaches 2.4:1 on this dark surface, under the 3:1 that
- * large text needs. --brand-light clears it at 3.3:1. */
 .tp-headline-accent {
-  color: var(--brand-light);
+  color: var(--tp-accent);
 }
 
 .tp-copy {
-  max-width: 52ch;
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--ts-text-muted-1);
-}
-
-.tp-chart {
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.tp-tier--single {
-  display: flex;
-  justify-content: center;
-}
-
-.tp-box {
-  /* Column so the hover description can stack under the label; the label row
-   * itself (icon + title) is .tp-node-head, which keeps the old flex-row. */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 14px 32px;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--ts-text);
-  background: var(--ts-card-bg);
-  border: 1px solid var(--ts-border);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.tp-node-head {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-/* bolder, high-contrast edge in light mode, on every box — the pale blue
- * (and, for Leader/Vice Lead/Lead boxes, gold/accent-colored) borders were
- * too soft against the white/light-blue background to read as defined
- * boxes. Higher specificity than .tp-box--top/.tp-box--lead so this wins
- * on every side, including top. */
-:root[data-theme="light"] .tp-box {
-  border-width: 2px;
-  border-color: #000000;
-}
-
-/* ...except the subsystem Lead boxes: keep their signature accent-colored
- * border in light mode too (matching dark mode), just bolder for contrast. */
-:root[data-theme="light"] .tp-box--lead {
-  border-color: var(--accent);
-}
-
-.tp-box--top {
-  border-top: 2px solid var(--ts-gold);
-  color: var(--ts-gold-text);
-}
-
-.tp-connector {
-  position: relative;
-  width: 2px;
-  height: 28px;
-  margin: 0 auto;
-  background: var(--ts-border);
-  /* travel distance for the ball below, kept as a custom property (rather
-   * than duplicating each keyframe per height) so it inherits down into
-   * ::after and can be overridden per variant/breakpoint in one place. */
-  --tp-travel: 28px;
-}
-
-/* A single bulb relays down the whole path in one shared timeline: Leader
- * (lights first) -> ball travels -> Vice Lead (lights on arrival) -> ball
- * travels -> branch point (bar lights) -> splits into two balls, one per
- * lead column -> each Lead box (lights on arrival) -> ball continues ->
- * cascades through its 3 subteam pills. Only one dot per path is ever
- * visible moving at a time; boxes/bars glow exactly when the dot reaches
- * them. The ball travels via `transform: translateY()`, not `top` — top/
- * left trigger layout on every frame of a continuously-looping animation;
- * transform is GPU-composited and cheap, which matters here since several
- * of these run at once alongside the box/bar paint flashes. */
-.tp-connector::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 6px;
-  height: 6px;
-  margin-left: -3px;
-  border-radius: 50%;
-  background: var(--brand-light);
-  box-shadow: 0 0 8px 2px rgba(84, 88, 204, 0.75);
-  transform: translateY(0);
-  animation-duration: 5.6s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  will-change: transform, opacity;
-}
-
-.tp-connector--top::after {
-  animation-name: tp-pulse-leg1;
-}
-
-.tp-connector--branch::after {
-  animation-name: tp-pulse-leg2;
-}
-
-/* the bulb originates here each cycle — the Leader box gets its own brief
- * glow right at the loop boundary (0%/100% are the same instant), so it
- * lights just as the dot is "born" there before traveling down leg 1. */
-.tp-box--lit-0 {
-  animation: tp-box-flash-0 5.6s linear infinite;
-}
-
-@keyframes tp-box-flash-0 {
-  0%,
-  100% {
-    box-shadow: 0 0 0 1px var(--brand-light), 0 0 26px 6px rgba(84, 88, 204, 0.6);
-  }
-  3%,
-  97% {
-    box-shadow: none;
-  }
-}
-
-/* leg 1: Leader -> Vice Lead. Arrival at 13% is the anchor everything else
- * below is built from — each stage's glow starts rising at the exact %
- * its trigger arrives (never a beat before), and the next ball's fade-in
- * starts the instant that glow finishes: no dead gaps, no anticipation. */
-@keyframes tp-pulse-leg1 {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  2% {
-    opacity: 1;
-  }
-  13% {
-    transform: translateY(var(--tp-travel));
-    opacity: 1;
-  }
-  15%,
-  100% {
-    transform: translateY(var(--tp-travel));
-    opacity: 0;
-  }
-}
-
-/* the box glows starting exactly at 13% — the instant the ball arrives —
- * not before. */
-.tp-box--lit-1 {
-  animation: tp-box-flash-1 5.6s linear infinite;
-}
-
-@keyframes tp-box-flash-1 {
-  0%,
-  13% {
-    box-shadow: none;
-  }
-  15% {
-    box-shadow: 0 0 0 1px var(--brand-light), 0 0 26px 6px rgba(84, 88, 204, 0.6);
-  }
-  18%,
-  100% {
-    box-shadow: none;
-  }
-}
-
-/* leg 2: Vice Lead -> branch point. Fade-in starts at 18%, the instant Vice
- * Lead's glow finished — a clean handoff, no gap and no overlap. */
-@keyframes tp-pulse-leg2 {
-  0%,
-  18% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  31% {
-    transform: translateY(var(--tp-travel));
-    opacity: 1;
-  }
-  33%,
-  100% {
-    transform: translateY(var(--tp-travel));
-    opacity: 0;
-  }
-}
-
-.tp-tier3 {
-  position: relative;
-  padding-top: 32px;
-}
-
-.tp-tier3::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 25%;
-  right: 25%;
-  height: 2px;
-  background: var(--ts-border);
-  animation: tp-bar-flash 5.6s linear infinite;
-}
-
-@keyframes tp-bar-flash {
-  0%,
-  31% {
-    background: var(--ts-border);
-    box-shadow: none;
-  }
-  33% {
-    background: var(--brand-light);
-    box-shadow: 0 0 10px 2px rgba(84, 88, 204, 0.65);
-  }
-  36%,
-  100% {
-    background: var(--ts-border);
-    box-shadow: none;
-  }
-}
-
-/* the single ball visibly divides right on the bar: two dots race outward
- * from the center to each side, starting the same instant (31%) the trunk
- * ball arrives there and the bar lights — same point in space and time, so
- * it reads as one ball becoming two rather than a separate, disconnected
- * blink. Left/right travel here is a % of the bar's own (responsive)
- * width, which `transform: translateX()` can't express without measuring
- * the container in JS — kept as `left` as a deliberate, narrow exception:
- * only 2 elements, ~2% of the cycle, opacity 0 the rest of the time. */
-.tp-split-ball {
-  position: absolute;
-  top: 0;
-  width: 6px;
-  height: 6px;
-  margin-left: -3px;
-  margin-top: -2px;
-  border-radius: 50%;
-  background: var(--brand-light);
-  box-shadow: 0 0 8px 2px rgba(84, 88, 204, 0.75);
-  animation-duration: 5.6s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  will-change: left, opacity;
-}
-
-.tp-split-ball--left {
-  animation-name: tp-split-left;
-}
-
-.tp-split-ball--right {
-  animation-name: tp-split-right;
-}
-
-@keyframes tp-split-left {
-  0%,
-  31% {
-    left: 50%;
-    opacity: 0;
-  }
-  33% {
-    opacity: 1;
-  }
-  38% {
-    left: 25%;
-    opacity: 1;
-  }
-  40%,
-  100% {
-    left: 25%;
-    opacity: 0;
-  }
-}
-
-@keyframes tp-split-right {
-  0%,
-  31% {
-    left: 50%;
-    opacity: 0;
-  }
-  33% {
-    opacity: 1;
-  }
-  38% {
-    left: 75%;
-    opacity: 1;
-  }
-  40%,
-  100% {
-    left: 75%;
-    opacity: 0;
-  }
-}
-
-.tp-leads {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-.tp-lead-column {
-  position: relative;
-}
-
-/* the branch bar splits into two balls here, one per lead column — reuses
- * the same .tp-connector/::after mechanism as the trunk legs above, just
- * absolutely positioned to sit in the gap above each lead box. */
-.tp-connector--split {
-  position: absolute;
-  top: -32px;
-  left: 50%;
-  height: 32px;
-  margin: 0;
-  transform: translateX(-50%);
-  background: var(--accent);
-  opacity: 0.4;
-  --tp-travel: 32px;
-}
-
-.tp-connector--split::after {
-  animation-name: tp-pulse-leg3;
-  background: var(--accent);
-  box-shadow: 0 0 8px 2px var(--accent);
-}
-
-/* leg 3: branch point -> each Lead box (two balls, same timeline). Fade-in
- * starts at 40%, the instant the horizontal split finished fading out at
- * that same spot — the ball keeps going straight down with no gap. */
-@keyframes tp-pulse-leg3 {
-  0%,
-  40% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  42% {
-    opacity: 1;
-  }
-  53% {
-    transform: translateY(var(--tp-travel));
-    opacity: 1;
-  }
-  55%,
-  100% {
-    transform: translateY(var(--tp-travel));
-    opacity: 0;
-  }
-}
-
-.tp-box--lead {
-  width: 100%;
-  flex-direction: column;
-  gap: 8px;
-  border-color: var(--accent);
-  padding: 18px 12px;
-  font-size: 13px;
-  transition: transform 0.25s ease, background 0.25s ease;
-}
-
-/* Gated to real hover devices only: a bare `:hover` rule on a clickable
- * element makes touch browsers eat the first tap just to trigger the hover
- * state, requiring a second tap before `click` even fires. Stacked on top of
- * this component's own tap-to-reveal/tap-to-navigate logic, that meant
- * Mechanical/Autonomous Lead — the only nodes with a raw `:hover` rule —
- * needed 3 taps instead of 2 on touch, while the plain subteam pills (no
- * `:hover` rule) worked fine. */
-@media (hover: hover) {
-  .tp-box--lead:hover {
-    transform: translateY(-5px);
-    background: var(--ts-card-bg);
-  }
-}
-
-/* both leads flash together — the branch point is where the single bulb's
- * path splits, so this is the one moment two boxes light up at once. */
-.tp-box--lit-2 {
-  animation: tp-box-flash-2 5.6s linear infinite;
-}
-
-@keyframes tp-box-flash-2 {
-  0%,
-  53% {
-    box-shadow: none;
-  }
-  55% {
-    box-shadow: 0 0 0 1px var(--accent), 0 0 26px 6px var(--accent);
-  }
-  58%,
-  100% {
-    box-shadow: none;
-  }
-}
-
-.tp-lead-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #ffffff;
-}
-
-/* the light keeps going past the Lead box, down into its subteam list —
- * both the line's own pulse and a discrete traveling ball (via .tp-connector
- * shared on this element too). */
-.tp-lead-connector {
-  width: 2px;
-  height: 16px;
-  margin: 0 auto;
-  background: var(--accent);
-  opacity: 0.4;
-  animation: tp-connector-flash 5.6s linear infinite;
-  --tp-travel: 16px;
-}
-
-.tp-lead-connector::after {
-  animation-name: tp-pulse-leg4;
-  background: var(--accent);
-  box-shadow: 0 0 8px 2px var(--accent);
-}
-
-/* leg 4: Lead box -> subteam list. Fade-in starts at 58%, the instant the
- * Lead box finishes flashing. Arrival at 69% is where the subteam cascade
- * below picks up. */
-@keyframes tp-pulse-leg4 {
-  0%,
-  58% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  60% {
-    opacity: 1;
-  }
-  69% {
-    transform: translateY(var(--tp-travel));
-    opacity: 1;
-  }
-  71%,
-  100% {
-    transform: translateY(var(--tp-travel));
-    opacity: 0;
-  }
-}
-
-@keyframes tp-connector-flash {
-  0%,
-  69% {
-    opacity: 0.4;
-    box-shadow: none;
-  }
-  71% {
-    opacity: 1;
-    box-shadow: 0 0 8px 2px var(--accent);
-  }
-  74%,
-  100% {
-    opacity: 0.4;
-    box-shadow: none;
-  }
-}
-
-.tp-owns {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.tp-owns-item {
-  position: relative;
-  padding: 10px 12px;
-  text-align: center;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  color: var(--ts-text-muted-1);
-  background: var(--ts-card-bg);
-  border: 1px solid var(--ts-border);
-  border-left: 2px solid var(--accent);
-  border-radius: 6px;
-  animation: tp-owns-flash 5.6s linear infinite;
-}
-
-/* a short connector (line + traveling ball) between each subteam pill,
- * sitting in the flex gap below it — same convention as every other
- * connector in this diagram, just short enough to fit an 8px gap. Only
- * the first two pills get one; there's nothing below the last pill. */
-.tp-owns-item:not(:last-child)::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -8px;
-  width: 2px;
-  height: 8px;
-  transform: translateX(-50%);
-  background: var(--accent);
-  opacity: 0.4;
-}
-
-.tp-owns-item:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -8px;
-  width: 6px;
-  height: 6px;
-  margin-left: -3px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px 2px var(--accent);
-  transform: translateY(0);
-  opacity: 0;
-  animation-duration: 5.6s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  will-change: transform, opacity;
-}
-
-/* leg 5: subteam pill 1 -> pill 2. Fade-in starts at 74%, the instant
- * pill 1 finishes flashing. Travel window is 3% of the cycle (~0.17s) for
- * this 8px hop, matching the ~45px/s speed the trunk legs travel at above
- * (e.g. leg 1: 28px over 11% = ~45px/s). */
-.tp-owns-item:nth-child(1)::after {
-  animation-name: tp-pulse-leg5;
-}
-
-@keyframes tp-pulse-leg5 {
-  0%,
-  74% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  75% {
-    opacity: 1;
-  }
-  78% {
-    transform: translateY(8px);
-    opacity: 1;
-  }
-  79%,
-  100% {
-    transform: translateY(8px);
-    opacity: 0;
-  }
-}
-
-/* leg 6: subteam pill 2 -> pill 3. Same speed, one beat later. */
-.tp-owns-item:nth-child(2)::after {
-  animation-name: tp-pulse-leg6;
-}
-
-@keyframes tp-pulse-leg6 {
-  0%,
-  83% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  84% {
-    opacity: 1;
-  }
-  87% {
-    transform: translateY(8px);
-    opacity: 1;
-  }
-  88%,
-  100% {
-    transform: translateY(8px);
-    opacity: 0;
-  }
-}
-
-/* same bold black edge in light mode, on the subteam pills too — but keep
- * their left edge in the subsystem's accent color, matching dark mode. */
-:root[data-theme="light"] .tp-owns-item {
-  border-width: 2px;
-  border-color: #000000;
-  border-left-color: var(--accent);
-}
-
-/* the bulb cascades down the three subteam pills in turn */
-.tp-owns-item:nth-child(1) {
-  animation-name: tp-owns-flash-1;
-}
-
-.tp-owns-item:nth-child(2) {
-  animation-name: tp-owns-flash-2;
-}
-
-.tp-owns-item:nth-child(3) {
-  animation-name: tp-owns-flash-3;
-}
-
-@keyframes tp-owns-flash-1 {
-  0%,
-  69% {
-    box-shadow: none;
-  }
-  71% {
-    box-shadow: 0 0 16px 1px var(--accent);
-  }
-  74%,
-  100% {
-    box-shadow: none;
-  }
-}
-
-@keyframes tp-owns-flash-2 {
-  0%,
-  78% {
-    box-shadow: none;
-  }
-  80% {
-    box-shadow: 0 0 16px 1px var(--accent);
-  }
-  83%,
-  100% {
-    box-shadow: none;
-  }
-}
-
-@keyframes tp-owns-flash-3 {
-  0%,
-  87% {
-    box-shadow: none;
-  }
-  89% {
-    box-shadow: 0 0 16px 1px var(--accent);
-  }
-  92%,
-  100% {
-    box-shadow: none;
-  }
-}
-
-@media (max-width: 1000px) {
-  .tp-layout {
-    grid-template-columns: 1fr;
-    gap: 56px;
-  }
-
-  .tp-intro {
-    max-width: 560px;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .tp-eyebrow {
-    justify-content: center;
-  }
-
-  .tp-copy {
-    margin: 0 auto;
-  }
-}
-
-/* Phones keep BOTH lead columns side by side. Stacking them turned the chart
- * into a 1300px vertical list that read as a long menu, not an org chart, and
- * the whole point of the diagram is that the two branches are parallel. Type
- * and padding shrink instead. */
-@media (max-width: 640px) {
-  .tp-chart {
-    max-width: 100%;
-  }
-
-  .tp-leads {
-    gap: 10px;
-  }
-
-  .tp-box {
-    padding: 10px 12px;
-    font-size: 12px;
-    letter-spacing: 0.02em;
-  }
-
-  .tp-tier--single .tp-box {
-    width: 100%;
-  }
-
-  .tp-box--lead {
-    padding: 12px 8px;
-    font-size: 11px;
-  }
-
-  .tp-lead-icon {
-    width: 28px;
-    height: 28px;
-  }
-
-  .tp-lead-icon svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  .tp-owns {
-    gap: 6px;
-  }
-
-  .tp-owns-item {
-    padding: 8px 6px;
-    font-size: 11px;
-  }
-
-  .tp-connector {
-    height: 20px;
-    --tp-travel: 20px;
-  }
-
-  .tp-connector--split {
-    top: -22px;
-    height: 22px;
-    --tp-travel: 22px;
-  }
-
-  .tp-tier3 {
-    padding-top: 22px;
-  }
-
-  /* Descriptions now open on tap (see TeamStructure.jsx's handleActivate),
-     so unlike before they're no longer force-collapsed here — only the
-     tapped role's .is-active state expands one at a time. */
-
-  .tp-hint.tp-hint--desktop {
-    display: none;
-  }
-
-  /* Doubled selector, not just .tp-hint--mobile: the plain-class default
-   * (display: none, set later in the file next to .tp-hint) has equal
-   * specificity, so source order alone would let it win over this media
-   * query regardless of viewport. The extra .tp-hint bumps specificity so
-   * this override always wins under 640px. */
-  .tp-hint.tp-hint--mobile {
-    display: block;
-  }
-}
-
-/* Below ~380px two columns of pills stop being readable. */
-@media (max-width: 379px) {
-  .tp-leads {
-    grid-template-columns: 1fr;
-    gap: 26px;
-  }
-
-  .tp-tier3::before {
-    display: none;
-  }
-}
-
-/* the relay is a continuous infinite-loop animation — mandatory to collapse
- * under reduced motion. The traveling balls need an explicit opacity:0
- * (their only opacity control is the animation itself); everything else's
- * un-animated resting state is already the correct "off" look. */
-@media (prefers-reduced-motion: reduce) {
-  .tp-box--lit-0,
-  .tp-box--lit-1,
-  .tp-box--lit-2,
-  .tp-tier3::before,
-  .tp-lead-connector,
-  .tp-owns-item {
-    animation: none;
-  }
-
-  .tp-connector::after,
-  .tp-split-ball,
-  .tp-owns-item::after {
-    animation: none;
-    opacity: 0;
-  }
-}
-
-/* ============================================================================
- * ROLE HOVER — what each part of the org actually owns.
- *
- * Hovering (or tabbing to) any box dims the rest of the chart and expands that
- * role's responsibilities underneath its label. Descriptions are always in the
- * DOM and only visually collapsed, so screen readers get them unconditionally.
- * ==========================================================================*/
-
-.tp-node {
-  cursor: default;
-  transition:
-    opacity var(--transition-base),
-    border-color var(--transition-base),
-    background var(--transition-base);
-}
-
-/* The two top boxes are content-sized flex items, so an expanding description
- * would snap them much wider mid-hover. Pin the width and hover only changes
- * height. (The Lead boxes and subteam pills are already full-width of their
- * column, so they don't have this problem.) */
-.tp-tier--single .tp-box {
-  width: min(100%, 340px);
-}
-
-/* Lead boxes stack their icon ABOVE the title, unlike the top boxes which set
- * the two side by side — .tp-node-head has to honour that. The box's own gap
- * moves to 0 because the head now owns that spacing, and the description
- * brings its own margin once it opens. */
-.tp-box--lead {
-  gap: 0;
-}
-
-.tp-box--lead .tp-node-head {
-  flex-direction: column;
-  gap: 8px;
-}
-
-.tp-node:focus-visible {
-  outline: 2px solid var(--accent, var(--brand));
-  outline-offset: 3px;
-}
-
-/* Everything that isn't the active role recedes, so the hovered branch is the
- * only thing left reading on the board. */
-.tp-chart.has-active .tp-node:not(.is-active) {
-  opacity: 0.3;
-}
-
-/* Only border-color and background are set here on purpose: the idle
- * traveling-light animation owns box-shadow, and a running animation beats a
- * plain declaration.
- *
- * Deliberately NOT `animation-play-state: paused`. Pausing applies to the
- * hovered element alone, so its clock stops while the rest of the chart keeps
- * running — un-hovering then leaves it permanently out of phase with the
- * other column, and the two Leads stop lighting together. The relay is one
- * shared 5.6s timeline across both columns; nothing may stop independently of
- * it, or the choreography drifts apart for the rest of the page's life. */
-.tp-node.is-active {
-  border-color: var(--accent, var(--brand));
-  background: var(--bg-elevated);
-}
-
-/* 0fr → 1fr expands to the text's exact height — no magic max-height number
- * and no measuring in JS. The inner span carries the overflow clip. */
-.tp-node-desc {
-  display: grid;
-  grid-template-rows: 0fr;
-  /* Full box width rather than a ch cap: these run to a few sentences, and a
-   * narrow measure would turn each one into a very tall column. */
-  max-width: 100%;
-  margin-top: 0;
-  opacity: 0;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  font-weight: 400;
-  line-height: 1.6;
-  letter-spacing: 0;
-  text-transform: none;
-  /* The boxes centre their labels, but these run to several sentences and
-   * centred body copy is genuinely hard to read, so it ranges left. */
-  text-align: left;
-  color: var(--ts-text-muted-1);
+  font-size: 17px;
+  line-height: 1.72;
+  color: var(--tp-ink-dim);
+  max-width: 34ch;
+  margin: 0 0 30px;
   text-wrap: pretty;
-  transition:
-    grid-template-rows var(--transition-slow),
-    opacity var(--transition-base),
-    margin-top var(--transition-slow);
 }
 
-.tp-node-desc > span {
-  overflow: hidden;
-}
-
-.tp-node.is-active .tp-node-desc {
-  grid-template-rows: 1fr;
-  margin-top: 9px;
-  opacity: 1;
-}
-
-/* Affordance for the hover/tap — without it the interaction is undiscoverable.
- * Two variants share this styling; only one shows at a time (mobile's swap
- * happens in the 640px breakpoint below). */
 .tp-hint {
-  margin: 18px 0 0;
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--ts-text-muted-2);
+  color: var(--tp-ink-faint);
+  margin: 0 0 38px;
 }
 
+/* Which hint shows is a pointer question, not a width one — a small laptop
+ * still hovers and a large tablet still taps. */
 .tp-hint--mobile {
   display: none;
 }
 
-/* The chart names the subsystems; this is the way through to the people in
- * them. Same shape as every other button on the site (Inter, 10px radius,
- * brand fill) — --brand is already theme-aware, so it darkens for contrast in
- * light mode on its own. */
+@media (hover: none) {
+  .tp-hint--desktop {
+    display: none;
+  }
+  .tp-hint--mobile {
+    display: block;
+  }
+}
+
 .tp-cta {
-  display: inline-block;
-  margin-top: 28px;
-  padding: 14px 26px;
-  border-radius: 10px;
-  background: var(--brand);
-  font-family: var(--font-sans);
-  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 8px 8px 26px;
+  border-radius: 999px;
+  background: var(--tp-accent);
+  color: #fff;
+  font-size: 15px;
   font-weight: 600;
-  line-height: 1;
-  color: #ffffff;
   text-decoration: none;
+  box-shadow: 0 18px 40px -18px var(--tp-glow);
+  transition: background 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.tp-cta:is(:hover, :focus-visible) {
+  background: var(--tp-accent-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 26px 54px -18px var(--tp-glow);
+  color: #fff;
+}
+
+.tp-cta-arrow {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+/* ─── Stage ───────────────────────────────────────────────────────────────── */
+
+.tp-stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+/* The radial canvas is a fixed 1060x860 that gets scaled; this wrapper reserves
+ * the scaled height so the section's own height stays honest. */
+.tp-canvas-clip {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tp-canvas {
+  position: relative;
+  width: 1060px;
+  height: 860px;
+  flex: none;
+  transform-origin: center center;
+}
+
+.tp-wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.tp-ring-breathe {
+  transform-origin: 530px 420px;
+  animation: tp-ring-breathe 7s ease-in-out infinite;
+}
+
+.tp-arc {
+  animation: tp-dash-ring 4.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.tp-arc--b {
+  animation-delay: 0.6s;
+}
+
+.tp-wire {
+  transition: stroke 0.35s ease, stroke-width 0.35s ease;
+}
+
+/* A wire lights when the node it feeds is the active one. */
+.tp-wire[data-lit="true"] {
+  stroke: var(--tp-accent);
+  stroke-width: 2;
+}
+
+/* Radial nodes are pinned to the coordinates the component supplies. */
+.tp-stage[data-mode="radial"] .tp-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  animation: tp-rise-c 0.8s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* ─── Nodes ───────────────────────────────────────────────────────────────── */
+
+.tp-node {
+  outline: none;
+}
+
+.tp-node[data-target="true"] {
+  cursor: pointer;
+}
+
+.tp-node:focus-visible :is(.tp-disc-ring, .tp-node-shell, .tp-pill, .tp-chip) {
+  outline: 2px solid var(--tp-accent-bright);
+  outline-offset: 3px;
+}
+
+/* The centre command disc. */
+.tp-disc-ring {
+  width: 186px;
+  height: 186px;
+  border-radius: 999px;
+  background: var(--tp-shell);
+  border: 1px solid var(--tp-shell-border);
+  padding: 9px;
+  box-shadow: 0 40px 90px -40px var(--tp-glow);
+}
+
+.tp-disc {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--tp-disc-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  color: #fff;
+  text-align: center;
+}
+
+.tp-disc-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--tp-accent-soft);
+}
+
+:root[data-theme="light"] .tp-disc-kicker {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.tp-disc-title {
+  font-family: "Archivo", var(--font-sans);
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+/* The vice-lead capsule. */
+.tp-pill {
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: var(--tp-node-bg);
+  border: 1px solid var(--tp-hairline);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--tp-ink-node);
   white-space: nowrap;
-  transition:
-    background var(--transition-base),
-    transform var(--transition-fast);
+  text-transform: uppercase;
+  transition: border-color 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    color 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.tp-cta:hover {
-  background: var(--brand-light);
-  color: #ffffff;
+/* A division lead card. */
+.tp-node-shell {
+  padding: 2px;
+  border-radius: 22px;
+  background: var(--tp-shell);
+  border: 1px solid var(--tp-shell-border);
+  transition: transform 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.7s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.tp-cta:active {
-  transform: translateY(1px);
+.tp-card {
+  padding: 16px 22px;
+  border-radius: 20px;
+  background: var(--tp-card-bg);
+  box-shadow: var(--tp-inner-lip);
+  text-align: center;
+  min-width: 168px;
+}
+
+.tp-card-kicker {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--tp-ink-faint);
+  margin-bottom: 6px;
+}
+
+.tp-card-title {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: var(--tp-ink-strong);
+}
+
+/* A sub-team chip. */
+.tp-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--tp-node-bg);
+  border: 1px solid var(--tp-node-border);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--tp-ink-node);
+  white-space: nowrap;
+  transition: border-color 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    color 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.7s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.tp-chip-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--tp-accent);
+  flex: 0 0 auto;
+}
+
+/*
+ * Lift on hover, but only where hovering is real. A bare :hover on a clickable
+ * element makes touch browsers spend the first tap triggering the hover state,
+ * which would fight this component's own tap-to-reveal-then-navigate flow.
+ */
+@media (hover: hover) {
+  .tp-node[data-target="true"]:hover :is(.tp-chip, .tp-pill) {
+    border-color: var(--tp-accent);
+    color: var(--tp-ink-strong);
+    transform: translateY(-3px);
+    box-shadow: 0 18px 36px -18px var(--tp-glow);
+  }
+
+  .tp-node[data-target="true"]:hover .tp-node-shell {
+    transform: scale(1.05);
+  }
+}
+
+/* The active node — hovered, focused or tapped — reads the same either way. */
+.tp-node.is-active :is(.tp-chip, .tp-pill) {
+  border-color: var(--tp-accent);
+  color: var(--tp-ink-strong);
+}
+
+.tp-node.is-active .tp-node-shell {
+  box-shadow: 0 22px 46px -22px var(--tp-glow);
+}
+
+.tp-node.is-active .tp-disc-ring {
+  box-shadow: 0 40px 90px -40px var(--tp-glow), 0 0 0 1px var(--tp-accent);
+}
+
+/* ─── The description readout ─────────────────────────────────────────────── */
+
+/*
+ * One shared panel under the chart rather than a tooltip per node. On the
+ * radial the nodes sit out at the canvas edges, where an attached popover would
+ * either overflow the section or cover its neighbours.
+ */
+.tp-readout {
+  margin-top: 24px;
+  min-height: 88px;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: var(--tp-shell);
+  border: 1px solid var(--tp-shell-border);
+  transition: opacity 0.45s ease, background-color var(--transition-slow),
+    border-color var(--transition-slow);
+}
+
+.tp-readout[data-empty="true"] {
+  opacity: 0.5;
+}
+
+.tp-readout-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tp-accent-soft);
+  margin: 0 0 8px;
+}
+
+.tp-readout-text {
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--tp-ink-dim);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* Every node keeps its own description for screen readers; the readout is
+ * only the visual channel. */
+.tp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Stack layout (phones) ───────────────────────────────────────────────── */
+
+.tp-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tp-stack .tp-node {
+  animation: tp-rise 0.7s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.tp-stem {
+  width: 1px;
+  height: 26px;
+  flex: none;
+  background: linear-gradient(180deg, var(--tp-hairline), transparent);
+}
+
+.tp-branch {
+  width: 100%;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--tp-node-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tp-branch-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* ─── Motion ──────────────────────────────────────────────────────────────── */
+
+@keyframes tp-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes tp-rise-c {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes tp-ring-breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.015);
+  }
+}
+
+@keyframes tp-dash-ring {
+  to {
+    stroke-dashoffset: -640;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-intro,
+  .tp-stage[data-mode="radial"] .tp-node,
+  .tp-stack .tp-node {
+    animation: none;
+  }
+  .tp-ring-breathe,
+  .tp-arc {
+    animation: none;
+  }
+  .tp-cta,
+  .tp-chip,
+  .tp-pill,
+  .tp-node-shell,
+  .tp-wire,
+  .tp-readout {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 1040px) {
+  .tp-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+
+  .tp-headline {
+    font-size: clamp(38px, 9vw, 60px);
+  }
+
+  .tp-copy {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .tp-eyebrow {
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .tp-eyebrow-line {
+    width: 36px;
+  }
+
+  .tp-headline {
+    margin-bottom: 20px;
+  }
+
+  .tp-copy {
+    font-size: 15.5px;
+    margin-bottom: 22px;
+  }
+
+  .tp-hint {
+    margin-bottom: 26px;
+  }
+
+  .tp-card {
+    min-width: 0;
+  }
 }
