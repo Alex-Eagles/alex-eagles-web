@@ -829,6 +829,75 @@
       </div>
     </div>
   </section>
+
+  <!-- ========================= MISSION SOFTWARE ========================= -->
+  <section id="vp-software" style="position:relative; background:#07091c; padding:clamp(88px,12vh,140px) 32px;">
+    <div style="max-width:1120px; margin:0 auto;">
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
+        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Mission software</div>
+        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">The brain stays on the ground.</h2>
+        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:600px; line-height:1.6;">Off-the-shelf stations like Mission Planner and QGroundControl aren&rsquo;t built around the SUAS flow, so we built our own: a web app with a React front end over independent backend services (MAVLink, camera, detection, and payload) behind an API gateway, so a fault in one can&rsquo;t take down telemetry.</p>
+      </div>
+
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:56px;">
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+          <div style="display:flex; align-items:center; gap:6px; padding:9px 12px; background:#12142c; border-bottom:1px solid rgba(60,64,181,0.3);">
+            <span style="width:9px; height:9px; border-radius:9999px; background:#d9302a;"></span>
+            <span style="width:9px; height:9px; border-radius:9999px; background:#e0a83c;"></span>
+            <span style="width:9px; height:9px; border-radius:9999px; background:#3ec97a;"></span>
+            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#565a94; margin-left:8px;">Alex Eagles &middot; Ground Control Station</span>
+          </div>
+          <img src="/images/blog/sw-gcs.jpeg" alt="Custom ground control station: mission planning view with mapping survey area and live telemetry" style="display:block; width:100%; height:auto;">
+        </div>
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">BUILT FOR THE MISSION, NOT GENERIC FLIGHT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0;">Every screen optimizes for what moves the score.</h3>
+          </div>
+          <div class="vp-split-body" style="display:flex; flex-direction:column; gap:16px; margin-top:14px;">
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(217,48,42,0.16); border:1px solid rgba(217,48,42,0.4); color:#d9302a; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">01</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Search boundaries are pre-loaded; selecting one auto-generates the lawnmower survey path in under three seconds for a 10-acre area.</p></div>
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">02</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Every detection is queued for a one-click operator accept or reject, rather than auto-dropping on a model&rsquo;s confidence alone.</p></div>
+            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">03</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">A dedicated, always-on panel shows boundaries, position, ground speed, and AGL altitude for the judge, isolated so a fault elsewhere can&rsquo;t hide it.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- data pipeline: capture -> downlink/batch -> detect -> cluster -> operator -> drop -->
+      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); margin-top:64px;">
+        <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#5458cc; text-align:center; margin-bottom:22px;">MISSION DATA ARCHITECTURE</div>
+        <div id="vp-dataflow" style="display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px;">
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">01</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Capture</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">SIYI A8 mini geotags each frame via the flight controller&rsquo;s GPS at the instant of capture.</div></div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">02</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Downlink &amp; batch</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">Images cross the Herelink downlink and queue until a batch of 8 is ready, amortizing inference latency.</div></div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">03</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Detect</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">UAV-DETR, a transformer tuned for small aerial objects, flags candidate tents and mannequins per batch.</div></div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">04</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Cluster</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">k-means resolves repeat sightings of the same object across overlapping frames into one coordinate.</div></div>
+          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
+          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(217,48,42,0.4); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">05</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Operator &amp; drop</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">One click accepts the candidate; the aircraft navigates to it and releases the matching payload.</div></div>
+        </div>
+      </div>
+
+      <!-- mapping -->
+      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
+        <div class="vp-split-text">
+          <div class="vp-split-head">
+            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">MAPPING &middot; RISK ASSESSMENT</div>
+            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0;">When 4K was the problem.</h3>
+          </div>
+          <div class="vp-split-body" style="margin-top:14px;">
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 12px;">The lawnmower survey feeds a georeferenced orthomosaic built with OpenDroneMap, which anchors every photo to its GPS geotag rather than guessing position from overlap, so the map stays globally consistent instead of bowing across a large area.</p>
+            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0;">Our first pass (10 m/s, a photo every 0.3 s, full 4K) failed: the camera couldn&rsquo;t finish writing one frame before the next trigger, so far fewer images landed than commanded. Slowing to 6 m/s and dropping to 1080p kept the camera in pace and packed in more overlap, same hardware, same software, and the map built cleanly.</p>
+          </div>
+        </div>
+        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
+          <img src="/images/blog/sw-mapping.jpeg" alt="Georeferenced orthomosaic reconstructed from a tuned survey flight" style="display:block; width:100%; height:auto;">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
   <!-- ========================= PAYLOAD DELIVERY ========================= -->
   <section id="vp-payload" style="position:relative; background:#0d1035; padding:clamp(88px,12vh,140px) 32px;">
     <div style="max-width:1120px; margin:0 auto;">
@@ -905,73 +974,6 @@
         </div>
         <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#f4f5fb; box-shadow:0 24px 60px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center;">
           <img src="/images/payload/dc-winch-dispenser.png" alt="DC motor magazine dispenser CAD: dual-tower silo with servo-actuated trapdoors" style="display:block; width:100%; height:auto;">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================= MISSION SOFTWARE ========================= -->
-  <section id="vp-software" style="position:relative; background:#07091c; padding:clamp(88px,12vh,140px) 32px;">
-    <div style="max-width:1120px; margin:0 auto;">
-      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
-        <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Mission software</div>
-        <h2 style="font-family:'Barlow Condensed'; font-weight:700; font-size:clamp(34px,5vw,52px); line-height:1; letter-spacing:-0.01em; margin:0; color:#f0f2ff;">The brain stays on the ground.</h2>
-        <p style="font-family:'Inter'; font-size:15px; color:#8b8fc8; margin:14px auto 0; max-width:600px; line-height:1.6;">Off-the-shelf stations like Mission Planner and QGroundControl aren&rsquo;t built around the SUAS flow, so we built our own: a web app with a React front end over independent backend services (MAVLink, camera, detection, and payload) behind an API gateway, so a fault in one can&rsquo;t take down telemetry.</p>
-      </div>
-
-      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1.15fr 1fr; gap:36px; align-items:center; margin-top:56px;">
-        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
-          <div style="display:flex; align-items:center; gap:6px; padding:9px 12px; background:#12142c; border-bottom:1px solid rgba(60,64,181,0.3);">
-            <span style="width:9px; height:9px; border-radius:9999px; background:#d9302a;"></span>
-            <span style="width:9px; height:9px; border-radius:9999px; background:#e0a83c;"></span>
-            <span style="width:9px; height:9px; border-radius:9999px; background:#3ec97a;"></span>
-            <span style="font-family:'JetBrains Mono'; font-size:10px; color:#565a94; margin-left:8px;">Alex Eagles &middot; Ground Control Station</span>
-          </div>
-          <img src="/images/blog/sw-gcs.jpeg" alt="Custom ground control station: mission planning view with mapping survey area and live telemetry" style="display:block; width:100%; height:auto;">
-        </div>
-        <div class="vp-split-text">
-          <div class="vp-split-head">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#d9302a; margin-bottom:10px;">BUILT FOR THE MISSION, NOT GENERIC FLIGHT</div>
-            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0;">Every screen optimizes for what moves the score.</h3>
-          </div>
-          <div class="vp-split-body" style="display:flex; flex-direction:column; gap:16px; margin-top:14px;">
-            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(217,48,42,0.16); border:1px solid rgba(217,48,42,0.4); color:#d9302a; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">01</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Search boundaries are pre-loaded; selecting one auto-generates the lawnmower survey path in under three seconds for a 10-acre area.</p></div>
-            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">02</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">Every detection is queued for a one-click operator accept or reject, rather than auto-dropping on a model&rsquo;s confidence alone.</p></div>
-            <div style="display:flex; gap:12px;"><span style="flex:0 0 auto; width:26px; height:26px; border-radius:7px; background:rgba(96,165,250,0.14); border:1px solid rgba(96,165,250,0.4); color:#60a5fa; font-family:'JetBrains Mono'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center;">03</span><p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.55; margin:0;">A dedicated, always-on panel shows boundaries, position, ground speed, and AGL altitude for the judge, isolated so a fault elsewhere can&rsquo;t hide it.</p></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- data pipeline: capture -> downlink/batch -> detect -> cluster -> operator -> drop -->
-      <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); margin-top:64px;">
-        <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#5458cc; text-align:center; margin-bottom:22px;">MISSION DATA ARCHITECTURE</div>
-        <div id="vp-dataflow" style="display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:10px;">
-          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">01</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Capture</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">SIYI A8 mini geotags each frame via the flight controller&rsquo;s GPS at the instant of capture.</div></div>
-          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
-          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">02</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Downlink &amp; batch</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">Images cross the Herelink downlink and queue until a batch of 8 is ready, amortizing inference latency.</div></div>
-          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
-          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">03</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Detect</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">UAV-DETR, a transformer tuned for small aerial objects, flags candidate tents and mannequins per batch.</div></div>
-          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
-          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(60,64,181,0.3); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">04</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Cluster</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">k-means resolves repeat sightings of the same object across overlapping frames into one coordinate.</div></div>
-          <div class="vp-dataflow-arrow" style="align-self:center; color:#3c40b5; font-size:20px;">&rarr;</div>
-          <div style="flex:1 1 150px; max-width:190px; background:#161b40; border:1px solid rgba(217,48,42,0.4); border-radius:12px; padding:16px 14px;"><div style="font-family:'JetBrains Mono'; font-weight:700; font-size:12px; color:#d9302a; margin-bottom:6px;">05</div><div style="font-family:'Inter'; font-weight:600; font-size:13px; color:#f0f2ff; margin-bottom:4px;">Operator &amp; drop</div><div style="font-family:'Inter'; font-size:11.5px; color:#8b8fc8; line-height:1.4;">One click accepts the candidate; the aircraft navigates to it and releases the matching payload.</div></div>
-        </div>
-      </div>
-
-      <!-- mapping -->
-      <div data-reveal="" class="vp-split" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); display:grid; grid-template-columns:1fr 1.15fr; gap:36px; align-items:center; margin-top:64px;">
-        <div class="vp-split-text">
-          <div class="vp-split-head">
-            <div style="font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; color:#60a5fa; margin-bottom:10px;">MAPPING &middot; RISK ASSESSMENT</div>
-            <h3 style="font-family:'Barlow Condensed'; font-weight:700; font-size:26px; color:#f0f2ff; line-height:1.1; margin:0;">When 4K was the problem.</h3>
-          </div>
-          <div class="vp-split-body" style="margin-top:14px;">
-            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0 0 12px;">The lawnmower survey feeds a georeferenced orthomosaic built with OpenDroneMap, which anchors every photo to its GPS geotag rather than guessing position from overlap, so the map stays globally consistent instead of bowing across a large area.</p>
-            <p style="font-family:'Inter'; font-size:13.5px; color:#c3c6ea; line-height:1.6; margin:0;">Our first pass (10 m/s, a photo every 0.3 s, full 4K) failed: the camera couldn&rsquo;t finish writing one frame before the next trigger, so far fewer images landed than commanded. Slowing to 6 m/s and dropping to 1080p kept the camera in pace and packed in more overlap, same hardware, same software, and the map built cleanly.</p>
-          </div>
-        </div>
-        <div class="vp-split-media" style="border-radius:14px; overflow:hidden; border:1px solid rgba(60,64,181,0.35); background:#000; box-shadow:0 24px 60px rgba(0,0,0,0.45);">
-          <img src="/images/blog/sw-mapping.jpeg" alt="Georeferenced orthomosaic reconstructed from a tuned survey flight" style="display:block; width:100%; height:auto;">
         </div>
       </div>
     </div>
