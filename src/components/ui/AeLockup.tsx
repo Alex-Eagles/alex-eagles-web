@@ -1,5 +1,6 @@
 import { useTheme } from "@/context/ThemeContext";
 import AeLogo from "@/components/ui/AeLogo";
+import "@/styles/AeLockup.css";
 
 /**
  * AeLockup — the emblem, a hairline rule, and the ALEX EAGLES wordmark.
@@ -17,15 +18,24 @@ import AeLogo from "@/components/ui/AeLogo";
  *
  * Type: Orbitron 800, the face the homepage hero sets "ALEX EAGLES" in, so the
  * two read as the same wordmark. Already loaded site-wide (see index.html), so
- * this costs no extra font request. Tracking is the hero's 4px-at-92px scaled
- * down to an em value that holds at navbar size.
+ * this costs no extra font request.
+ *
+ * Entrance: the wordmark wipes out from behind the rule on mount — see
+ * AeLockup.css. To replay it on every navigation, give the element a `key`
+ * that changes with the route (the navbar keys it on pathname); a component
+ * that never unmounts would only ever animate once, on first load.
+ *
+ * Both emblem files are trimmed to their artwork, so a single `size` drives
+ * identical apparent size in either theme. They previously carried different
+ * transparent margins, which made the white one render noticeably smaller than
+ * the blue at the same box size.
  */
 
 /** The blue emblem's own ink. Keep in step if the artwork is ever re-exported. */
 const EMBLEM_BLUE = "#35409a";
 
 interface AeLockupProps {
-  /** Emblem edge length in px; the wordmark scales from it. */
+  /** Emblem edge length in px; the rule and wordmark scale from it. */
   size?: number;
   className?: string;
 }
@@ -46,12 +56,15 @@ export default function AeLockup({ size = 44, className }: AeLockupProps) {
       />
 
       {/* The divider from the brand lockup. A styled element rather than a "|"
-          glyph so its height and weight don't drift with the font. */}
+          glyph so its height and weight don't drift with the font — and so it
+          can be set to exactly the emblem's height, which is what puts the two
+          tops on one line. */}
       <span
+        className="ae-lockup-rule"
         aria-hidden="true"
         style={{
           width: 1,
-          height: size * 0.58,
+          height: size,
           background: ink,
           /* The rule is a separator, not a letter — at full strength it competes
              with the wordmark it's separating. */
@@ -61,6 +74,7 @@ export default function AeLockup({ size = 44, className }: AeLockupProps) {
       />
 
       <span
+        className="ae-lockup-word"
         style={{
           fontFamily: '"Orbitron", ui-sans-serif, system-ui, sans-serif',
           fontWeight: 800,

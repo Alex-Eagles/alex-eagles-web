@@ -94,7 +94,11 @@ export default function Navbar() {
         aria-label="Alex Eagles — home"
         className="fixed z-40 md:top-6 md:left-8 hidden md:flex items-center h-12 transition-opacity duration-200 hover:opacity-80"
       >
-        <AeLockup size={44} />
+        {/* Keyed on the route so the wordmark replays its entrance on every
+            navigation. The navbar itself never unmounts between pages, so
+            without this the animation would run once on first load and never
+            again. */}
+        <AeLockup key={pathname} size={44} />
       </Link>
 
       {/* ---------- Desktop: centered glass pill ---------- */}
