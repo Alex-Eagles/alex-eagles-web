@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import {
   m,
   LazyMotion,
@@ -7,18 +7,18 @@ import {
   AnimatePresence,
   useMotionValue,
   useSpring,
+  useScroll,
   useTransform,
   useReducedMotion,
   useInView,
   type MotionValue,
   type PanInfo,
 } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
-// import { X, ChevronLeft, ChevronRight, Play, LayoutGrid, Film } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Play, LayoutGrid, Film } from 'lucide-react';
 import { galleryData } from '@/data/gallery';
 
 type GalleryItem = (typeof galleryData)[number];
-// type ViewMode = 'grid';
+type ViewMode = 'grid' | 'reel';
 
 const CATEGORIES = ['All', 'SUAS', 'UAVC','Test Flight', 'Manufacturing', 'Team'] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -535,114 +535,113 @@ function SpatialGridCard({
   );
 }
 
-// function OrbitalReelCard({
-//   item, index, isDimmed, reduceMotion, isMobile, containerRef, onOpen, onHover, isDragging, priority
-// }: {
-//   item: GalleryItem; index: number; isDimmed: boolean; reduceMotion: boolean; isMobile: boolean; containerRef: RefObject<HTMLDivElement | null>; onOpen: () => void; onHover: HoverFn; isDragging: boolean; priority: boolean;
-// }) 
-// {
-//   const ref = useRef<HTMLDivElement>(null);
-//   const { scrollXProgress } = useScroll({ target: ref, container: containerRef, axis: 'x', offset: ['start end', 'center center', 'end start'] });
+function OrbitalReelCard({
+  item, index, isDimmed, reduceMotion, isMobile, containerRef, onOpen, onHover, isDragging, priority
+}: {
+  item: GalleryItem; index: number; isDimmed: boolean; reduceMotion: boolean; isMobile: boolean; containerRef: RefObject<HTMLDivElement | null>; onOpen: () => void; onHover: HoverFn; isDragging: boolean; priority: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollXProgress } = useScroll({ target: ref, container: containerRef, axis: 'x', offset: ['start end', 'center center', 'end start'] });
 
-//   /*
-//    * `isMobile` was already being passed in and typed here, but never
-//    * destructured — so none of it applied and the reel ran its full desktop
-//    * treatment on phones. That's the worst of the blinking: every card's opacity
-//    * is driven by its position in the scroller (0.3 at the edges, 1 in the
-//    * middle), so swiping faded each card out and back in, on top of a one-off
-//    * entry animation and a scanline sweep. On a touch scroller that reads as the
-//    * media appearing, blinking, and appearing again.
-//    */
-//   const still = reduceMotion || isMobile;
-//   const canAnimate = !still;
+  /*
+   * `isMobile` was already being passed in and typed here, but never
+   * destructured — so none of it applied and the reel ran its full desktop
+   * treatment on phones. That's the worst of the blinking: every card's opacity
+   * is driven by its position in the scroller (0.3 at the edges, 1 in the
+   * middle), so swiping faded each card out and back in, on top of a one-off
+   * entry animation and a scanline sweep. On a touch scroller that reads as the
+   * media appearing, blinking, and appearing again.
+   */
+  const still = reduceMotion || isMobile;
+  const canAnimate = !still;
 
-//   /*
-//    * The card takes its shape from whatever it holds.
-//    *
-//    * It used to be a hard `aspect-[4/5]` portrait frame for everything, and the
-//    * collection is an even split — 13 landscape, 13 portrait, plus 15 video-only
-//    * entries. So half of it was a landscape photo letterboxed into a portrait
-//    * box: black bars top and bottom, and the picture itself shrunk to a band in
-//    * the middle. Matching the box to the media shows each one at its own
-//    * proportions and leaves nothing to letterbox.
-//    *
-//    * Clamped because the source material runs to extremes (a 0.54 phone portrait,
-//    * a 1.89 crop) and an unclamped strip would lurch between a sliver and a
-//    * billboard. Null until the media reports back, so the default is the portrait
-//    * shape the reel had before.
-//    */
-//   const [ratio, setRatio] = useState<number | null>(null);
-//   const aspectRatio = ratio ? Math.min(Math.max(ratio, 0.7), 1.5) : 4 / 5;
+  /*
+   * The card takes its shape from whatever it holds.
+   *
+   * It used to be a hard `aspect-[4/5]` portrait frame for everything, and the
+   * collection is an even split — 13 landscape, 13 portrait, plus 15 video-only
+   * entries. So half of it was a landscape photo letterboxed into a portrait
+   * box: black bars top and bottom, and the picture itself shrunk to a band in
+   * the middle. Matching the box to the media shows each one at its own
+   * proportions and leaves nothing to letterbox.
+   *
+   * Clamped because the source material runs to extremes (a 0.54 phone portrait,
+   * a 1.89 crop) and an unclamped strip would lurch between a sliver and a
+   * billboard. Null until the media reports back, so the default is the portrait
+   * shape the reel had before.
+   */
+  const [ratio, setRatio] = useState<number | null>(null);
+  const aspectRatio = ratio ? Math.min(Math.max(ratio, 0.7), 1.5) : 4 / 5;
 
-//   const scale = useTransform(scrollXProgress, [0, 0.5, 1], [0.75, 1, 0.75]);
-//   const rotY = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [35, 0, -35] : [0, 0, 0]);
-//   const opacity = useTransform(scrollXProgress, [0, 0.5, 1], [0.3, 1, 0.3]);
-//   const zTrans = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [-100, 0, -100] : [0, 0, 0]);
+  const scale = useTransform(scrollXProgress, [0, 0.5, 1], [0.75, 1, 0.75]);
+  const rotY = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [35, 0, -35] : [0, 0, 0]);
+  const opacity = useTransform(scrollXProgress, [0, 0.5, 1], [0.3, 1, 0.3]);
+  const zTrans = useTransform(scrollXProgress, [0, 0.5, 1], canAnimate ? [-100, 0, -100] : [0, 0, 0]);
 
-//   return (
-//     <m.div
-//       layoutId={`card-container-${item.id}`}
-//       initial={still ? false : { opacity: 0, x: 60 }}
-//       whileInView={still ? undefined : { opacity: 1, x: 0 }}
-//       viewport={{ once: true, margin: '-50px' }}
-//       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 }}
-//       className={`group/card w-[72vw] flex-shrink-0 snap-center sm:w-[420px] ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
-//       style={{ perspective: 1000 }}
-//     >
-//       <m.div
-//         ref={ref}
-//         /* No scroll-driven transform at all when still — the previous fallback
-//            still applied `scale` and `opacity`, which is the fade-per-swipe. */
-//         style={
-//           canAnimate
-//             ? { aspectRatio, scale, rotateY: rotY, opacity, z: zTrans, transformStyle: 'preserve-3d' as const }
-//             : { aspectRatio }
-//         }
-//         onClick={() => {
-//           if (isDragging) return;
-//           const card = ref.current;
-//           const container = containerRef.current;
-//           if (card && container) {
-//             const cardRect = card.getBoundingClientRect();
-//             const containerRect = container.getBoundingClientRect();
-//             const cardCenter = cardRect.left + cardRect.width / 2;
-//             const containerCenter = containerRect.left + containerRect.width / 2;
-            
-//             const isCentered = Math.abs(cardCenter - containerCenter) < (cardRect.width / 3);
+  return (
+    <m.div
+      layoutId={`card-container-${item.id}`}
+      initial={still ? false : { opacity: 0, x: 60 }}
+      whileInView={still ? undefined : { opacity: 1, x: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: index * 0.06 }}
+      className={`group/card w-[72vw] flex-shrink-0 snap-center sm:w-[420px] ${still ? '' : 'transition-[opacity] duration-500'} ${isDimmed ? 'opacity-40' : ''}`}
+      style={{ perspective: 1000 }}
+    >
+      <m.div
+        ref={ref}
+        /* No scroll-driven transform at all when still — the previous fallback
+           still applied `scale` and `opacity`, which is the fade-per-swipe. */
+        style={
+          canAnimate
+            ? { aspectRatio, scale, rotateY: rotY, opacity, z: zTrans, transformStyle: 'preserve-3d' as const }
+            : { aspectRatio }
+        }
+        onClick={() => {
+          if (isDragging) return;
+          const card = ref.current;
+          const container = containerRef.current;
+          if (card && container) {
+            const cardRect = card.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const cardCenter = cardRect.left + cardRect.width / 2;
+            const containerCenter = containerRect.left + containerRect.width / 2;
 
-//             if (isCentered) {
-//               onOpen();
-//             } else {
-//               const offsetToScroll = cardCenter - containerCenter;
-//               container.scrollBy({ left: offsetToScroll, behavior: 'smooth' });
-//             }
-//           }
-//         }}
-//         onMouseEnter={() => onHover(item.id, 'VIEW')}
-//         onMouseLeave={() => onHover(null, null)}
-//         /* No aspect-[4/5] here — the shape comes from `aspectRatio` in the
-//            style above, which follows the media. */
-//         className="relative w-full overflow-hidden rounded-2xl bg-black/10 select-none shadow-[var(--elevation-2)] hover:shadow-[var(--elevation-3)] transition-shadow duration-500 cursor-pointer"
-//         onDragStart={(e) => e.preventDefault()}
-//       >
-//         {canAnimate && (
-//           <m.div
-//             variants={scanlineVariants}
-//             initial="hidden"
-//             whileInView="visible"
-//             viewport={{ once: true, margin: '-50px' }}
-//             transition={{ duration: 1.2, ease: 'linear', delay: index * 0.06 + 0.2 }}
-//             className="pointer-events-none absolute left-0 right-0 h-24 bg-gradient-to-b from-transparent via-[var(--brand-light)]/30 to-transparent z-10"
-//           />
-//         )}
-        
-//         <SmartMedia item={item} priority={priority} onRatio={setRatio} fill />
+            const isCentered = Math.abs(cardCenter - containerCenter) < (cardRect.width / 3);
 
-//         <CardChrome item={item} />
-//       </m.div>
-//     </m.div>
-//   );
-// }
+            if (isCentered) {
+              onOpen();
+            } else {
+              const offsetToScroll = cardCenter - containerCenter;
+              container.scrollBy({ left: offsetToScroll, behavior: 'smooth' });
+            }
+          }
+        }}
+        onMouseEnter={() => onHover(item.id, 'VIEW')}
+        onMouseLeave={() => onHover(null, null)}
+        /* No aspect-[4/5] here — the shape comes from `aspectRatio` in the
+           style above, which follows the media. */
+        className="relative w-full overflow-hidden rounded-2xl bg-black/10 select-none shadow-[var(--elevation-2)] hover:shadow-[var(--elevation-3)] transition-shadow duration-500 cursor-pointer"
+        onDragStart={(e) => e.preventDefault()}
+      >
+        {canAnimate && (
+          <m.div
+            variants={scanlineVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 1.2, ease: 'linear', delay: index * 0.06 + 0.2 }}
+            className="pointer-events-none absolute left-0 right-0 h-24 bg-gradient-to-b from-transparent via-[var(--brand-light)]/30 to-transparent z-10"
+          />
+        )}
+
+        <SmartMedia item={item} priority={priority} onRatio={setRatio} fill />
+
+        <CardChrome item={item} />
+      </m.div>
+    </m.div>
+  );
+}
 
 function TelemetryCounter({ target, reduceMotion }: { target: number; reduceMotion: boolean }) {
   const [count, setCount] = useState(0);
@@ -672,7 +671,7 @@ function TelemetryCounter({ target, reduceMotion }: { target: number; reduceMoti
 
 export default function Gallery() {
   const [items, setItems] = useState<GalleryItem[]>([]);
-  // const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
@@ -690,18 +689,18 @@ export default function Gallery() {
   const globalMouseX = useMotionValue(0);
   const globalMouseY = useMotionValue(0);
 
-  // const reelRef = useRef<HTMLDivElement>(null);
+  const reelRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const parallaxX = useSpring(useTransform(globalMouseX, [0, typeof window !== 'undefined' ? window.innerWidth : 1920], [6, -6]), { stiffness: 50, damping: 30 });
   const parallaxY = useSpring(useTransform(globalMouseY, [0, typeof window !== 'undefined' ? window.innerHeight : 1080], [4, -4]), { stiffness: 50, damping: 30 });
 
-  // const [isDragging, setIsDragging] = useState(false);
-  // const dragThreshold = 5;
-  // const startX = useRef(0);
-  // const scrollLeft = useRef(0);
-  // const isDraggingRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragThreshold = 5;
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const isDraggingRef = useRef(false);
 
   /*
    * Click-and-drag scrolling is a mouse affordance, and touch already has one
@@ -710,69 +709,77 @@ export default function Gallery() {
    * is `scrollSnapType = 'none'` — which only gets restored by mouseup/mouseleave,
    * events touch doesn't reliably deliver. Snapping then stays off for good.
    */
-  // const handleMouseDown = (e: ReactMouseEvent) => {
-  //   if (!reelRef.current || !isFinePointer) return;
-  //   startX.current = e.pageX;
-  //   scrollLeft.current = reelRef.current.scrollLeft;
-  //   isDraggingRef.current = false;
-  //   setIsDragging(false);
-  // };
+  const handleMouseDown = (e: ReactMouseEvent) => {
+    if (!reelRef.current || !isFinePointer) return;
+    startX.current = e.pageX;
+    scrollLeft.current = reelRef.current.scrollLeft;
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  };
 
-  // const handleReelMouseMove = (e: ReactMouseEvent) => {
-  //   if (!reelRef.current || !isFinePointer || startX.current === 0) return;
-  //   const dx = Math.abs(e.pageX - startX.current);
+  const handleReelMouseMove = (e: ReactMouseEvent) => {
+    if (!reelRef.current || !isFinePointer || startX.current === 0) return;
+    const dx = Math.abs(e.pageX - startX.current);
 
-  //   if (!isDraggingRef.current && dx > dragThreshold) {
-  //     isDraggingRef.current = true;
-  //     setIsDragging(true);
-  //     reelRef.current.style.scrollSnapType = 'none';
-  //   }
+    if (!isDraggingRef.current && dx > dragThreshold) {
+      isDraggingRef.current = true;
+      setIsDragging(true);
+      reelRef.current.style.scrollSnapType = 'none';
+    }
 
-  //   if (isDraggingRef.current) {
-  //     e.preventDefault();
-  //     const walk = (e.pageX - startX.current) * 2;
-  //     reelRef.current.scrollLeft = scrollLeft.current - walk;
-  //   }
-  // };
+    if (isDraggingRef.current) {
+      e.preventDefault();
+      const walk = (e.pageX - startX.current) * 2;
+      reelRef.current.scrollLeft = scrollLeft.current - walk;
+    }
+  };
 
-  // const handleMouseLeaveOrUp = () => {
-  //   if (!reelRef.current) return;
-  //   startX.current = 0;
-  //   if (isDraggingRef.current) {
-  //     setTimeout(() => {
-  //       setIsDragging(false);
-  //       isDraggingRef.current = false;
-  //     }, 100);
-  //   }
-  //   reelRef.current.style.scrollSnapType = 'x mandatory';
-  // };
+  const handleMouseLeaveOrUp = () => {
+    if (!reelRef.current) return;
+    startX.current = 0;
+    if (isDraggingRef.current) {
+      setTimeout(() => {
+        setIsDragging(false);
+        isDraggingRef.current = false;
+      }, 100);
+    }
+    reelRef.current.style.scrollSnapType = 'x mandatory';
+  };
 
-  // const [activeReelIndex, setActiveReelIndex] = useState(0);
+  const [activeReelIndex, setActiveReelIndex] = useState(0);
 
-  // const updateActiveReelIndex = useCallback(() => {
-  //   if (!reelRef.current) return;
-  //   const container = reelRef.current;
-    
-  //   const containerRect = container.getBoundingClientRect();
-  //   const containerCenter = containerRect.left + containerRect.width / 2;
-    
-  //   let closestIndex = 0;
-  //   let minDiff = Infinity;
-    
-  //   const cards = container.querySelectorAll('.group\\/card');
-  //   cards.forEach((card, i) => {
-  //     const rect = card.getBoundingClientRect();
-  //     const cardCenter = rect.left + rect.width / 2;
-  //     const diff = Math.abs(containerCenter - cardCenter);
-      
-  //     if (diff < minDiff) {
-  //       minDiff = diff;
-  //       closestIndex = i;
-  //     }
-  //   });
-    
-  //   setActiveReelIndex(closestIndex);
-  // }, []);
+  const updateActiveReelIndex = useCallback(() => {
+    if (!reelRef.current) return;
+    const container = reelRef.current;
+
+    const containerRect = container.getBoundingClientRect();
+    const containerCenter = containerRect.left + containerRect.width / 2;
+
+    let closestIndex = 0;
+    let minDiff = Infinity;
+
+    const cards = container.querySelectorAll('.group\\/card');
+    cards.forEach((card, i) => {
+      const rect = card.getBoundingClientRect();
+      const cardCenter = rect.left + rect.width / 2;
+      const diff = Math.abs(containerCenter - cardCenter);
+
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestIndex = i;
+      }
+    });
+
+    setActiveReelIndex(closestIndex);
+  }, []);
+
+  useEffect(() => {
+    const reel = reelRef.current;
+    if (!reel || viewMode !== 'reel') return;
+    reel.addEventListener('scroll', updateActiveReelIndex, { passive: true });
+    updateActiveReelIndex();
+    return () => reel.removeEventListener('scroll', updateActiveReelIndex);
+  }, [viewMode, updateActiveReelIndex]);
 
   useEffect(() => {
     const shuffled = [...galleryData].sort(() => Math.random() - 0.5);
@@ -878,14 +885,10 @@ export default function Gallery() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // const viewModes: { key: ViewMode; label: string; icon: typeof LayoutGrid }[] = [
-  //   { key: 'grid', label: 'Grid', icon: LayoutGrid },
-  //   { key: 'reel', label: 'Reel', icon: Film },
-  // ];
-
-//   const viewModes = [
-//   { key: 'grid', label: 'Grid', icon: LayoutGrid },
-// ];
+  const viewModes: { key: ViewMode; label: string; icon: typeof LayoutGrid }[] = [
+    { key: 'grid', label: 'Grid', icon: LayoutGrid },
+    { key: 'reel', label: 'Reel', icon: Film },
+  ];
 
   return (
     <LazyMotion features={domAnimation}>
@@ -946,8 +949,7 @@ export default function Gallery() {
             </div>
           </div>
 
-          <div className="hidden sm:block w-full sm:w-1/4 order-3 shrink-0" aria-hidden="true" />
-          {/* <div className="w-full sm:w-1/4 flex justify-center sm:justify-end order-3 shrink-0">
+          <div className="w-full sm:w-1/4 flex justify-center sm:justify-end order-3 shrink-0">
             <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] transition-colors duration-[400ms] ease-out">
               {viewModes.map(({ key, label, icon: Icon }) => (
                 <button key={key} onClick={() => setViewMode(key)} onMouseEnter={() => setCursorLabel(label)} onMouseLeave={() => setCursorLabel(null)} aria-label={`${label} view`} className={`relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-xs uppercase tracking-[0.1em] transition-colors duration-300 ${viewMode === key ? 'text-fg' : 'text-fg-muted hover:text-fg'}`}>
@@ -957,20 +959,20 @@ export default function Gallery() {
                 </button>
               ))}
             </div>
-          </div> */}
+          </div>
 
         </m.div>
 
         <AnimatePresence mode="wait">
-          <m.div key={`-${activeCategory}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.35, ease: 'easeOut' }} className="relative z-10">
-            
+          <m.div key={`${viewMode}-${activeCategory}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.35, ease: 'easeOut' }} className="relative z-10">
+
             {filteredItems.length === 0 && (
               <div className="flex justify-center items-center py-20">
                 <p className="font-mono text-xs uppercase tracking-[0.2em] text-fg-muted">No visual records found in this category.</p>
               </div>
             )}
 
-            {filteredItems.length > 0 && (
+            {viewMode === 'grid' && filteredItems.length > 0 && (
               <m.div className="max-w-[1600px] mx-auto grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" style={!isMobile && !prefersReducedMotion ? { x: parallaxX, y: parallaxY, gridAutoRows: 300 } : { gridAutoRows: 300 }}>
                 <AnimatePresence>
                   {filteredItems.map((item, i) => (
@@ -980,7 +982,98 @@ export default function Gallery() {
               </m.div>
             )}
 
-            
+            {viewMode === 'reel' && filteredItems.length > 0 && (
+              /*
+               * Was `w-full max-w-[100vw] -mx-6 px-6` — an attempt at the
+               * full-bleed trick, and the reason the reel sat off-centre.
+               *
+               * That trick only works on a box whose width is `auto`, where
+               * negative margins genuinely widen it. `w-full` pins the width to
+               * the parent, so `-mx-6` couldn't widen anything and just shifted
+               * the whole box 24px left; `px-6` then pulled the content in
+               * another 24px on each side. Net effect: a track starting at the
+               * parent's left edge but ending 48px short of its right one.
+               * Asymmetric, so the centred card was 24px left of true centre and
+               * the next card was clipped early with dead space beside it.
+               *
+               * The bleed wasn't buying anything, so it's gone. The track is now
+               * the parent's content box — symmetric by construction — which is
+               * what the `calc(50% - 36vw)` side padding below assumes.
+               */
+              <div className="relative">
+                <button onClick={() => reelRef.current?.scrollBy({ left: -500, behavior: 'smooth' })} className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-3 text-white backdrop-blur transition-colors hover:bg-black/80 sm:flex" aria-label="Scroll reel left">
+                  <ChevronLeft size={24} />
+                </button>
+
+                <div
+                  ref={reelRef}
+                  onScroll={updateActiveReelIndex}
+                  onMouseDown={handleMouseDown}
+                  onMouseLeave={handleMouseLeaveOrUp}
+                  onMouseUp={handleMouseLeaveOrUp}
+                  onMouseMove={handleReelMouseMove}
+                  /*
+                   * items-center: cards no longer share one height now that each
+                   * takes the shape of its own media, so without this they'd
+                   * hang from the top of the tallest one.
+                   *
+                   * The side padding is what centres a card, and it must be
+                   * exactly half the leftover space: (track - card) / 2.
+                   *
+                   * It used to be `14vw` against a `72vw` card — 14 + 72 + 14 =
+                   * 100, which is only correct if the track is the full viewport.
+                   * It isn't: the wrapper above is `-mx-6 px-6`, so the track is
+                   * about 48px narrower, and 14vw overshot by ~24px. The first
+                   * card therefore sat off-centre at scrollLeft 0, and the only
+                   * thing hiding it was scroll-snap pulling it back — which the
+                   * drag handlers switch off (`scrollSnapType = 'none'`) and
+                   * which touch doesn't reliably switch back on. When it stayed
+                   * off, the card stayed off-centre.
+                   *
+                   * `50%` in padding resolves against the containing block's
+                   * width — the track — so `calc(50% - <half card>)` is that
+                   * exact half-leftover whatever the track turns out to be. The
+                   * card is now centred at scrollLeft 0 by construction, with
+                   * snapping as polish rather than as the mechanism.
+                   */
+                 className="relative flex items-center gap-6 sm:gap-8 overflow-x-auto snap-x snap-mandatory py-10 [&::-webkit-scrollbar]:hidden"
+                style={{ scrollbarWidth: 'none', perspective: 1200, paddingLeft: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)', paddingRight: isMobile ? 'calc(50% - 36vw)' : 'calc(50% - 210px)' }}
+                >
+                  <AnimatePresence>
+                    {/* priority={i < 3}: the reel is a horizontal scroller, so
+                        the second and third cards are one swipe from being on
+                        screen — load them eagerly rather than waiting for them
+                        to come within range. */}
+                    {filteredItems.map((item, i) => (
+                      <OrbitalReelCard key={item.id} item={item} index={i} isDimmed={hoveredCardId !== null && hoveredCardId !== item.id} reduceMotion={prefersReducedMotion} isMobile={isMobile} priority={i < 3} containerRef={reelRef} onOpen={() => openAt(i, item.id)} onHover={handleHover} isDragging={isDragging} />
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                <div className="flex md:hidden justify-center items-center gap-2 mt-4 pb-4">
+                  {filteredItems.map((item, i) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        const container = reelRef.current;
+                        const cards = container?.querySelectorAll('.group\\/card');
+                        if (container && cards && cards[i]) {
+                          const card = cards[i] as HTMLElement;
+                          const scrollPos = card.offsetLeft - (container.clientWidth / 2) + (card.clientWidth / 2);
+                          container.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                        }
+                      }}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${i === activeReelIndex ? 'w-6 bg-[var(--brand-glow)]' : 'w-1.5 bg-[var(--border-subtle)] hover:bg-white/50'}`}
+                      aria-label={`Go to slide ${i + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button onClick={() => reelRef.current?.scrollBy({ left: 500, behavior: 'smooth' })} className="absolute right-6 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-3 text-white backdrop-blur transition-colors hover:bg-black/80 sm:flex" aria-label="Scroll reel right">
+                  <ChevronRight size={24} />
+                </button>
+              </div>
+            )}
           </m.div>
         </AnimatePresence>
 
