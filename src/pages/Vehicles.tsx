@@ -92,6 +92,23 @@ export default function Vehicles() {
     // abandoned same-origin GET has nothing to clean up.
     void fetch(HERO_VIDEO_URL, { credentials: "same-origin" }).catch(() => {});
 
+    // support.js is only appended to the document once index.html has been
+    // fetched AND parsed (step 4, below) — so today it doesn't even start
+    // downloading until that's done, a fully serial hop on top of the HTML
+    // fetch it doesn't actually depend on. A preload hint (unlike video,
+    // Chrome does act on this for scripts) starts that 68KB request now, in
+    // parallel with the HTML fetch, so it's already in cache by the time step
+    // 4 creates the real <script src>. Left in place rather than cleaned up on
+    // unmount — same reasoning as the script tag itself below: it's a static,
+    // cacheable asset shared across visits to this route.
+    if (!document.querySelector(`link[rel="preload"][href="${SUPPORT_URL}"]`)) {
+      const preload = document.createElement("link");
+      preload.rel = "preload";
+      preload.as = "script";
+      preload.href = SUPPORT_URL;
+      document.head.appendChild(preload);
+    }
+
     (async () => {
       try {
         const res = await fetch(VEHICLE_URL, { credentials: "same-origin" });

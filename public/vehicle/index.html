@@ -241,24 +241,21 @@
   #vp-build-skip:hover { background:rgba(60,64,181,0.92)!important; border-color:#60a5fa!important; color:#fff!important; }
   .vp-secnav-link[data-active="1"] { color:#fff !important; background:#3c40b5 !important; border-color:#3c40b5 !important; }
 
-  /* ---- SECTION NAV on phones: the team page's pull-out panel ----------------
-     The sticky pill row is a horizontal scroller. On a phone it shows about
+  /* ---- SECTION NAV: the team page's pull-out panel, at every width --------
+     The sticky pill row was a horizontal scroller. On a phone it showed about
      three of its nine links at a time, with the other six behind a sideways
-     swipe that nothing on screen advertises, and it holds a band of vertical
-     space directly under the navbar for the entire page.
+     swipe that nothing on screen advertised, and it held a band of vertical
+     space directly under the navbar for the entire page. Desktop had the same
+     row, just with more links visible at once.
 
-     Below the breakpoint it's replaced by the same pull tab + side panel the
-     team page uses (src/components/team/JumpNav.tsx): same geometry, same
-     open/close behaviour, same Escape and tap-outside handling. It's rebuilt in
-     plain CSS/JS rather than imported because this page is a standalone
-     document that the React tree only injects, so it can't mount a component.
-     Above the breakpoint the tab and panel are display:none and never paint. */
-  #vp-secnav-tab, #vp-secnav-panel { display:none; }
+     It's replaced everywhere by the same pull tab + side panel the team page
+     uses (src/components/team/JumpNav.tsx): same geometry, same open/close
+     behaviour, same Escape and tap-outside handling. It's rebuilt in plain
+     CSS/JS rather than imported because this page is a standalone document
+     that the React tree only injects, so it can't mount a component. */
+  #vp-secnav { display:none !important; }
 
-  @media (max-width:760px) {
-    #vp-secnav { display:none !important; }
-
-    #vp-secnav-tab {
+  #vp-secnav-tab {
       display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
       position:fixed; top:50%; right:16px; z-index:51;
       transform:translateY(-50%);
@@ -320,8 +317,7 @@
       border:1px solid transparent;
       transition:background .2s ease, color .2s ease;
     }
-    .vp-secnav-panellink:hover, .vp-secnav-panellink:focus-visible { background:rgba(60,64,181,0.28); color:#f0f2ff; }
-  }
+  .vp-secnav-panellink:hover, .vp-secnav-panellink:focus-visible { background:rgba(60,64,181,0.28); color:#f0f2ff; }
 
   /* Matches JumpNav's own narrow-screen step so the tab clears the cards. */
   @media (max-width:640px) {
@@ -477,8 +473,8 @@
       <a href="#vp-build-scroll" class="vp-secnav-link" data-nav="vp-build-scroll" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Build</a>
       <a href="#vp-explorer" class="vp-secnav-link" data-nav="vp-explorer" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Avionics</a>
       <a href="#vp-process" class="vp-secnav-link" data-nav="vp-process" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Process</a>
-      <a href="#vp-payload" class="vp-secnav-link" data-nav="vp-payload" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Payload</a>
       <a href="#vp-software" class="vp-secnav-link" data-nav="vp-software" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Software</a>
+      <a href="#vp-payload" class="vp-secnav-link" data-nav="vp-payload" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Payload</a>
       <a href="#vp-prototypes-slot" class="vp-secnav-link" data-nav="vp-prototypes-slot" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Test drones</a>
       <a href="#vp-stats" class="vp-secnav-link" data-nav="vp-stats" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Stats</a>
       <a href="#vp-reports" class="vp-secnav-link" data-nav="vp-reports" style="text-decoration:none; white-space:nowrap; flex:0 0 auto; font-family:'Inter'; font-weight:600; font-size:12.5px; padding:8px 15px; border-radius:9999px; color:#a0a3d2; border:1px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;" onmouseover="this.style.color='#f0f2ff'" onmouseout="this.style.color='#a0a3d2'">Reports</a>
@@ -508,8 +504,8 @@
     <a href="#vp-build-scroll" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-build-scroll">Build</a>
     <a href="#vp-explorer" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-explorer">Avionics</a>
     <a href="#vp-process" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-process">Process</a>
-    <a href="#vp-payload" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-payload">Payload</a>
     <a href="#vp-software" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-software">Software</a>
+    <a href="#vp-payload" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-payload">Payload</a>
     <a href="#vp-prototypes-slot" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-prototypes-slot">Test drones</a>
     <a href="#vp-stats" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-stats">Stats</a>
     <a href="#vp-reports" class="vp-secnav-link vp-secnav-panellink" data-nav="vp-reports">Reports</a>
@@ -915,7 +911,7 @@
   </section>
 
   <!-- ========================= MISSION SOFTWARE ========================= -->
-  <section id="vp-software" style="position:relative; background:#07091c; padding:clamp(88px,12vh,140px) 32px;">
+  <section id="vp-software" style="position:relative; background:#0d1035; padding:clamp(88px,12vh,140px) 32px;">
     <div style="max-width:1120px; margin:0 auto;">
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
         <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Mission software</div>
@@ -983,7 +979,7 @@
 
   
   <!-- ========================= PAYLOAD DELIVERY ========================= -->
-  <section id="vp-payload" style="position:relative; background:#0d1035; padding:clamp(88px,12vh,140px) 32px;">
+  <section id="vp-payload" style="position:relative; background:#07091c; padding:clamp(88px,12vh,140px) 32px;">
     <div style="max-width:1120px; margin:0 auto;">
       <div data-reveal="" style="opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); text-align:center;">
         <div style="font-family:'Inter'; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#5458cc; margin-bottom:12px;">Payload delivery</div>
@@ -2189,13 +2185,40 @@ class Component extends DCLogic {
         if (a && a.complete && a.naturalWidth) { ctx.globalAlpha = 1; ctx.drawImage(a, 0, 0, canvas.width, canvas.height); }
         if (t > 0.001 && b && b.complete && b.naturalWidth) { ctx.globalAlpha = t; ctx.drawImage(b, 0, 0, canvas.width, canvas.height); ctx.globalAlpha = 1; }
       };
-      for (let i = 0; i < FRAMES; i++) {
+      /*
+       * All 140 frames used to be requested in one synchronous loop the moment
+       * this script ran — ~22MB of PNGs firing off at once, right alongside the
+       * hero video, the hoisted fonts/CSS, and support.js. Every one of those
+       * competed for the same handful of connections the browser will open to
+       * this origin, so nothing on the page — including the hero, which is what
+       * actually paints first — got its fair share of bandwidth for however long
+       * that queue took to drain.
+       *
+       * Only the first handful load eagerly now (enough that the scrub already
+       * has something to draw the instant the section is reached), each tagged
+       * fetchPriority 'high' so they don't lose out to fonts/CSS of similar
+       * eagerness. The remaining frames are queued one at a time behind
+       * requestIdleCallback at 'low' priority, so they fill in during idle time
+       * instead of racing everything else for the initial connections.
+       */
+      const EAGER_FRAMES = 12;
+      const loadFrame = (i) => {
         const im = new Image();
         im.decoding = 'async';
+        if ('fetchPriority' in im) im.fetchPriority = i < EAGER_FRAMES ? 'high' : 'low';
         im.src = 'assets/frames/f' + String(i).padStart(3, '0') + '.png';
         im.onload = () => { drawFrame(curF); };
-        imgs.push(im);
-      }
+        imgs[i] = im;
+      };
+      for (let i = 0; i < Math.min(EAGER_FRAMES, FRAMES); i++) loadFrame(i);
+      const scheduleIdle = (fn) =>
+        'requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 600 }) : setTimeout(fn, 32);
+      const loadRest = (i) => {
+        if (i >= FRAMES) return;
+        loadFrame(i);
+        scheduleIdle(() => loadRest(i + 1));
+      };
+      if (FRAMES > EAGER_FRAMES) scheduleIdle(() => loadRest(EAGER_FRAMES));
 
       let lastEi = -1;
       const updateUI = (prog) => {

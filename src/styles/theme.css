@@ -176,9 +176,9 @@
    --team-aerodesign: #85b7eb; /* sky blue               */
   --team-wing: #6ad1d8; /* cyan                   */
   --team-tail-stability: #f0a07a; /* coral                  */
-  --team-structure: #c2c0b4; /* warm gray              */
-  --team-propulsion: #97c459; /* green                  */
-  --team-software: #5dcaa5; /* teal                   */
+  --team-structure: #97c459; /* green                  */
+  --team-propulsion: #c497c4; /* dusty mauve            */
+  --team-software: #6bc78a; /* emerald                */
   --team-hardware: #f0b24a; /* gold                   */
   --team-computer-vision: #d01925de; /* pink                   */
   --team-ai: #d5323cde; /* pink — same discipline as Computer Vision */
@@ -1077,9 +1077,9 @@
    --team-aerodesign-page: #1d65b0;
    --team-wing-page: #1e6e73;
    --team-tail-stability-page: #aa4413;
-   --team-structure-page: #676454;
-   --team-propulsion-page: #4f6d27;
-   --team-software-page: #257057;
+   --team-structure-page: #4f6d27;
+   --team-propulsion-page: #6b2e6b;
+   --team-software-page: #206f3a;
    --team-hardware-page: #895a0b;
    --team-computer-vision-page: #d01925de;
    --team-ai-page: #d01925de;

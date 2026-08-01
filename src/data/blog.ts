@@ -61,11 +61,11 @@ export const CATEGORY_STYLE: Record<BlogCategory, CategoryStyle> = {
     badgeText: "#5F3A0A",
   },
   software: {
-    bg: { light: "#9FD1BA", dark: "#10241D" },
-    accent: "#9FE1CB",
-    text: { light: "#085041", dark: "#B7ECD9" },
-    label: { light: "#0C5744", dark: "#59C79E" },
-    badgeText: "#085041",
+    bg: { light: "#C7FFDB", dark: "#0F2E1A" },
+    accent: "#9CD4AE",
+    text: { light: "#164F2D", dark: "#ACFDCA" },
+    label: { light: "#288A49", dark: "#7ECE98" },
+    badgeText: "#164F2D",
   },
   firmware: {
     bg: { light: "#DEDCFC", dark: "#1A1830" },
@@ -82,11 +82,11 @@ export const CATEGORY_STYLE: Record<BlogCategory, CategoryStyle> = {
     badgeText: "#4B1528",
   },
   structure: {
-    bg: { light: "#E7E3D6", dark: "#201E19" },
-    accent: "#D3D1C7",
-    text: { light: "#2C2C2A", dark: "#E5E2D8" },
-    label: { light: "#4C4B48", dark: "#B0AB9C" },
-    badgeText: "#2C2C2A",
+    bg: { light: "#DCEAC7", dark: "#1A2211" },
+    accent: "#C0DD97",
+    text: { light: "#173404", dark: "#D4EAB0" },
+    label: { light: "#2E550D", dark: "#8FC257" },
+    badgeText: "#173404",
   },
   aerodesign: {
     bg: { light: "#D5E7F7", dark: "#10202E" },
@@ -96,11 +96,11 @@ export const CATEGORY_STYLE: Record<BlogCategory, CategoryStyle> = {
     badgeText: "#042C53",
   },
   propulsion: {
-    bg: { light: "#DCEAC7", dark: "#1A2211" },
-    accent: "#C0DD97",
-    text: { light: "#173404", dark: "#D4EAB0" },
-    label: { light: "#2E550D", dark: "#8FC257" },
-    badgeText: "#173404",
+    bg: { light: "#FBDBFB", dark: "#2C112C" },
+    accent: "#E3AAE3",
+    text: { light: "#571957", dark: "#F8BAF8" },
+    label: { light: "#862D86", dark: "#C982C9" },
+    badgeText: "#571957",
   },
 };
 

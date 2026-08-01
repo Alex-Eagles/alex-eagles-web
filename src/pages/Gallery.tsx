@@ -946,6 +946,7 @@ export default function Gallery() {
             </div>
           </div>
 
+          <div className="hidden sm:block w-full sm:w-1/4 order-3 shrink-0" aria-hidden="true" />
           {/* <div className="w-full sm:w-1/4 flex justify-center sm:justify-end order-3 shrink-0">
             <div className="relative flex items-center gap-1 rounded-full border border-[var(--border-subtle)] p-1 bg-[var(--bg-primary)] transition-colors duration-[400ms] ease-out">
               {viewModes.map(({ key, label, icon: Icon }) => (
