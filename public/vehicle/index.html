@@ -343,7 +343,11 @@
   <header id="vp-hero" style="position:relative; height:100vh; min-height:640px; width:100%; overflow:hidden; background:#07091c;">
     <!-- MEDIA: full-bleed during landing, slides to the right half when the clip ends -->
     <div id="vp-hero-media" style="position:absolute; top:0; left:0; right:0; bottom:0; z-index:1; overflow:hidden; transition:left 1.15s cubic-bezier(.45,.05,.2,1);">
-      <video id="vp-hero-video" muted="" playsinline="" preload="auto" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 45%;">
+      <!-- poster: the hero had none, so until the clip arrived this was an
+           empty black box — most of what read as "the video takes forever".
+           It's frame 0 of the clip itself, so there's no jump when playback
+           starts. Vehicles.tsx rewrites `assets/…` on poster as well as src. -->
+      <video id="vp-hero-video" muted="" playsinline="" preload="auto" poster="assets/landing-poster.webp" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 45%;">
         <source src="assets/landing.mp4" type="video/mp4">
       </video>
       <div data-dim="" aria-hidden="true" style="position:absolute; inset:0; transition:opacity 1.15s ease; background:radial-gradient(120% 90% at 50% -10%, rgba(22,26,80,0.35) 0%, rgba(7,9,28,0.35) 45%, rgba(7,9,28,0.85) 100%);"></div>
