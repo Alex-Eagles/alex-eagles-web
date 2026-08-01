@@ -53,6 +53,7 @@ export type Role =
   | "Vice Team Lead"
   | "Head of Autonomous"
   | "Vice Lead of Autonomous"
+  | "Head of Mechanical"
   | "EM Integration Lead"
   | "Section Lead"
   | "Vice Lead"
@@ -75,6 +76,7 @@ export function roleTier(role: Role): Tier {
     case "EM Integration Lead":
       return "exec";
     case "Head of Autonomous":
+    case "Head of Mechanical":
       return "head";
     case "Vice Lead of Autonomous":
     case "Vice Lead":
@@ -573,23 +575,24 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2026",
             major: "Computer & Communication Engineering",
           }),
-          slot("Member", "Abdelrahman Aboelwafa", {
-            photo: "abdelrahman-yasser",
-            linkedIn: "https://www.linkedin.com/in/abdelrahmanaboelwafa",
-            gradYear: "2028+",
-            major: "CCE",
-          }),
           slot("Member", "Ahmed ElMetwalli", {
             photo: "ahmed-elmetwalli",
             linkedIn: "https://www.linkedin.com/in/ahmed-el-mitwally-71385433b/",
             gradYear: "2028",
             major: "Computer and Communications",
           }),
-          slot("Member", "Dina Shiha", {
-            photo: "dina-shiha",
-            linkedIn: "https://www.linkedin.com/in/dina-shiha-822b43203",
-            gradYear: "2026",
-            major: "Electromechanical Engineering",
+          slot("Member", "Abdelrahman Aboelwafa", {
+            photo: "abdelrahman-yasser-2026",
+            linkedIn: "https://www.linkedin.com/in/abdelrahmanaboelwafa",
+            gradYear: "2028+",
+            major: "CCE",
+          }),
+          slot("Member", "Hossam Eldin Elshazly", {
+            photo: "hossam-eldin-2026",
+            linkedIn:
+              "https://www.linkedin.com/in/hossam-eldeen-2158a4284?utm_source=share_via&utm_content=profile&utm_medium=member_ios",
+            gradYear: "2027",
+            major: "Computer and communication",
           }),
           slot("Member", "Fai Raafat", {
             photo: "fai-raafat",
@@ -610,12 +613,11 @@ const ROSTER_2026: YearRoster = {
             gradYear: "2027",
             major: "Mechatronics",
           }),
-          slot("Member", "Hossam Eldin Elshazly", {
-            photo: "hossam-eldin-2026",
-            linkedIn:
-              "https://www.linkedin.com/in/hossam-eldeen-2158a4284?utm_source=share_via&utm_content=profile&utm_medium=member_ios",
-            gradYear: "2027",
-            major: "Computer and communication",
+          slot("Member", "Dina Shiha", {
+            photo: "dina-shiha",
+            linkedIn: "https://www.linkedin.com/in/dina-shiha-822b43203",
+            gradYear: "2026",
+            major: "Electromechanical Engineering",
           }),
         ], {
           blurb:
@@ -738,21 +740,19 @@ const ROSTER_2025: YearRoster = {
     {
       num: "01",
       name: "Mechanical",
+      // Mohamed Fathallah runs the whole division, on top of the sub-teams —
+      // mirrors Autonomous's `heads` row below. Ehdaa Farahat succeeds him as
+      // Structure's own Section Lead (see that section).
+      heads: [
+        head("Head of Mechanical", "Mohamed Fathallah", "Mechanical", {
+          photo: "mohamed-fathallah",
+          // "Mechanical Lead" to match the "<Section> Lead" naming every
+          // other lead card on the page uses, rather than Autonomous's
+          // "Head of X" phrasing.
+          roleLabel: "Mechanical Lead",
+        }),
+      ],
       sections: [
-        section(
-          "Structure",
-          [
-            slot("Section Lead", "Mohamed Fathallah", { photo: "mohamed-fathallah" }),
-            slot("Vice Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
-            slot("Member", "Hana Waleed", { photo: "hana-waleed" }),
-            slot("Member", "Hossam Eldeen", { photo: "hossam-eldeen" }),
-            slot("Member", "Reem Eldalil", { photo: "reem-eldalil" }),
-          ],
-          {
-            blurb:
-              "We design and build the airframe that holds everything together: sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
-          },
-        ),
         /*
          * One flat Aerodesign section. Wing and Tail & Stability used to hang
          * off it as nested subsections; they're folded in here instead, so the
@@ -803,6 +803,19 @@ const ROSTER_2025: YearRoster = {
           {
             blurb:
               "We shape how the aircraft flies: the aerodynamics of the whole airframe. We set the wing and tail geometry, run the analysis, and tune for lift, drag, and stable, efficient performance.",
+          },
+        ),
+        section(
+          "Structure",
+          [
+            slot("Section Lead", "Ehdaa Farahat", { photo: "ehdaa-farahat" }),
+            slot("Member", "Hana Waleed", { photo: "hana-waleed" }),
+            slot("Member", "Hossam Eldeen", { photo: "hossam-eldeen" }),
+            slot("Member", "Reem Eldalil", { photo: "reem-eldalil" }),
+          ],
+          {
+            blurb:
+              "We design and build the airframe that holds everything together: sizing the load-bearing structure, choosing materials, and manufacturing the parts so the aircraft stays light and survives every flight.",
           },
         ),
         section(

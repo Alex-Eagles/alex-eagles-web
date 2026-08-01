@@ -350,17 +350,6 @@
   text-align: center;
 }
 
-.tp-disc-kicker {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  color: var(--tp-accent-soft);
-}
-
-:root[data-theme="light"] .tp-disc-kicker {
-  color: rgba(255, 255, 255, 0.78);
-}
-
 .tp-disc-title {
   font-family: "Archivo", var(--font-sans);
   font-weight: 900;
@@ -405,14 +394,6 @@
   box-shadow: var(--tp-inner-lip);
   text-align: center;
   min-width: 168px;
-}
-
-.tp-card-kicker {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.22em;
-  color: var(--tp-ink-faint);
-  margin-bottom: 6px;
 }
 
 .tp-card-title {

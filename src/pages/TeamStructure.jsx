@@ -13,7 +13,7 @@ const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
  * us — so the composition never reflows, it only gets smaller.
  */
 const CANVAS_W = 1060;
-const CANVAS_H = 860;
+const CANVAS_H = 760;
 
 /*
  * Below this scale the 11-13px labels stop being readable, so the component
@@ -25,7 +25,6 @@ const RADIAL_MIN_SCALE = 0.62;
 /** The command disc at the centre. */
 const LEADER = {
   id: "leader",
-  kicker: "CMD",
   title: "Team Leader",
   // Matches the leadership card's id on /team (slugify of the role).
   to: "/team#team-leader",
@@ -51,7 +50,6 @@ const VICE = {
 const BRANCHES = [
   {
     id: "mechanical",
-    code: "Branch 01",
     lead: "Mechanical Lead",
     x: 280,
     y: 420,
@@ -81,7 +79,6 @@ const BRANCHES = [
   },
   {
     id: "autonomous",
-    code: "Branch 02",
     lead: "Autonomous Lead",
     x: 780,
     y: 420,
@@ -217,7 +214,6 @@ export default function TeamStructure() {
     <div {...nodeProps(LEADER.id, LEADER.to)} style={style}>
       <div className="tp-disc-ring">
         <div className="tp-disc">
-          <span className="tp-disc-kicker">{LEADER.kicker}</span>
           <span className="tp-disc-title">
             Team
             <br />
@@ -240,7 +236,6 @@ export default function TeamStructure() {
     <div {...nodeProps(branch.id, branch.to)} style={style}>
       <div className="tp-node-shell">
         <div className="tp-card">
-          <div className="tp-card-kicker">{branch.code}</div>
           <div className="tp-card-title">{branch.lead}</div>
         </div>
       </div>

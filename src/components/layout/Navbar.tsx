@@ -81,10 +81,13 @@ export default function Navbar() {
        * a logo squeezed between them would be an addition to a bar that's
        * deliberately spare, so `hidden md:flex` leaves phones untouched.
        *
-       * Mirrors <ThemeToggle/> opposite it (md:top-6 md:right-8) so the two
-       * pieces of fixed chrome sit at the same height, a little above the
-       * centred link pill, which starts at 35px. `md:h-12` matches the toggle's
-       * box so both line up on their centres rather than their top edges.
+       * Mirrors <ThemeToggle/> opposite it (md:top-[35px] md:right-8) so the
+       * two pieces of fixed chrome sit at the same height. Both share the nav
+       * pill's own `top-[35px]` rather than a separate guessed offset — the
+       * toggle (51px) and the logo's `md:h-12` (48px) box are both close
+       * enough to the pill's own rendered height that starting all three from
+       * the same top edge lines up their centres too, instead of the ~11px
+       * mismatch a shorter top produced.
        *
        * AeLockup handles the theme swap itself — white emblem and white type on
        * dark, blue emblem and matching blue type on light.
@@ -92,7 +95,7 @@ export default function Navbar() {
       <Link
         to="/"
         aria-label="Alex Eagles — home"
-        className="fixed z-40 md:top-6 md:left-8 hidden md:flex items-center h-12 transition-opacity duration-200 hover:opacity-80"
+        className="fixed z-40 md:top-[35px] md:left-8 hidden md:flex items-center h-12 transition-opacity duration-200 hover:opacity-80"
       >
         {/* Keyed on the route so the wordmark replays its entrance on every
             navigation. The navbar itself never unmounts between pages, so

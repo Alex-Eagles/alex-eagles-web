@@ -19,7 +19,9 @@ export default function ThemeToggle({
   // `ui-blur` lets global.css drop the backdrop blur on touch devices, where a
   // fixed blurred element is re-rasterised on every scroll frame. `ae-toggle`
   // is the hook for the phone-sized icon-only variant, also in global.css.
-  className = "ui-blur ae-toggle fixed top-5 right-5 md:top-6 md:right-8 z-40",
+  // `md:top-[35px]` matches the logo lockup opposite it and the nav pill's own
+  // top — see the comment above the logo <Link/> in Navbar.tsx.
+  className = "ui-blur ae-toggle fixed top-5 right-5 md:top-[35px] md:right-8 z-40",
 }: ThemeToggleProps) {
   const { isDark, toggle } = useTheme();
 
