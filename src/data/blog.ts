@@ -317,9 +317,9 @@ export const BLOG_POSTS: BlogPostFull[] = [
     excerpt:
       "The fuselage structure was developed to carry the wing, tail, propulsion, and payload loads through a single airframe, tying every subsystem together into one integrated design. Component placement was iterated to keep the center of gravity, aerodynamic requirements, and structural load paths all satisfied at once.",
     image: "/images/blog/aerodesign-fuselage-integration.png",
-    category: "aerodesign",
+    category: "structure",
     date: "Apr 2026",
-    author: "Aerodesign Team",
+    author: "Structure Team",
     readTime: "2 min read",
   },
   {
@@ -350,9 +350,9 @@ export const BLOG_POSTS: BlogPostFull[] = [
     excerpt:
       "The wing's internal structure was laid out spar by spar and rib by rib, with lightening holes cut into each rib to save weight without giving up bending or torsional stiffness. Preliminary CAD models tied the layout together, checking that the structure could actually be built and assembled the way it was designed.",
     image: "/images/blog/aerodesign-structural-cad.jpg",
-    category: "aerodesign",
+    category: "structure",
     date: "Mar 2026",
-    author: "Aerodesign Team",
+    author: "Structure Team",
     readTime: "2 min read",
   },
   {
